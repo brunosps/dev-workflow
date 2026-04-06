@@ -1,5 +1,5 @@
 {
-  "name": "dev-workflow",
+  "name": "@brunosps/dev-workflow",
   "version": "0.0.3",
   "description": "AI-driven development workflow commands for any project. Scaffolds a complete PRD-to-PR pipeline with multi-platform AI assistant support.",
   "bin": {
@@ -26,6 +26,9 @@
     "code-review",
     "qa"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=18"
