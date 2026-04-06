@@ -5,7 +5,7 @@ AI-driven development workflow commands for any project. Scaffolds a complete PR
 ## Install
 
 ```bash
-npx @brunosps/dev-workflow init
+npx @brunosps00/dev-workflow init
 ```
 
 This will:
@@ -135,17 +135,17 @@ your-project/
 ## Options
 
 ```bash
-npx @brunosps/dev-workflow init                  # Interactive language selection
-npx @brunosps/dev-workflow init --lang=en        # English, skip prompt
-npx @brunosps/dev-workflow init --lang=pt-br     # Portuguese, skip prompt
-npx @brunosps/dev-workflow init --force          # Overwrite existing files
-npx @brunosps/dev-workflow update                # Update commands/templates only
-npx @brunosps/dev-workflow help                  # Show help
+npx @brunosps00/dev-workflow init                  # Interactive language selection
+npx @brunosps00/dev-workflow init --lang=en        # English, skip prompt
+npx @brunosps00/dev-workflow init --lang=pt-br     # Portuguese, skip prompt
+npx @brunosps00/dev-workflow init --force          # Overwrite existing files
+npx @brunosps00/dev-workflow update                # Update commands/templates only
+npx @brunosps00/dev-workflow help                  # Show help
 ```
 
 ## Getting Started
 
-After running `npx @brunosps/dev-workflow init`:
+After running `npx @brunosps00/dev-workflow init`:
 
 1. **Run `/analyze-project`** in your AI assistant to generate project rules
 2. **Run `/brainstorm`** to start planning a new feature
