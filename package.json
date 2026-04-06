@@ -1,0 +1,38 @@
+{
+  "name": "dev-workflow",
+  "version": "1.0.0",
+  "description": "AI-driven development workflow commands for any project. Scaffolds a complete PRD-to-PR pipeline with multi-platform AI assistant support.",
+  "bin": {
+    "dev-workflow": "./bin/dev-workflow.js"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "scaffold/",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "ai",
+    "workflow",
+    "development",
+    "cli",
+    "claude",
+    "codex",
+    "copilot",
+    "opencode",
+    "prd",
+    "techspec",
+    "code-review",
+    "qa"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brunosantos/dev-workflow"
+  },
+  "author": "Bruno Santos"
+}
