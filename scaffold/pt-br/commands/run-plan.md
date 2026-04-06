@@ -7,10 +7,10 @@ Executar TODAS as tarefas pendentes de um projeto de forma sequencial e automát
 
 ## Localização dos Arquivos
 
-- Tasks: `ai/tasks/prd-[nome-funcionalidade]/tasks.md`
-- Task Individual: `ai/tasks/prd-[nome-funcionalidade]/[num]_task.md`
-- PRD: `ai/tasks/prd-[nome-funcionalidade]/prd.md`
-- Tech Spec: `ai/tasks/prd-[nome-funcionalidade]/techspec.md`
+- Tasks: `ai/spec/prd-[nome-funcionalidade]/tasks.md`
+- Task Individual: `ai/spec/prd-[nome-funcionalidade]/[num]_task.md`
+- PRD: `ai/spec/prd-[nome-funcionalidade]/prd.md`
+- Tech Spec: `ai/spec/prd-[nome-funcionalidade]/techspec.md`
 - Comando de Revisão: `ai/commands/revisar-implementacao.md`
 
 ## Processo de Execução
@@ -142,7 +142,7 @@ Se uma tarefa FALHAR durante a execução:
 ## Exemplo de Uso
 
 ```
-/executar-plano ai/tasks/prd-minha-feature
+/executar-plano ai/spec/prd-minha-feature
 ```
 
 Isso executará TODAS as tarefas pendentes do projeto, uma após a outra, com revisão após cada task e ciclo de revisão final interativo.

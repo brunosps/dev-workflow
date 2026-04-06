@@ -16,7 +16,7 @@
 
     | Variable | Description | Example |
     |----------|-------------|---------|
-    | `{{TARGET}}` | PRD path OR project name | `ai/tasks/prd-user-management` or `my-project` |
+    | `{{TARGET}}` | PRD path OR project name | `ai/spec/prd-user-onboarding` or `my-project` |
     | `{{BUG_DESCRIPTION}}` | Problem description | `Error 500 when saving user` |
     | `{{MODE}}` | (Optional) Execution mode | `--analysis` to generate document |
 
@@ -37,10 +37,10 @@
 
     In this mode:
     1. Follow the normal question and analysis flow
-    2. Instead of executing, generate a document at `ai/tasks/bugfix-[name]/prd.md`
+    2. Instead of executing, generate a document at `ai/spec/bugfix-[name]/prd.md`
     3. The file is named `prd.md` to maintain compatibility with the create-techspec/create-tasks pipeline
-    4. Then the user can run `create-techspec ai/tasks/bugfix-[name]`
-    5. And then `create-tasks ai/tasks/bugfix-[name]`
+    4. Then the user can run `create-techspec ai/spec/bugfix-[name]`
+    5. And then `create-tasks ai/spec/bugfix-[name]`
 
     ## Workflow
 
@@ -278,9 +278,9 @@
     </critical>
 
     **Actions:**
-    1. Create directory: `ai/tasks/bugfix-[bug-name]/`
+    1. Create directory: `ai/spec/bugfix-[bug-name]/`
     2. Populate with all information collected in previous steps
-    3. Save as: `ai/tasks/bugfix-[bug-name]/prd.md` (uses name `prd.md` for pipeline compatibility)
+    3. Save as: `ai/spec/bugfix-[bug-name]/prd.md` (uses name `prd.md` for pipeline compatibility)
 
     **Bug name:** Use kebab-case based on the description (e.g., "login-not-working", "error-500-save-user")
 
@@ -291,13 +291,13 @@
     ```
     ## Bugfix Document Generated
 
-    File created: `ai/tasks/bugfix-[name]/prd.md`
+    File created: `ai/spec/bugfix-[name]/prd.md`
 
     **Next steps:**
     1. Review the generated document
-    2. Run: `create-techspec ai/tasks/bugfix-[name]`
-    3. Run: `create-tasks ai/tasks/bugfix-[name]`
-    4. Execute the tasks with: `run-task [number] ai/tasks/bugfix-[name]`
+    2. Run: `create-techspec ai/spec/bugfix-[name]`
+    3. Run: `create-tasks ai/spec/bugfix-[name]`
+    4. Execute the tasks with: `run-task [number] ai/spec/bugfix-[name]`
 
     The flow follows the same pattern as a feature/PRD.
     ```

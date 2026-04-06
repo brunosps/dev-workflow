@@ -11,7 +11,7 @@
     | Variable | Description | Example |
     |----------|-------------|---------|
     | `{{RULES_PATH}}` | Path to project rules/patterns | `ai/rules/`, `CLAUDE.md` |
-    | `{{PRD_PATH}}` | Path to the feature PRD | `tasks/prd-notifications/prd.md` |
+    | `{{PRD_PATH}}` | Path to the feature PRD | `spec/prd-notifications/prd.md` |
 
     ## Main Objectives
 
@@ -23,7 +23,7 @@
     ## Template and Inputs
 
     - Tech Spec template: `templates/techspec-template.md`
-    - Required PRD: `{{PRD_PATH}}` (e.g., `tasks/prd-[feature-name]/prd.md`)
+    - Required PRD: `{{PRD_PATH}}` (e.g., `spec/prd-[feature-name]/prd.md`)
     - Output document: same directory as the PRD, named `techspec.md`
     - Project rules: `{{RULES_PATH}}` and `ai/rules/`
     - Ecosystem integrations: `ai/rules/integrations.md`
@@ -50,7 +50,7 @@
     ## Prerequisites
 
     - Review project patterns in `{{RULES_PATH}}`
-    - Confirm that the PRD exists at `{{PRD_PATH}}` or `tasks/prd-[feature-name]/prd.md`
+    - Confirm that the PRD exists at `{{PRD_PATH}}` or `spec/prd-[feature-name]/prd.md`
 
     ## Workflow
 
@@ -83,7 +83,7 @@
     - Provide: architecture overview, component design, interfaces, models, endpoints, integration points, impact analysis, testing strategy, observability
     - **Include Branch section**:
       - Pattern: `feat/prd-[feature-name]`
-      - Example: `feat/prd-visitor-notifications`
+      - Example: `feat/prd-user-onboarding`
     - **Include DETAILED testing section** with:
       - Suggested unit tests (use cases, services, adapters)
       - Correct framework for the project (as defined in `ai/rules/`)

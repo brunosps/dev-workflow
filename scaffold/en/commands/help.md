@@ -73,9 +73,9 @@ This workspace uses an AI command system that automates the full development cyc
 | Command | What it does | Input | Output |
 |---------|-------------|-------|--------|
 | `/brainstorm` | Facilitates structured ideation before PRD or implementation | Problem, idea, or context | Options + trade-offs + recommendation |
-| `/create-prd` | Creates PRD with min. 7 clarification questions | Feature description | `ai/tasks/prd-[name]/prd.md` |
-| `/create-techspec` | Creates technical specification from the PRD | PRD path | `ai/tasks/prd-[name]/techspec.md` |
-| `/create-tasks` | Breaks PRD+TechSpec into tasks (max 2 RFs/task) | PRD path | `ai/tasks/prd-[name]/tasks.md` + `*_task.md` |
+| `/create-prd` | Creates PRD with min. 7 clarification questions | Feature description | `ai/spec/prd-[name]/prd.md` |
+| `/create-techspec` | Creates technical specification from the PRD | PRD path | `ai/spec/prd-[name]/techspec.md` |
+| `/create-tasks` | Breaks PRD+TechSpec into tasks (max 2 RFs/task) | PRD path | `ai/spec/prd-[name]/tasks.md` + `*_task.md` |
 
 ### Execution
 
@@ -106,6 +106,7 @@ This workspace uses an AI command system that automates the full development cyc
 | `/run-qa` | Visual QA with Playwright MCP + accessibility | PRD path | `QA/qa-report.md` + `QA/screenshots/` + `QA/logs/` |
 | `/review-implementation` | Compares PRD vs code (RFs, endpoints, tasks) | PRD path | Gap report |
 | `/code-review` | Formal code review (quality, rules, tests) | PRD path | `code-review.md` |
+| `/refactoring-analysis` | Audit code smells and refactoring opportunities (Fowler's catalog) | PRD path | `refactoring-analysis.md` |
 
 ### Versioning
 
@@ -158,25 +159,26 @@ LEVEL 3 - Formal Code Review (/code-review)
 ```bash
 /brainstorm "initial idea"                      # 0. Explore options and trade-offs
 /create-prd                                     # 1. Describe the feature
-/create-techspec ai/tasks/prd-name              # 2. Generate tech spec
-/create-tasks ai/tasks/prd-name                 # 3. Break into tasks
-/run-plan ai/tasks/prd-name                     # 4. Execute all (includes Level 1+2)
-/code-review ai/tasks/prd-name                  # 5. Formal code review (Level 3)
-/generate-pr main                               # 6. Create PR
-/archive-prd ai/tasks/prd-name                  # 7. After merge
+/create-techspec ai/spec/prd-name              # 2. Generate tech spec
+/create-tasks ai/spec/prd-name                 # 3. Break into tasks
+/run-plan ai/spec/prd-name                     # 4. Execute all (includes Level 1+2)
+/refactoring-analysis ai/spec/prd-name         # 5. Audit code smells (optional)
+/code-review ai/spec/prd-name                  # 6. Formal code review (Level 3)
+/generate-pr main                               # 7. Create PR
+/archive-prd ai/spec/prd-name                  # 8. After merge
 ```
 
 ### New Feature (Incremental)
 ```bash
 /brainstorm "initial idea"                      # 0. Explore options and trade-offs
 /create-prd                                     # 1. PRD
-/create-techspec ai/tasks/prd-name              # 2. TechSpec
-/create-tasks ai/tasks/prd-name                 # 3. Tasks
-/run-task ai/tasks/prd-name                     # 4. Task 1 (with Level 1)
-/run-task ai/tasks/prd-name                     # 5. Task 2 (with Level 1)
+/create-techspec ai/spec/prd-name              # 2. TechSpec
+/create-tasks ai/spec/prd-name                 # 3. Tasks
+/run-task ai/spec/prd-name                     # 4. Task 1 (with Level 1)
+/run-task ai/spec/prd-name                     # 5. Task 2 (with Level 1)
 # ... repeat for each task
-/review-implementation ai/tasks/prd-name        # 6. PRD review (Level 2)
-/code-review ai/tasks/prd-name                  # 7. Code review (Level 3)
+/review-implementation ai/spec/prd-name        # 6. PRD review (Level 2)
+/code-review ai/spec/prd-name                  # 7. Code review (Level 3)
 /generate-pr main                               # 8. PR
 ```
 
@@ -190,18 +192,18 @@ LEVEL 3 - Formal Code Review (/code-review)
 ### Complex Bug
 ```bash
 /bugfix "description" --analysis                # Generate analysis document
-/create-techspec ai/tasks/bugfix-name           # TechSpec for the fix
-/create-tasks ai/tasks/bugfix-name              # Tasks for the fix
-/run-plan ai/tasks/bugfix-name                  # Execute all
+/create-techspec ai/spec/bugfix-name           # TechSpec for the fix
+/create-tasks ai/spec/bugfix-name              # Tasks for the fix
+/run-plan ai/spec/bugfix-name                  # Execute all
 /generate-pr main                               # PR
 ```
 
 ### Visual QA (Frontend)
 ```bash
-/run-qa ai/tasks/prd-name                       # QA with Playwright MCP
+/run-qa ai/spec/prd-name                       # QA with Playwright MCP
 # If bugs found:
 /bugfix "description"                           # Fix each bug
-/fix-qa ai/tasks/prd-name                       # Fix + retest full cycle
+/fix-qa ai/spec/prd-name                       # Fix + retest full cycle
 ```
 
 ### Deep Research
@@ -224,6 +226,7 @@ your-project/
 │   │   ├── run-plan.md
 │   │   ├── run-qa.md
 │   │   ├── code-review.md
+│   │   ├── refactoring-analysis.md
 │   │   ├── review-implementation.md
 │   │   ├── analyze-project.md
 │   │   ├── deep-research.md

@@ -5,8 +5,8 @@
 
     The feature you will work on is identified by this slug:
 
-    - Required PRD: `tasks/prd-[feature-name]/prd.md`
-    - Required Tech Spec: `tasks/prd-[feature-name]/techspec.md`
+    - Required PRD: `spec/prd-[feature-name]/prd.md`
+    - Required Tech Spec: `spec/prd-[feature-name]/techspec.md`
 
     ## Process Steps
 
@@ -23,8 +23,8 @@
     ```
 
     **Naming convention**: `feat/prd-[name]`
-    - Example: `feat/prd-visitor-notifications`
-    - Example: `feat/prd-device-integration`
+    - Example: `feat/prd-user-onboarding`
+    - Example: `feat/prd-payment-checkout`
 
     1. **Analyze PRD and Technical Specification**
     - Extract requirements and technical decisions
@@ -93,11 +93,11 @@
     ## Output Specifications
 
     ### File Locations
-    - Feature folder: `./tasks/prd-[feature-name]/`
+    - Feature folder: `./spec/prd-[feature-name]/`
     - Template for the task list: `./templates/tasks-template.md`
-    - Task list: `./tasks/prd-[feature-name]/tasks.md`
+    - Task list: `./spec/prd-[feature-name]/tasks.md`
     - Template for each individual task: `./templates/task-template.md`
-    - Individual tasks: `./tasks/prd-[feature-name]/[num]_task.md`
+    - Individual tasks: `./spec/prd-[feature-name]/[num]_task.md`
 
     ### Task Summary Format (tasks.md)
 

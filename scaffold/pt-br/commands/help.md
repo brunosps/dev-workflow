@@ -60,9 +60,9 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 | Comando | O que faz | Input | Output |
 |---------|-----------|-------|--------|
 | `/brainstorm` | Facilita ideação estruturada antes do PRD ou da implementação | Problema, ideia ou contexto | Opções + trade-offs + recomendação |
-| `/criar-prd` | Cria PRD com min. 7 perguntas de clarificação | Descrição da feature | `ai/tasks/prd-[nome]/prd.md` |
-| `/criar-techspec` | Cria especificação técnica a partir do PRD | Path do PRD | `ai/tasks/prd-[nome]/techspec.md` |
-| `/criar-tasks` | Quebra PRD+TechSpec em tasks (max 2 RFs/task) | Path do PRD | `ai/tasks/prd-[nome]/tasks.md` + `*_task.md` |
+| `/criar-prd` | Cria PRD com min. 7 perguntas de clarificação | Descrição da feature | `ai/spec/prd-[nome]/prd.md` |
+| `/criar-techspec` | Cria especificação técnica a partir do PRD | Path do PRD | `ai/spec/prd-[nome]/techspec.md` |
+| `/criar-tasks` | Quebra PRD+TechSpec em tasks (max 2 RFs/task) | Path do PRD | `ai/spec/prd-[nome]/tasks.md` + `*_task.md` |
 
 ### Execução
 
@@ -93,6 +93,7 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 | `/executar-qa` | QA visual com Playwright MCP + acessibilidade | Path do PRD | `QA/qa-report.md` + `QA/screenshots/` |
 | `/revisar-implementacao` | Compara PRD vs código (RFs, endpoints, tasks) | Path do PRD | Relatório de gaps |
 | `/code-review` | Code review formal (qualidade, rules, testes) | Path do PRD | `code-review.md` |
+| `/refactoring-analysis` | Auditoria de code smells e oportunidades de refatoração (catálogo Fowler) | Path do PRD | `refactoring-analysis.md` |
 
 ### Versionamento
 
@@ -113,23 +114,24 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 ```bash
 /brainstorm "ideia inicial"                    # 0. Explora opções e trade-offs
 /criar-prd                                    # 1. Descreve a funcionalidade
-/criar-techspec ai/tasks/prd-nome             # 2. Gera spec técnica
-/criar-tasks ai/tasks/prd-nome                # 3. Quebra em tasks
-/executar-plano ai/tasks/prd-nome             # 4. Executa todas (inclui Nível 1+2)
-/code-review ai/tasks/prd-nome               # 5. Code review formal (Nível 3)
-/gerar-pr main                                # 6. Cria PR
+/criar-techspec ai/spec/prd-nome             # 2. Gera spec técnica
+/criar-tasks ai/spec/prd-nome                # 3. Quebra em tasks
+/executar-plano ai/spec/prd-nome             # 4. Executa todas (inclui Nível 1+2)
+/refactoring-analysis ai/spec/prd-nome        # 5. Auditoria de code smells (opcional)
+/code-review ai/spec/prd-nome               # 6. Code review formal (Nível 3)
+/gerar-pr main                                # 7. Cria PR
 ```
 
 ### Nova Feature (Incremental)
 ```bash
 /criar-prd                                    # 1. PRD
-/criar-techspec ai/tasks/prd-nome             # 2. TechSpec
-/criar-tasks ai/tasks/prd-nome                # 3. Tasks
-/executar-task ai/tasks/prd-nome              # 4. Task 1 (com Nível 1)
-/executar-task ai/tasks/prd-nome              # 5. Task 2 (com Nível 1)
+/criar-techspec ai/spec/prd-nome             # 2. TechSpec
+/criar-tasks ai/spec/prd-nome                # 3. Tasks
+/executar-task ai/spec/prd-nome              # 4. Task 1 (com Nível 1)
+/executar-task ai/spec/prd-nome              # 5. Task 2 (com Nível 1)
 # ... repete para cada task
-/revisar-implementacao ai/tasks/prd-nome      # 6. Revisão PRD (Nível 2)
-/code-review ai/tasks/prd-nome               # 7. Code review (Nível 3)
+/revisar-implementacao ai/spec/prd-nome      # 6. Revisão PRD (Nível 2)
+/code-review ai/spec/prd-nome               # 7. Code review (Nível 3)
 /gerar-pr main                                # 8. PR
 ```
 
@@ -143,17 +145,17 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 ### Bug Complexo
 ```bash
 /bugfix meu-projeto "descrição" --análise     # Gera documento de análise
-/criar-techspec ai/tasks/bugfix-nome          # TechSpec do fix
-/criar-tasks ai/tasks/bugfix-nome             # Tasks do fix
-/executar-plano ai/tasks/bugfix-nome          # Executa tudo
+/criar-techspec ai/spec/bugfix-nome          # TechSpec do fix
+/criar-tasks ai/spec/bugfix-nome             # Tasks do fix
+/executar-plano ai/spec/bugfix-nome          # Executa tudo
 /gerar-pr main                                # PR
 ```
 
 ### QA Visual (Frontend)
 ```bash
-/executar-qa ai/tasks/prd-nome                # QA com Playwright MCP
+/executar-qa ai/spec/prd-nome                # QA com Playwright MCP
 # Se encontrar bugs:
-/corrigir-qa ai/tasks/prd-nome               # Corrige + retesta ciclo completo
+/corrigir-qa ai/spec/prd-nome               # Corrige + retesta ciclo completo
 ```
 
 ### Onboarding em Projeto Novo
@@ -178,6 +180,7 @@ workspace/
 │   │   ├── executar-plano.md
 │   │   ├── executar-qa.md
 │   │   ├── code-review.md
+│   │   ├── refactoring-analysis.md
 │   │   ├── revisar-implementacao.md
 │   │   ├── deep-research.md
 │   │   ├── bugfix.md

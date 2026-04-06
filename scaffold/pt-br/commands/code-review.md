@@ -11,7 +11,7 @@ Você é um assistente IA especializado em Code Review formal (Nível 3). Sua ta
 
 | Variável | Descrição | Exemplo |
 |----------|-----------|---------|
-| `{{PRD_PATH}}` | Caminho da pasta do PRD | `ai/tasks/prd-minha-feature` |
+| `{{PRD_PATH}}` | Caminho da pasta do PRD | `ai/spec/prd-minha-feature` |
 
 ## Posicionamento
 

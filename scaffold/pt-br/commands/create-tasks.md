@@ -5,8 +5,8 @@
 
     A funcionalidade em que você trabalhará é identificada por este slug:
 
-    - PRD requerido: `ai/tasks/prd-[nome-funcionalidade]/prd.md`
-    - Tech Spec requerido: `ai/tasks/prd-[nome-funcionalidade]/techspec.md`
+    - PRD requerido: `ai/spec/prd-[nome-funcionalidade]/prd.md`
+    - Tech Spec requerido: `ai/spec/prd-[nome-funcionalidade]/techspec.md`
 
     ## Etapas do Processo
 
@@ -23,8 +23,8 @@
     ```
 
     **Padrão de nomenclatura**: `feat/prd-[nome]`
-    - Exemplo: `feat/prd-visitor-notifications`
-    - Exemplo: `feat/prd-device-integration`
+    - Exemplo: `feat/prd-user-onboarding`
+    - Exemplo: `feat/prd-payment-checkout`
 
     1. **Analisar PRD e Especificação Técnica**
     - Extrair requisitos e decisões técnicas
@@ -93,11 +93,11 @@
     ## Especificações de Saída
 
     ### Localização dos Arquivos
-    - Pasta da funcionalidade: `ai/tasks/prd-[nome-funcionalidade]/`
+    - Pasta da funcionalidade: `ai/spec/prd-[nome-funcionalidade]/`
     - Template para a lista de tarefas: `ai/templates/tasks-template.md`
-    - Lista de tarefas: `ai/tasks/prd-[nome-funcionalidade]/tasks.md`
+    - Lista de tarefas: `ai/spec/prd-[nome-funcionalidade]/tasks.md`
     - Template para cada tarefa individual: `ai/templates/task-template.md`
-    - Tarefas individuais: `ai/tasks/prd-[nome-funcionalidade]/[num]_task.md`
+    - Tarefas individuais: `ai/spec/prd-[nome-funcionalidade]/[num]_task.md`
 
     ### Formato do Resumo de Tarefas (tasks.md)
 

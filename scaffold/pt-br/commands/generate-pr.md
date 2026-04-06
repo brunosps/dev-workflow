@@ -112,8 +112,8 @@
 
     ## Related
 
-    - PRD: `ai/tasks/prd-[nome]/prd.md`
-    - TechSpec: `ai/tasks/prd-[nome]/techspec.md`
+    - PRD: `ai/spec/prd-[nome]/prd.md`
+    - TechSpec: `ai/spec/prd-[nome]/techspec.md`
 
     ---
     Generated with AI CLI

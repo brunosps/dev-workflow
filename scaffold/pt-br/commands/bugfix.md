@@ -7,7 +7,7 @@
 
     | Variável | Descrição | Exemplo |
     |----------|-----------|---------|
-    | `{{TARGET}}` | PRD path OU nome do projeto | `ai/tasks/prd-minha-feature` ou `meu-projeto` |
+    | `{{TARGET}}` | PRD path OU nome do projeto | `ai/spec/prd-minha-feature` ou `meu-projeto` |
     | `{{BUG_DESCRIPTION}}` | Descrição do problema | `Erro 500 ao salvar usuário` |
     | `{{MODE}}` | (Opcional) Modo de execução | `--análise` para gerar documento |
 
@@ -16,7 +16,7 @@
     | Modo | Quando Usar | Resultado |
     |------|-------------|-----------|
     | **Direto** (padrão) | Bug simples, <=5 arquivos, sem migration | Executa correção imediata |
-    | **Análise** (`--análise`) | Bug complexo, precisa planejamento | Gera `ai/tasks/bugfix-*/prd.md` para techspec -> tasks |
+    | **Análise** (`--análise`) | Bug complexo, precisa planejamento | Gera `ai/spec/bugfix-*/prd.md` para techspec -> tasks |
 
     ### Modo Análise
 
@@ -28,10 +28,10 @@
 
     Neste modo:
     1. Segue o fluxo normal de perguntas e análise
-    2. Em vez de executar, gera documento em `ai/tasks/bugfix-[nome]/prd.md`
+    2. Em vez de executar, gera documento em `ai/spec/bugfix-[nome]/prd.md`
     3. O arquivo é nomeado `prd.md` para manter compatibilidade com o pipeline criar-techspec/criar-tasks
-    4. Depois o usuário pode rodar `/criar-techspec ai/tasks/bugfix-[nome]`
-    5. E então `/criar-tasks ai/tasks/bugfix-[nome]`
+    4. Depois o usuário pode rodar `/criar-techspec ai/spec/bugfix-[nome]`
+    5. E então `/criar-tasks ai/spec/bugfix-[nome]`
 
     ## Fluxo de Trabalho
 
@@ -203,9 +203,9 @@
     </critical>
 
     **Ações:**
-    1. Criar diretório: `ai/tasks/bugfix-[nome-do-bug]/`
+    1. Criar diretório: `ai/spec/bugfix-[nome-do-bug]/`
     2. Preencher com todas as informações coletadas nos passos anteriores
-    3. Salvar como: `ai/tasks/bugfix-[nome-do-bug]/prd.md` (usa nome `prd.md` para compatibilidade com pipeline)
+    3. Salvar como: `ai/spec/bugfix-[nome-do-bug]/prd.md` (usa nome `prd.md` para compatibilidade com pipeline)
 
     **IMPORTANTE:** O arquivo deve ser nomeado `prd.md` para que os comandos
     `/criar-techspec` e `/criar-tasks` funcionem sem modificação.

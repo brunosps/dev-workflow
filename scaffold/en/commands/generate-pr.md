@@ -122,8 +122,8 @@ Build the body following the template below, filling in with collected informati
 
 ## Related
 
-- PRD: `ai/tasks/prd-[name]/prd.md`
-- TechSpec: `ai/tasks/prd-[name]/techspec.md`
+- PRD: `ai/spec/prd-[name]/prd.md`
+- TechSpec: `ai/spec/prd-[name]/techspec.md`
 
 ---
 Generated with AI CLI

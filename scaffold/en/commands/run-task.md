@@ -14,9 +14,9 @@ When available in the project at `./.agents/skills/`, use these skills as specia
 
 ## File Locations
 
-- PRD: `./tasks/prd-[feature-name]/prd.md`
-- Tech Spec: `./tasks/prd-[feature-name]/techspec.md`
-- Tasks: `./tasks/prd-[feature-name]/tasks.md`
+- PRD: `./spec/prd-[feature-name]/prd.md`
+- Tech Spec: `./spec/prd-[feature-name]/techspec.md`
+- Tasks: `./spec/prd-[feature-name]/tasks.md`
 - Project Rules: `ai/rules/`
 
 ## Steps to Execute

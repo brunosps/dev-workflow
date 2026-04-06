@@ -12,7 +12,7 @@ Você é um assistente IA especializado em Quality Assurance. Sua tarefa é vali
 
 | Variável | Descrição | Exemplo |
 |----------|-----------|---------|
-| `{{PRD_PATH}}` | Caminho da pasta do PRD | `ai/tasks/prd-minha-feature` |
+| `{{PRD_PATH}}` | Caminho da pasta do PRD | `ai/spec/prd-minha-feature` |
 
 ## Objetivos
 

@@ -11,7 +11,7 @@
     | Variável | Descrição | Exemplo |
     |----------|-----------|---------|
     | `{{RULES_PATH}}` | Caminho para as rules/padrões do projeto | `ai/rules/`, `CLAUDE.md` |
-    | `{{PRD_PATH}}` | Caminho do PRD da funcionalidade | `ai/tasks/prd-notifications/prd.md` |
+    | `{{PRD_PATH}}` | Caminho do PRD da funcionalidade | `ai/spec/prd-notifications/prd.md` |
 
     ## Objetivos Principais
 
@@ -23,7 +23,7 @@
     ## Template e Entradas
 
     - Template Tech Spec: `ai/templates/techspec-template.md`
-    - PRD requerido: `{{PRD_PATH}}` (ex: `ai/tasks/prd-[nome-funcionalidade]/prd.md`)
+    - PRD requerido: `{{PRD_PATH}}` (ex: `ai/spec/prd-[nome-funcionalidade]/prd.md`)
     - Documento de saída: mesmo diretório do PRD como `techspec.md`
     - Rules do projeto: `{{RULES_PATH}}` e `ai/rules/`
     - Integrações do ecossistema: `ai/rules/integrations.md` (se existir)
@@ -48,7 +48,7 @@
     ## Pré-requisitos
 
     - Revisar padrões do projeto em `{{RULES_PATH}}`
-    - Confirmar que o PRD existe em `{{PRD_PATH}}` ou `ai/tasks/prd-[nome-funcionalidade]/prd.md`
+    - Confirmar que o PRD existe em `{{PRD_PATH}}` ou `ai/spec/prd-[nome-funcionalidade]/prd.md`
 
     ## Fluxo de Trabalho
 
@@ -81,7 +81,7 @@
     - Fornecer: visão geral da arquitetura, design de componentes, interfaces, modelos, endpoints, pontos de integração, análise de impacto, estratégia de testes, observabilidade
     - **Incluir seção de Branch**:
       - Padrão: `feat/prd-[nome-da-feature]`
-      - Exemplo: `feat/prd-visitor-notifications`
+      - Exemplo: `feat/prd-user-onboarding`
     - **Incluir seção de testes DETALHADA** com:
       - Testes unitários sugeridos (use cases, services, adapters)
       - Framework correto para o projeto

@@ -19,9 +19,13 @@ These rules will be consumed by other workflow commands (create-prd, create-tech
 
 ## Analysis Workflow
 
-### Step 1: Detect Project Structure
+### Step 1: Detect Project Structure (Recursive Deep Scan)
 
-Scan the root directory for project indicators:
+<critical>Do NOT stop at the first level. Recursively scan the entire tree until you reach every leaf project. A monorepo may contain sub-projects that are themselves monorepos or have git submodules. Keep going until there are no more nested projects to discover.</critical>
+
+#### 1.1 Identify project type indicators
+
+Scan for these files at the root AND recursively in subdirectories:
 
 | File | Indicates |
 |------|-----------|
@@ -29,22 +33,135 @@ Scan the root directory for project indicators:
 | `requirements.txt` / `pyproject.toml` / `setup.py` | Python |
 | `go.mod` | Go |
 | `Cargo.toml` | Rust |
-| `pom.xml` / `build.gradle` | Java / Kotlin |
+| `pom.xml` / `build.gradle` / `build.gradle.kts` | Java / Kotlin |
 | `composer.json` | PHP |
 | `Gemfile` | Ruby |
 | `.csproj` / `.sln` | .NET / C# |
 | `pubspec.yaml` | Dart / Flutter |
+| `mix.exs` | Elixir |
+| `CMakeLists.txt` | C / C++ |
 
-**Monorepo detection:**
-- Check for `workspaces` in package.json (npm/yarn/pnpm)
-- Check for `lerna.json`, `nx.json`, `turbo.json`
-- Check for `.git/modules` or `.gitmodules` (submodules)
-- If monorepo: treat each workspace/submodule as a separate module
+#### 1.2 Detect monorepo orchestrators
+
+```bash
+# Check monorepo tooling at root
+cat package.json | grep -E "workspaces|workspace"  # npm/yarn/pnpm workspaces
+ls lerna.json nx.json turbo.json pnpm-workspace.yaml rush.json 2>/dev/null
+
+# Discover workspace packages (resolve globs to actual directories)
+# Example for pnpm: read pnpm-workspace.yaml → resolve packages glob → list all
+# Example for npm/yarn: read package.json workspaces → resolve globs → list all
+# Example for nx: read workspace.json or project.json in subdirs
+# Example for turborepo: read turbo.json → read package.json workspaces
+```
+
+#### 1.3 Detect git submodules (recursive)
+
+```bash
+# Check for submodules
+cat .gitmodules 2>/dev/null
+
+# List all submodules recursively (submodules can contain submodules)
+git submodule status --recursive 2>/dev/null
+```
+
+For each submodule found:
+- Record its path, URL, and branch
+- Enter the submodule directory and repeat the full Step 1 scan inside it
+- A submodule may itself be a monorepo — detect and expand it
+
+#### 1.4 Recursive project discovery
+
+Starting from the workspace root, perform a **depth-first scan**:
+
+```
+1. At current directory, check: is this a project? (has package.json, go.mod, etc.)
+2. If monorepo orchestrator found → resolve all workspace packages → enter each
+3. If .gitmodules found → resolve all submodules → enter each
+4. For each discovered sub-directory that is a project → repeat from step 1
+5. Stop only when a directory has no nested projects, workspaces, or submodules
+```
+
+**Common monorepo layouts to detect:**
+
+| Layout | Pattern | How to discover projects |
+|--------|---------|------------------------|
+| **apps + packages** | `apps/*/`, `packages/*/` | Each dir with its own package.json/go.mod/etc. |
+| **services** | `services/*/` | Microservices, each is independent |
+| **libs + apps** | `libs/*/`, `apps/*/` | Shared libraries + applications |
+| **nested monorepo** | `packages/core/packages/*/` | Monorepo inside monorepo — keep descending |
+| **git submodules** | `.gitmodules` paths | External repos mounted as directories |
+| **multi-language** | `backend/`, `frontend/`, `infra/` | Different stacks in one repo |
+| **gradle multi-project** | `settings.gradle` with `include` | Java/Kotlin sub-projects |
+| **cargo workspace** | `Cargo.toml` with `[workspace]` | Rust crates |
+| **go workspace** | `go.work` | Go modules |
+| **dotnet solution** | `.sln` with project refs | C# projects |
+
+#### 1.5 Build the project tree
+
+After the recursive scan, produce a complete **project tree** that shows the hierarchy:
+
+```
+workspace-root/                          [monorepo — turborepo + pnpm]
+├── apps/
+│   ├── web/                             [Next.js 14, TypeScript]
+│   ├── mobile/                          [React Native, TypeScript]
+│   └── admin/                           [Next.js 14, TypeScript]
+├── packages/
+│   ├── ui/                              [React component library]
+│   ├── db/                              [Prisma schema + client]
+│   ├── config/                          [Shared ESLint/TS configs]
+│   └── auth/                            [Auth utilities]
+├── services/
+│   ├── api/                             [NestJS, TypeScript]
+│   └── worker/                          [Bull queue processor]
+├── infra/                               [Terraform, AWS CDK]
+│   └── modules/                         [git submodule → terraform-modules repo]
+│       ├── networking/                  [Terraform module]
+│       └── compute/                     [Terraform module]
+└── docs/                                [Docusaurus]
+```
+
+This tree is the **map** for the rest of the analysis. Every leaf project in this tree will get its own `ai/rules/{project}.md` file.
+
+#### 1.6 Map inter-project dependencies
+
+For monorepos and multi-project setups, identify how projects depend on each other:
+
+```bash
+# For Node.js: check dependencies/devDependencies referencing workspace packages
+# Example: "@myorg/ui": "workspace:*" or "file:../packages/ui"
+grep -r "workspace:" apps/*/package.json packages/*/package.json 2>/dev/null
+
+# For Go: check go.mod replace directives
+grep "replace" */go.mod 2>/dev/null
+
+# For Rust: check Cargo.toml path dependencies
+grep "path = " */Cargo.toml 2>/dev/null
+```
+
+Record a **dependency matrix**:
+
+| Project | Depends on | Depended by |
+|---------|-----------|-------------|
+| `apps/web` | `packages/ui`, `packages/db`, `packages/auth` | — |
+| `packages/ui` | `packages/config` | `apps/web`, `apps/admin` |
+| `services/api` | `packages/db`, `packages/auth` | `apps/web` (via API) |
+
+Also identify **inter-project communication patterns**:
+- Internal imports (workspace packages)
+- REST / GraphQL API calls between services
+- Message queues (Redis pub/sub, RabbitMQ, Kafka, MQTT)
+- gRPC calls
+- Shared database access
+- Event-driven patterns
 
 **Record:**
-- Project type: monorepo vs single project
-- Root-level tooling (Makefile, docker-compose, CI configs)
-- List of modules/packages detected
+- Project type: monorepo / multi-project / git submodules / single project
+- Full project tree with every leaf identified
+- Root-level tooling (Makefile, docker-compose, CI configs, monorepo orchestrator)
+- Dependency matrix between projects
+- Communication patterns between services
 
 ### Step 2: Identify Tech Stack (per module)
 
@@ -68,7 +185,17 @@ For each module/project detected, identify:
 
 ### Step 3: Detect Code Patterns and Conventions
 
-Read **5-10 representative source files** per module to identify actual patterns in use:
+Read **10-20 representative source files** per module to identify actual patterns in use. For large projects, increase coverage proportionally.
+
+**File selection strategy — read at least:**
+- 2-3 **entry points** (controllers, route handlers, resolvers, pages)
+- 2-3 **business logic** (services, use cases, domain models)
+- 2-3 **data layer** (repositories, DAOs, ORM models, migrations)
+- 1-2 **middleware / guards / interceptors**
+- 1-2 **shared utilities / helpers**
+- 1-2 **configuration files** (env loaders, app bootstrap, DI containers)
+- 2-3 **test files** (unit, integration, e2e)
+- 1-2 **type definitions / DTOs / schemas** (if typed language)
 
 **Architecture patterns:**
 - MVC (Model-View-Controller)
@@ -100,6 +227,60 @@ Read **5-10 representative source files** per module to identify actual patterns
 - Where it's used (file paths)
 - A real code example from the project (5-15 lines)
 
+### Step 3.1: Trace Request Flows End-to-End
+
+Pick **2-3 representative features** and trace the full request lifecycle:
+
+1. **Entry point** — how does the request arrive? (route definition, controller method, resolver)
+2. **Validation** — where and how is input validated? (middleware, DTO, schema)
+3. **Auth/Authorization** — what guards or middleware protect the route?
+4. **Business logic** — which service/use case handles the operation?
+5. **Data access** — how does it reach the database? (repository, direct ORM call, raw query)
+6. **Response** — how is the response shaped? (serializer, transformer, direct return)
+7. **Error path** — what happens when something fails at each layer?
+
+Document the traced flows with file paths at each step. This reveals the actual architecture better than scanning files in isolation.
+
+### Step 3.2: Analyze Security and Infrastructure Patterns
+
+**Security patterns:**
+- Authentication flow (session, JWT, OAuth, API keys) — trace the full auth chain
+- Authorization model (RBAC, ABAC, policies, guards)
+- CORS configuration
+- Rate limiting / throttling
+- Input sanitization beyond validation
+- Secret management (env vars, vaults, config services)
+- CSRF protection (if applicable)
+
+**Infrastructure and deployment:**
+- Dockerfile analysis (base image, multi-stage builds, exposed ports)
+- Docker Compose services (databases, caches, queues, external services)
+- CI/CD pipeline stages (lint, test, build, deploy)
+- Environment separation (dev, staging, prod)
+- Cloud provider indicators (AWS, GCP, Azure configs, IaC files)
+
+**Performance patterns:**
+- Caching strategy (Redis, in-memory, HTTP cache headers)
+- Pagination approach (offset, cursor, keyset)
+- Queue/job processing (Bull, Celery, Sidekiq, etc.)
+- Connection pooling configuration
+- Lazy loading / eager loading patterns (ORM queries)
+
+**Observability:**
+- Logging library and patterns (structured logs, log levels)
+- Error tracking (Sentry, Bugsnag, Datadog, etc.)
+- Metrics / APM instrumentation
+- Health check endpoints
+
+**API contracts:**
+- OpenAPI / Swagger spec presence
+- GraphQL schema files
+- tRPC router definitions
+- gRPC proto files
+- API versioning strategy
+
+**For each area, document what exists with file paths and code examples. If an area has no implementation, note it as "Not detected" — this is valuable information for future development.**
+
 ### Step 4: Detect Anti-patterns
 
 Look for common issues:
@@ -123,6 +304,42 @@ Look for common issues:
 - Describe the issue with file path and line reference
 - Explain the risk
 - Suggest the project's own idiom for fixing it (if a good pattern exists elsewhere)
+
+### Step 4.1: Topology Analysis
+
+Analyze the dependency graph of the codebase to identify structural risks. This goes beyond individual anti-patterns to reveal systemic coupling issues.
+
+**How to analyze:**
+- Scan all import/require/include statements across source files
+- Count inbound and outbound dependencies for each file/module
+- Build a simplified dependency map of the most connected nodes
+
+**Metrics to compute per file/module:**
+
+| Metric | Formula | Interpretation |
+|--------|---------|---------------|
+| **Afferent coupling (Ca)** | Count of files that import this file | High = many dependents, risky to change |
+| **Efferent coupling (Ce)** | Count of files this file imports | High = many dependencies, fragile |
+| **Instability (I)** | Ce / (Ca + Ce) | 0 = maximally stable, 1 = maximally unstable |
+
+**What to detect:**
+
+- **God nodes:** files with Ca > 10 — these are the highest-blast-radius files in the project
+- **Hub files:** files with both high Ca AND high Ce — dangerous because they are heavily depended on while also being fragile
+- **Barrel file risk:** index files that re-export many modules (Ca is artificially inflated, but blast radius is real)
+- **Circular dependencies:** bidirectional import cycles — trace the full cycle path
+- **Isolated modules:** files with Ca = 0 and Ce = 0 — potential dead code
+
+**Generate a dependency graph** of the top 10-15 most connected files as ASCII art:
+
+```
+auth.service → user.repository, token.service, config
+user.controller → auth.service, user.service, validation.pipe
+user.service → user.repository, email.service
+email.service → config, templates
+```
+
+**Record critical nodes** in a table with Ca, Ce, Instability, and risk classification.
 
 ### Step 5: Detect Git and Collaboration Patterns
 
@@ -157,11 +374,42 @@ Record:
 
 ## Structure
 
-{monorepo vs single project}
+{monorepo / multi-project / git submodules / single project}
+{monorepo orchestrator if applicable: Turborepo, Nx, Lerna, pnpm workspaces, etc.}
 
-| Module | Path | Stack | Description |
-|--------|------|-------|-------------|
-| {name} | {path} | {framework + language} | {brief description} |
+### Project Tree
+
+{Full project tree showing every discovered project down to the deepest leaf}
+```
+workspace-root/
+├── apps/
+│   ├── web/                         [Next.js, TypeScript]
+│   └── mobile/                      [React Native, TypeScript]
+├── packages/
+│   ├── ui/                          [React component library]
+│   └── db/                          [Prisma client]
+├── services/
+│   └── api/                         [NestJS, TypeScript]
+└── infra/                           [git submodule → terraform-modules]
+    ├── networking/                   [Terraform module]
+    └── compute/                     [Terraform module]
+```
+
+### Project Index
+
+| Project | Path | Stack | Type | Rules |
+|---------|------|-------|------|-------|
+| {name} | {path} | {framework + language} | app / package / service / submodule / infra | [{name}.md]({name}.md) |
+
+### Dependency Matrix
+
+| Project | Depends on | Depended by |
+|---------|-----------|-------------|
+| {name} | {list} | {list} |
+
+### Communication Patterns
+
+{How projects/services communicate: workspace imports, REST, GraphQL, gRPC, message queues, shared DB, events}
 
 ## Stack Summary
 
@@ -174,15 +422,22 @@ Record:
 | Testing | {testing frameworks} |
 | CI/CD | {ci/cd tools} |
 | Package Manager | {pkg managers} |
+| Monorepo Tool | {orchestrator or "N/A"} |
 
 ## Git Conventions
 
 - Commit style: {convention}
 - Branch pattern: {pattern}
 
+## Submodules
+
+{If git submodules exist, list each with: path, remote URL, branch, and what it contains}
+{If no submodules: "None detected"}
+
 ## Quick Reference
 
 - See [{module}]({module}.md) for detailed rules per module
+- See [integrations.md](integrations.md) for inter-project communication (if monorepo)
 ```
 
 #### 6.2 `ai/rules/{module}.md` (per module)
@@ -206,8 +461,15 @@ Record:
 
 ### Directory Structure
 ```
-{Actual directory tree, 2-3 levels deep}
+{Actual directory tree — go as deep as needed to show every meaningful layer, do not stop at 2-3 levels}
 ```
+
+### Project Context
+- **Location in workspace:** {relative path from root}
+- **Type:** {app / package / service / library / submodule / infra}
+- **Git submodule:** {yes/no — if yes, remote URL and branch}
+- **Depends on:** {list of sibling projects this project imports/uses}
+- **Depended by:** {list of sibling projects that import/use this one}
 
 ## Patterns to Follow
 
@@ -232,13 +494,49 @@ Record:
 | Functions | {convention} | {example} |
 | Variables | {convention} | {example} |
 
-## Anti-patterns to Avoid
+## Request Flow Examples
 
-### {Anti-pattern}
-- **Severity:** {High/Medium/Low}
-- **Found in:** {file_path}
-- **Issue:** {description}
-- **Recommendation:** {fix approach using project's own idioms}
+### {Feature/Flow Name}
+1. **Entry:** `{route file}` → `{controller method}`
+2. **Validation:** `{validation layer}`
+3. **Auth:** `{guard/middleware}`
+4. **Logic:** `{service/use-case}`
+5. **Data:** `{repository/ORM call}`
+6. **Response:** `{serializer/transformer}`
+
+## Security Patterns
+
+- **Authentication:** {method — session/JWT/OAuth/API keys}
+- **Authorization:** {model — RBAC/ABAC/guards/policies}
+- **CORS:** {configuration location and policy}
+- **Rate Limiting:** {implementation or "Not detected"}
+- **Secret Management:** {env vars / vault / config service}
+
+## Infrastructure
+
+- **Containerization:** {Dockerfile details or "Not detected"}
+- **Services:** {Docker Compose services or cloud services}
+- **CI/CD:** {pipeline stages and config location}
+- **Environments:** {dev/staging/prod separation}
+
+## Performance Patterns
+
+- **Caching:** {strategy and implementation}
+- **Pagination:** {approach — offset/cursor/keyset}
+- **Queues/Jobs:** {library and usage}
+- **Connection Pooling:** {configuration}
+
+## Observability
+
+- **Logging:** {library, pattern, structured/unstructured}
+- **Error Tracking:** {service — Sentry/Datadog/etc. or "Not detected"}
+- **Health Checks:** {endpoint location or "Not detected"}
+
+## API Contracts
+
+- **Spec format:** {OpenAPI/GraphQL schema/proto/none}
+- **Versioning:** {strategy or "Not detected"}
+- **Documentation:** {location or "Not detected"}
 
 ## Testing Conventions
 
@@ -246,6 +544,7 @@ Record:
 - File pattern: {e.g., *.spec.ts, *.test.py}
 - Location: {co-located, __tests__/, tests/}
 - Mocking approach: {jest.fn(), unittest.mock, etc.}
+- Coverage targets: {thresholds if configured}
 
 ## Import Conventions
 
@@ -255,24 +554,131 @@ Record:
 ```{language}
 {actual import block from codebase}
 ```
+
+## Topology Analysis
+
+### Dependency Graph
+
+```
+{ASCII dependency graph of the top 10-15 most connected files/modules}
+{Example:}
+{auth.service → user.repository, token.service, config}
+{user.controller → auth.service, user.service, validation.pipe}
+```
+
+### Critical Nodes
+
+| File | Ca (in) | Ce (out) | Instability | Classification |
+|------|---------|----------|-------------|----------------|
+| {file} | {n} | {n} | {ratio} | {God node / Hub / Barrel / Stable / Unstable} |
+
+### Circular Dependencies
+
+- {module A} <-> {module B} (via {shared dependency})
+- {or "None detected"}
+
+### Observations
+
+{Free-form analysis: which modules are highest risk for changes, which are surprisingly isolated, any structural recommendations}
+
+## Anti-patterns to Avoid
+
+### {Anti-pattern}
+- **Severity:** {High/Medium/Low}
+- **Found in:** {file_path}
+- **Issue:** {description}
+- **Recommendation:** {fix approach using project's own idioms}
+```
+
+#### 6.3 `ai/rules/integrations.md` (monorepo / multi-project only)
+
+Generate this file when 2+ projects are detected.
+
+```markdown
+# Integrations — {Workspace Name}
+
+> Auto-generated by /analyze-project on {date}
+
+## Project Dependency Graph
+
+{Visual representation of how projects depend on each other}
+
+```
+apps/web → packages/ui, packages/db, packages/auth
+apps/admin → packages/ui, packages/db
+services/api → packages/db, packages/auth
+packages/ui → packages/config
+packages/auth → packages/db
+```
+
+## Shared Packages
+
+| Package | Path | Used by | Purpose |
+|---------|------|---------|---------|
+| {name} | {path} | {list of consumers} | {what it provides} |
+
+## Service Communication
+
+| From | To | Method | Endpoint/Topic | Description |
+|------|-----|--------|---------------|-------------|
+| {service A} | {service B} | REST / gRPC / queue / event | {endpoint or topic name} | {what data flows} |
+
+## Git Submodules
+
+| Submodule | Path | Remote URL | Branch | Contains |
+|-----------|------|-----------|--------|----------|
+| {name} | {path} | {url} | {branch} | {brief description of what's inside} |
+
+## Shared Configuration
+
+| Config | Location | Consumed by |
+|--------|----------|-------------|
+| {ESLint config} | {path} | {list of projects} |
+| {TypeScript config} | {path} | {list of projects} |
+| {Docker Compose} | {path} | {list of services} |
+
+## Build & Deploy Order
+
+{Recommended build order based on dependency graph}
+
+1. {packages/config} — no dependencies
+2. {packages/db} — depends on config
+3. {packages/ui} — depends on config
+4. {packages/auth} — depends on db
+5. {services/api} — depends on db, auth
+6. {apps/web} — depends on ui, db, auth
 ```
 
 ## Quality Checklist
 
 Before declaring the analysis complete, verify:
 
-- [ ] Read at least 5 source files per module (not just config files)
+- [ ] Read at least 10 source files per module (not just config files)
+- [ ] Traced at least 2 request flows end-to-end
 - [ ] Detected and documented the primary architecture pattern
 - [ ] Found real code examples for each documented pattern
-- [ ] Checked for at least 5 anti-pattern categories
-- [ ] Generated index.md with accurate stack summary
-- [ ] Generated per-module rule files with actual code examples
+- [ ] Checked for at least 8 anti-pattern categories
+- [ ] Documented security patterns (auth, authorization, CORS, etc.)
+- [ ] Documented infrastructure setup (Docker, CI/CD, environments)
+- [ ] Documented performance patterns (caching, pagination, queues)
+- [ ] Documented observability setup (logging, error tracking, health checks)
+- [ ] Recursive project discovery completed (reached every leaf project)
+- [ ] Full project tree documented in index.md
+- [ ] Dependency matrix between projects documented
+- [ ] Git submodules identified and scanned recursively (if any)
+- [ ] Generated index.md with accurate stack summary and project tree
+- [ ] Generated one `ai/rules/{project}.md` per leaf project discovered
+- [ ] Generated `ai/rules/integrations.md` (if 2+ projects)
 - [ ] All file paths in rules reference real, existing files
+- [ ] Topology analysis completed (god nodes, coupling metrics, dependency graph)
+- [ ] Critical nodes table generated with Ca, Ce, instability
+- [ ] Circular dependencies identified and documented
 - [ ] Anti-patterns include file references and severity levels
 - [ ] Git conventions are documented
-- [ ] Testing conventions are documented
+- [ ] Testing conventions are documented (framework, patterns, coverage)
+- [ ] API contracts documented (OpenAPI, GraphQL schema, etc.)
 
-## Minimum 7 Clarification Questions
+## Clarification Questions
 
 <critical>
 Before starting the analysis, ask the user AT LEAST 3 clarification questions:
@@ -280,6 +686,8 @@ Before starting the analysis, ask the user AT LEAST 3 clarification questions:
 1. Are there specific areas of the codebase you want me to focus on?
 2. Are there any known patterns or conventions that should be documented but might not be obvious from the code?
 3. Are there parts of the codebase that are legacy or being actively refactored (so I can flag the target pattern vs current state)?
+4. Are there external services or integrations that are critical to how this project works?
+5. Is there anything about the deployment or infrastructure setup I should pay special attention to?
 </critical>
 
 After the user responds, proceed with the full analysis.

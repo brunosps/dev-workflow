@@ -6,9 +6,9 @@ Você é um assistente IA responsável por implementar tasks de desenvolvimento 
 
 ## Localização dos Arquivos
 
-- PRD: `ai/tasks/prd-[nome-funcionalidade]/prd.md`
-- Tech Spec: `ai/tasks/prd-[nome-funcionalidade]/techspec.md`
-- Tasks: `ai/tasks/prd-[nome-funcionalidade]/tasks.md`
+- PRD: `ai/spec/prd-[nome-funcionalidade]/prd.md`
+- Tech Spec: `ai/spec/prd-[nome-funcionalidade]/techspec.md`
+- Tasks: `ai/spec/prd-[nome-funcionalidade]/tasks.md`
 - Rules do Projeto: `ai/rules/`
 
 ## Etapas para Executar

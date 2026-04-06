@@ -14,7 +14,7 @@
 
     - Template fonte: `ai/templates/prd-template.md` (relativo ao workspace root)
     - Nome do arquivo final: `prd.md`
-    - Diretório final: `ai/tasks/prd-[nome-funcionalidade]/` (relativo ao workspace root, nome em kebab-case)
+    - Diretório final: `ai/spec/prd-[nome-funcionalidade]/` (relativo ao workspace root, nome em kebab-case)
 
     ## Features Multi-Projeto
 
@@ -60,8 +60,8 @@
     - Mantenha o documento principal com no máximo 1.000 palavras
 
     ### 4. Criar Diretório e Salvar (Obrigatório)
-    - Crie o diretório: `ai/tasks/prd-[nome-funcionalidade]/` (relativo ao workspace root)
-    - Salve o PRD em: `ai/tasks/prd-[nome-funcionalidade]/prd.md`
+    - Crie o diretório: `ai/spec/prd-[nome-funcionalidade]/` (relativo ao workspace root)
+    - Salve o PRD em: `ai/spec/prd-[nome-funcionalidade]/prd.md`
 
     ### 5. Reportar Resultados
     - Forneça o caminho do arquivo final
@@ -91,7 +91,7 @@
     - [ ] PRD gerado usando o template
     - [ ] Requisitos funcionais numerados incluídos
     - [ ] Projetos impactados identificados (se multi-projeto)
-    - [ ] Arquivo salvo em `ai/tasks/prd-[nome-funcionalidade]/prd.md` (workspace root)
+    - [ ] Arquivo salvo em `ai/spec/prd-[nome-funcionalidade]/prd.md` (workspace root)
     - [ ] Caminho final fornecido
 
     <critical>NÃO GERE O PRD SEM ANTES FAZER NO MINIMO 7 PERGUNTAS DE CLARIFICAÇÃO</critical>

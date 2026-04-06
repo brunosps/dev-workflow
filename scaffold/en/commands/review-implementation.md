@@ -17,7 +17,7 @@ This command is called automatically by `/run-plan` at the end of all tasks, but
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `{{PRD_PATH}}` | Path to the PRD folder | `ai/tasks/prd-user-management` |
+| `{{PRD_PATH}}` | Path to the PRD folder | `ai/spec/prd-user-onboarding` |
 
 ## Objective
 

@@ -17,7 +17,7 @@
 
     | Variável | Descrição | Exemplo |
     |----------|-----------|---------|
-    | `{{PRD_PATH}}` | Caminho da pasta do PRD | `ai/tasks/prd-minha-feature` |
+    | `{{PRD_PATH}}` | Caminho da pasta do PRD | `ai/spec/prd-minha-feature` |
 
     ## Objetivo
 

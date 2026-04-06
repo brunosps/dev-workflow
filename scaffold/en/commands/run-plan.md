@@ -7,10 +7,10 @@ Execute ALL pending tasks in a project sequentially and automatically, marking e
 
 ## File Locations
 
-- Tasks: `./tasks/prd-[feature-name]/tasks.md`
-- Individual Task: `./tasks/prd-[feature-name]/[num]_task.md`
-- PRD: `./tasks/prd-[feature-name]/prd.md`
-- Tech Spec: `./tasks/prd-[feature-name]/techspec.md`
+- Tasks: `./spec/prd-[feature-name]/tasks.md`
+- Individual Task: `./spec/prd-[feature-name]/[num]_task.md`
+- PRD: `./spec/prd-[feature-name]/prd.md`
+- Tech Spec: `./spec/prd-[feature-name]/techspec.md`
 - Review Command: `ai/commands/review-implementation.md`
 
 ## Execution Process
@@ -218,10 +218,10 @@ Task completed, committed, and marked in tasks.md
 ## Usage Example
 
 ```
-run-plan ai/tasks/prd-user-management
+run-plan ai/spec/prd-user-onboarding
 ```
 
-This will execute ALL pending tasks in the `prd-user-management` project, one after another, with review after each task and an interactive final review cycle.
+This will execute ALL pending tasks in the `prd-user-onboarding` project, one after another, with review after each task and an interactive final review cycle.
 
 ## Important Notes
 

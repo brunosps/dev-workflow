@@ -14,8 +14,8 @@
 
     - Source template: `ai/templates/prd-template.md` (relative to workspace root)
     - Final file name: `prd.md`
-    - Final directory: `ai/tasks/prd-[feature-name]/` (relative to workspace root, name in kebab-case)
-    - **IMPORTANT**: PRDs must be saved in `ai/tasks/` at the workspace root, NEVER inside subprojects
+    - Final directory: `ai/spec/prd-[feature-name]/` (relative to workspace root, name in kebab-case)
+    - **IMPORTANT**: PRDs must be saved in `ai/spec/` at the workspace root, NEVER inside subprojects
 
     ## Multi-Project Features
 
@@ -61,8 +61,8 @@
     - Keep the main document to a maximum of 1,000 words
 
     ### 4. Create Directory and Save (Required)
-    - Create the directory: `ai/tasks/prd-[feature-name]/` (relative to workspace root)
-    - Save the PRD in: `ai/tasks/prd-[feature-name]/prd.md`
+    - Create the directory: `ai/spec/prd-[feature-name]/` (relative to workspace root)
+    - Save the PRD in: `ai/spec/prd-[feature-name]/prd.md`
 
     ### 5. Report Results
     - Provide the final file path
@@ -92,7 +92,7 @@
     - [ ] PRD generated using the template
     - [ ] Numbered functional requirements included
     - [ ] Impacted projects identified (if multi-project)
-    - [ ] File saved in `ai/tasks/prd-[feature-name]/prd.md` (workspace root)
+    - [ ] File saved in `ai/spec/prd-[feature-name]/prd.md` (workspace root)
     - [ ] Final path provided
 
     <critical>DO NOT GENERATE THE PRD WITHOUT FIRST ASKING AT LEAST 7 CLARIFICATION QUESTIONS</critical>

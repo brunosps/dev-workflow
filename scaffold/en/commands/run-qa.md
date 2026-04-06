@@ -20,7 +20,7 @@ When available in the project under `./.agents/skills/`, use these skills as ope
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `{{PRD_PATH}}` | Path to the PRD folder | `ai/tasks/prd-camera-viewer-ui` |
+| `{{PRD_PATH}}` | Path to the PRD folder | `ai/spec/prd-user-onboarding` |
 
 ## Objectives
 
