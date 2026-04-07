@@ -7,7 +7,7 @@
     - NÃO use quando os requisitos ainda não foram finalizados
 
     ## Posição no Pipeline
-    **Antecessor:** `/dw-run-plan` (auto) ou `/dw-run-task` (manual) | **Sucessor:** `/dw-code-review`
+    **Antecessor:** `/dw-run-plan` (auto) ou `/dw-run-task` (manual) | **Sucessor:** `/dw-code-review` (auto-fixes gaps before completing)
 
     Chamado por: `/dw-run-plan` ao final de todas as tasks
 
@@ -170,30 +170,81 @@
     2. [ação secundária]
     ```
 
-    ### 8. Decisão Pós-Relatório (Obrigatório)
+    ### 8. Loop de Resolução de Gaps (Obrigatório)
 
-    **Se NÃO há gaps (0 pendentes, 0 parciais, 100% implementado):**
-    - Apresente o relatório ao usuário
-    - **NÃO entre em modo de planejamento**
-    - **NÃO crie tasks adicionais**
-    - **NÃO proponha implementar nada**
-    - Simplesmente conclua com: "Implementação 100% conforme. Nenhuma ação necessária."
-    - ENCERRE a revisão imediatamente
+    <critical>A revisão NÃO termina no primeiro relatório. Se gaps forem encontrados, entre em um loop automático de fix-review até 100% de conformidade ou BLOCK explícito.</critical>
 
-    **Se HÁ gaps (pendentes > 0 OU parciais > 0):**
-    - Apresente o relatório com gaps e recomendações
-    - Liste ações necessárias para resolver cada gap
-    - Aguarde instruções do usuário sobre como proceder
-    - **NÃO execute correções sem instrução explícita do usuário**
+    Após gerar o relatório, avalie:
 
-    **Fluxo de Decisão de Verificação de Conformidade:**
     ```dot
-    digraph compliance {
-      "Analysis Complete" -> "0 gaps AND 0 partial?";
-      "0 gaps AND 0 partial?" -> "Report + EXIT" [label="yes"];
-      "0 gaps AND 0 partial?" -> "Report + List Actions\nWAIT for user" [label="no"];
+    digraph review_loop {
+      rankdir=TB;
+      "Generate Review Report" -> "Gaps found?";
+      "Gaps found?" -> "100% Compliant\nExit" [label="no"];
+      "Gaps found?" -> "Fix gaps\n(implement missing code)" [label="yes"];
+      "Fix gaps\n(implement missing code)" -> "Re-review\nimplementation";
+      "Re-review\nimplementation" -> "Still gaps?";
+      "Still gaps?" -> "100% Compliant\nExit" [label="no"];
+      "Still gaps?" -> "Max cycles\nreached?" [label="yes"];
+      "Max cycles\nreached?" -> "Fix gaps\n(implement missing code)" [label="no"];
+      "Max cycles\nreached?" -> "BLOCKED\nReport residual gaps" [label="yes (3 cycles)"];
     }
     ```
+
+    **Regras do loop:**
+    1. Após o relatório inicial, se houver gaps (❌ não implementado ou ⚠️ parcial), entre no loop automaticamente
+    2. Para cada ciclo:
+       a. Corrija todos os gaps identificados: implemente código faltante, complete implementações parciais
+       b. Siga os padrões do projeto em `.dw/rules/` durante as correções
+       c. Execute testes após as correções (`pnpm test` ou equivalente)
+       d. Releia os arquivos alterados e recompare com os requisitos do PRD
+       e. Atualize o relatório de revisão com os resultados do ciclo
+       f. Se 100% conforme → saia do loop, apresente o relatório final
+       g. Se gaps permanecerem → continue para o próximo ciclo
+    3. **Máximo de 3 ciclos de fix-review.** Após 3 ciclos, marque a revisão como **BLOCKED** com gaps residuais documentados
+    4. Cada ciclo deve adicionar uma seção ao relatório mostrando o que foi corrigido e o novo status de conformidade
+    5. Commite correções após cada ciclo: `fix(review): implement [requirement] from PRD`
+
+    **O que corrigir automaticamente:**
+    - ❌ Requisitos não implementados → implemente-os
+    - ⚠️ Requisitos parcialmente implementados → complete-os
+    - 📝 Tasks marcadas como concluídas mas incompletas → finalize-as
+
+    **O que NÃO corrigir (parar e perguntar ao usuário):**
+    - Requisitos que contradizem uns aos outros no PRD
+    - Requisitos que precisam de decisões arquiteturais não cobertas na TechSpec
+    - Requisitos que dependem de serviços externos não disponíveis
+    - Se uma correção ultrapassar o escopo de uma única task
+
+    **Formato do relatório por ciclo (adicionar ao relatório de revisão):**
+    ```markdown
+    ## Fix Cycle [N] — [YYYY-MM-DD]
+
+    ### Gaps Resolved
+    | RF | Description | Action Taken | Status |
+    |----|-------------|-------------|--------|
+    | RF-XX | [requirement] | [what was implemented] | ✅ |
+
+    ### Tests
+    - `pnpm test`: PASS/FAIL
+    - Files changed: [list]
+
+    ### Remaining Gaps
+    - [list or "None"]
+
+    ### Cycle Result: CONTINUE / COMPLIANT / BLOCKED
+    ```
+
+    **Se 100% conforme após qualquer ciclo:**
+    - Apresente o relatório final
+    - **NÃO entre em modo de planejamento (EnterPlanMode)**
+    - **NÃO crie tasks (TaskCreate)**
+    - Conclua com: "Implementação 100% conforme após [N] ciclos de fix. Nenhuma ação adicional necessária."
+
+    **Se BLOCKED após 3 ciclos:**
+    - Apresente o relatório com gaps residuais
+    - Liste o que não pôde ser resolvido e por quê
+    - Aguarde instruções do usuário
 
     ## Níveis de Status
 
@@ -246,4 +297,5 @@
     <critical>NÃO APROVE requisitos sem evidência concreta no código</critical>
     <critical>ANALISE o código real, não confie apenas nos checkboxes do tasks.md</critical>
     <critical>Se 100% dos requisitos foram implementados e NÃO há gaps: NÃO entre em plan mode, NÃO crie tasks. Apenas apresente o relatório e ENCERRE.</critical>
+    <critical>Se gaps forem encontrados, entre no loop de fix-review automaticamente. NÃO aguarde instruções do usuário para corrigir gaps. Máximo de 3 ciclos antes de marcar como BLOCKED.</critical>
 </system_instructions>

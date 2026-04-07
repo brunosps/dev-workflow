@@ -7,7 +7,7 @@ Você é um assistente IA especializado em Quality Assurance. Sua tarefa é vali
 - NÃO use quando os requisitos ainda não foram definidos (crie o PRD primeiro)
 
 ## Posição no Pipeline
-**Antecessor:** `/dw-run-plan` ou `/dw-run-task` | **Sucessor:** `/dw-fix-qa` (se bugs) ou `/dw-code-review`
+**Antecessor:** `/dw-run-plan` ou `/dw-run-task` | **Sucessor:** `/dw-code-review` (auto-fixes bugs internally before completing)
 
 <critical>Utilize o Playwright MCP para executar todos os testes E2E</critical>
 <critical>Verifique TODOS os requisitos do PRD e TechSpec antes de aprovar</critical>
@@ -268,6 +268,62 @@ Gerar relatório em `{{PRD_PATH}}/QA/qa-report.md`:
 ## Conclusão
 [Parecer final do QA]
 ```
+
+### 9. Loop QA Fix-Retest (Automático)
+
+<critical>O QA NÃO termina no primeiro relatório. Se bugs forem encontrados, entre em um loop automático de fix-retest até que o QA seja APROVADO ou explicitamente BLOQUEADO.</critical>
+
+Após gerar o relatório inicial de QA:
+
+```dot
+digraph qa_loop {
+  rankdir=TB;
+  "Generate QA Report" -> "Bugs found?";
+  "Bugs found?" -> "QA APPROVED\nExit" [label="no"];
+  "Bugs found?" -> "Fix bugs\n(follow dw-fix-qa rules)" [label="yes"];
+  "Fix bugs\n(follow dw-fix-qa rules)" -> "Retest ALL\nfixed bugs";
+  "Retest ALL\nfixed bugs" -> "New/reopened\nbugs?";
+  "New/reopened\nbugs?" -> "QA APPROVED\nExit" [label="no"];
+  "New/reopened\nbugs?" -> "Max cycles\nreached?" [label="yes"];
+  "Max cycles\nreached?" -> "Fix bugs\n(follow dw-fix-qa rules)" [label="no"];
+  "Max cycles\nreached?" -> "QA BLOCKED\nReport residual bugs" [label="yes (5 cycles)"];
+}
+```
+
+**Regras do loop:**
+1. Após o relatório inicial, se `QA/bugs.md` tiver bugs com `Status: Open`, entre no loop automaticamente
+2. Para cada ciclo:
+   a. Corrija todos os bugs abertos cirurgicamente (mesmas regras do `/dw-fix-qa`: sem scope creep, impacto mínimo)
+   b. Reteste TODOS os bugs corrigidos via Playwright MCP com captura de evidências
+   c. Verifique regressões introduzidas pelas correções
+   d. Atualize `QA/bugs.md` e `QA/qa-report.md` com os resultados do ciclo
+   e. Se todos os bugs críticos/altos estiverem fechados → **QA APPROVED**, saia do loop
+   f. Se novos bugs apareceram ou correções falharam → continue para o próximo ciclo
+3. **Máximo de 5 ciclos de fix-retest.** Após 5 ciclos, marque o QA como **BLOCKED** com bugs residuais documentados
+4. Cada ciclo deve atualizar o relatório de QA com uma seção "Cycle N" mostrando o que foi corrigido, retestado e o resultado
+5. Faça commit das correções após cada ciclo bem-sucedido: `fix(qa): resolve BUG-NN [description]`
+
+**Formato do relatório por ciclo (adicionar ao qa-report.md):**
+```markdown
+## Fix-Retest Cycle [N] — [YYYY-MM-DD]
+
+### Bugs Fixed
+| Bug | Fix Description | Retest | Evidence |
+|-----|----------------|--------|----------|
+| BUG-01 | [what was changed] | PASS/FAIL | `QA/screenshots/BUG-01-cycle-N.png` |
+
+### Regressions Checked
+- [list of related flows retested]
+
+### Cycle Result
+- **Bugs remaining:** [count]
+- **Status:** CONTINUE / APPROVED / BLOCKED
+```
+
+**Red flags — PARE o loop:**
+- Correção requer uma nova feature (não é bug) → pare, recomende `/dw-create-prd`
+- Correção requer refatoração significativa → pare, recomende `/dw-refactoring-analysis`
+- Mesmo bug reaparece após 2+ tentativas de correção → marque como BLOCKED com análise de causa raiz
 
 ## Checklist de Qualidade
 

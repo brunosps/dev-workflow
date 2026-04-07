@@ -7,7 +7,7 @@ You are a specialized implementation reviewer that compares documented requireme
 - Do NOT use when requirements have not been finalized yet
 
 ## Pipeline Position
-**Predecessor:** `/dw-run-plan` (auto) or `/dw-run-task` (manual) | **Successor:** `/dw-code-review`
+**Predecessor:** `/dw-run-plan` (auto) or `/dw-run-task` (manual) | **Successor:** `/dw-code-review` (auto-fixes gaps before completing)
 
 Called by: `/dw-run-plan` at end of all tasks
 
@@ -175,34 +175,81 @@ Check if the implementation follows project patterns:
 2. [secondary action]
 ```
 
-### 8. Post-Report Decision (Required)
+### 8. Gap Resolution Loop (Required)
 
-After generating the final report, evaluate the result:
+<critical>Review does NOT end at the first report. If gaps are found, enter an automatic fix-review loop until 100% compliance or explicit BLOCK.</critical>
 
-**If there are NO gaps (0 pending, 0 partial, 100% implemented):**
-- Present the report to the user
-- **DO NOT enter planning mode (EnterPlanMode)**
-- **DO NOT dispatch execution agents (Task)**
-- **DO NOT create tasks (TaskCreate)**
-- **DO NOT propose implementing anything**
-- Simply conclude with: "Implementation 100% compliant. No action needed."
-- END the review immediately
+After generating the report, evaluate:
 
-**If there ARE gaps (pending > 0 OR partial > 0):**
-- Present the report with gaps and recommendations
-- List actions needed to resolve each gap
-- Wait for user instructions on how to proceed
-- **DO NOT enter planning mode automatically**
-- **DO NOT execute fixes without explicit user instruction**
-
-**Compliance Check Decision Flow:**
 ```dot
-digraph compliance {
-  "Analysis Complete" -> "0 gaps AND 0 partial?";
-  "0 gaps AND 0 partial?" -> "Report + EXIT" [label="yes"];
-  "0 gaps AND 0 partial?" -> "Report + List Actions\nWAIT for user" [label="no"];
+digraph review_loop {
+  rankdir=TB;
+  "Generate Review Report" -> "Gaps found?";
+  "Gaps found?" -> "100% Compliant\nExit" [label="no"];
+  "Gaps found?" -> "Fix gaps\n(implement missing code)" [label="yes"];
+  "Fix gaps\n(implement missing code)" -> "Re-review\nimplementation";
+  "Re-review\nimplementation" -> "Still gaps?";
+  "Still gaps?" -> "100% Compliant\nExit" [label="no"];
+  "Still gaps?" -> "Max cycles\nreached?" [label="yes"];
+  "Max cycles\nreached?" -> "Fix gaps\n(implement missing code)" [label="no"];
+  "Max cycles\nreached?" -> "BLOCKED\nReport residual gaps" [label="yes (3 cycles)"];
 }
 ```
+
+**Loop rules:**
+1. After the initial report, if there are gaps (❌ not implemented or ⚠️ partial), enter the loop automatically
+2. For each cycle:
+   a. Fix all identified gaps: implement missing code, complete partial implementations
+   b. Follow project patterns from `.dw/rules/` during fixes
+   c. Run tests after fixes (`pnpm test` or equivalent)
+   d. Re-read the changed files and re-compare against PRD requirements
+   e. Update the review report with cycle results
+   f. If 100% compliance → exit loop, present final report
+   g. If gaps remain → continue next cycle
+3. **Maximum 3 fix-review cycles.** After 3 cycles, mark review as **BLOCKED** with residual gaps documented
+4. Each cycle must append a section to the report showing what was fixed and the new compliance status
+5. Commit fixes after each cycle: `fix(review): implement [requirement] from PRD`
+
+**What to fix automatically:**
+- ❌ Requirements not implemented → implement them
+- ⚠️ Requirements partially implemented → complete them
+- 📝 Tasks marked complete but actually incomplete → finish them
+
+**What NOT to fix (stop and ask user):**
+- Requirements that contradict each other in the PRD
+- Requirements that need architectural decisions not covered in TechSpec
+- Requirements that depend on external services not available
+- If a fix would take more than the scope of a single task
+
+**Cycle report format (append to review report):**
+```markdown
+## Fix Cycle [N] — [YYYY-MM-DD]
+
+### Gaps Resolved
+| RF | Description | Action Taken | Status |
+|----|-------------|-------------|--------|
+| RF-XX | [requirement] | [what was implemented] | ✅ |
+
+### Tests
+- `pnpm test`: PASS/FAIL
+- Files changed: [list]
+
+### Remaining Gaps
+- [list or "None"]
+
+### Cycle Result: CONTINUE / COMPLIANT / BLOCKED
+```
+
+**If 100% compliant after any cycle:**
+- Present the final report
+- **DO NOT enter planning mode (EnterPlanMode)**
+- **DO NOT create tasks (TaskCreate)**
+- Conclude with: "Implementation 100% compliant after [N] fix cycles. No further action needed."
+
+**If BLOCKED after 3 cycles:**
+- Present the report with residual gaps
+- List what could not be resolved and why
+- Wait for user instructions
 
 ## Status Levels
 
@@ -255,4 +302,5 @@ git diff <commit> -- path/to/file
 <critical>DO NOT APPROVE requirements without concrete evidence in the code</critical>
 <critical>ANALYZE the actual code, do not trust only the checkboxes in tasks.md</critical>
 <critical>If 100% of requirements were implemented and there are NO gaps: DO NOT enter plan mode, DO NOT create tasks, DO NOT dispatch agents. Just present the report and END.</critical>
+<critical>If gaps are found, enter the fix-review loop automatically. Do NOT wait for user instructions to fix gaps. Maximum 3 cycles before marking as BLOCKED.</critical>
 </system_instructions>
