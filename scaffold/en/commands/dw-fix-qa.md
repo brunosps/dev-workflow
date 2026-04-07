@@ -17,7 +17,6 @@ You are an AI assistant specialized in post-QA bug fixing with evidence-driven r
 
 When available in the project under `./.agents/skills/`, use these skills as operational support without replacing this command:
 
-- `agent-browser`: support for reproducing bugs with persistent sessions, capturing network data, additional screenshots, and validating fixes browser-first
 - `webapp-testing`: support for structuring retests, captures, and scripts when complementary to Playwright MCP
 - `vercel-react-best-practices`: use only if the fix affects React/Next.js frontend and there is risk of rendering, hydration, fetching, or performance regression
 
@@ -87,7 +86,7 @@ For each fixed bug:
    - `QA/logs/console-retest.log`
    - `QA/logs/network-retest.log`
 7. Record in the QA report which user/profile was used in the retest
-8. If the retest requires persistent auth, request inspection beyond MCP, or more faithful real-browser reproduction, complement with `agent-browser` and record this in the report
+8. If the retest requires persistent auth, request inspection beyond MCP, or more faithful real-browser reproduction, record this in the report
 
 ### 4. Update Artifacts
 

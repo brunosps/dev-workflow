@@ -20,7 +20,6 @@ Você é um assistente IA especializado em Quality Assurance. Sua tarefa é vali
 
 Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apoio operacional sem substituir este comando:
 
-- `agent-browser`: apoio para navegação operacional, auth persistente, screenshots adicionais, inspeção de requests e debugging de sessão
 - `webapp-testing`: apoio para estruturar fluxos de teste, retestes, screenshots e logs quando complementar ao Playwright MCP
 - `vercel-react-best-practices`: use apenas se o frontend sob teste for React/Next.js e houver indicação de regressão relacionada a renderização, fetching, hidratação ou performance percebida
 
@@ -96,7 +95,7 @@ Consulte `.dw/rules/` para URLs e frameworks específicos do projeto.
 - Verificar se a aplicação está rodando em localhost
 - Usar `browser_navigate` do Playwright MCP para acessar a aplicação
 - Confirmar que a página carregou corretamente com `browser_snapshot`
-- Se sessão persistente, import de auth, inspeção de rede além do MCP ou reprodução browser-first forem necessários, complementar com `agent-browser`
+- Se sessão persistente, import de auth, inspeção de rede além do MCP ou reprodução browser-first forem necessários, complementar com `webapp-testing`
 
 ### 3. Verificação de Páginas do Menu (Obrigatório — Executar ANTES dos testes de RF)
 
@@ -163,7 +162,7 @@ Para cada requisito funcional do PRD:
 8. Marcar como PASSOU ou FALHOU
 9. Salvar o script Playwright do fluxo em `{{PRD_PATH}}/QA/scripts/` com nome padronizado: `RF-XX-[slug].spec.ts` (ou `.js`)
 10. Registrar no relatório quais credenciais (usuário/perfil) foram usadas em cada fluxo sensível a permissões
-11. Quando o fluxo MCP ficar instável ou insuficiente para evidência operacional, complementar com `agent-browser` ou `webapp-testing`, registrando isso explicitamente no relatório
+11. Quando o fluxo MCP ficar instável ou insuficiente para evidência operacional, complementar com `webapp-testing`, registrando isso explicitamente no relatório
 
 <critical>Não basta validar apenas o caminho feliz. Cada requisito deve ser exercitado contra seus estados de borda e suas regressões mais prováveis</critical>
 <critical>Se um requisito não puder ser completamente validado via E2E, o QA deve ser marcado como REJEITADO ou BLOQUEADO, nunca APROVADO</critical>

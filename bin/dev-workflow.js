@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const { run } = require('../lib/init');
+const installDeps = require('../lib/install-deps');
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -19,13 +20,15 @@ const HELP_TEXT = `
   Usage:
     npx dev-workflow init [--force] [--lang=en|pt-br]
     npx dev-workflow update [--lang=en|pt-br]
+    npx dev-workflow install-deps
     npx dev-workflow help
 
   Commands:
-    init      Scaffold .dw/ (commands, templates, references, scripts, skills, rules, MCPs)
-    update    Update managed files (commands, templates, references, scripts, skills, wrappers, MCPs)
-              Preserves: .dw/rules/, .dw/spec/, user data
-    help      Show this help message
+    init           Scaffold .dw/ (commands, templates, references, scripts, skills, rules, MCPs)
+    update         Update managed files (commands, templates, references, scripts, skills, wrappers, MCPs)
+                   Preserves: .dw/rules/, .dw/spec/, user data
+    install-deps   Install system dependencies (Playwright browsers, MCP servers)
+    help           Show this help message
 
   Options:
     --force        Overwrite existing files (init only; update always overwrites managed files)
@@ -37,6 +40,7 @@ const HELP_TEXT = `
     npx dev-workflow init --lang=pt-br     # Portuguese, no prompt
     npx dev-workflow init --force          # Overwrite existing files
     npx dev-workflow update --lang=en      # Update all managed files to latest version
+    npx dev-workflow install-deps          # Install Playwright browsers and MCP servers
 `;
 
 async function main() {
@@ -46,6 +50,9 @@ async function main() {
       break;
     case 'update':
       await run({ force: !!flags.force, lang: flags.lang, mode: 'update' });
+      break;
+    case 'install-deps':
+      installDeps.run();
       break;
     case 'help':
     case '--help':

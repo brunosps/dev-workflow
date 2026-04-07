@@ -20,7 +20,6 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como sup
 |-------|---------|
 | `vercel-react-best-practices` | Task envolve renderização React, hidratação, data fetching, bundle, cache ou performance |
 | `webapp-testing` | Task tem frontend interativo que necessita validação E2E em navegador real |
-| `agent-browser` | Validação de UI requer sessão persistente, inspeção de navegação operacional ou evidência visual complementar |
 
 ## Localização dos Arquivos
 
@@ -78,7 +77,7 @@ Após fornecer o resumo e abordagem, **comece imediatamente** a implementar a ta
 - Seguir padrões estabelecidos do projeto
 - Garantir que todos os requisitos sejam atendidos
 - **Rodar testes**: use o comando de teste do projeto
-- Se houver frontend interativo, valide também o comportamento real com `webapp-testing` ou `agent-browser` quando isso reduzir o risco de regressão invisível nos testes unitários
+- Se houver frontend interativo, valide também o comportamento real com `webapp-testing` quando isso reduzir o risco de regressão invisível nos testes unitários
 
 **VOCÊ DEVE** iniciar a implementação logo após o processo acima.
 

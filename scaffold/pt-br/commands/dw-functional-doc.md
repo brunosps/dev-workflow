@@ -49,7 +49,6 @@ Funciona melhor com projeto analisado por `/dw-analyze-project`
 
 Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apoio operacional, sem substituir este comando como fonte de verdade:
 
-- `agent-browser`: apoio para navegação real, inspeção de requests, screenshots, auth persistente e reprodução browser-first
 - `webapp-testing`: apoio para estruturar fluxos E2E, retestes locais e coleta de evidências
 - `remotion-best-practices`: apoio obrigatório quando houver vídeo humano final, legendas, composição, transições, FFmpeg ou Remotion
 - `humanizer`: apoio obrigatório para revisar e naturalizar todas as legendas, captions `.srt`, textos descritivos e qualquer redação voltada a leitura humana antes da entrega final

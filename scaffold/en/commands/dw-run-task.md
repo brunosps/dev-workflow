@@ -20,7 +20,6 @@ When available in the project at `./.agents/skills/`, use these skills as specia
 |-------|---------|
 | `vercel-react-best-practices` | Task touches React rendering, hydration, data fetching, bundle, cache, or performance |
 | `webapp-testing` | Task has interactive frontend needing E2E validation in a real browser |
-| `agent-browser` | UI validation requires persistent session, operational navigation inspection, or complementary visual evidence |
 
 ## File Locations
 
@@ -78,7 +77,7 @@ After providing the summary and approach, **begin implementation immediately**:
 - Follow established project patterns
 - Ensure all requirements are met
 - **Run tests**: use the project's test command
-- If there is interactive frontend, also validate real behavior with `webapp-testing` or `agent-browser` when doing so reduces the risk of invisible regression in unit tests
+- If there is interactive frontend, also validate real behavior with `webapp-testing` when doing so reduces the risk of invisible regression in unit tests
 
 **YOU MUST** start the implementation right after the process above.
 

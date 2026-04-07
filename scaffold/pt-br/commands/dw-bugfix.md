@@ -16,7 +16,6 @@
     Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como suporte contextual sem substituir este comando:
 
     - `vercel-react-best-practices`: use quando o bug afeta React/Next.js e há suspeita de problemas de render, hidratação, fetching, waterfall, bundle ou re-render
-    - `agent-browser`: use quando o bug requer reprodução em navegador real, sessão persistente, inspeção de requests ou captura visual
     - `webapp-testing`: use quando a correção requer fluxo E2E/reteste reproduzível em uma web app
     - `security-review`: use quando a causa raiz toca auth, autorização, input externo, upload, secrets, SQL, XSS, SSRF ou outras superfícies sensíveis
 
@@ -152,7 +151,7 @@
     - Mensagens de erro relacionadas
     - Stack traces
     - Arquivos modificados recentemente
-    - Se o bug for relacionado a UI ou depender de fluxo no navegador, complemente a coleta com `agent-browser` ou `webapp-testing`
+    - Se o bug for relacionado a UI ou depender de fluxo no navegador, complemente a coleta com `webapp-testing`
 
     ### 3. Perguntas de Clarificação (OBRIGATÓRIO - EXATAMENTE 3)
 
@@ -179,7 +178,7 @@
     - **Causa Provável**: Baseado nas evidências
     - **Arquivos Afetados**: Lista de arquivos a modificar
     - **Impacto**: Outros componentes que podem ser afetados
-    - **Skills utilizadas**: registre explicitamente se a análise usou `vercel-react-best-practices`, `agent-browser`, `webapp-testing` ou `security-review`
+    - **Skills utilizadas**: registre explicitamente se a análise usou `vercel-react-best-practices`, `webapp-testing` ou `security-review`
 
     ### 4.1 Checkpoint de Escopo (OBRIGATÓRIO)
 

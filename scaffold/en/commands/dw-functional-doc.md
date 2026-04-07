@@ -49,7 +49,6 @@ Works best with project analyzed by `/dw-analyze-project`
 
 When available in the project under `./.agents/skills/`, use these skills as operational support without replacing this command as source of truth:
 
-- `agent-browser`: support for real navigation, request inspection, screenshots, persistent auth, and browser-first reproduction
 - `webapp-testing`: support for structuring E2E flows, local retests, and evidence collection
 - `remotion-best-practices`: mandatory support when there is a final human video, captions, composition, transitions, FFmpeg, or Remotion
 - `humanizer`: mandatory support for reviewing and naturalizing all captions, `.srt` files, descriptive texts, and any human-facing writing before final delivery

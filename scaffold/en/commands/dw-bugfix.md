@@ -16,7 +16,6 @@
     When available in the project at `./.agents/skills/`, use these skills as contextual support without replacing this command:
 
     - `vercel-react-best-practices`: use when the bug affects React/Next.js and there is suspicion of render, hydration, fetching, waterfall, bundle, or re-render issues
-    - `agent-browser`: use when the bug requires reproduction in a real browser, persistent session, request inspection, or visual capture
     - `webapp-testing`: use when the fix requires a reproducible E2E/retest flow in a web app
     - `security-review`: use when the root cause touches auth, authorization, external input, upload, secrets, SQL, XSS, SSRF, or other sensitive surfaces
 
@@ -158,7 +157,7 @@
     - Related error messages
     - Stack traces
     - Recently modified files
-    - If the bug is UI-related or depends on browser flow, supplement collection with `agent-browser` or `webapp-testing`
+    - If the bug is UI-related or depends on browser flow, supplement collection with `webapp-testing`
 
     ### 3. Clarification Questions (MANDATORY - EXACTLY 3)
 
@@ -196,7 +195,7 @@
     - **Probable Cause**: Based on the evidence
     - **Affected Files**: List of files to modify
     - **Impact**: Other components that may be affected
-    - **Skills used**: explicitly record if the analysis used `vercel-react-best-practices`, `agent-browser`, `webapp-testing`, or `security-review`
+    - **Skills used**: explicitly record if the analysis used `vercel-react-best-practices`, `webapp-testing`, or `security-review`
 
     ### 4.1 Scope Checkpoint (MANDATORY)
 
