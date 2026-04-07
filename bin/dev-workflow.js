@@ -18,16 +18,17 @@ const HELP_TEXT = `
 
   Usage:
     npx dev-workflow init [--force] [--lang=en|pt-br]
-    npx dev-workflow update [--force]
+    npx dev-workflow update [--lang=en|pt-br]
     npx dev-workflow help
 
   Commands:
-    init      Scaffold .dw/commands, templates, rules, and platform wrappers
-    update    Update commands and templates (preserves rules and tasks)
+    init      Scaffold .dw/ (commands, templates, references, scripts, skills, rules, MCPs)
+    update    Update managed files (commands, templates, references, scripts, skills, wrappers, MCPs)
+              Preserves: .dw/rules/, .dw/spec/, user data
     help      Show this help message
 
   Options:
-    --force        Overwrite existing files
+    --force        Overwrite existing files (init only; update always overwrites managed files)
     --lang=LANG    Set language without prompt (en or pt-br)
 
   Examples:
@@ -35,6 +36,7 @@ const HELP_TEXT = `
     npx dev-workflow init --lang=en        # English, no prompt
     npx dev-workflow init --lang=pt-br     # Portuguese, no prompt
     npx dev-workflow init --force          # Overwrite existing files
+    npx dev-workflow update --lang=en      # Update all managed files to latest version
 `;
 
 async function main() {
