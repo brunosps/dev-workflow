@@ -57,7 +57,7 @@
     - Definir escopo e entregáveis claros para cada tarefa
     - **Incluir testes unitários como subtarefas OBRIGATÓRIAS** dentro de cada tarefa de backend
     - Cada task deve listar explicitamente os RFs que cobre (ex: "Cobre: RF1.1, RF1.2")
-    - **Cada task termina com commit** (sem push, push apenas no /gerar-pr)
+    - **Cada task termina com commit** (sem push, push apenas no /dw-generate-pr)
 
     ## Cobertura End-to-End (OBRIGATÓRIO)
 
@@ -92,10 +92,10 @@
     ## Workflow por Task
 
     Cada task segue o fluxo:
-    1. `/executar-task` - Implementa a task
+    1. `/dw-run-task` - Implementa a task
     2. Testes unitários incluídos na implementação
     3. Commit automático ao final da task (sem push)
-    4. Próxima task ou `/gerar-pr [branch-alvo]` quando todas concluídas
+    4. Próxima task ou `/dw-generate-pr [branch-alvo]` quando todas concluídas
 
     ## Especificações de Saída
 
@@ -134,7 +134,7 @@
     ## Workflow
     1. Implementar task + testes unitários
     2. Commit ao final de cada task
-    3. /gerar-pr [branch-alvo] quando todas tasks concluídas
+    3. /dw-generate-pr [branch-alvo] quando todas tasks concluídas
     ```
 
     Após completar a análise e gerar todos os arquivos necessários, apresente os resultados ao usuário e aguarde confirmação para prosseguir com a implementação.

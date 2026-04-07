@@ -10,8 +10,8 @@ Você é um assistente de ajuda do workspace. Quando invocado, apresente ao usu�
 
 ## Comportamento
 
-- Se invocado sem argumentos (`/ajuda`): mostre o guia completo abaixo
-- Se invocado com argumento (`/ajuda criar-prd`): mostre apenas a seção detalhada daquele comando
+- Se invocado sem argumentos (`/dw-help`): mostre o guia completo abaixo
+- Se invocado com argumento (`/dw-help dw-create-prd`): mostre apenas a seção detalhada daquele comando
 
 ---
 
@@ -25,14 +25,14 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 
 ```
 ┌─────────────┐     ┌────────────────┐     ┌──────────────┐
-│ /criar-prd  │────>│/criar-techspec │────>│ /criar-tasks │
+│ /dw-create-prd  │────>│/dw-create-techspec │────>│ /dw-create-tasks │
 │ (O QUÊ)     │     │ (COMO)         │     │ (QUANDO)     │
 └─────────────┘     └────────────────┘     └──────┬───────┘
                                                    │
                                      ┌─────────────┴─────────────┐
                                      ▼                           ▼
                             ┌────────────────┐         ┌─────────────────┐
-                            │ /executar-task  │         │ /executar-plano │
+                            │ /dw-run-task  │         │ /dw-run-plan │
                             │ (uma por vez)   │         │ (todas auto)    │
                             └───────┬────────┘         └────────┬────────┘
                                     │                           │
@@ -56,7 +56,7 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
                               ┌──────────────┼──────────────┐
                               ▼              ▼              ▼
                     ┌──────────────┐ ┌──────────────┐ ┌─────────────────────┐
-                    │/executar-qa  │ │/revisar-impl.│ │ /dw-code-review        │
+                    │/dw-run-qa  │ │/dw-review-impl.│ │ /dw-code-review        │
                     │(QA visual)   │ │(PRD compliance│ │ (code review formal)│
                     └──────────────┘ │ Nível 2)     │ │ (Nível 3)           │
                                      └──────────────┘ └─────────────────────┘
@@ -64,7 +64,7 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
                               ┌───────────────┴───────────────┐
                               ▼                               ▼
                     ┌──────────────┐                 ┌────────────────┐
-                    │ /dw-commit      │                 │ /gerar-pr      │
+                    │ /dw-commit      │                 │ /dw-generate-pr      │
                     │ (um projeto) │                 │ (push + PR)    │
                     └──────────────┘                 └────────────────┘
 ```
@@ -76,24 +76,24 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 | Comando | O que faz | Input | Output |
 |---------|-----------|-------|--------|
 | `/dw-brainstorm` | Facilita ideação estruturada antes do PRD ou da implementação | Problema, ideia ou contexto | Opções + trade-offs + recomendação |
-| `/criar-prd` | Cria PRD com min. 7 perguntas de clarificação | Descrição da feature | `.dw/spec/prd-[nome]/prd.md` |
-| `/criar-techspec` | Cria especificação técnica a partir do PRD | Path do PRD | `.dw/spec/prd-[nome]/techspec.md` |
-| `/criar-tasks` | Quebra PRD+TechSpec em tasks (max 2 FRs/task) | Path do PRD | `.dw/spec/prd-[nome]/tasks.md` + `*_task.md` |
+| `/dw-create-prd` | Cria PRD com min. 7 perguntas de clarificação | Descrição da feature | `.dw/spec/prd-[nome]/prd.md` |
+| `/dw-create-techspec` | Cria especificação técnica a partir do PRD | Path do PRD | `.dw/spec/prd-[nome]/techspec.md` |
+| `/dw-create-tasks` | Quebra PRD+TechSpec em tasks (max 2 FRs/task) | Path do PRD | `.dw/spec/prd-[nome]/tasks.md` + `*_task.md` |
 
 ### Execução
 
 | Comando | O que faz | Input | Output |
 |---------|-----------|-------|--------|
-| `/executar-task` | Implementa UMA task + validação Nível 1 + commit | Path do PRD | Código + commit |
-| `/executar-plano` | Executa TODAS tasks + revisão final Nível 2 | Path do PRD | Código + commits + relatório |
+| `/dw-run-task` | Implementa UMA task + validação Nível 1 + commit | Path do PRD | Código + commit |
+| `/dw-run-plan` | Executa TODAS tasks + revisão final Nível 2 | Path do PRD | Código + commits + relatório |
 | `/dw-bugfix` | Analisa e corrige bugs (triagem bug vs feature) | Target + descrição | Fix + commit OU PRD (se feature) |
-| `/corrigir-qa` | Corrige bugs documentados no QA e retesta com evidências | Path do PRD | Código + `QA/bugs.md` + `QA/qa-report.md` atualizados |
+| `/dw-fix-qa` | Corrige bugs documentados no QA e retesta com evidências | Path do PRD | Código + `QA/bugs.md` + `QA/qa-report.md` atualizados |
 
 ### Análise e Pesquisa
 
 | Comando | O que faz | Input | Output |
 |---------|-----------|-------|--------|
-| `/analisar-projeto` | Escaneia o repo e gera rules do projeto automaticamente | (nenhum) | `.dw/rules/index.md` + `.dw/rules/[projeto].md` |
+| `/dw-analyze-project` | Escaneia o repo e gera rules do projeto automaticamente | (nenhum) | `.dw/rules/index.md` + `.dw/rules/[projeto].md` |
 | `/dw-deep-research` | Pesquisa profunda com citações e verificação multi-fonte | Tópico ou pergunta | Relatório com citações em Markdown/HTML |
 | `/dw-functional-doc` | Mapeia telas, fluxos e módulos em dossiê funcional com cobertura E2E | URL/rota alvo + projeto | `.dw/flows/<projeto>/<slug>/` com docs, scripts, evidências |
 
@@ -101,14 +101,14 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 
 | Nível | Comando | Quando | Gera Relatório? |
 |-------|---------|--------|-----------------|
-| **1** | *(embutido no /executar-task)* | Após cada task | Não (output no terminal) |
-| **2** | `/revisar-implementacao` | Após todas tasks / manual | Sim (output formatado) |
+| **1** | *(embutido no /dw-run-task)* | Após cada task | Não (output no terminal) |
+| **2** | `/dw-review-implementation` | Após todas tasks / manual | Sim (output formatado) |
 | **3** | `/dw-code-review` | Antes do PR / manual | Sim (`code-review.md`) |
 
 | Comando | O que faz | Input | Output |
 |---------|-----------|-------|--------|
-| `/executar-qa` | QA visual com Playwright MCP + acessibilidade | Path do PRD | `QA/qa-report.md` + `QA/screenshots/` |
-| `/revisar-implementacao` | Compara PRD vs código (FRs, endpoints, tasks) | Path do PRD | Relatório de gaps |
+| `/dw-run-qa` | QA visual com Playwright MCP + acessibilidade | Path do PRD | `QA/qa-report.md` + `QA/screenshots/` |
+| `/dw-review-implementation` | Compara PRD vs código (FRs, endpoints, tasks) | Path do PRD | Relatório de gaps |
 | `/dw-code-review` | Code review formal (qualidade, rules, testes) | Path do PRD | `code-review.md` |
 | `/dw-refactoring-analysis` | Auditoria de code smells e oportunidades de refatoração (catálogo Fowler) | Path do PRD | `refactoring-analysis.md` |
 
@@ -117,68 +117,68 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 | Comando | O que faz | Input | Output |
 |---------|-----------|-------|--------|
 | `/dw-commit` | Commit semântico (Conventional Commits) | - | Commit |
-| `/gerar-pr` | Push + cria PR + copia body + abre URL | Branch alvo | PR no GitHub |
+| `/dw-generate-pr` | Push + cria PR + copia body + abre URL | Branch alvo | PR no GitHub |
 
 ### Utilitários
 
 | Comando | O que faz | Input | Output |
 |---------|-----------|-------|--------|
-| `/ajuda` | Este guia de comandos | (opcional) comando | Este documento |
+| `/dw-help` | Este guia de comandos | (opcional) comando | Este documento |
 
 ## Fluxos Comuns
 
 ### Nova Feature (Completo)
 ```bash
 /dw-brainstorm "ideia inicial"                    # 0. Explora opções e trade-offs
-/criar-prd                                    # 1. Descreve a funcionalidade
-/criar-techspec .dw/spec/prd-nome             # 2. Gera spec técnica
-/criar-tasks .dw/spec/prd-nome                # 3. Quebra em tasks
-/executar-plano .dw/spec/prd-nome             # 4. Executa todas (inclui Nível 1+2)
+/dw-create-prd                                    # 1. Descreve a funcionalidade
+/dw-create-techspec .dw/spec/prd-nome             # 2. Gera spec técnica
+/dw-create-tasks .dw/spec/prd-nome                # 3. Quebra em tasks
+/dw-run-plan .dw/spec/prd-nome             # 4. Executa todas (inclui Nível 1+2)
 /dw-refactoring-analysis .dw/spec/prd-nome        # 5. Auditoria de code smells (opcional)
 /dw-code-review .dw/spec/prd-nome               # 6. Code review formal (Nível 3)
-/gerar-pr main                                # 7. Cria PR
+/dw-generate-pr main                                # 7. Cria PR
 ```
 
 ### Nova Feature (Incremental)
 ```bash
-/criar-prd                                    # 1. PRD
-/criar-techspec .dw/spec/prd-nome             # 2. TechSpec
-/criar-tasks .dw/spec/prd-nome                # 3. Tasks
-/executar-task .dw/spec/prd-nome              # 4. Task 1 (com Nível 1)
-/executar-task .dw/spec/prd-nome              # 5. Task 2 (com Nível 1)
+/dw-create-prd                                    # 1. PRD
+/dw-create-techspec .dw/spec/prd-nome             # 2. TechSpec
+/dw-create-tasks .dw/spec/prd-nome                # 3. Tasks
+/dw-run-task .dw/spec/prd-nome              # 4. Task 1 (com Nível 1)
+/dw-run-task .dw/spec/prd-nome              # 5. Task 2 (com Nível 1)
 # ... repete para cada task
-/revisar-implementacao .dw/spec/prd-nome      # 6. Revisão PRD (Nível 2)
+/dw-review-implementation .dw/spec/prd-nome      # 6. Revisão PRD (Nível 2)
 /dw-code-review .dw/spec/prd-nome               # 7. Code review (Nível 3)
-/gerar-pr main                                # 8. PR
+/dw-generate-pr main                                # 8. PR
 ```
 
 ### Bug Simples
 ```bash
 /dw-bugfix meu-projeto "descrição do bug"        # Analisa e corrige
 /dw-commit                                       # Commit da correção
-/gerar-pr main                                # PR
+/dw-generate-pr main                                # PR
 ```
 
 ### Bug Complexo
 ```bash
 /dw-bugfix meu-projeto "descrição" --análise     # Gera documento de análise
-/criar-techspec .dw/spec/dw-bugfix-nome          # TechSpec do fix
-/criar-tasks .dw/spec/dw-bugfix-nome             # Tasks do fix
-/executar-plano .dw/spec/dw-bugfix-nome          # Executa tudo
-/gerar-pr main                                # PR
+/dw-create-techspec .dw/spec/dw-bugfix-nome          # TechSpec do fix
+/dw-create-tasks .dw/spec/dw-bugfix-nome             # Tasks do fix
+/dw-run-plan .dw/spec/dw-bugfix-nome          # Executa tudo
+/dw-generate-pr main                                # PR
 ```
 
 ### QA Visual (Frontend)
 ```bash
-/executar-qa .dw/spec/prd-nome                # QA com Playwright MCP
+/dw-run-qa .dw/spec/prd-nome                # QA com Playwright MCP
 # Se encontrar bugs:
-/corrigir-qa .dw/spec/prd-nome               # Corrige + retesta ciclo completo
+/dw-fix-qa .dw/spec/prd-nome               # Corrige + retesta ciclo completo
 ```
 
 ### Onboarding em Projeto Novo
 ```bash
-/analisar-projeto                             # Escaneia e gera rules automaticamente
-/ajuda                                        # Mostra comandos disponíveis
+/dw-analyze-project                             # Escaneia e gera rules automaticamente
+/dw-help                                        # Mostra comandos disponíveis
 ```
 
 ## Estrutura de Arquivos
@@ -215,7 +215,7 @@ workspace/
 │   ├── scripts/               # Scripts utilitários
 │   │   └── functional-doc/    # Geração de dossiê & runner Playwright
 │   ├── references/            # Materiais de referência e documentos externos
-│   ├── rules/                 # Regras por projeto (gerado por /analisar-projeto)
+│   ├── rules/                 # Regras por projeto (gerado por /dw-analyze-project)
 │   │   ├── index.md
 │   │   └── [projeto].md
 │   └── tasks/                 # PRDs e tasks em andamento
@@ -228,21 +228,21 @@ workspace/
 
 ## Dúvidas Frequentes
 
-**Q: Qual a diferença entre `/executar-task` e `/executar-plano`?**
-- `/executar-task` executa UMA task com controle manual entre cada uma
-- `/executar-plano` executa TODAS automaticamente com revisão final
+**Q: Qual a diferença entre `/dw-run-task` e `/dw-run-plan`?**
+- `/dw-run-task` executa UMA task com controle manual entre cada uma
+- `/dw-run-plan` executa TODAS automaticamente com revisão final
 
-**Q: Preciso rodar `/revisar-implementacao` manualmente?**
-- Não se usar `/executar-plano` (já inclui). Sim se usar `/executar-task` incremental.
+**Q: Preciso rodar `/dw-review-implementation` manualmente?**
+- Não se usar `/dw-run-plan` (já inclui). Sim se usar `/dw-run-task` incremental.
 
-**Q: Quando usar `/dw-code-review` vs `/revisar-implementacao`?**
-- `/revisar-implementacao` (Nível 2): Verifica se os FRs do PRD foram implementados
+**Q: Quando usar `/dw-code-review` vs `/dw-review-implementation`?**
+- `/dw-review-implementation` (Nível 2): Verifica se os FRs do PRD foram implementados
 - `/dw-code-review` (Nível 3): Além disso, analisa qualidade de código e gera relatório formal
 
 **Q: O `/dw-bugfix` sempre corrige direto?**
-- Não. Ele faz triagem. Se for feature (não bug), redireciona para `/criar-prd`. Se for bug complexo, pode gerar documento de análise com `--análise`.
+- Não. Ele faz triagem. Se for feature (não bug), redireciona para `/dw-create-prd`. Se for bug complexo, pode gerar documento de análise com `--análise`.
 
-**Q: Preciso rodar `/analisar-projeto` antes de tudo?**
+**Q: Preciso rodar `/dw-analyze-project` antes de tudo?**
 - Sim, é recomendado para projetos novos. Ele gera as rules em `.dw/rules/` que todos os outros comandos utilizam.
 
 </system_instructions>

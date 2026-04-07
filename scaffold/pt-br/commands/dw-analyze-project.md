@@ -39,7 +39,7 @@ Analisar o repositório atual e gerar automaticamente:
 - `.dw/rules/index.md` - Visão geral do ecossistema/projeto
 - `.dw/rules/[projeto].md` - Rules detalhadas por projeto/módulo
 
-Estes arquivos serão utilizados por todos os outros comandos do workflow (criar-prd, criar-techspec, executar-task, code-review, etc.).
+Estes arquivos serão utilizados por todos os outros comandos do workflow (dw-create-prd, dw-create-techspec, dw-run-task, code-review, etc.).
 
 ## Variáveis de Entrada
 
@@ -445,7 +445,7 @@ Gerar este arquivo quando 2+ projetos forem detectados.
 ```markdown
 # Integrações — [Nome do Workspace]
 
-> Auto-gerado por /analisar-projeto em [data]
+> Auto-gerado por /dw-analyze-project em [data]
 
 ## Grafo de Dependências
 
@@ -663,7 +663,7 @@ packages/auth → packages/db
 ## Exemplo de Uso
 
 ```
-/analisar-projeto
+/dw-analyze-project
 ```
 
 Isso escaneará o repositório atual e gerará os arquivos de rules automaticamente.

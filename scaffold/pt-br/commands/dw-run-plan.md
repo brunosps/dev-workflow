@@ -19,7 +19,7 @@ Executar TODAS as tarefas pendentes de um projeto de forma sequencial e automát
 - Task Individual: `.dw/spec/prd-[nome-funcionalidade]/[num]_task.md`
 - PRD: `.dw/spec/prd-[nome-funcionalidade]/prd.md`
 - Tech Spec: `.dw/spec/prd-[nome-funcionalidade]/techspec.md`
-- Comando de Revisão: `.dw/commands/revisar-implementacao.md`
+- Comando de Revisão: `.dw/commands/dw-review-implementation.md`
 
 ## Processo de Execução
 
@@ -48,10 +48,10 @@ Para cada tarefa pendente (em ordem sequencial):
    - Ler o arquivo da task individual `[num]_task.md`
 
 2. **Executar a task**
-   - Seguir TODAS as instruções em `.dw/commands/executar-task.md`
+   - Seguir TODAS as instruções em `.dw/commands/dw-run-task.md`
    - Implementar a tarefa completamente
    - Garantir que todos os critérios de sucesso sejam atendidos
-   - A validação Nível 1 (critérios + testes + padrões) já está embutida no `executar-task.md`
+   - A validação Nível 1 (critérios + testes + padrões) já está embutida no `dw-run-task.md`
 
 3. **Marcar como concluída**
    - Atualizar `tasks.md` mudando `- [ ]` para `- [x]`
@@ -67,7 +67,7 @@ Para cada tarefa pendente (em ordem sequencial):
 Quando todas as tarefas estiverem concluídas:
 
 1. **Executar Revisão Geral**
-   - Seguir `.dw/commands/revisar-implementacao.md` para TODAS as tasks
+   - Seguir `.dw/commands/dw-review-implementation.md` para TODAS as tasks
    - Gerar relatório completo de gaps e recomendações
    - **Se 0 gaps e 100% implementado**: Pular para o Relatório Final com status "PLANO COMPLETO". NÃO entrar em plan mode, NÃO criar tasks adicionais.
 
@@ -136,7 +136,7 @@ Se uma tarefa FALHAR durante a execução:
 
 ## Regras Importantes
 
-<critical>SEMPRE leia e siga as instruções completas em `.dw/commands/executar-task.md` para CADA tarefa</critical>
+<critical>SEMPRE leia e siga as instruções completas em `.dw/commands/dw-run-task.md` para CADA tarefa</critical>
 
 <critical>NUNCA pule uma tarefa - execute-as SEQUENCIALMENTE na ordem definida</critical>
 
@@ -146,7 +146,7 @@ Se uma tarefa FALHAR durante a execução:
 
 <critical>Utilize o Context7 MCP para analisar a documentação da linguagem, frameworks e bibliotecas envolvidas na implementação</critical>
 
-<critical>A validação pós-task (Nível 1) já está embutida no `.dw/commands/executar-task.md` - NÃO execute revisão separada por task</critical>
+<critical>A validação pós-task (Nível 1) já está embutida no `.dw/commands/dw-run-task.md` - NÃO execute revisão separada por task</critical>
 
 <critical>Na revisão final, PERGUNTE ao usuário sobre CADA recomendação individualmente antes de implementar</critical>
 
@@ -229,7 +229,7 @@ Task concluída, commitada e marcada no tasks.md
 ## Exemplo de Uso
 
 ```
-/executar-plano .dw/spec/prd-minha-feature
+/dw-run-plan .dw/spec/prd-minha-feature
 ```
 
 Isso executará TODAS as tarefas pendentes do projeto, uma após a outra, com revisão após cada task e ciclo de revisão final interativo.
@@ -237,7 +237,7 @@ Isso executará TODAS as tarefas pendentes do projeto, uma após a outra, com re
 ## Notas Importantes
 
 - Este comando é ideal para execução automatizada de planos completos
-- Use `/executar-task` para executar apenas uma task de cada vez
+- Use `/dw-run-task` para executar apenas uma task de cada vez
 - Use `list-tasks` para ver o progresso sem executar
 - Sempre revise o plano antes de iniciar execução automática completa
 - Mantenha backups antes de executar planos grandes

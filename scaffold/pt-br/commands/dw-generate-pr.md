@@ -12,12 +12,12 @@
     ## Uso
 
     ```
-    /gerar-pr [branch-alvo]
+    /dw-generate-pr [branch-alvo]
     ```
 
     Exemplos:
-    - `/gerar-pr main`
-    - `/gerar-pr develop`
+    - `/dw-generate-pr main`
+    - `/dw-generate-pr develop`
 
     ## Objetivo
 

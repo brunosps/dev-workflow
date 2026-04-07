@@ -36,8 +36,8 @@ Este é o **Nível 3 de Revisão**:
 
 | Nível | Comando | Quando | Relatório |
 |-------|---------|--------|-----------|
-| 1 | *(embutido no /executar-task)* | Após cada task | Não |
-| 2 | `/revisar-implementacao` | Após todas tasks | Output terminal |
+| 1 | *(embutido no /dw-run-task)* | Após cada task | Não |
+| 2 | `/dw-review-implementation` | Após todas tasks | Output terminal |
 | **3** | **`/dw-code-review`** | **Antes do PR** | **`code-review.md`** |
 
 O Nível 3 inclui TUDO do Nível 2 (PRD compliance) mais análise de qualidade de código.

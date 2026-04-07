@@ -46,9 +46,9 @@
     Neste modo:
     1. Segue o fluxo normal de perguntas e análise
     2. Em vez de executar, gera documento em `.dw/spec/dw-bugfix-[nome]/prd.md`
-    3. O arquivo é nomeado `prd.md` para manter compatibilidade com o pipeline criar-techspec/criar-tasks
-    4. Depois o usuário pode rodar `/criar-techspec .dw/spec/dw-bugfix-[nome]`
-    5. E então `/criar-tasks .dw/spec/dw-bugfix-[nome]`
+    3. O arquivo é nomeado `prd.md` para manter compatibilidade com o pipeline dw-create-techspec/dw-create-tasks
+    4. Depois o usuário pode rodar `/dw-create-techspec .dw/spec/dw-bugfix-[nome]`
+    5. E então `/dw-create-tasks .dw/spec/dw-bugfix-[nome]`
 
     ## Fluxo de Trabalho
 
@@ -107,7 +107,7 @@
     ---
 
     **Deseja que eu inicie o fluxo de criação de PRD?**
-    - `sim` - Vou seguir `.dw/commands/criar-prd.md` para esta feature
+    - `sim` - Vou seguir `.dw/commands/dw-create-prd.md` para esta feature
     - `não, é bug` - Me explique melhor por que considera um bug
     - `não, cancelar` - Encerrar
     ```
@@ -234,7 +234,7 @@
     3. Salvar como: `.dw/spec/dw-bugfix-[nome-do-bug]/prd.md` (usa nome `prd.md` para compatibilidade com pipeline)
 
     **IMPORTANTE:** O arquivo deve ser nomeado `prd.md` para que os comandos
-    `/criar-techspec` e `/criar-tasks` funcionem sem modificação.
+    `/dw-create-techspec` e `/dw-create-tasks` funcionem sem modificação.
 
     ## Tipos de Tarefa (permitidos em bugfix)
 
@@ -300,7 +300,7 @@
 
     <critical>
     PRIMEIRO: Avalie se é bug ou feature (Passo 0).
-    Se for feature: Redirecione para criar-prd.md.
+    Se for feature: Redirecione para dw-create-prd.md.
     NUNCA pule as 3 perguntas.
     NUNCA execute tarefas sem aprovação.
     SEMPRE numere as tarefas sequencialmente (1, 2, 3...).

@@ -172,12 +172,12 @@ git commit -m "feat([modulo]): [descrição concisa]
 - Add unit tests"
 ```
 
-**Nota**: O push será feito apenas no `/gerar-pr` ao final de todas as tasks.
+**Nota**: O push será feito apenas no `/dw-generate-pr` ao final de todas as tasks.
 
 <critical>Após completar a tarefa, marque como completa em tasks.md</critical>
 
 ## Próximos Passos
 
-- Se há mais tasks: `/executar-task [próxima-task]`
-- Se última task: `/gerar-pr [branch-alvo]` (ex: `/gerar-pr main`)
+- Se há mais tasks: `/dw-run-task [próxima-task]`
+- Se última task: `/dw-generate-pr [branch-alvo]` (ex: `/dw-generate-pr main`)
 </system_instructions>

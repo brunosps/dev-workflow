@@ -17,11 +17,11 @@
 
     | Nível | Comando | Quando | Relatório |
     |-------|---------|--------|-----------|
-    | 1 | *(embutido no /executar-task)* | Após cada task | Não |
-    | **2** | **`/revisar-implementacao`** | **Após todas tasks** | **Output formatado** |
+    | 1 | *(embutido no /dw-run-task)* | Após cada task | Não |
+    | **2** | **`/dw-review-implementation`** | **Após todas tasks** | **Output formatado** |
     | 3 | `/dw-code-review` | Antes do PR | `code-review.md` |
 
-    Este comando é chamado automaticamente pelo `/executar-plano` ao final de todas as tasks, mas também pode ser executado manualmente.
+    Este comando é chamado automaticamente pelo `/dw-run-plan` ao final de todas as tasks, mas também pode ser executado manualmente.
 
     ## Variáveis de Entrada
 
