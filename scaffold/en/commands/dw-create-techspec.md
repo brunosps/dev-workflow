@@ -13,6 +13,14 @@
     ## Pipeline Position
     **Predecessor:** `/dw-create-prd` | **Successor:** `/dw-create-tasks`
 
+    ## Complementary Skills
+
+    When available in the project under `./.agents/skills/`, use these skills as support:
+
+    - `vercel-react-best-practices`: use when defining frontend architecture for React/Next.js projects
+    - `ui-ux-pro-max`: use when defining design system decisions, color palettes, typography, and UI style for the TechSpec
+    - `security-review`: use when the feature touches auth, authorization, or sensitive data handling
+
     ## Multi-Project Decision Flowchart
 
     ```dot

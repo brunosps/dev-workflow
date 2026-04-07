@@ -58,6 +58,7 @@ When available in the project under `./.agents/skills/`, use these skills as ope
 - `webapp-testing`: support for structuring E2E flows, local retests, and evidence collection
 - `remotion-best-practices`: mandatory support when there is a final human video, captions, composition, transitions, FFmpeg, or Remotion
 - `humanizer`: mandatory support for reviewing and naturalizing all captions, `.srt` files, descriptive texts, and any human-facing writing before final delivery
+- `ui-ux-pro-max`: use when documenting visual patterns, design system choices, and UI style consistency across screens
 
 ## Mandatory Browser Tools
 

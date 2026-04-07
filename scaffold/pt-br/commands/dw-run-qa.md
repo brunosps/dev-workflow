@@ -22,6 +22,7 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apo
 
 - `webapp-testing`: apoio para estruturar fluxos de teste, retestes, screenshots e logs quando complementar ao Playwright MCP
 - `vercel-react-best-practices`: use apenas se o frontend sob teste for React/Next.js e houver indicação de regressão relacionada a renderização, fetching, hidratação ou performance percebida
+- `ui-ux-pro-max`: use quando validar consistência de design, paletas de cores, tipografia, espaçamento e hierarquia visual contra padrões da indústria
 
 ## Variáveis de Entrada
 

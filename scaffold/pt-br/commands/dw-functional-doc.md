@@ -58,6 +58,7 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apo
 - `webapp-testing`: apoio para estruturar fluxos E2E, retestes locais e coleta de evidências
 - `remotion-best-practices`: apoio obrigatório quando houver vídeo humano final, legendas, composição, transições, FFmpeg ou Remotion
 - `humanizer`: apoio obrigatório para revisar e naturalizar todas as legendas, captions `.srt`, textos descritivos e qualquer redação voltada a leitura humana antes da entrega final
+- `ui-ux-pro-max`: use quando documentar padrões visuais, escolhas de design system e consistência de estilo UI entre telas
 
 ## Ferramentas obrigatórias para browser
 
