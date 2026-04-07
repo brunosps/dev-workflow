@@ -37,6 +37,9 @@ Funciona melhor com projeto analisado por `/dw-analyze-project`
 <critical>Header e footer de vídeos humanos não podem disputar área útil com a tela do browser. Quando eles existirem, devem ficar fora do stage do browser, em uma composição maior, preservando intacta a viewport real da aplicação.</critical>
 <critical>Quando o objetivo for um tour humano com browser centralizado, mantenha a aplicação em um palco central sem colunas laterais fixas, preservando header e footer em largura total fora da área do browser.</critical>
 <critical>Qualidade visual do browser é requisito obrigatório. Não entregue tour humano com viewport ou gravação reescalada para baixo em relação à resolução final. O runner deve alinhar viewport e captura de vídeo à resolução final ou registrar bloqueio explícito.</critical>
+<critical>Legenda hardcoded sobre a tela do produto não é padrão aceitável quando o ambiente permitir shell dedicada. O padrão preferencial e obrigatório é: `header` superior com título do tour, `stage` centralizado para o browser intacto e `footer` inferior exclusivo para a legenda narrativa.</critical>
+<critical>Mesmo quando o vídeo humano for montado a partir de screenshots e não de navegação gravada, a composição final deve manter o mesmo layout de shell: cabeçalho e rodapé fora da área útil da aplicação. Não entregar slideshow fullscreen com subtitles queimadas diretamente sobre o conteúdo do produto.</critical>
+<critical>Se já existir no workspace um flow anterior com shell de gravação humana melhor resolvida, reutilize esse padrão visual e estrutural antes de improvisar nova composição. Esse reaproveitamento é preferível a uma solução simplificada com legendas embutidas sobre a viewport.</critical>
 
 ### Requisitos de Cadência do Vídeo
 <critical>Antes e depois de ações principais, inserir pausas intencionais. Como regra operacional: manter de 2 a 3 segundos de permanência em estados relevantes já carregados e pelo menos 1,5 segundo após o desfecho visível de cada ação principal antes de seguir.</critical>
@@ -223,6 +226,7 @@ Gerar `e2e-runbook.md` no estilo operacional detalhado:
   - quando houver título e legenda, reservar cabeçalho e rodapé próprios fora do stage do browser
   - quando a composição pedir browser centralizado, manter a aplicação em um palco central sem colunas laterais fixas e sem sacrificar a largura total do cabeçalho e do rodapé
   - evitar qualquer redução artificial da viewport do app para encaixar overlays
+  - evitar subtitles queimadas diretamente dentro da viewport do produto quando houver possibilidade de usar shell externa
   - alinhar a captura de vídeo à resolução final para evitar perda de nitidez no browser
   - manter em tela cada estado relevante por tempo suficiente para leitura visual, em especial listas, diálogos, badges, validações, mensagens e resultados finais
   - manter as legendas tempo suficiente para leitura confortável, sem trocar texto antes de a etapa correspondente ser compreendida visualmente
@@ -245,6 +249,26 @@ Quando produzir ou revisar o tour final, aplicar estas regras como baseline:
 - quando houver comparação entre estado anterior e posterior, mostrar claramente os dois momentos
 - se a gravação ficar rápida demais para leitura humana, considerar a execução inadequada mesmo que tecnicamente correta
 - se `ffmpeg` estiver instalado, considerar incompleta a entrega que deixar apenas `webm` ou outro bruto sem gerar `mp4`
+- considerar inadequado o vídeo que use apenas captions sobrepostas ao browser quando o projeto permitir shell com header/footer dedicados
+
+## Padrão visual obrigatório da shell
+
+Quando houver vídeo humano final, adotar como padrão visual mínimo:
+
+- `header` fixo fora do browser com o nome do módulo ou fluxo
+- `main` centralizando um `stage` único do browser
+- `footer` fixo fora do browser, reservado para legenda narrativa ou contexto curto
+- `stage` com borda, raio e sombra próprios, sem cortar a viewport da aplicação
+- largura e altura do `stage` definidas explicitamente e proporcionais à resolução final
+
+Baseline recomendada para `1920x1080` quando não houver padrão melhor no próprio flow:
+
+- `header`: ~`64px`
+- `footer`: ~`112px`
+- `stage`: ~`1600x900`
+
+Se já existir no workspace um script de shell funcional (ex: `record-human-tour.cjs`), reutilize-o como referência. Se optar por outro layout, justifique explicitamente no `manifest.json`.
+
 - Atualizar `manifest.json` com status final, artefatos e bloqueios, distinguindo:
   - evidências MCP
   - captura bruta de execução

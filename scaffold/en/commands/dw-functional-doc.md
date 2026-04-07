@@ -37,6 +37,9 @@ Works best with project analyzed by `/dw-analyze-project`
 <critical>Header and footer of human videos must not compete for useful area with the browser stage. When they exist, they must be outside the browser stage, in a larger composition, preserving the real application viewport intact.</critical>
 <critical>When the goal is a human tour with centered browser, keep the application in a central stage without fixed side columns, preserving header and footer at full width outside the browser area.</critical>
 <critical>Browser visual quality is a mandatory requirement. Do not deliver a human tour with viewport or recording downscaled relative to the final resolution. The runner must align viewport and video capture to the final resolution or record an explicit blocker.</critical>
+<critical>Hardcoded subtitles over the product screen are not an acceptable standard when the environment supports a dedicated shell. The preferred and mandatory standard is: `header` at the top with the tour title, `stage` centered for the intact browser, and `footer` at the bottom exclusively for the narrative caption.</critical>
+<critical>Even when the human video is assembled from screenshots rather than recorded navigation, the final composition must maintain the same shell layout: header and footer outside the application area. Do not deliver a fullscreen slideshow with subtitles burned directly over the product content.</critical>
+<critical>If a previous flow in the workspace already has a better-resolved human recording shell, reuse that visual and structural pattern before improvising a new composition. This reuse is preferable to a simplified solution with captions embedded over the viewport.</critical>
 
 ### Video Pacing Requirements
 <critical>Before and after main actions, insert intentional pauses. As an operational rule: maintain 2 to 3 seconds of permanence on relevant loaded states and at least 1.5 seconds after the visible outcome of each main action before proceeding.</critical>
@@ -223,6 +226,7 @@ Generate `e2e-runbook.md` in detailed operational style:
   - when there is a title and caption, reserve header and footer outside the browser stage
   - when the composition calls for a centered browser, keep the application in a central stage without fixed side columns and without sacrificing full-width header and footer
   - avoid any artificial reduction of the app viewport to fit overlays
+  - avoid burned subtitles directly inside the product viewport when there is a possibility of using an external shell
   - align video capture to final resolution to avoid sharpness loss in the browser
   - keep each relevant state on screen long enough for visual reading, especially lists, dialogs, badges, validations, messages, and final results
   - keep captions on screen long enough for comfortable reading, without switching text before the corresponding step is visually understood
@@ -245,6 +249,26 @@ When producing or reviewing the final tour, apply these rules as baseline:
 - when comparing before and after states, clearly show both moments
 - if the recording is too fast for human reading, consider the execution inadequate even if technically correct
 - if `ffmpeg` is installed, consider incomplete any delivery that leaves only `webm` or another raw format without generating `mp4`
+- consider inadequate any video that uses only overlaid captions on the browser when the project supports a shell with dedicated header/footer
+
+## Mandatory Visual Shell Standard
+
+When there is a final human video, adopt as minimum visual standard:
+
+- `header` fixed outside the browser with the module or flow name
+- `main` centering a single browser `stage`
+- `footer` fixed outside the browser, reserved for narrative caption or short context
+- `stage` with its own border, radius, and shadow, without cropping the application viewport
+- `stage` width and height explicitly defined and proportional to the final resolution
+
+Baseline recommended for `1920x1080` when no better standard exists in the flow itself:
+
+- `header`: ~`64px`
+- `footer`: ~`112px`
+- `stage`: ~`1600x900`
+
+If a previous flow in the workspace already has a working shell script (e.g., `record-human-tour.cjs`), reuse it as reference. If choosing a different layout, justify explicitly in `manifest.json`.
+
 - Update `manifest.json` with final status, artifacts, and blockers, distinguishing:
   - MCP evidence
   - raw execution capture
