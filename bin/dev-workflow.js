@@ -22,7 +22,7 @@ const HELP_TEXT = `
     npx dev-workflow help
 
   Commands:
-    init      Scaffold ai/commands, templates, rules, and platform wrappers
+    init      Scaffold .dw/commands, templates, rules, and platform wrappers
     update    Update commands and templates (preserves rules and tasks)
     help      Show this help message
 

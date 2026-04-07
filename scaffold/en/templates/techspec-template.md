@@ -116,7 +116,7 @@ type ServiceName interface {
 
 ### Standards Compliance
 
-[Review the rules in `ai/rules/` that apply to this techspec and list them below:]
+[Review the rules in `.dw/rules/` that apply to this techspec and list them below:]
 
 ### Relevant Files
 

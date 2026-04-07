@@ -116,7 +116,7 @@ type NomeServico interface {
 
 ### Conformidade com Padrões
 
-[Pesquise as rules em `ai/rules/` que se encaixam nesta techspec e liste-as abaixo:]
+[Pesquise as rules em `.dw/rules/` que se encaixam nesta techspec e liste-as abaixo:]
 
 ### Arquivos Relevantes
 

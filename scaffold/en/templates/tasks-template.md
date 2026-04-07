@@ -31,4 +31,4 @@ Each task follows this flow:
 1. `/execute-task [N]_task.md` - Implements the task
 2. Unit tests included in the implementation
 3. Commit at the end of each task (no push)
-4. Next task or `/generate-pr [target-branch]` when all tasks are completed
+4. Next task or `/dw-generate-pr [target-branch]` when all tasks are completed
