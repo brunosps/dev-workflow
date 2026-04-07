@@ -29,6 +29,14 @@ digraph brainstorm_decision {
 }
 ```
 
+## Complementary Skills
+
+When available in the project under `./.agents/skills/`, use these skills to enrich ideation:
+
+- `ui-ux-pro-max`: use when brainstorming involves frontend, UI style direction, design system choices, or visual identity exploration
+- `vercel-react-best-practices`: use when brainstorming React/Next.js architecture or performance trade-offs
+- `security-review`: use when brainstorming touches auth, data handling, or security-sensitive features
+
 ## Template Reference
 
 - Brainstorm matrix template: `.dw/templates/brainstorm-matrix.md` (relative to workspace root)
