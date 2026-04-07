@@ -39,6 +39,9 @@ Funciona melhor com projeto analisado por `/dw-analyze-project`
 <critical>Qualidade visual do browser é requisito obrigatório. Não entregue tour humano com viewport ou gravação reescalada para baixo em relação à resolução final. O runner deve alinhar viewport e captura de vídeo à resolução final ou registrar bloqueio explícito.</critical>
 <critical>Legenda hardcoded sobre a tela do produto não é padrão aceitável quando o ambiente permitir shell dedicada. O padrão preferencial e obrigatório é: `header` superior com título do tour, `stage` centralizado para o browser intacto e `footer` inferior exclusivo para a legenda narrativa.</critical>
 <critical>Mesmo quando o vídeo humano for montado a partir de screenshots e não de navegação gravada, a composição final deve manter o mesmo layout de shell: cabeçalho e rodapé fora da área útil da aplicação. Não entregar slideshow fullscreen com subtitles queimadas diretamente sobre o conteúdo do produto.</critical>
+<critical>No artefato principal de vídeo humano, a legenda precisa estar visível dentro do `footer` da shell. Arquivo `.srt` sidecar e faixa de subtitle embutida podem existir como apoio, mas não substituem a obrigação de a narrativa principal já aparecer posicionada corretamente no rodapé da composição final.</critical>
+<critical>É inválido entregar como versão principal um MP4 cuja legenda dependa do player para posicionamento (`mov_text`, `tx3g`, subtitle track similar) quando isso fizer o texto sair do footer da shell. Se houver faixa embutida auxiliar, validar visualmente que a versão principal continua correta mesmo sem o player renderizar subtitles.</critical>
+<critical>Quando o pedido envolver vídeo humano com legenda, gerar sempre dois artefatos de vídeo: um `clean` sem legenda renderizada no quadro, para uso com player + `.srt` sidecar; e um `captioned` com a narrativa já queimada corretamente no `footer` da shell.</critical>
 <critical>Se já existir no workspace um flow anterior com shell de gravação humana melhor resolvida, reutilize esse padrão visual e estrutural antes de improvisar nova composição. Esse reaproveitamento é preferível a uma solução simplificada com legendas embutidas sobre a viewport.</critical>
 
 ### Requisitos de Cadência do Vídeo
@@ -121,6 +124,9 @@ Se houver execução:
 Se houver vídeo humano final:
 - salvar em `evidence/videos/` com nome que diferencie claramente o tour final da captura bruta
 - quando `ffmpeg` estiver disponível, salvar também a versão `mp4` do tour humano final
+- quando houver legendas, salvar também duas variantes explícitas:
+  - uma versão `clean` sem legenda desenhada no frame
+  - uma versão `captioned` com legenda desenhada no `footer` da shell
 - registrar no `manifest.json` quais arquivos são `raw` e quais são `human_final`
 
 ## Fluxo obrigatório
@@ -227,6 +233,10 @@ Gerar `e2e-runbook.md` no estilo operacional detalhado:
   - quando a composição pedir browser centralizado, manter a aplicação em um palco central sem colunas laterais fixas e sem sacrificar a largura total do cabeçalho e do rodapé
   - evitar qualquer redução artificial da viewport do app para encaixar overlays
   - evitar subtitles queimadas diretamente dentro da viewport do produto quando houver possibilidade de usar shell externa
+  - queimar a narrativa principal no `footer` da shell do vídeo final; usar `.srt` sidecar e faixa embutida apenas como artefatos complementares
+  - para cada tour final com legenda, produzir:
+    - `clean`: sem legenda no frame, com `.srt` separado para o player decidir
+    - `captioned`: legenda já posicionada no `footer` da shell
   - alinhar a captura de vídeo à resolução final para evitar perda de nitidez no browser
   - manter em tela cada estado relevante por tempo suficiente para leitura visual, em especial listas, diálogos, badges, validações, mensagens e resultados finais
   - manter as legendas tempo suficiente para leitura confortável, sem trocar texto antes de a etapa correspondente ser compreendida visualmente
@@ -250,6 +260,8 @@ Quando produzir ou revisar o tour final, aplicar estas regras como baseline:
 - se a gravação ficar rápida demais para leitura humana, considerar a execução inadequada mesmo que tecnicamente correta
 - se `ffmpeg` estiver instalado, considerar incompleta a entrega que deixar apenas `webm` ou outro bruto sem gerar `mp4`
 - considerar inadequado o vídeo que use apenas captions sobrepostas ao browser quando o projeto permitir shell com header/footer dedicados
+- considerar inadequado o vídeo cuja legenda principal dependa do renderer do player e por isso apareça fora do `footer` previsto na shell
+- considerar incompleta a entrega que disponibilize só uma das variantes (`clean` ou `captioned`) quando o fluxo exigir vídeo com legenda
 
 ## Padrão visual obrigatório da shell
 

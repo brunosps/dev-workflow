@@ -39,6 +39,9 @@ Works best with project analyzed by `/dw-analyze-project`
 <critical>Browser visual quality is a mandatory requirement. Do not deliver a human tour with viewport or recording downscaled relative to the final resolution. The runner must align viewport and video capture to the final resolution or record an explicit blocker.</critical>
 <critical>Hardcoded subtitles over the product screen are not an acceptable standard when the environment supports a dedicated shell. The preferred and mandatory standard is: `header` at the top with the tour title, `stage` centered for the intact browser, and `footer` at the bottom exclusively for the narrative caption.</critical>
 <critical>Even when the human video is assembled from screenshots rather than recorded navigation, the final composition must maintain the same shell layout: header and footer outside the application area. Do not deliver a fullscreen slideshow with subtitles burned directly over the product content.</critical>
+<critical>In the main human video artifact, the caption must be visible inside the shell's `footer`. A sidecar `.srt` file and an embedded subtitle track may exist as support, but they do not replace the obligation for the main narrative to already appear correctly positioned in the footer of the final composition.</critical>
+<critical>It is invalid to deliver as the main version an MP4 whose caption depends on the player for positioning (`mov_text`, `tx3g`, or similar subtitle track) when this causes the text to appear outside the shell's footer. If there is an auxiliary embedded track, visually validate that the main version remains correct even without the player rendering subtitles.</critical>
+<critical>When the request involves human video with captions, always generate two video artifacts: a `clean` version without captions rendered in the frame, for use with player + sidecar `.srt`; and a `captioned` version with the narrative already burned correctly in the shell's `footer`.</critical>
 <critical>If a previous flow in the workspace already has a better-resolved human recording shell, reuse that visual and structural pattern before improvising a new composition. This reuse is preferable to a simplified solution with captions embedded over the viewport.</critical>
 
 ### Video Pacing Requirements
@@ -121,6 +124,9 @@ If there is execution:
 If there is a final human video:
 - save in `evidence/videos/` with a name that clearly differentiates the final tour from the raw capture
 - when `ffmpeg` is available, also save the `mp4` version of the final human tour
+- when captions are involved, save two explicit variants:
+  - a `clean` version without captions drawn in the frame
+  - a `captioned` version with captions drawn in the shell's `footer`
 - record in `manifest.json` which files are `raw` and which are `human_final`
 
 ## Required Flow
@@ -227,6 +233,10 @@ Generate `e2e-runbook.md` in detailed operational style:
   - when the composition calls for a centered browser, keep the application in a central stage without fixed side columns and without sacrificing full-width header and footer
   - avoid any artificial reduction of the app viewport to fit overlays
   - avoid burned subtitles directly inside the product viewport when there is a possibility of using an external shell
+  - burn the main narrative in the shell's `footer` of the final video; use sidecar `.srt` and embedded track only as complementary artifacts
+  - for each final tour with captions, produce:
+    - `clean`: no captions in the frame, with separate `.srt` for the player to decide
+    - `captioned`: captions already positioned in the shell's `footer`
   - align video capture to final resolution to avoid sharpness loss in the browser
   - keep each relevant state on screen long enough for visual reading, especially lists, dialogs, badges, validations, messages, and final results
   - keep captions on screen long enough for comfortable reading, without switching text before the corresponding step is visually understood
@@ -250,6 +260,8 @@ When producing or reviewing the final tour, apply these rules as baseline:
 - if the recording is too fast for human reading, consider the execution inadequate even if technically correct
 - if `ffmpeg` is installed, consider incomplete any delivery that leaves only `webm` or another raw format without generating `mp4`
 - consider inadequate any video that uses only overlaid captions on the browser when the project supports a shell with dedicated header/footer
+- consider inadequate any video whose main caption depends on the player's renderer and therefore appears outside the shell's intended `footer`
+- consider incomplete any delivery that provides only one of the variants (`clean` or `captioned`) when the flow requires video with captions
 
 ## Mandatory Visual Shell Standard
 
