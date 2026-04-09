@@ -23,6 +23,11 @@ Quando disponíveis no projeto em `./.agents/skills/`, use como suporte analíti
 - `security-review`: delegue preocupações de segurança para este skill — não duplique
 - `vercel-react-best-practices`: delegue padrões de performance React/Next.js para este skill
 
+## Ferramentas de Análise
+
+Quando o projeto usar React, execute `npx react-doctor@latest --verbose` no diretório do frontend antes de iniciar a análise. Incorpore o health score e findings do react-doctor na seção de métricas do relatório.
+Para projetos Angular, use `ng lint` como complemento analítico.
+
 ## Variáveis de Entrada
 
 | Variável | Descrição | Exemplo |

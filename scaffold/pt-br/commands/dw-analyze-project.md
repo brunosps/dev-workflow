@@ -213,6 +213,11 @@ Para cada projeto/módulo detectado, identificar:
 | **Containerização** | Dockerfile, docker-compose.yml |
 | **Monorepo tools** | Turborepo, Nx, Lerna, pnpm workspaces |
 
+#### Baseline de Saúde do Frontend
+
+Quando React for detectado, execute `npx react-doctor@latest --verbose` e inclua o health score nas rules geradas como métrica baseline.
+Para projetos Angular, execute `ng lint` e documente warnings como baseline.
+
 ### Passo 4: Ler Arquivos Fonte Representativos (Obrigatório)
 
 Ler **10-20 arquivos fonte** por módulo para identificar padrões. Para projetos grandes, aumentar cobertura proporcionalmente.

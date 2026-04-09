@@ -24,6 +24,11 @@ When available in the project under `./.agents/skills/`, use these skills as ope
 - `vercel-react-best-practices`: use only if the frontend under test is React/Next.js and there is indication of regression related to rendering, fetching, hydration, or perceived performance
 - `ui-ux-pro-max`: use when validating design consistency, color palettes, typography, spacing, and visual hierarchy against industry standards
 
+## Analysis Tools
+
+- **React**: run `npx react-doctor@latest --diff` after tests to verify the health score has not regressed with the changes
+- **Angular**: run `ng lint` to validate Angular code conformance after changes
+
 ## Input Variables
 
 | Variable | Description | Example |

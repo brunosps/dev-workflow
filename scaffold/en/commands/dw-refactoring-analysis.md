@@ -23,6 +23,11 @@ When available in the project under `./.agents/skills/`, use these skills as ana
 - `security-review`: defer security concerns to this skill — do not duplicate
 - `vercel-react-best-practices`: defer React/Next.js performance patterns to this skill
 
+## Analysis Tools
+
+When the project uses React, run `npx react-doctor@latest --verbose` in the frontend directory before starting the analysis. Incorporate the health score and findings into the report's metrics section.
+For Angular projects, use `ng lint` as an analytical complement.
+
 ## Input Variables
 
 | Variable | Description | Example |

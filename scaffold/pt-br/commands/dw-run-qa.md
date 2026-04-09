@@ -24,6 +24,11 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apo
 - `vercel-react-best-practices`: use apenas se o frontend sob teste for React/Next.js e houver indicação de regressão relacionada a renderização, fetching, hidratação ou performance percebida
 - `ui-ux-pro-max`: use quando validar consistência de design, paletas de cores, tipografia, espaçamento e hierarquia visual contra padrões da indústria
 
+## Ferramentas de Análise
+
+- **React**: execute `npx react-doctor@latest --diff` após os testes para verificar se o health score não regrediu com as mudanças
+- **Angular**: execute `ng lint` para validar conformidade do código Angular após as mudanças
+
 ## Variáveis de Entrada
 
 | Variável | Descrição | Exemplo |

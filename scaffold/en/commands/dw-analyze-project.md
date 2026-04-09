@@ -225,6 +225,11 @@ For each module/project detected, identify:
 | **Auth** | NextAuth, Passport, Keycloak, Auth0, etc. | Dependencies + auth-related files |
 | **API Style** | REST, GraphQL, tRPC, gRPC | Route definitions, schema files |
 
+#### Frontend Health Baseline
+
+When React is detected, run `npx react-doctor@latest --verbose` and include the health score in the generated rules as a baseline metric.
+For Angular projects, run `ng lint` and document any warnings as baseline.
+
 ### Step 4: Detect Code Patterns and Conventions
 
 Read **10-20 representative source files** per module to identify actual patterns in use. For large projects, increase coverage proportionally.
