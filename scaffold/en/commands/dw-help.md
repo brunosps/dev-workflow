@@ -101,6 +101,7 @@ This workspace uses an AI command system that automates the full development cyc
 | `/dw-run-plan` | Executes ALL tasks + final Level 2 review | PRD path | Code + commits + report |
 | `/dw-bugfix` | Analyzes and fixes bugs (bug vs feature triage) | Target + description | Fix + commit OR PRD (if feature) |
 | `/dw-fix-qa` | Fixes documented QA bugs and retests with evidence | PRD path | Code + `QA/bugs.md` + `QA/qa-report.md` updated |
+| `/dw-redesign-ui` | Audits, proposes, and implements visual redesign of pages/components | Target page/component | Redesign brief + code |
 
 ### Research
 
@@ -223,6 +224,16 @@ LEVEL 3 - Formal Code Review (/dw-code-review)
 /dw-fix-qa .dw/spec/prd-name                       # Fix + retest full cycle
 ```
 
+### Frontend Redesign
+```bash
+/dw-analyze-project                                # 0. Understand project patterns
+/dw-redesign-ui "target page or component"         # 1. Audit + propose + implement
+/dw-run-qa .dw/spec/prd-name                       # 2. Visual QA (optional)
+/dw-code-review .dw/spec/prd-name                  # 3. Code review
+/dw-commit                                         # 4. Commit
+/dw-generate-pr main                               # 5. PR
+```
+
 ### Deep Research
 ```bash
 /dw-deep-research "topic or question"              # Multi-source research with citations
@@ -247,6 +258,7 @@ your-project/
 │   │   ├── dw-review-implementation.md
 │   │   ├── dw-analyze-project.md
 │   │   ├── dw-deep-research.md
+│   │   ├── dw-redesign-ui.md
 │   │   ├── dw-bugfix.md
 │   │   ├── dw-commit.md
 │   │   ├── dw-functional-doc.md
@@ -270,8 +282,8 @@ your-project/
 │   │       ├── tasks.md
 │   │       └── *_task.md
 │   └── archived/prd/          # Completed PRDs
-├── .codex/skills/             # Codex skills
 ├── .claude/skills/            # Claude Code skills
+├── .agents/skills/            # Codex/Copilot skills
 ├── .opencode/commands/        # OpenCode commands
 └── .github/copilot-instructions.md  # Copilot instructions
 ```
@@ -282,8 +294,8 @@ Commands work across multiple AI tools, all pointing to the same source `.dw/com
 
 | Tool | Location | Format |
 |------|----------|--------|
-| **Codex CLI** | `.codex/skills/*/SKILL.md` | Skill referencing `.dw/commands/` |
 | **Claude Code** | `.claude/skills/*/SKILL.md` | Skill referencing `.dw/commands/` |
+| **Codex CLI** | `.agents/skills/*/SKILL.md` | Skill referencing `.dw/commands/` |
 | **OpenCode** | `.opencode/commands/*.md` | Command referencing `.dw/commands/` |
 | **GitHub Copilot** | `.github/copilot-instructions.md` | Instructions listing the commands |
 
@@ -305,5 +317,8 @@ Commands work across multiple AI tools, all pointing to the same source `.dw/com
 
 **Q: When should I use `/dw-deep-research`?**
 - For comprehensive multi-source analysis, technology comparisons, state-of-the-art reviews, or any topic requiring cited evidence. Not for simple lookups or debugging.
+
+**Q: Does `/dw-redesign-ui` work with Angular?**
+- Yes. The command is framework-agnostic. For React it uses react-doctor and `vercel-react-best-practices`; for Angular it uses `ng lint` and Angular DevTools. Visual design (`ui-ux-pro-max`) works with any framework.
 
 </system_instructions>

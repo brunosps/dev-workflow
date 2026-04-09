@@ -88,6 +88,7 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 | `/dw-run-plan` | Executa TODAS tasks + revisão final Nível 2 | Path do PRD | Código + commits + relatório |
 | `/dw-bugfix` | Analisa e corrige bugs (triagem bug vs feature) | Target + descrição | Fix + commit OU PRD (se feature) |
 | `/dw-fix-qa` | Corrige bugs documentados no QA e retesta com evidências | Path do PRD | Código + `QA/bugs.md` + `QA/qa-report.md` atualizados |
+| `/dw-redesign-ui` | Audita, propõe e implementa redesign visual de páginas/componentes | Página/componente alvo | Brief de redesign + código |
 
 ### Análise e Pesquisa
 
@@ -175,6 +176,16 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 /dw-fix-qa .dw/spec/prd-nome               # Corrige + retesta ciclo completo
 ```
 
+### Redesign de Frontend
+```bash
+/dw-analyze-project                                # 0. Entender padrões do projeto
+/dw-redesign-ui "página ou componente alvo"        # 1. Auditar + propor + implementar
+/dw-run-qa .dw/spec/prd-nome                       # 2. QA visual (opcional)
+/dw-code-review .dw/spec/prd-nome                  # 3. Code review
+/dw-commit                                         # 4. Commit
+/dw-generate-pr main                               # 5. PR
+```
+
 ### Onboarding em Projeto Novo
 ```bash
 /dw-analyze-project                             # Escaneia e gera rules automaticamente
@@ -200,6 +211,7 @@ workspace/
 │   │   ├── dw-refactoring-analysis.md
 │   │   ├── dw-review-implementation.md
 │   │   ├── dw-deep-research.md
+│   │   ├── dw-redesign-ui.md
 │   │   ├── dw-bugfix.md
 │   │   ├── dw-fix-qa.md
 │   │   ├── dw-commit.md
@@ -244,5 +256,8 @@ workspace/
 
 **Q: Preciso rodar `/dw-analyze-project` antes de tudo?**
 - Sim, é recomendado para projetos novos. Ele gera as rules em `.dw/rules/` que todos os outros comandos utilizam.
+
+**Q: O `/dw-redesign-ui` funciona com Angular?**
+- Sim. O comando é framework-agnostic. Para React usa react-doctor e `vercel-react-best-practices`; para Angular usa `ng lint` e Angular DevTools. Design visual (`ui-ux-pro-max`) funciona com qualquer framework.
 
 </system_instructions>
