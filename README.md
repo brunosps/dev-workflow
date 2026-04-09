@@ -110,7 +110,7 @@ Displays the complete guide of available commands, integration flows, and when t
 | Platform | Wrapper Location | Status |
 |----------|-----------------|--------|
 | Claude Code | `.claude/skills/` | Full support |
-| Codex CLI | `.codex/skills/` | Full support |
+| Codex CLI | `.agents/skills/` | Full support |
 | Copilot | `.agents/skills/` | Full support |
 | OpenCode | `.agents/skills/` | Full support |
 
@@ -128,8 +128,7 @@ your-project/
 ├── .claude/
 │   ├── skills/            # Claude Code wrappers
 │   └── settings.json      # MCP servers (Context7, Playwright)
-├── .codex/skills/         # Codex CLI wrappers
-└── .agents/skills/        # Copilot/OpenCode wrappers
+└── .agents/skills/        # Codex/Copilot/OpenCode wrappers
 ```
 
 ## Options
