@@ -273,6 +273,20 @@ Save to `{{PRD_PATH}}/dw-code-review.md`:
 
 **REJECTED**: Tests failing, RFs not implemented, serious rules violations, security issues, or CRITICAL issues.
 
+## Next Steps by Status
+
+<critical>The suggested next step MUST match the review status. NEVER suggest /dw-fix-qa after code-review — that command is exclusively for bugs found by /dw-run-qa.</critical>
+
+- **APPROVED**: Suggest `/dw-commit` followed by `/dw-generate-pr`
+- **APPROVED WITH CAVEATS**: List the caveats. Suggest fixing the caveats, re-running build + lint with --fix, then re-running `/dw-code-review`
+- **REJECTED**: List the findings that caused rejection. The correct flow is:
+  1. Fix the findings listed in the report
+  2. Run build and lint with `--fix` until they pass
+  3. Re-run `/dw-code-review`
+  4. Repeat until APPROVED
+  - Do NOT suggest `/dw-fix-qa` (that is for visual QA bugs)
+  - Do NOT suggest `/dw-run-qa` before resolving code-review findings
+
 **Approval Decision Flow:**
 ```dot
 digraph approval {

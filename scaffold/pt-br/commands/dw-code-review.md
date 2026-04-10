@@ -253,6 +253,20 @@ Salvar em `{{PRD_PATH}}/dw-code-review.md`:
 
 **REPROVADO**: Testes falhando, RFs não implementados, violação grave de rules, problemas de segurança, ou CRITICAL issues.
 
+## Próximos Passos por Status
+
+<critical>O próximo passo sugerido DEVE corresponder ao status do review. NUNCA sugira /dw-fix-qa após code-review — esse comando é exclusivo para bugs encontrados pelo /dw-run-qa.</critical>
+
+- **APROVADO**: Sugira `/dw-commit` seguido de `/dw-generate-pr`
+- **APROVADO COM RESSALVAS**: Liste as ressalvas. Sugira corrigir as ressalvas, re-executar build + lint com --fix, e então re-executar `/dw-code-review`
+- **REPROVADO**: Liste os findings que causaram a reprovação. O fluxo correto é:
+  1. Corrigir os findings listados no relatório
+  2. Executar build e lint com `--fix` até passar
+  3. Re-executar `/dw-code-review`
+  4. Repetir até APROVADO
+  - NÃO sugira `/dw-fix-qa` (esse é para bugs de QA visual)
+  - NÃO sugira `/dw-run-qa` antes de resolver os findings do code-review
+
 **Fluxo de Decisão de Aprovação:**
 ```dot
 digraph approval {
