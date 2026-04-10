@@ -61,6 +61,17 @@ Use diagnostic tools based on the project's framework:
 5. Wait for explicit user approval before implementing.
 6. **IMPLEMENT**: apply the chosen design respecting the existing stack. Use `vercel-react-best-practices` for React/Next.js. Maintain the project's CSS methodology.
 7. **VALIDATE**: capture after-state, compare before/after, verify accessibility (WCAG 2.2 via `ui-ux-pro-max`), run react-doctor `--diff` if React.
+8. **PERSIST CONTRACT**: if the user approved a direction, generate `design-contract.md` in the PRD directory (`.dw/spec/prd-[name]/design-contract.md`) with: approved direction, color palette, typography pairing, layout rules, accessibility rules, and component rules. This contract will be read by `dw-run-task` and `dw-run-plan` to ensure visual consistency.
+
+## GSD Integration
+
+If GSD (get-shit-done-cc) is installed in the project:
+- After generating the design contract, register in `.planning/` for cross-session persistence
+- Query `.planning/intel/` in the audit phase for existing UI patterns
+
+If GSD is NOT installed:
+- The design contract works normally (file-based in `.dw/spec/`)
+- Audit uses only `.dw/rules/` for context
 
 ## Preferred Response Format
 
@@ -106,6 +117,7 @@ Depending on the request, this command may produce:
 - Accessibility report
 - Design system alignment checklist
 - Health score comparison (react-doctor)
+- Design contract with approved direction (`.dw/spec/prd-[name]/design-contract.md`)
 
 ## Closing
 
