@@ -230,6 +230,18 @@ For each module/project detected, identify:
 When React is detected, run `npx react-doctor@latest --verbose` and include the health score in the generated rules as a baseline metric.
 For Angular projects, run `ng lint` and document any warnings as baseline.
 
+#### Codebase Intelligence (GSD)
+
+If GSD (get-shit-done-cc) is installed in the project:
+- After generating rules in `.dw/rules/`, delegate to `/gsd-map-codebase` to create a rich index in `.planning/intel/`
+- The index includes: architectural assumptions, decision spaces, behavioral references, UI patterns
+- The index is incremental — re-running adds to the existing index, does not replace
+- Other dw-* commands can query the index via `/gsd-intel` internally
+
+If GSD is NOT installed:
+- Generate only `.dw/rules/` (current behavior)
+- Suggest: "For queryable codebase intelligence, install GSD via `npx dev-workflow install-deps`"
+
 ### Step 4: Detect Code Patterns and Conventions
 
 Read **10-20 representative source files** per module to identify actual patterns in use. For large projects, increase coverage proportionally.

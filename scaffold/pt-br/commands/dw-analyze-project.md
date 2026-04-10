@@ -218,6 +218,18 @@ Para cada projeto/módulo detectado, identificar:
 Quando React for detectado, execute `npx react-doctor@latest --verbose` e inclua o health score nas rules geradas como métrica baseline.
 Para projetos Angular, execute `ng lint` e documente warnings como baseline.
 
+#### Inteligência do Codebase (GSD)
+
+Se o GSD (get-shit-done-cc) estiver instalado no projeto:
+- Após gerar as rules em `.dw/rules/`, delegue para `/gsd-map-codebase` para criar índice rico em `.planning/intel/`
+- O índice inclui: architectural assumptions, decision spaces, behavioral references, UI patterns
+- O índice é incremental — re-executar adiciona ao existente, não substitui
+- Outros comandos dw-* podem consultar o índice via `/gsd-intel` internamente
+
+Se o GSD NÃO estiver instalado:
+- Gere apenas `.dw/rules/` (comportamento atual)
+- Sugira: "Para inteligência queryable do codebase, instale GSD via `npx dev-workflow install-deps`"
+
 ### Passo 4: Ler Arquivos Fonte Representativos (Obrigatório)
 
 Ler **10-20 arquivos fonte** por módulo para identificar padrões. Para projetos grandes, aumentar cobertura proporcionalmente.
