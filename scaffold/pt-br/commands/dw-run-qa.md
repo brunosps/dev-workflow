@@ -99,7 +99,7 @@ Consulte `.dw/rules/` para URLs e frameworks específicos do projeto.
   - `{{PRD_PATH}}/QA/scripts/`
 <critical>ANTES de executar qualquer teste que envolva login ou autenticação, busque credenciais de teste no codebase. Procure por (em ordem de prioridade):
 1. `.dw/templates/qa-test-credentials.md`
-2. Qualquer arquivo com "credenciais", "credentials", "test-users", "test-accounts" no nome (busca recursiva com glob)
+2. Qualquer arquivo com "credenciais", "credentials", "test-users", "test-accounts", "auth", "login", "usuarios-teste" no nome (busca recursiva com glob)
 3. Variáveis de ambiente em `.env.test`, `.env.local`, `.env.development`
 4. Documentação em README ou docs/ que mencione usuários de teste
 Se NENHUMA credencial for encontrada, PARE e pergunte ao usuário antes de continuar. NÃO tente adivinhar credenciais ou usar dados falsos.</critical>
