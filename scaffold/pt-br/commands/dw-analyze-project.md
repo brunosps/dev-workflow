@@ -218,6 +218,8 @@ Para cada projeto/módulo detectado, identificar:
 Quando React for detectado, execute `npx react-doctor@latest --verbose` e inclua o health score nas rules geradas como métrica baseline.
 Para projetos Angular, execute `ng lint` e documente warnings como baseline.
 
+<critical>Se o GSD estiver instalado, a execução do /gsd-map-codebase é OBRIGATÓRIA. O comando NÃO pode ser considerado completo sem executar TODOS os passos aplicáveis, incluindo a geração do índice em .planning/intel/.</critical>
+
 #### Inteligência do Codebase (GSD)
 
 Se o GSD (get-shit-done-cc) estiver instalado no projeto:

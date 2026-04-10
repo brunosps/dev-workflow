@@ -65,6 +65,8 @@ Utilize ferramentas de diagnóstico conforme o framework do projeto:
 
 ## Integração GSD
 
+<critical>Quando o GSD estiver instalado, o registro do design contract em .planning/ e a consulta de .planning/intel/ são OBRIGATÓRIOS.</critical>
+
 Se o GSD (get-shit-done-cc) estiver instalado no projeto:
 - Após gerar o design contract, registre em `.planning/` para persistência cross-sessão
 - Consulte `.planning/intel/` na fase de auditoria para UI patterns existentes

@@ -34,7 +34,7 @@
 
     ## Inteligência do Codebase
 
-    Se `.planning/intel/` existir, consulte antes de redigir os requisitos:
+    <critical>Se `.planning/intel/` existir, a consulta é OBRIGATÓRIA antes de redigir os requisitos. NÃO pule este passo.</critical>
     - Execute internamente: `/gsd-intel "features existentes no domínio de [tópico do PRD]"`
     - Use os findings para evitar duplicar funcionalidade existente e referenciar padrões já estabelecidos
 

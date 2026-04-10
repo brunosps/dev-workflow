@@ -22,6 +22,8 @@ Voce e um assistente de continuidade de sessao. Este comando existe para restaur
 
 ## Integracao GSD
 
+<critical>Quando o GSD estiver instalado, a delegação para /gsd-resume-work é OBRIGATÓRIA, não opcional.</critical>
+
 Se o GSD (get-shit-done-cc) estiver instalado no projeto:
 - Delegue para `/gsd-resume-work` para restaurar estado cross-sessao de `.planning/STATE.md`
 - Incorpore contexto adicional: threads persistentes, backlog, notas

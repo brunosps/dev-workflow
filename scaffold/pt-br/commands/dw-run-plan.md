@@ -136,6 +136,8 @@ Se uma tarefa FALHAR durante a execução:
 
 ## Integração GSD
 
+<critical>Quando o GSD estiver instalado, a verificação de plano e a execução paralela são OBRIGATÓRIAS, não opcionais. O comando NÃO pode pular estes passos.</critical>
+
 ### Verificação de Plano (Pré-Execução)
 
 Se o GSD (get-shit-done-cc) estiver instalado no projeto:

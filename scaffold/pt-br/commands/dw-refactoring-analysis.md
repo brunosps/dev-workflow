@@ -30,7 +30,7 @@ Para projetos Angular, use `ng lint` como complemento analítico.
 
 ## Inteligência do Codebase
 
-Se `.planning/intel/` existir, consulte antes da auditoria:
+<critical>Se `.planning/intel/` existir, a consulta é OBRIGATÓRIA antes de redigir os requisitos. NÃO pule este passo.</critical>
 - Execute internamente: `/gsd-intel "tech debt, decision spaces e dívida técnica conhecida"`
 - Contextualize findings com decisões já documentadas
 - Evite sinalizar como smell algo que é uma decisão intencional registrada

@@ -23,7 +23,7 @@
 
     ## Inteligência do Codebase
 
-    Se `.planning/intel/` existir, consulte antes de propor arquitetura:
+    <critical>Se `.planning/intel/` existir, a consulta é OBRIGATÓRIA antes de redigir os requisitos. NÃO pule este passo.</critical>
     - Execute internamente: `/gsd-intel "padrões arquiteturais e decisões técnicas do projeto"`
     - Alinhe propostas com padrões existentes; sinalize desvios explicitamente
 

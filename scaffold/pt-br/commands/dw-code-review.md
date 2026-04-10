@@ -26,7 +26,7 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apo
 
 ## Inteligência do Codebase
 
-Se `.planning/intel/` existir, consulte antes da análise:
+<critical>Se `.planning/intel/` existir, a consulta é OBRIGATÓRIA antes de redigir os requisitos. NÃO pule este passo.</critical>
 - Execute internamente: `/gsd-intel "convenções, anti-patterns e decision spaces documentados"`
 - Priorize findings que violem convenções documentadas
 - Verifique se decisões arquiteturais questionáveis são intencionais (documentadas como decision spaces)

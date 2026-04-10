@@ -23,7 +23,7 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como sup
 
 ## Inteligência do Codebase
 
-Se `.planning/intel/` existir, consulte antes de implementar:
+<critical>Se `.planning/intel/` existir, a consulta é OBRIGATÓRIA antes de redigir os requisitos. NÃO pule este passo.</critical>
 - Execute internamente: `/gsd-intel "padrões de implementação em [área alvo da task]"`
 - Siga convenções encontradas para estrutura de arquivos, nomenclatura e tratamento de erros
 

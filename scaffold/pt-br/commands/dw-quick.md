@@ -31,6 +31,8 @@ Voce e um executor de tasks rapidas. Este comando existe para implementar mudanc
 
 ## Integracao GSD
 
+<critical>Quando o GSD estiver instalado, a delegação para /gsd-quick é OBRIGATÓRIA para tracking.</critical>
+
 Se o GSD (get-shit-done-cc) estiver instalado no projeto:
 - Delegue para `/gsd-quick` para tracking em `.planning/quick/`
 - A task fica registrada no historico para consulta futura via `/dw-intel`

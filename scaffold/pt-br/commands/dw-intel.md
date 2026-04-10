@@ -31,6 +31,8 @@ Voce e um assistente de inteligencia do codebase. Este comando existe para respo
 
 ## Integracao GSD
 
+<critical>Quando .planning/intel/ existir, a consulta via /gsd-intel é OBRIGATÓRIA como fonte primária. NÃO pule esta consulta.</critical>
+
 Se o GSD (get-shit-done-cc) estiver instalado e `.planning/intel/` existir:
 - Delegue para `/gsd-intel "{{QUERY}}"` para consulta indexada
 - O GSD retorna informacoes de: architectural assumptions, decision spaces, behavioral references, UI patterns
