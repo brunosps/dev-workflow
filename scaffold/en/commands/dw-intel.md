@@ -31,6 +31,8 @@ You are a codebase intelligence assistant. This command exists to answer questio
 
 ## GSD Integration
 
+<critical>When .planning/intel/ exists, querying via /gsd-intel is MANDATORY as the primary source. Do NOT skip this query.</critical>
+
 If GSD (get-shit-done-cc) is installed and `.planning/intel/` exists:
 - Delegate to `/gsd-intel "{{QUERY}}"` for indexed lookup
 - GSD returns information from: architectural assumptions, decision spaces, behavioral references, UI patterns

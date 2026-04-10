@@ -34,7 +34,7 @@
 
     ## Codebase Intelligence
 
-    If `.planning/intel/` exists, query before writing requirements:
+    <critical>If `.planning/intel/` exists, querying it is MANDATORY before writing requirements. Do NOT skip this step.</critical>
     - Internally run: `/gsd-intel "existing features in the [PRD topic] domain"`
     - Use findings to avoid duplicating existing functionality and reference established patterns
 

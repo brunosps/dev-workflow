@@ -22,6 +22,8 @@ You are a session continuity assistant. This command exists to restore context f
 
 ## GSD Integration
 
+<critical>When GSD is installed, delegation to /gsd-resume-work is MANDATORY, not optional.</critical>
+
 If GSD (get-shit-done-cc) is installed in the project:
 - Delegate to `/gsd-resume-work` for cross-session state restoration from `.planning/STATE.md`
 - Incorporate additional context: persistent threads, backlog, notes

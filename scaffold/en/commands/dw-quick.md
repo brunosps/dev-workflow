@@ -31,6 +31,8 @@ You are a quick task executor. This command exists to implement one-off changes 
 
 ## GSD Integration
 
+<critical>When GSD is installed, delegation to /gsd-quick is MANDATORY for tracking.</critical>
+
 If GSD (get-shit-done-cc) is installed in the project:
 - Delegate to `/gsd-quick` for tracking in `.planning/quick/`
 - The task is registered in history for future lookup via `/dw-intel`

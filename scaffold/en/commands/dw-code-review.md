@@ -26,7 +26,7 @@ When available in the project under `./.agents/skills/`, use these skills as ana
 
 ## Codebase Intelligence
 
-If `.planning/intel/` exists, query before analysis:
+<critical>If `.planning/intel/` exists, querying it is MANDATORY before writing requirements. Do NOT skip this step.</critical>
 - Internally run: `/gsd-intel "documented conventions, anti-patterns, and decision spaces"`
 - Prioritize findings that violate documented conventions
 - Check if questionable architectural decisions are intentional (documented as decision spaces)

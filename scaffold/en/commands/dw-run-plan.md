@@ -143,6 +143,8 @@ If a task FAILS during execution:
 
 ## GSD Integration
 
+<critical>When GSD is installed, plan verification and parallel execution are MANDATORY, not optional. The command MUST NOT skip these steps.</critical>
+
 ### Plan Verification (Pre-Execution)
 
 If GSD (get-shit-done-cc) is installed in the project:

@@ -23,7 +23,7 @@ When available in the project at `./.agents/skills/`, use these skills as specia
 
 ## Codebase Intelligence
 
-If `.planning/intel/` exists, query before implementing:
+<critical>If `.planning/intel/` exists, querying it is MANDATORY before writing requirements. Do NOT skip this step.</critical>
 - Internally run: `/gsd-intel "implementation patterns in [task target area]"`
 - Follow conventions found for file structure, naming, and error handling
 

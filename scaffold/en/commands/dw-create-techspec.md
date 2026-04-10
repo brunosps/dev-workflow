@@ -23,7 +23,7 @@
 
     ## Codebase Intelligence
 
-    If `.planning/intel/` exists, query before proposing architecture:
+    <critical>If `.planning/intel/` exists, querying it is MANDATORY before writing requirements. Do NOT skip this step.</critical>
     - Internally run: `/gsd-intel "architectural patterns and technical decisions in the project"`
     - Align proposals with existing patterns; flag deviations explicitly
 

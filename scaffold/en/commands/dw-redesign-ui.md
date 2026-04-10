@@ -65,6 +65,8 @@ Use diagnostic tools based on the project's framework:
 
 ## GSD Integration
 
+<critical>When GSD is installed, registering the design contract in .planning/ and querying .planning/intel/ are MANDATORY.</critical>
+
 If GSD (get-shit-done-cc) is installed in the project:
 - After generating the design contract, register in `.planning/` for cross-session persistence
 - Query `.planning/intel/` in the audit phase for existing UI patterns
