@@ -141,6 +141,41 @@ If a task FAILS during execution:
 4. Wait for manual intervention from the user
 5. **DO NOT** automatically continue to the next task
 
+## GSD Integration
+
+### Plan Verification (Pre-Execution)
+
+If GSD (get-shit-done-cc) is installed in the project:
+- Before starting execution, delegate to GSD's plan-checker agent
+- The verifier analyzes: cyclic dependencies, task viability, risks, PRD requirements coverage
+- If FAIL: present issues found and suggest fixes. Maximum 3 correction cycles
+- If PASS: proceed to execution
+
+If GSD is NOT installed:
+- Skip verification and execute directly (current behavior)
+
+### Parallel Execution (Wave-Based)
+
+If GSD (get-shit-done-cc) is installed in the project:
+- Analyze each task's `blockedBy` field to build the dependency graph
+- Group tasks into waves:
+  - Wave 1: tasks with no dependencies (can run in parallel)
+  - Wave 2: tasks that depend on Wave 1 tasks
+  - Wave N: and so on
+- Delegate each wave to GSD's parallel execution engine (`/gsd-execute-phase`)
+- Each task runs in an isolated worktree with fresh context
+- Results are merged after the wave completes
+- If any task in a wave fails: pause the wave, report, await user decision
+
+If GSD is NOT installed:
+- Execute sequentially as today (current behavior)
+
+### Design Contracts
+
+If `design-contract.md` exists in the PRD directory:
+- Include the contract in the context of each task involving frontend
+- Validate visual consistency during Level 1 of each task
+
 ## Important Rules
 
 <critical>ALWAYS read and follow the complete instructions in `.dw/commands/dw-run-task.md` for EACH task</critical>
