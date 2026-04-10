@@ -56,18 +56,22 @@ Avalie se o topico necessita de pesquisa profunda:
 
 Se executar, use modo `standard` por padrao. Incorpore os findings nas etapas seguintes.
 
-### Etapa 3: Brainstorm
+### Etapa 3: Brainstorm (Interativo)
 
 Execute `/dw-brainstorm` com o contexto acumulado (intel + pesquisa).
 - Gere 3 direcoes
 - Convirja automaticamente na opcao mais pragmatica para o contexto do projeto
 - NAO aguarde aprovacao do usuario (brainstorm e automatico no autopilot)
 
-### Etapa 4: PRD
+### Etapa 4: PRD (Interativo — 7+ Perguntas)
+
+<critical>O PRD DEVE incluir entrevista interativa com o usuario. Faca NO MINIMO 7 perguntas de esclarecimento ANTES de redigir o PRD. NAO responda as perguntas automaticamente com base no contexto — o usuario DEVE responder.</critical>
 
 Execute `/dw-create-prd` usando os findings do brainstorm.
-- Siga todas as instrucoes do comando (perguntas de esclarecimento respondidas com base no contexto acumulado)
-- Gere o PRD completo em `.dw/spec/prd-[nome]/prd.md`
+- Siga TODAS as instrucoes do comando, especialmente a secao de perguntas de esclarecimento
+- Faca pelo menos 7 perguntas ao usuario sobre: problema, usuarios-alvo, funcionalidades criticas, escopo, restricoes, design, integracao
+- Aguarde as respostas do usuario para cada pergunta
+- So apos receber todas as respostas, redija o PRD completo em `.dw/spec/prd-[nome]/prd.md`
 
 ### ═══ GATE 1: Aprovacao do PRD ═══
 
@@ -78,11 +82,15 @@ Apresente ao usuario:
 
 **Aguarde aprovacao explicita.** Se o usuario pedir mudancas, ajuste e reapresente.
 
-### Etapa 5: TechSpec
+### Etapa 5: TechSpec (Interativo — 7+ Perguntas)
+
+<critical>O TechSpec DEVE incluir entrevista interativa com o usuario. Faca NO MINIMO 7 perguntas de esclarecimento tecnico ANTES de redigir o TechSpec. NAO responda as perguntas automaticamente — o usuario DEVE responder.</critical>
 
 Execute `/dw-create-techspec` a partir do PRD aprovado.
-- Siga todas as instrucoes do comando
-- Gere em `.dw/spec/prd-[nome]/techspec.md`
+- Siga TODAS as instrucoes do comando, especialmente a secao de perguntas de esclarecimento
+- Faca pelo menos 7 perguntas ao usuario sobre: arquitetura preferida, libs existentes vs novas, estrategia de testes, integracao com sistemas existentes, restricoes de infraestrutura, performance, seguranca
+- Aguarde as respostas do usuario para cada pergunta
+- So apos receber todas as respostas, gere em `.dw/spec/prd-[nome]/techspec.md`
 
 ### Etapa 6: Tasks
 
@@ -115,6 +123,16 @@ Execute `/dw-run-plan` com o path do PRD.
 
 ### Etapa 9: Review de Implementacao (Loop)
 
+<critical>ANTES do review de PRD compliance, execute build e lint do projeto. Se falharem, corrija e re-execute ate passar. O review de implementacao NAO pode comecar com build ou lint quebrados.</critical>
+
+Execute build e lint do projeto:
+1. Identifique os comandos de build e lint em `package.json` (scripts `build`, `lint`, `lint:fix`, `type-check`, etc.)
+2. Execute lint com `--fix` habilitado (ex: `npm run lint -- --fix` ou `npx eslint . --fix`) para auto-corrigir o que for possivel
+3. Execute build (ex: `npm run build` ou `npx tsc --noEmit`)
+4. Se algum falhar apos o `--fix`: analise os erros, corrija manualmente, e re-execute
+5. Repita ate que build E lint passem sem erros
+6. So entao prossiga para o review
+
 Execute `/dw-review-implementation` para verificar PRD compliance (Level 2).
 - Se encontrar gaps: corrija automaticamente e re-execute o review
 - Maximo 3 ciclos de correcao
@@ -133,6 +151,13 @@ Se o QA encontrou bugs:
 - Loop ate estabilizar
 
 ### Etapa 12: Review de Implementacao (Pos-QA)
+
+<critical>ANTES do review pos-QA, execute build e lint novamente com --fix. Correcoes do QA podem ter introduzido novos problemas.</critical>
+
+Execute build e lint do projeto (mesma sequencia da Etapa 9):
+1. Lint com `--fix` habilitado
+2. Build
+3. Se falhar: corrija e re-execute ate passar
 
 Execute `/dw-review-implementation` novamente para confirmar que as correcoes do QA nao quebraram PRD compliance.
 - Se encontrar gaps: corrija e re-execute

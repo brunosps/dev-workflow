@@ -56,18 +56,22 @@ Evaluate whether the topic requires deep research:
 
 If executed, use `standard` mode by default. Incorporate findings into subsequent steps.
 
-### Step 3: Brainstorm
+### Step 3: Brainstorm (Interactive)
 
 Run `/dw-brainstorm` with accumulated context (intel + research).
 - Generate 3 directions
 - Automatically converge on the most pragmatic option for the project context
 - Do NOT wait for user approval (brainstorm is automatic in autopilot)
 
-### Step 4: PRD
+### Step 4: PRD (Interactive — 7+ Questions)
+
+<critical>The PRD MUST include an interactive interview with the user. Ask AT LEAST 7 clarification questions BEFORE writing the PRD. Do NOT answer questions automatically based on context — the user MUST respond.</critical>
 
 Run `/dw-create-prd` using brainstorm findings.
-- Follow all command instructions (clarification questions answered based on accumulated context)
-- Generate the complete PRD in `.dw/spec/prd-[name]/prd.md`
+- Follow ALL command instructions, especially the clarification questions section
+- Ask at least 7 questions about: problem, target users, critical features, scope, constraints, design, integration
+- Wait for user responses to each question
+- Only after receiving all responses, write the complete PRD in `.dw/spec/prd-[name]/prd.md`
 
 ### === GATE 1: PRD Approval ===
 
@@ -78,11 +82,15 @@ Present to the user:
 
 **Wait for explicit approval.** If the user requests changes, adjust and re-present.
 
-### Step 5: TechSpec
+### Step 5: TechSpec (Interactive — 7+ Questions)
+
+<critical>The TechSpec MUST include an interactive interview with the user. Ask AT LEAST 7 technical clarification questions BEFORE writing the TechSpec. Do NOT answer questions automatically — the user MUST respond.</critical>
 
 Run `/dw-create-techspec` from the approved PRD.
-- Follow all command instructions
-- Generate in `.dw/spec/prd-[name]/techspec.md`
+- Follow ALL command instructions, especially the clarification questions section
+- Ask at least 7 questions about: preferred architecture, existing vs new libs, testing strategy, integration with existing systems, infrastructure constraints, performance, security
+- Wait for user responses to each question
+- Only after receiving all responses, generate in `.dw/spec/prd-[name]/techspec.md`
 
 ### Step 6: Tasks
 
@@ -115,6 +123,16 @@ Run `/dw-run-plan` with the PRD path.
 
 ### Step 9: Implementation Review (Loop)
 
+<critical>BEFORE the PRD compliance review, run the project's build and lint. If they fail, fix and re-run until they pass. The implementation review CANNOT start with broken build or lint.</critical>
+
+Run the project's build and lint:
+1. Identify build and lint commands in `package.json` (scripts `build`, `lint`, `lint:fix`, `type-check`, etc.)
+2. Run lint with `--fix` enabled (e.g., `npm run lint -- --fix` or `npx eslint . --fix`) to auto-correct what's possible
+3. Run build (e.g., `npm run build` or `npx tsc --noEmit`)
+4. If any fail after `--fix`: analyze errors, fix manually, and re-run
+5. Repeat until both build AND lint pass without errors
+6. Only then proceed to the review
+
 Run `/dw-review-implementation` to verify PRD compliance (Level 2).
 - If gaps found: fix automatically and re-run the review
 - Maximum 3 correction cycles
@@ -133,6 +151,13 @@ If QA found bugs:
 - Loop until stable
 
 ### Step 12: Implementation Review (Post-QA)
+
+<critical>BEFORE the post-QA review, run build and lint again with --fix. QA fixes may have introduced new issues.</critical>
+
+Run the project's build and lint (same sequence as Step 9):
+1. Lint with `--fix` enabled
+2. Build
+3. If any fail: fix and re-run until they pass
 
 Run `/dw-review-implementation` again to confirm QA fixes did not break PRD compliance.
 - If gaps found: fix and re-run
