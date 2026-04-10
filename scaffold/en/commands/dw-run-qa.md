@@ -222,7 +222,20 @@ Use `browser_snapshot` to verify labels and semantic structure.
 - Capture screenshots of main screens with `browser_take_screenshot` and save to `{{PRD_PATH}}/QA/screenshots/`
 - Check layouts in different states (empty, with data, error, loading)
 - Document visual inconsistencies found
-- Check responsiveness if applicable (different viewports)
+
+### 6.1. Mobile Validation (Required)
+
+<critical>ALL visual checks MUST include tests at mobile viewport (375px) IN ADDITION to desktop (1440px). QA approval REQUIRES that BOTH resolutions are functional and visually acceptable. If the mobile layout is broken, unusable, or visually degraded, QA CANNOT be approved.</critical>
+
+- Capture screenshots at 375px viewport (mobile) for EACH tested screen
+- Capture screenshots at 1440px viewport (desktop) for comparison
+- Verify: elements do not overlap, text is readable, buttons are tappable (min 44x44px), no horizontal scroll, forms are usable
+- Save screenshots with suffix: `[screen]-mobile.png` and `[screen]-desktop.png`
+
+If mobile FAILS visual validation:
+- Document issues in `{{PRD_PATH}}/QA/bugs.md` with severity **High** and tag `[MOBILE]`
+- In the final report, recommend `/dw-redesign-ui` as the next step to fix the mobile layout with a mobile-first approach
+- QA CANNOT be approved with broken mobile
 
 ### 7. Bug Documentation (If issues found)
 
