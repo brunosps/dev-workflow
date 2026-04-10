@@ -24,6 +24,16 @@ When available in the project under `./.agents/skills/`, use these skills as ana
 - `security-review`: use when auth, authorization, external input, upload, SQL, external integration, secrets, SSRF, XSS, or sensitive surfaces are present
 - `vercel-react-best-practices`: use when the diff touches React/Next.js to review rendering, fetching, bundle, hydration, and performance patterns
 
+## Codebase Intelligence
+
+If `.planning/intel/` exists, query before analysis:
+- Internally run: `/gsd-intel "documented conventions, anti-patterns, and decision spaces"`
+- Prioritize findings that violate documented conventions
+- Check if questionable architectural decisions are intentional (documented as decision spaces)
+
+If `.planning/intel/` does NOT exist:
+- Use `.dw/rules/` as context (current behavior)
+
 ## Input Variables
 
 | Variable | Description | Example |

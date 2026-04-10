@@ -24,6 +24,16 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apo
 - `security-review`: use quando auth, autorização, input externo, upload, SQL, integração externa, secrets, SSRF, XSS ou superfícies sensíveis estiverem presentes
 - `vercel-react-best-practices`: use quando o diff tocar React/Next.js para revisar padrões de renderização, fetching, bundle, hidratação e performance
 
+## Inteligência do Codebase
+
+Se `.planning/intel/` existir, consulte antes da análise:
+- Execute internamente: `/gsd-intel "convenções, anti-patterns e decision spaces documentados"`
+- Priorize findings que violem convenções documentadas
+- Verifique se decisões arquiteturais questionáveis são intencionais (documentadas como decision spaces)
+
+Se `.planning/intel/` NÃO existir:
+- Use `.dw/rules/` como contexto (comportamento atual)
+
 ## Variáveis de Entrada
 
 | Variável | Descrição | Exemplo |

@@ -21,6 +21,18 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como sup
 | `vercel-react-best-practices` | Task envolve renderização React, hidratação, data fetching, bundle, cache ou performance |
 | `webapp-testing` | Task tem frontend interativo que necessita validação E2E em navegador real |
 
+## Inteligência do Codebase
+
+Se `.planning/intel/` existir, consulte antes de implementar:
+- Execute internamente: `/gsd-intel "padrões de implementação em [área alvo da task]"`
+- Siga convenções encontradas para estrutura de arquivos, nomenclatura e tratamento de erros
+
+Se `design-contract.md` existir no diretório do PRD:
+- Leia o contrato e garanta que toda implementação frontend siga as regras de design aprovadas
+
+Se `.planning/intel/` NÃO existir:
+- Use `.dw/rules/` como contexto (comportamento atual)
+
 ## Localização dos Arquivos
 
 - PRD: `.dw/spec/prd-[nome-funcionalidade]/prd.md`

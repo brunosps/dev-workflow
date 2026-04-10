@@ -28,6 +28,16 @@ Quando disponíveis no projeto em `./.agents/skills/`, use como suporte analíti
 Quando o projeto usar React, execute `npx react-doctor@latest --verbose` no diretório do frontend antes de iniciar a análise. Incorpore o health score e findings do react-doctor na seção de métricas do relatório.
 Para projetos Angular, use `ng lint` como complemento analítico.
 
+## Inteligência do Codebase
+
+Se `.planning/intel/` existir, consulte antes da auditoria:
+- Execute internamente: `/gsd-intel "tech debt, decision spaces e dívida técnica conhecida"`
+- Contextualize findings com decisões já documentadas
+- Evite sinalizar como smell algo que é uma decisão intencional registrada
+
+Se `.planning/intel/` NÃO existir:
+- Use `.dw/rules/` como contexto (comportamento atual)
+
 ## Variáveis de Entrada
 
 | Variável | Descrição | Exemplo |

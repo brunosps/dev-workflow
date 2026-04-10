@@ -21,6 +21,15 @@
     - `ui-ux-pro-max`: use when defining design system decisions, color palettes, typography, and UI style for the TechSpec
     - `security-review`: use when the feature touches auth, authorization, or sensitive data handling
 
+    ## Codebase Intelligence
+
+    If `.planning/intel/` exists, query before proposing architecture:
+    - Internally run: `/gsd-intel "architectural patterns and technical decisions in the project"`
+    - Align proposals with existing patterns; flag deviations explicitly
+
+    If `.planning/intel/` does NOT exist:
+    - Use `.dw/rules/` as context (current behavior)
+
     ## Multi-Project Decision Flowchart
 
     ```dot

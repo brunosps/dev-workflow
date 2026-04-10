@@ -32,6 +32,15 @@
     - Final directory: `.dw/spec/prd-[feature-name]/` (relative to workspace root, name in kebab-case)
     - **IMPORTANT**: PRDs must be saved in `.dw/spec/` at the workspace root, NEVER inside subprojects
 
+    ## Codebase Intelligence
+
+    If `.planning/intel/` exists, query before writing requirements:
+    - Internally run: `/gsd-intel "existing features in the [PRD topic] domain"`
+    - Use findings to avoid duplicating existing functionality and reference established patterns
+
+    If `.planning/intel/` does NOT exist:
+    - Use `.dw/rules/` as context (current behavior)
+
     ## Multi-Project Features
 
     Many features may involve more than one project in the workspace (e.g., a feature may impact both frontend and backend, or multiple services).

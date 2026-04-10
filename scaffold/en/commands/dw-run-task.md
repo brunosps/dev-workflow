@@ -21,6 +21,18 @@ When available in the project at `./.agents/skills/`, use these skills as specia
 | `vercel-react-best-practices` | Task touches React rendering, hydration, data fetching, bundle, cache, or performance |
 | `webapp-testing` | Task has interactive frontend needing E2E validation in a real browser |
 
+## Codebase Intelligence
+
+If `.planning/intel/` exists, query before implementing:
+- Internally run: `/gsd-intel "implementation patterns in [task target area]"`
+- Follow conventions found for file structure, naming, and error handling
+
+If `design-contract.md` exists in the PRD directory:
+- Read the contract and ensure all frontend implementation follows the approved design rules
+
+If `.planning/intel/` does NOT exist:
+- Use `.dw/rules/` as context (current behavior)
+
 ## File Locations
 
 - PRD: `./spec/prd-[feature-name]/prd.md`
