@@ -204,28 +204,85 @@ Waves:
 - Fallback without GSD: Sequential execution as today
 - State: Each wave updates tasks.md checkboxes after completion
 
-## Feature 6: Codebase Intelligence (Evolution of `/dw-analyze-project`)
+## Feature 6: Codebase Intelligence (Evolution of `/dw-analyze-project` + New `/dw-intel`)
 
 ### Purpose
-Upgrade from one-shot rules generation to incremental, queryable codebase intelligence.
+Upgrade from one-shot rules generation to incremental, queryable codebase intelligence. Two modes: automatic (commands query internally) and explicit (user queries directly).
 
-### Flow
+### Indexing Flow (via `/dw-analyze-project`)
 ```
 1. dw-analyze-project runs (existing behavior: generates .dw/rules/)
 2. NEW: If GSD available, also delegate to /gsd-map-codebase
    - Creates .planning/intel/ with indexed analysis
    - Architectural assumptions, decision spaces, behavioral references
-3. NEW: Other dw-* commands can query intel internally via /gsd-intel
-   - dw-create-techspec queries for architectural patterns
-   - dw-run-task queries for implementation patterns in target area
-   - dw-code-review queries for convention violations
-4. Intel is incremental — re-running adds to existing index, doesn't replace
+3. Intel is incremental — re-running adds to existing index, doesn't replace
+```
+
+### Automatic Queries (inside existing commands)
+
+Each command queries intel at a specific moment for a specific purpose:
+
+| Command | When it queries | What it asks | How it uses the answer |
+|---------|----------------|-------------|----------------------|
+| `dw-create-prd` | Before generating requirements | "What features already exist in this domain?" | Avoid duplicating existing functionality; reference existing patterns |
+| `dw-create-techspec` | When proposing architecture | "What architectural patterns does this project use?" | Align tech decisions with existing patterns; flag deviations |
+| `dw-run-task` | Before implementing | "What are the implementation patterns in [target area]?" | Follow conventions for file structure, naming, error handling |
+| `dw-code-review` | During analysis | "What conventions and anti-patterns are documented?" | Check for convention violations; prioritize findings |
+| `dw-refactoring-analysis` | Before audit | "What tech debt and decision spaces exist?" | Contextualize findings; avoid flagging intentional decisions |
+| `dw-redesign-ui` | In audit phase | "What UI patterns, brand rules, and components exist?" | Ensure redesign is consistent with existing design language |
+
+Each integration follows the pattern:
+```markdown
+## GSD Codebase Intelligence
+
+Se `.planning/intel/` existir, consulte antes de [specific action]:
+- Execute internamente: `/gsd-intel "[specific query]"`
+- Incorpore os findings no [output section]
+
+Se `.planning/intel/` NÃO existir:
+- Use apenas `.dw/rules/` como contexto (comportamento atual)
+```
+
+### Explicit Queries: `/dw-intel` (New Command)
+
+User-facing command for direct codebase queries.
+
+**Usage:**
+```
+/dw-intel "como funciona a autenticação neste projeto?"
+/dw-intel "quais padrões de API são usados?"
+/dw-intel "qual o fluxo de dados entre frontend e backend?"
+```
+
+**Flow:**
+```
+1. User asks a question about the codebase
+2. If .planning/intel/ exists: delegate to /gsd-intel with the query
+   - GSD searches indexed intel files for relevant information
+   - Returns structured answer with file references
+3. If .planning/intel/ does NOT exist:
+   - Fall back to reading .dw/rules/ and searching codebase directly
+   - Suggest: "Para intel mais rico, execute /dw-analyze-project com GSD instalado"
+4. Present answer with source references (file paths, line numbers)
+```
+
+**Output format:**
+```markdown
+## Answer: [topic]
+
+[Structured answer based on codebase intelligence]
+
+### Sources
+- `.planning/intel/architecture.md` — [relevant section]
+- `src/auth/middleware.ts:45` — [code reference]
+- `.dw/rules/backend.md` — [convention reference]
 ```
 
 ### Integration Points
-- Triggered by: `dw-analyze-project` (extended behavior)
-- Creates: `.dw/rules/` (existing) + `.planning/intel/` (new, via GSD)
-- Queried by: `dw-create-techspec`, `dw-run-task`, `dw-code-review`, `dw-refactoring-analysis`
+- Indexed by: `dw-analyze-project` (extended, delegates to `/gsd-map-codebase`)
+- Queried automatically by: `dw-create-prd`, `dw-create-techspec`, `dw-run-task`, `dw-code-review`, `dw-refactoring-analysis`, `dw-redesign-ui`
+- Queried explicitly by: `/dw-intel` (new user-facing command)
+- Storage: `.planning/intel/` (GSD managed)
 - Fallback without GSD: Only `.dw/rules/` (current behavior, no queryable intel)
 
 ## Files to Modify
@@ -237,16 +294,20 @@ Upgrade from one-shot rules generation to incremental, queryable codebase intell
 | `scaffold/en/commands/dw-resume.md` | EN | Session resume + next step |
 | `scaffold/pt-br/commands/dw-quick.md` | PT-BR | Ad-hoc task execution |
 | `scaffold/en/commands/dw-quick.md` | EN | Ad-hoc task execution |
+| `scaffold/pt-br/commands/dw-intel.md` | PT-BR | Queryable codebase intelligence |
+| `scaffold/en/commands/dw-intel.md` | EN | Queryable codebase intelligence |
 
 ### Modified Commands
 | File | Change |
 |------|--------|
 | `scaffold/*/commands/dw-run-plan.md` | Add plan verification gate + parallel wave execution |
-| `scaffold/*/commands/dw-redesign-ui.md` | Add design contract generation after approval |
-| `scaffold/*/commands/dw-analyze-project.md` | Add GSD codebase intelligence delegation |
-| `scaffold/*/commands/dw-run-task.md` | Read design contracts when present |
-| `scaffold/*/commands/dw-create-techspec.md` | Query codebase intel if available |
-| `scaffold/*/commands/dw-code-review.md` | Query codebase intel if available |
+| `scaffold/*/commands/dw-redesign-ui.md` | Add design contract generation + query intel in audit |
+| `scaffold/*/commands/dw-analyze-project.md` | Add GSD codebase intelligence indexing |
+| `scaffold/*/commands/dw-run-task.md` | Read design contracts + query intel for implementation patterns |
+| `scaffold/*/commands/dw-create-techspec.md` | Query intel for architectural patterns |
+| `scaffold/*/commands/dw-create-prd.md` | Query intel for existing features/domain context |
+| `scaffold/*/commands/dw-code-review.md` | Query intel for conventions and anti-patterns |
+| `scaffold/*/commands/dw-refactoring-analysis.md` | Query intel for tech debt and decision spaces |
 
 ### Infrastructure
 | File | Change |
