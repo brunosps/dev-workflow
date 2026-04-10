@@ -92,6 +92,7 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 | `/dw-quick` | Executa task pontual com garantias do workflow sem PRD | Descrição da mudança | Código + commit |
 | `/dw-resume` | Restaura contexto da sessão e sugere próximo passo | (nenhum) | Resumo + sugestão |
 | `/dw-intel` | Consulta inteligência do codebase sobre padrões e arquitetura | Pergunta | Resposta com fontes |
+| `/dw-autopilot` | Orquestrador completo: de um desejo até o PR com mínima intervenção | Descrição do desejo | PRD + código + commits + PR |
 
 ### Análise e Pesquisa
 
@@ -189,6 +190,11 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 /dw-generate-pr main                               # 5. PR
 ```
 
+### Autopilot (Pipeline Completo)
+```bash
+/dw-autopilot "descrição do que quer construir"    # Pesquisa → PRD → Tasks → Código → QA → PR
+```
+
 ### Task Rápida
 ```bash
 /dw-quick "descrição da mudança"                   # Implementa + valida + commit
@@ -218,6 +224,7 @@ workspace/
 │   ├── commands/              # Fonte de verdade dos comandos
 │   │   ├── dw-help.md
 │   │   ├── dw-analyze-project.md
+│   │   ├── dw-autopilot.md
 │   │   ├── dw-brainstorm.md
 │   │   ├── dw-create-prd.md
 │   │   ├── dw-create-techspec.md
@@ -286,5 +293,8 @@ workspace/
 
 **Q: O `/dw-quick` substitui o `/dw-run-task`?**
 - Não. `/dw-quick` é para mudanças pontuais sem PRD. `/dw-run-task` executa tasks de um plano estruturado com PRD e TechSpec.
+
+**Q: O `/dw-autopilot` substitui todos os outros comandos?**
+- Não. Ele orquestra os comandos existentes em sequência. Você ainda pode usar cada comando individualmente para controle manual. O autopilot é para quando quer ir do desejo ao PR com mínima intervenção.
 
 </system_instructions>

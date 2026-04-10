@@ -105,6 +105,7 @@ This workspace uses an AI command system that automates the full development cyc
 | `/dw-quick` | Execute a one-off task with workflow guarantees without PRD | Change description | Code + commit |
 | `/dw-resume` | Restore session context and suggest next step | (none) | Summary + suggestion |
 | `/dw-intel` | Query codebase intelligence about patterns and architecture | Question | Answer with sources |
+| `/dw-autopilot` | Full pipeline orchestrator: from a wish to a PR with minimal intervention | Wish description | PRD + code + commits + PR |
 
 ### Research
 
@@ -237,6 +238,11 @@ LEVEL 3 - Formal Code Review (/dw-code-review)
 /dw-generate-pr main                               # 5. PR
 ```
 
+### Autopilot (Full Pipeline)
+```bash
+/dw-autopilot "description of what you want to build"  # Research → PRD → Tasks → Code → QA → PR
+```
+
 ### Quick Task
 ```bash
 /dw-quick "change description"                     # Implement + validate + commit
@@ -275,6 +281,7 @@ your-project/
 │   │   ├── dw-refactoring-analysis.md
 │   │   ├── dw-review-implementation.md
 │   │   ├── dw-analyze-project.md
+│   │   ├── dw-autopilot.md
 │   │   ├── dw-deep-research.md
 │   │   ├── dw-intel.md
 │   │   ├── dw-quick.md
@@ -347,5 +354,8 @@ Commands work across multiple AI tools, all pointing to the same source `.dw/com
 
 **Q: Does `/dw-quick` replace `/dw-run-task`?**
 - No. `/dw-quick` is for one-off changes without a PRD. `/dw-run-task` executes tasks from a structured plan with PRD and TechSpec.
+
+**Q: Does `/dw-autopilot` replace all other commands?**
+- No. It orchestrates existing commands in sequence. You can still use each command individually for manual control. Autopilot is for when you want to go from a wish to a PR with minimal intervention.
 
 </system_instructions>

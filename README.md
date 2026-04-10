@@ -10,7 +10,7 @@ npx @brunosps00/dev-workflow init
 
 This will:
 1. Ask you to select a language (English or Portuguese)
-2. Create `.dw/commands/` with 22 workflow commands
+2. Create `.dw/commands/` with 23 workflow commands
 3. Create `.dw/templates/` with document templates
 4. Create `.dw/rules/` (populated by `/dw-analyze-project`)
 5. Install bundled skills (ui-ux-pro-max, security-review, etc.) to `.agents/skills/`
@@ -28,6 +28,9 @@ npx @brunosps00/dev-workflow install-deps
 
 #### `/dw-brainstorm`
 Facilitates structured ideation before opening a PRD or implementation. Explores multiple directions — conservative, balanced, and bold — with trade-offs for each, then converges on concrete next steps. No code is written or files modified.
+
+#### `/dw-autopilot`
+Full pipeline orchestrator that takes a wish and automatically runs the entire development flow: codebase intelligence, research (conditional), brainstorm, PRD, techspec, tasks, execution, QA, review, and commit. Stops at 3 gates: PRD approval, tasks approval, and PR confirmation. With GSD installed, leverages plan verification and parallel execution.
 
 #### `/dw-create-prd`
 Creates a Product Requirements Document by first asking at least 7 clarification questions to fully understand the feature. Generates a structured PRD with numbered functional requirements focused on what and why, saved to `.dw/spec/prd-[feature-name]/prd.md`.
@@ -105,6 +108,10 @@ Displays the complete guide of available commands, integration flows, and when t
 ```
                         /dw-resume (pick up where you left off)
                             |
+/dw-autopilot "wish"  ------>  Runs entire pipeline automatically
+                                (gates: PRD approval, Tasks approval, PR confirmation)
+    --- OR ---
+
 /dw-brainstorm  ------>  /dw-create-prd  -->  .dw/spec/prd-{name}/prd.md
                             |
                         /dw-create-techspec  -->  .dw/spec/prd-{name}/techspec.md
@@ -147,7 +154,7 @@ All wrappers point to `.dw/commands/` as the single source of truth.
 ```
 your-project/
 ├── .dw/
-│   ├── commands/          # 22 workflow command files
+│   ├── commands/          # 23 workflow command files
 │   ├── templates/         # Document templates (PRD, TechSpec, etc.)
 │   ├── rules/             # Project-specific rules (run /dw-analyze-project)
 │   ├── references/        # Reference documentation
