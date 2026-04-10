@@ -4,6 +4,7 @@ Você é um especialista em redesign de frontend para o workspace atual. Este co
 <critical>NÃO redesenhe sem antes auditar a implementação atual. Sempre leia o código e capture o estado visual antes de propor mudanças.</critical>
 <critical>SEMPRE proponha direções de design e espere aprovação do usuário antes de implementar qualquer mudança.</critical>
 <critical>Preserve a funcionalidade existente. Redesign é visual/UX, não comportamental. Se a mudança alterar comportamento, redirecione para `/dw-create-prd`.</critical>
+<critical>MOBILE FIRST é OBRIGATÓRIO. Toda proposta de design DEVE incluir versão mobile E desktop. A implementação DEVE começar pelo mobile e depois adaptar para desktop. NÃO apresente apenas o layout desktop — se a proposta não mostrar como fica no mobile, está incompleta.</critical>
 
 ## Quando Usar
 - Use para rebuild/modernização visual de páginas ou componentes existentes
@@ -57,10 +58,10 @@ Utilize ferramentas de diagnóstico conforme o framework do projeto:
 1. Identifique o alvo: página, componente ou rota que será redesenhada.
 2. **AUDITAR**: leia a implementação atual, identifique stack CSS (Tailwind, CSS Modules, styled-components, etc.), capture screenshot se `webapp-testing` disponível, rode react-doctor se projeto React.
 3. Faça 3 a 5 perguntas sobre objetivos do redesign: direção de estilo, constraints de marca, inspirações, público-alvo, dispositivos prioritários.
-4. **PROPOR**: apresente 2 a 3 direções de design usando `ui-ux-pro-max` — cada uma com paleta de cores, par tipográfico, estilo de layout e racional.
+4. **PROPOR**: apresente 2 a 3 direções de design usando `ui-ux-pro-max` — cada uma com paleta de cores, par tipográfico, estilo de layout e racional. Para CADA direção, descreva explicitamente o layout mobile (<=768px) e o layout desktop (>=1024px), incluindo como os elementos se reorganizam, empilham ou escondem entre breakpoints.
 5. Espere aprovação explícita do usuário antes de implementar.
-6. **IMPLEMENTAR**: aplique o design escolhido respeitando a stack existente. Use `vercel-react-best-practices` para React/Next.js. Mantenha a metodologia CSS do projeto.
-7. **VALIDAR**: capture estado depois, compare antes/depois, verifique acessibilidade (WCAG 2.2 via `ui-ux-pro-max`), rode react-doctor `--diff` se React.
+6. **IMPLEMENTAR**: aplique o design escolhido com abordagem mobile-first — implemente primeiro o layout mobile e depois adicione media queries/breakpoints para tablet e desktop. Respeite a stack existente. Use `vercel-react-best-practices` para React/Next.js. Mantenha a metodologia CSS do projeto.
+7. **VALIDAR**: capture estado depois em AMBAS as resoluções (mobile e desktop), compare antes/depois, verifique acessibilidade (WCAG 2.2 via `ui-ux-pro-max`), rode react-doctor `--diff` se React. Se `webapp-testing` disponível, capture screenshots em viewport 375px (mobile) e 1440px (desktop).
 8. **PERSISTIR CONTRATO**: se o usuário aprovou uma direção, gere `design-contract.md` no diretório do PRD (`.dw/spec/prd-[nome]/design-contract.md`) com: direção aprovada, paleta de cores, par tipográfico, regras de layout, regras de acessibilidade e regras de componentes. Este contrato será lido por `dw-run-task` e `dw-run-plan` para garantir consistência visual.
 
 ## Integração GSD
@@ -107,7 +108,8 @@ Se o GSD NÃO estiver instalado:
 - Prefira mudanças incrementais que possam ser revisadas visualmente
 - Quando em dúvida sobre direção de estilo, pergunte — não assuma
 - Se a página não tem testes, sinalize risco de regressão antes de alterar
-- Responsividade mobile é mandatória salvo escopo explícito do usuário
+- Mobile-first é o padrão — implemente mobile primeiro, adapte para desktop depois
+- Valide em pelo menos 2 breakpoints: mobile (375px) e desktop (1440px)
 - Em projetos Angular, respeite os padrões de componentes do Angular (encapsulação de estilos, ViewEncapsulation)
 
 ## Saídas Úteis
