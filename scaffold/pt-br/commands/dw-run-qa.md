@@ -97,7 +97,13 @@ Consulte `.dw/rules/` para URLs e frameworks específicos do projeto.
   - `{{PRD_PATH}}/QA/screenshots/`
   - `{{PRD_PATH}}/QA/logs/`
   - `{{PRD_PATH}}/QA/scripts/`
-- Ler `.dw/templates/qa-test-credentials.md` e escolher o usuário/perfil apropriado para o cenário
+<critical>ANTES de executar qualquer teste que envolva login ou autenticação, busque credenciais de teste no codebase. Procure por (em ordem de prioridade):
+1. `.dw/templates/qa-test-credentials.md`
+2. Qualquer arquivo com "credenciais", "credentials", "test-users", "test-accounts" no nome (busca recursiva com glob)
+3. Variáveis de ambiente em `.env.test`, `.env.local`, `.env.development`
+4. Documentação em README ou docs/ que mencione usuários de teste
+Se NENHUMA credencial for encontrada, PARE e pergunte ao usuário antes de continuar. NÃO tente adivinhar credenciais ou usar dados falsos.</critical>
+- Escolher o usuário/perfil apropriado para o cenário de teste
 - Verificar se a aplicação está rodando em localhost
 - Usar `browser_navigate` do Playwright MCP para acessar a aplicação
 - Confirmar que a página carregou corretamente com `browser_snapshot`

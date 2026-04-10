@@ -97,7 +97,13 @@ Refer to `.dw/rules/` for project-specific URLs and frameworks.
   - `{{PRD_PATH}}/QA/screenshots/`
   - `{{PRD_PATH}}/QA/logs/`
   - `{{PRD_PATH}}/QA/scripts/`
-- Read `.dw/templates/qa-test-credentials.md` and choose the appropriate user/profile for the scenario
+<critical>BEFORE executing any test involving login or authentication, search for test credentials in the codebase. Look for (in priority order):
+1. `.dw/templates/qa-test-credentials.md`
+2. Any file with "credenciais", "credentials", "test-users", "test-accounts" in the name (recursive glob search)
+3. Environment variables in `.env.test`, `.env.local`, `.env.development`
+4. Documentation in README or docs/ mentioning test users
+If NO credentials are found, STOP and ask the user before continuing. Do NOT guess credentials or use fake data.</critical>
+- Choose the appropriate user/profile for the test scenario
 - Verify the application is running on localhost
 - Use `browser_navigate` from Playwright MCP to access the application
 - Confirm the page loaded correctly with `browser_snapshot`
