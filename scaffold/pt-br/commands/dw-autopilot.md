@@ -29,6 +29,16 @@ O autopilot para APENAS nestes 3 momentos:
 2. **GATE 2 — Tasks**: Apresenta a lista de tasks e aguarda aprovacao antes de iniciar a execucao
 3. **GATE 3 — PR**: Apos commit automatico, pergunta se o usuario quer gerar o Pull Request
 
+## Retomada de Sessao
+
+Se este comando for invocado para retomar um autopilot interrompido (via `/dw-resume`):
+
+<critical>Leia o arquivo `autopilot-state.json` no diretorio do PRD. Pule TODAS as etapas listadas em `completed_steps`. Retome a execucao a partir de `current_step`. Gates ja passados (listados em `gates_passed`) NAO devem ser reapresentados.</critical>
+
+1. Leia `.dw/spec/prd-[nome]/autopilot-state.json`
+2. Reporte: "Retomando autopilot da etapa [N] ([nome]). Etapas 1-[N-1] ja completadas."
+3. Continue a execucao normalmente a partir da etapa indicada
+
 ## Pipeline Completo
 
 ### Etapa 1: Inteligencia do Codebase
@@ -157,6 +167,30 @@ Se o GSD (get-shit-done-cc) estiver instalado:
 
 Se o GSD NAO estiver instalado:
 - Todos os comandos funcionam normalmente sem GSD
+
+## Persistencia de Estado
+
+<critical>O autopilot DEVE salvar seu estado apos cada etapa completada para permitir retomada via `/dw-resume` em caso de interrupcao.</critical>
+
+Salve o arquivo `.dw/spec/prd-[nome]/autopilot-state.json` com o seguinte formato:
+
+```json
+{
+  "mode": "autopilot",
+  "wish": "descricao original do usuario",
+  "prd_path": ".dw/spec/prd-[nome]",
+  "current_step": 8,
+  "completed_steps": [1, 2, 3, 4, 5, 6, 7],
+  "skipped_steps": [2],
+  "gates_passed": ["prd", "tasks"],
+  "started_at": "2026-04-10T14:30:00Z",
+  "last_updated": "2026-04-10T15:45:00Z"
+}
+```
+
+- Atualize `current_step` e `completed_steps` ANTES de iniciar cada etapa
+- Se a sessao cair, o `/dw-resume` lera este arquivo e continuara da etapa correta
+- Ao finalizar o pipeline (apos commit ou PR), remova o arquivo ou marque `"status": "completed"`
 
 ## Formato de Progresso
 

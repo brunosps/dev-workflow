@@ -13,6 +13,19 @@ Voce e um assistente de continuidade de sessao. Este comando existe para restaur
 
 ## Comportamento Obrigatorio
 
+<critical>ANTES de qualquer analise, verifique se existe um autopilot interrompido. Procure por `autopilot-state.json` em TODOS os diretorios dentro de `.dw/spec/`. Se encontrar um com status diferente de "completed", a retomada do autopilot tem PRIORIDADE sobre qualquer outra sugestao.</critical>
+
+### Deteccao de Autopilot Interrompido
+
+1. Procure por `.dw/spec/*/autopilot-state.json`
+2. Se encontrar um arquivo com `"mode": "autopilot"` e sem `"status": "completed"`:
+   - Apresente: desejo original, etapa em que parou, etapas ja completadas
+   - Pergunte: **"Encontrei um autopilot interrompido na etapa [N] ([nome da etapa]). Deseja continuar de onde parou?"**
+   - Se **SIM**: execute `/dw-autopilot` informando que deve retomar a partir da etapa `current_step` usando o state file. O autopilot deve ler o state e pular as etapas ja completadas.
+   - Se **NAO**: continue com o fluxo normal de resume abaixo
+
+### Fluxo Normal (sem autopilot pendente)
+
 1. Leia `.dw/spec/` e identifique PRDs com tasks pendentes (checkboxes `- [ ]` em tasks.md)
 2. Leia `git log --oneline -10` para identificar o ultimo trabalho realizado
 3. Identifique a branch ativa e se ha mudancas nao commitadas

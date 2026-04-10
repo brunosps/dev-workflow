@@ -13,6 +13,19 @@ You are a session continuity assistant. This command exists to restore context f
 
 ## Required Behavior
 
+<critical>BEFORE any analysis, check for an interrupted autopilot. Look for `autopilot-state.json` in ALL directories inside `.dw/spec/`. If you find one without `"status": "completed"`, autopilot resumption takes PRIORITY over any other suggestion.</critical>
+
+### Interrupted Autopilot Detection
+
+1. Search for `.dw/spec/*/autopilot-state.json`
+2. If you find a file with `"mode": "autopilot"` and no `"status": "completed"`:
+   - Present: original wish, step where it stopped, steps already completed
+   - Ask: **"Found an interrupted autopilot at step [N] ([step name]). Do you want to continue where you left off?"**
+   - If **YES**: run `/dw-autopilot` instructing it to resume from `current_step` using the state file. The autopilot must read the state and skip already completed steps.
+   - If **NO**: continue with the normal resume flow below
+
+### Normal Flow (no pending autopilot)
+
 1. Read `.dw/spec/` and identify PRDs with pending tasks (`- [ ]` checkboxes in tasks.md)
 2. Read `git log --oneline -10` to identify the last work performed
 3. Identify the active branch and whether there are uncommitted changes
