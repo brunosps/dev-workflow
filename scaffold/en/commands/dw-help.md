@@ -102,6 +102,9 @@ This workspace uses an AI command system that automates the full development cyc
 | `/dw-bugfix` | Analyzes and fixes bugs (bug vs feature triage) | Target + description | Fix + commit OR PRD (if feature) |
 | `/dw-fix-qa` | Fixes documented QA bugs and retests with evidence | PRD path | Code + `QA/bugs.md` + `QA/qa-report.md` updated |
 | `/dw-redesign-ui` | Audits, proposes, and implements visual redesign of pages/components | Target page/component | Redesign brief + code |
+| `/dw-quick` | Execute a one-off task with workflow guarantees without PRD | Change description | Code + commit |
+| `/dw-resume` | Restore session context and suggest next step | (none) | Summary + suggestion |
+| `/dw-intel` | Query codebase intelligence about patterns and architecture | Question | Answer with sources |
 
 ### Research
 
@@ -234,6 +237,21 @@ LEVEL 3 - Formal Code Review (/dw-code-review)
 /dw-generate-pr main                               # 5. PR
 ```
 
+### Quick Task
+```bash
+/dw-quick "change description"                     # Implement + validate + commit
+```
+
+### Resume Session
+```bash
+/dw-resume                                         # Restore context + suggest next step
+```
+
+### Query Codebase
+```bash
+/dw-intel "how does X work in this project?"       # Answer with sources
+```
+
 ### Deep Research
 ```bash
 /dw-deep-research "topic or question"              # Multi-source research with citations
@@ -258,7 +276,10 @@ your-project/
 │   │   ├── dw-review-implementation.md
 │   │   ├── dw-analyze-project.md
 │   │   ├── dw-deep-research.md
+│   │   ├── dw-intel.md
+│   │   ├── dw-quick.md
 │   │   ├── dw-redesign-ui.md
+│   │   ├── dw-resume.md
 │   │   ├── dw-bugfix.md
 │   │   ├── dw-commit.md
 │   │   ├── dw-functional-doc.md
@@ -320,5 +341,11 @@ Commands work across multiple AI tools, all pointing to the same source `.dw/com
 
 **Q: Does `/dw-redesign-ui` work with Angular?**
 - Yes. The command is framework-agnostic. For React it uses react-doctor and `vercel-react-best-practices`; for Angular it uses `ng lint` and Angular DevTools. Visual design (`ui-ux-pro-max`) works with any framework.
+
+**Q: What is GSD and do I need to install it?**
+- GSD (get-shit-done-cc) is an optional engine that enables advanced features: parallel execution, plan verification, codebase intelligence, and cross-session persistence. Install with `npx dev-workflow install-deps`. Without GSD, all commands work normally.
+
+**Q: Does `/dw-quick` replace `/dw-run-task`?**
+- No. `/dw-quick` is for one-off changes without a PRD. `/dw-run-task` executes tasks from a structured plan with PRD and TechSpec.
 
 </system_instructions>
