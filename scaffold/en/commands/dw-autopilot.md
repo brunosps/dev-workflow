@@ -70,6 +70,7 @@ Run `/dw-brainstorm` with accumulated context (intel + research).
 Run `/dw-create-prd` using brainstorm findings.
 - Follow ALL command instructions, especially the clarification questions section
 - Ask at least 7 questions about: problem, target users, critical features, scope, constraints, design, integration
+- In each question, present a recommendation grounded in brainstorm and deep-research findings (if executed). E.g.: "Based on the research, I recommend X because [evidence]. Do you agree or prefer a different direction?"
 - Wait for user responses to each question
 - Only after receiving all responses, write the complete PRD in `.dw/spec/prd-[name]/prd.md`
 
@@ -89,6 +90,7 @@ Present to the user:
 Run `/dw-create-techspec` from the approved PRD.
 - Follow ALL command instructions, especially the clarification questions section
 - Ask at least 7 questions about: preferred architecture, existing vs new libs, testing strategy, integration with existing systems, infrastructure constraints, performance, security
+- In each question, present a technical recommendation grounded in brainstorm, deep-research, and approved PRD findings. E.g.: "Research indicated lib X has better performance for this case [source]. Want to use X or have another preference?"
 - Wait for user responses to each question
 - Only after receiving all responses, generate in `.dw/spec/prd-[name]/techspec.md`
 
