@@ -53,6 +53,7 @@ Se este comando for invocado para retomar um autopilot interrompido (via `/dw-re
 Avalie se o topico necessita de pesquisa profunda:
 - **SIM** (execute `/dw-deep-research`): tecnologia nova para o projeto, dominio desconhecido, integracoes com APIs externas, decisoes arquiteturais criticas
 - **NAO** (pule para etapa 3): feature simples no dominio ja mapeado, refatoracao de algo existente, CRUD basico
+  - Se pular, DOCUMENTE o motivo no bloco de progresso. Ex: "Pesquisa pulada — dominio ja mapeado em .dw/rules/[arquivo].md". O usuario deve ver a justificativa.
 
 Se executar, use modo `standard` por padrao. Incorpore os findings nas etapas seguintes.
 
@@ -60,8 +61,8 @@ Se executar, use modo `standard` por padrao. Incorpore os findings nas etapas se
 
 Execute `/dw-brainstorm` com o contexto acumulado (intel + pesquisa).
 - Gere 3 direcoes
-- Convirja automaticamente na opcao mais pragmatica para o contexto do projeto
-- NAO aguarde aprovacao do usuario (brainstorm e automatico no autopilot)
+- Apresente as 3 direcoes ao usuario com sua recomendacao destacada e justificativa
+- Aguarde confirmacao do usuario sobre qual direcao seguir antes de prosseguir
 
 ### Etapa 4: PRD (Interativo — 7+ Perguntas)
 
@@ -72,6 +73,7 @@ Execute `/dw-create-prd` usando os findings do brainstorm.
 - Faca pelo menos 7 perguntas ao usuario sobre: problema, usuarios-alvo, funcionalidades criticas, escopo, restricoes, design, integracao
 - Em cada pergunta, apresente uma recomendacao embasada nos findings do brainstorm e do deep-research (se executado). Ex: "Com base na pesquisa, recomendo X porque [evidencia]. Concorda ou prefere outra direcao?"
 - Aguarde as respostas do usuario para cada pergunta
+- Este passo e BLOQUEANTE — o comando PARA ate receber resposta do usuario para CADA pergunta. Se o usuario nao responder, NAO prossiga. NAO assuma respostas com base no contexto.
 - So apos receber todas as respostas, redija o PRD completo em `.dw/spec/prd-[nome]/prd.md`
 
 ### ═══ GATE 1: Aprovacao do PRD ═══
@@ -92,6 +94,7 @@ Execute `/dw-create-techspec` a partir do PRD aprovado.
 - Faca pelo menos 7 perguntas ao usuario sobre: arquitetura preferida, libs existentes vs novas, estrategia de testes, integracao com sistemas existentes, restricoes de infraestrutura, performance, seguranca
 - Em cada pergunta, apresente uma recomendacao tecnica embasada nos findings do brainstorm, deep-research e PRD aprovado. Ex: "A pesquisa indicou que a lib X tem melhor performance para este caso [fonte]. Quer usar X ou tem outra preferencia?"
 - Aguarde as respostas do usuario para cada pergunta
+- Este passo e BLOQUEANTE — o comando PARA ate receber resposta do usuario para CADA pergunta. Se o usuario nao responder, NAO prossiga. NAO assuma respostas com base no contexto.
 - So apos receber todas as respostas, gere em `.dw/spec/prd-[nome]/techspec.md`
 
 ### Etapa 6: Tasks
@@ -114,7 +117,7 @@ Apresente ao usuario:
 Avalie se as tasks envolvem frontend:
 - **SIM** (execute `/dw-redesign-ui`): se houver tasks com componentes visuais E a skill `ui-ux-pro-max` estiver disponivel
   - Gere o design contract em `.dw/spec/prd-[nome]/design-contract.md`
-  - NAO aguarde aprovacao (o contract e automatico no autopilot, baseado nos requisitos do PRD)
+  - Apresente um resumo do design contract ao usuario (paleta, tipografia, layout mobile/desktop) como checkpoint visual antes de prosseguir
 - **NAO** (pule para etapa 8): tasks puramente backend/infra
 
 ### Etapa 8: Execucao
@@ -150,7 +153,7 @@ Execute `/dw-run-qa` com Playwright MCP.
 
 Se o QA encontrou bugs:
 - Execute `/dw-fix-qa` para corrigir e retestar
-- Loop ate estabilizar
+- Loop ate estabilizar (maximo 5 ciclos). Apos 5 ciclos, PARE e pergunte ao usuario como deseja prosseguir.
 
 ### Etapa 12: Review de Implementacao (Pos-QA)
 
@@ -218,6 +221,8 @@ Salve o arquivo `.dw/spec/prd-[nome]/autopilot-state.json` com o seguinte format
 - Atualize `current_step` e `completed_steps` ANTES de iniciar cada etapa
 - Se a sessao cair, o `/dw-resume` lera este arquivo e continuara da etapa correta
 - Ao finalizar o pipeline (apos commit ou PR), remova o arquivo ou marque `"status": "completed"`
+
+<critical>Apos CADA etapa completada, exiba o bloco de progresso atualizado ao usuario. Isso e OBRIGATORIO — o usuario DEVE ver o que foi feito e o que vem a seguir. Se uma etapa foi pulada, o motivo DEVE aparecer no bloco de progresso.</critical>
 
 ## Formato de Progresso
 
