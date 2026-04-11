@@ -53,6 +53,7 @@ If this command is invoked to resume an interrupted autopilot (via `/dw-resume`)
 Evaluate whether the topic requires deep research:
 - **YES** (run `/dw-deep-research`): new technology for the project, unknown domain, external API integrations, critical architectural decisions
 - **NO** (skip to step 3): simple feature in an already mapped domain, refactoring existing code, basic CRUD
+  - If skipping, DOCUMENT the reason in the progress block. E.g.: "Research skipped — domain already mapped in .dw/rules/[file].md". The user must see the justification.
 
 If executed, use `standard` mode by default. Incorporate findings into subsequent steps.
 
@@ -60,8 +61,8 @@ If executed, use `standard` mode by default. Incorporate findings into subsequen
 
 Run `/dw-brainstorm` with accumulated context (intel + research).
 - Generate 3 directions
-- Automatically converge on the most pragmatic option for the project context
-- Do NOT wait for user approval (brainstorm is automatic in autopilot)
+- Present the 3 directions to the user with your recommendation highlighted and justified
+- Wait for user confirmation on which direction to follow before proceeding
 
 ### Step 4: PRD (Interactive — 7+ Questions)
 
@@ -72,6 +73,7 @@ Run `/dw-create-prd` using brainstorm findings.
 - Ask at least 7 questions about: problem, target users, critical features, scope, constraints, design, integration
 - In each question, present a recommendation grounded in brainstorm and deep-research findings (if executed). E.g.: "Based on the research, I recommend X because [evidence]. Do you agree or prefer a different direction?"
 - Wait for user responses to each question
+- This step is BLOCKING — the command STOPS until a response is received from the user for EACH question. If the user does not respond, do NOT proceed. Do NOT assume answers based on context.
 - Only after receiving all responses, write the complete PRD in `.dw/spec/prd-[name]/prd.md`
 
 ### === GATE 1: PRD Approval ===
@@ -92,6 +94,7 @@ Run `/dw-create-techspec` from the approved PRD.
 - Ask at least 7 questions about: preferred architecture, existing vs new libs, testing strategy, integration with existing systems, infrastructure constraints, performance, security
 - In each question, present a technical recommendation grounded in brainstorm, deep-research, and approved PRD findings. E.g.: "Research indicated lib X has better performance for this case [source]. Want to use X or have another preference?"
 - Wait for user responses to each question
+- This step is BLOCKING — the command STOPS until a response is received from the user for EACH question. If the user does not respond, do NOT proceed. Do NOT assume answers based on context.
 - Only after receiving all responses, generate in `.dw/spec/prd-[name]/techspec.md`
 
 ### Step 6: Tasks
@@ -114,7 +117,7 @@ Present to the user:
 Evaluate whether tasks involve frontend:
 - **YES** (run `/dw-redesign-ui`): if there are tasks with visual components AND the `ui-ux-pro-max` skill is available
   - Generate the design contract in `.dw/spec/prd-[name]/design-contract.md`
-  - Do NOT wait for approval (contract is automatic in autopilot, based on PRD requirements)
+  - Present a summary of the design contract to the user (palette, typography, mobile/desktop layout) as a visual checkpoint before proceeding
 - **NO** (skip to step 8): purely backend/infra tasks
 
 ### Step 8: Execution
@@ -150,7 +153,7 @@ Run `/dw-run-qa` with Playwright MCP.
 
 If QA found bugs:
 - Run `/dw-fix-qa` to fix and retest
-- Loop until stable
+- Loop until stable (maximum 5 cycles). After 5 cycles, STOP and ask the user how to proceed.
 
 ### Step 12: Implementation Review (Post-QA)
 
@@ -218,6 +221,8 @@ Save the file `.dw/spec/prd-[name]/autopilot-state.json` with the following form
 - Update `current_step` and `completed_steps` BEFORE starting each step
 - If the session drops, `/dw-resume` will read this file and continue from the correct step
 - When the pipeline finishes (after commit or PR), remove the file or mark `"status": "completed"`
+
+<critical>After EACH completed step, display the updated progress block to the user. This is MANDATORY — the user MUST see what was done and what comes next. If a step was skipped, the reason MUST appear in the progress block.</critical>
 
 ## Progress Format
 
