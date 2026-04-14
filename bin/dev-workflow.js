@@ -2,6 +2,7 @@
 
 const { run } = require('../lib/init');
 const installDeps = require('../lib/install-deps');
+const uninstall = require('../lib/uninstall');
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -28,6 +29,8 @@ const HELP_TEXT = `
     update         Update managed files (commands, templates, references, scripts, skills, wrappers, MCPs)
                    Preserves: .dw/rules/, .dw/spec/, user data
     install-deps   Install system dependencies (Playwright browsers, MCP servers)
+    uninstall      Remove all managed files (commands, templates, wrappers, skills, MCPs)
+                   Preserves: .dw/rules/, .dw/spec/, .planning/ (user data)
     help           Show this help message
 
   Options:
@@ -41,6 +44,7 @@ const HELP_TEXT = `
     npx dev-workflow init --force          # Overwrite existing files
     npx dev-workflow update --lang=en      # Update all managed files to latest version
     npx dev-workflow install-deps          # Install Playwright browsers and MCP servers
+    npx dev-workflow uninstall             # Remove all managed files (preserves user data)
 `;
 
 async function main() {
@@ -53,6 +57,9 @@ async function main() {
       break;
     case 'install-deps':
       installDeps.run();
+      break;
+    case 'uninstall':
+      uninstall.run();
       break;
     case 'help':
     case '--help':
