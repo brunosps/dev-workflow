@@ -129,6 +129,7 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 | Comando | O que faz | Input | Output |
 |---------|-----------|-------|--------|
 | `/dw-help` | Este guia de comandos | (opcional) comando | Este documento |
+| `/dw-update` | Atualiza o dev-workflow para a versão mais recente no npm sem sair do agente | (nenhum) | Arquivos gerenciados atualizados |
 
 ## Fluxos Comuns
 
