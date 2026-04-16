@@ -146,6 +146,7 @@ This workspace uses an AI command system that automates the full development cyc
 | `/dw-task-summary` | Shows details of a task without executing | Number + path | Task summary |
 | `/dw-archive-prd` | Moves completed PRD to `.dw/archived/prd/` | PRD path | Archived PRD |
 | `/dw-help` | This command guide | (optional) command | This document |
+| `/dw-update` | Updates dev-workflow to the latest version on npm without leaving the agent | (none) | Updated managed files |
 
 ## Review Architecture (3 Levels)
 
