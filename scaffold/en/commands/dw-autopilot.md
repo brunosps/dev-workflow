@@ -5,6 +5,24 @@ You are a full pipeline orchestrator. This command receives a user's wish and au
 <critical>The ONLY pause moments are the 3 gates defined below. Between gates, execute everything automatically without asking for confirmation.</critical>
 <critical>Each step MUST follow the complete instructions from the corresponding command in `.dw/commands/`. Read and execute the full command, not a summarized version.</critical>
 
+<critical>FORMAL EXECUTION IS MANDATORY — READ BEFORE STARTING:
+A step that invokes a `/dw-xxx` command is ONLY considered complete when the artifacts produced by that command exist on disk. Manual validations (running tests, opening Playwright ad-hoc, eyeballing the code, writing a short qa-report by hand) DO NOT replace formal execution of the command.
+- BEFORE each step: announce to the user `→ Invoking /dw-[name] — executing full instructions`.
+- DURING: follow the instructions in `.dw/commands/[name].md` in full, without summarizing or substituting.
+- AFTER: run `ls` on the artifact paths listed in that step and confirm they exist before updating `autopilot-state.json`. If any artifact is missing, the step did NOT run — re-execute the command formally.</critical>
+
+<critical>FORBIDDEN RATIONALIZATIONS — if you think any of these, STOP and execute the command formally:
+| Thought | Reality |
+|---------|---------|
+| "I already ran the tests manually" | The command produces structured artifacts. Run the command. |
+| "I validated via ad-hoc Playwright" | `/dw-run-qa` requires RF matrix, bugs.md, screenshots, scripts, logs, checklist. Run the command. |
+| "The implementation is obviously correct" | `/dw-review-implementation` requires a compliance matrix per RF/endpoint/task. Run the command. |
+| "A strong manual validation is enough" | NO. Technical equivalence DOES NOT replace formal execution. |
+| "I already checked build and lint, that's enough" | Build/lint DO NOT replace review nor QA. Run the commands. |
+| "I wrote a summarized qa-report.md by hand" | A loose file IS NOT execution of `/dw-run-qa`. The full `QA/` tree is mandatory. |
+| "The autopilot already advanced, I don't need to go back" | If the artifact doesn't exist, the step didn't run. Go back and execute. |
+| "I fixed bugs along the way, so QA is already ok" | Fixing bugs does not replace running formal QA. Run `/dw-run-qa`. |</critical>
+
 ## When to Use
 - Use when you want to go from an idea to a PR with minimal manual intervention
 - Use for complete features that go through the entire pipeline (research, planning, execution, quality)
@@ -143,11 +161,26 @@ Run `/dw-review-implementation` to verify PRD compliance (Level 2).
 - Maximum 3 correction cycles
 - Do NOT advance to QA until the review passes
 
+<critical>Required artifacts for this step (verify BEFORE marking complete):
+- Formatted output with compliance matrix shown to the user in the session
+- Explicit verdict (PASS / GAP / FAIL) for EACH RF in the PRD, EACH endpoint in the TechSpec, and EACH task
+- If gaps: correction commits before re-running the review
+A short text review, a "looks good", or a conclusion "implementation is correct" WITHOUT the structured RF-by-RF matrix DOES NOT count. A mental or eyeball review DOES NOT count. If the matrix didn't appear in the output, the command didn't run — re-execute.</critical>
+
 ### Step 10: Visual QA
 
 Run `/dw-run-qa` with Playwright MCP.
 - Test happy paths, edge cases, negative flows, accessibility
 - Document bugs with screenshots
+
+<critical>Required artifacts for this step (run `ls` on EACH path BEFORE marking complete):
+- `{{PRD_PATH}}/QA/qa-report.md` — exists and contains a per-RF section with PASS/FAIL
+- `{{PRD_PATH}}/QA/bugs.md` — exists (may be empty if no bugs, but the file must exist)
+- `{{PRD_PATH}}/QA/checklist.md` — exists and fully covered
+- `{{PRD_PATH}}/QA/screenshots/` — directory exists and contains at least 1 PNG per RF tested (format `RF-XX-[slug]-PASS.png` or `-FAIL.png`)
+- `{{PRD_PATH}}/QA/scripts/` — directory exists and contains Playwright `.spec.ts`/`.spec.js` scripts per RF
+- `{{PRD_PATH}}/QA/logs/` — directory exists with captured console/network logs
+Running Playwright ad-hoc, taking a few loose screenshots, or writing a short qa-report.md by hand DOES NOT replace this structure. If any artifact is missing or incomplete, the command did NOT run — invoke `/dw-run-qa` formally and follow its flow to completion.</critical>
 
 ### Step 11: Fix QA (Conditional)
 
@@ -168,12 +201,33 @@ Run `/dw-review-implementation` again to confirm QA fixes did not break PRD comp
 - If gaps found: fix and re-run
 - Maximum 3 cycles
 
+<critical>Required artifacts (same rules as Step 9): explicit RF-by-RF matrix in the output. No matrix = command didn't run = re-execute.</critical>
+
 ### Step 13: Code Review
 
 Run `/dw-code-review` (Level 3) for formal review.
 - Generate persisted report
 
 ### Step 14: Commit
+
+<critical>MANDATORY PRE-COMMIT AUDIT — execute BEFORE invoking `/dw-commit`:
+
+Run `ls` on each path below and confirm existence. If ANY is missing, DO NOT commit:
+- `{{PRD_PATH}}/QA/qa-report.md`
+- `{{PRD_PATH}}/QA/bugs.md`
+- `{{PRD_PATH}}/QA/checklist.md`
+- `{{PRD_PATH}}/QA/screenshots/` (non-empty)
+- `{{PRD_PATH}}/QA/scripts/` (non-empty with `.spec.*` files)
+- `{{PRD_PATH}}/QA/logs/`
+- Evidence of the last `/dw-review-implementation` run with RF-by-RF matrix (session output or reference in `autopilot-state.json`)
+
+Also verify `autopilot-state.json`:
+- Every step 1 through 13 that is NOT in `skipped_steps` must be in `completed_steps`
+- Each completed step must have its artifacts listed in `step_artifacts`
+
+If any artifact or step is missing: STOP immediately. Report to the user: `Step N did not produce artifact X — re-running /dw-[command]`. Re-execute the command. Verify again. Only then proceed to `/dw-commit`.
+
+DO NOT make a partial commit. DO NOT justify the absence with manual validation. DO NOT mark a step as complete without the formal artifact.</critical>
 
 Run `/dw-commit` automatically.
 - Semantic commits following Conventional Commits
@@ -213,13 +267,26 @@ Save the file `.dw/spec/prd-[name]/autopilot-state.json` with the following form
   "completed_steps": [1, 2, 3, 4, 5, 6, 7],
   "skipped_steps": [2],
   "gates_passed": ["prd", "tasks"],
+  "step_artifacts": {
+    "9": ["review-matrix-shown-in-session"],
+    "10": [
+      ".dw/spec/prd-[name]/QA/qa-report.md",
+      ".dw/spec/prd-[name]/QA/bugs.md",
+      ".dw/spec/prd-[name]/QA/checklist.md",
+      ".dw/spec/prd-[name]/QA/screenshots/",
+      ".dw/spec/prd-[name]/QA/scripts/",
+      ".dw/spec/prd-[name]/QA/logs/"
+    ],
+    "12": ["review-matrix-post-qa-shown-in-session"]
+  },
   "started_at": "2026-04-10T14:30:00Z",
   "last_updated": "2026-04-10T15:45:00Z"
 }
 ```
 
-- Update `current_step` and `completed_steps` BEFORE starting each step
-- If the session drops, `/dw-resume` will read this file and continue from the correct step
+- Update `current_step`, `completed_steps`, and `step_artifacts` BEFORE moving to the next step
+- A step ONLY moves to `completed_steps` after verifying its artifacts exist on disk
+- If the session drops, `/dw-resume` will read this file and continue from the correct step — and revalidate artifacts before trusting `completed_steps`
 - When the pipeline finishes (after commit or PR), remove the file or mark `"status": "completed"`
 
 <critical>After EACH completed step, display the updated progress block to the user. This is MANDATORY — the user MUST see what was done and what comes next. If a step was skipped, the reason MUST appear in the progress block.</critical>
