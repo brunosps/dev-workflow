@@ -11,6 +11,12 @@ You are a session continuity assistant. This command exists to restore context f
 ## Pipeline Position
 **Predecessor:** (session start) | **Successor:** any dw-* command
 
+## Complementary Skills
+
+| Skill | Trigger |
+|-------|---------|
+| `dw-memory` | **ALWAYS** — for each active PRD identified, read `.dw/spec/<prd>/MEMORY.md` (shared) to reconstitute constraints, decisions, and handoff notes from the prior session. Include in the summary presented to the user. |
+
 ## Required Behavior
 
 <critical>BEFORE any analysis, check for an interrupted autopilot. Look for `autopilot-state.json` in ALL directories inside `.dw/spec/`. If you find one without `"status": "completed"`, autopilot resumption takes PRIORITY over any other suggestion.</critical>
@@ -29,9 +35,10 @@ You are a session continuity assistant. This command exists to restore context f
 1. Read `.dw/spec/` and identify PRDs with pending tasks (`- [ ]` checkboxes in tasks.md)
 2. Read `git log --oneline -10` to identify the last work performed
 3. Identify the active branch and whether there are uncommitted changes
-4. Cross-reference: last active PRD, last completed task, next pending task
-5. Present the summary in the format below
-6. Suggest the next command to execute
+4. **Invoke `dw-memory`**: for the active PRD, read `.dw/spec/<prd>/MEMORY.md` and the next pending task's memory (`tasks/<N>_memory.md` if present). Extract durable decisions, cross-task constraints, and handoff notes.
+5. Cross-reference: last active PRD, last completed task, next pending task, memory context
+6. Present the summary in the format below (including a "From where we left off" bullet list based on memory)
+7. Suggest the next command to execute
 
 ## GSD Integration
 

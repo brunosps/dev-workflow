@@ -18,6 +18,8 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como sup
 
 | Skill | Gatilho |
 |-------|---------|
+| `dw-verify` | **SEMPRE** — invocada antes do commit para produzir Verification Report com evidence fresca |
+| `dw-memory` | **SEMPRE** — lê memory da workflow no início e atualiza ao final da task (promotion test) |
 | `vercel-react-best-practices` | Task envolve renderização React, hidratação, data fetching, bundle, cache ou performance |
 | `webapp-testing` | Task tem frontend interativo que necessita validação E2E em navegador real |
 
@@ -51,6 +53,7 @@ Se `.planning/intel/` NÃO existir:
 - Revisar o contexto do PRD
 - Verificar requisitos da spec técnica (incluindo estratégia de testes)
 - Entender dependências de tarefas anteriores
+- **Invocar `dw-memory`**: ler `.dw/spec/prd-[nome]/MEMORY.md` (shared) e `.dw/spec/prd-[nome]/tasks/[num]_memory.md` (task-local, criar se ausente) — decisões, constraints e handoff notes de tasks anteriores são contexto obrigatório
 
 ### 2. Análise da Tarefa
 Analise considerando:
@@ -169,9 +172,19 @@ Formato no tasks.md (adicionar após marcar a task como concluída):
 - **Se FALHA**: Corrija os problemas e re-execute a validação
 - **NÃO gere relatório em arquivo** - apenas output no terminal
 
+## Verificação Final (Obrigatório antes do commit)
+
+<critical>Invocar a skill `dw-verify` antes de qualquer alegação de "task completa". Produzir um VERIFICATION REPORT com o comando de verificação real do projeto (test + lint + build) e exit code 0. Sem report PASS, NÃO prossiga para o commit.</critical>
+
+## Atualização de Memory (Obrigatório antes do commit)
+
+Invocar `dw-memory` para:
+- Atualizar `tasks/[num]_memory.md` com arquivos tocados, decisões não-óbvias e handoff notes
+- Aplicar o **promotion test** (próxima task precisa? durável? não óbvio do repo?) e promover apenas o que passar para `MEMORY.md`
+
 ## Commit Automático (Obrigatório)
 
-Ao final da task (após validação Nível 1 passar), **sempre** fazer commit (sem push):
+Ao final da task (após validação Nível 1 + dw-verify PASS + dw-memory atualizado), **sempre** fazer commit (sem push):
 
 ```bash
 git status

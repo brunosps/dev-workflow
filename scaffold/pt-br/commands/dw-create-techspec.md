@@ -94,6 +94,8 @@
     - Revisar padrões do projeto em `{{RULES_PATH}}`
     - Confirmar que o PRD existe em `{{PRD_PATH}}` ou `.dw/spec/prd-[nome-funcionalidade]/prd.md`
 
+    <critical>Hard gate: se o PRD tiver seção "Questões em Aberto" / "Open Questions" com itens não resolvidos, PARAR. Apresentar as questões ao usuário e pedir que sejam resolvidas antes de escrever o techspec. Um techspec construído sobre requisitos indefinidos gera retrabalho garantido.</critical>
+
     ## Fluxo de Trabalho
 
     ### 1. Analisar PRD (Obrigatório)

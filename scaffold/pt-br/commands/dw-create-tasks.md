@@ -42,10 +42,22 @@
     - Organizar sequenciamento
     - Incluir testes unitários como subtarefas de cada task
 
+    3.5. **Verificação de Dependências Circulares (Pré-flight)**
+    - Antes de escrever qualquer arquivo, monte o grafo de dependências (campo `blockedBy` ou "Depende de" entre tasks)
+    - Detecte ciclos: se a task A depende de B e B depende (direta ou transitivamente) de A, há ciclo
+    - Se houver ciclo: **NÃO escreva os arquivos**. Apresente o ciclo ao usuário e peça reestruturação (ex: extrair responsabilidade comum, inverter dependência, mesclar tasks)
+    - Se não houver ciclo: prossiga
+
     4. **Gerar Arquivos de Tarefas Individuais**
     - Criar arquivo para cada tarefa principal
     - Detalhar subtarefas e critérios de sucesso
     - Incluir testes unitários obrigatórios
+    - **Enriquecimento codebase-aware (Opcional mas recomendado)**: para tasks que tocam áreas conhecidas do codebase, dispatche um Agent Explore em paralelo (um por task ou um por área) para preencher:
+      - "Arquivos Relevantes": paths e razão pela qual são relevantes para a task
+      - "Arquivos Dependentes": paths que podem precisar mudar em cascata
+      - "Regras Aplicáveis": links para `.dw/rules/*.md` que restringem a task
+      - "ADRs Relacionados": arquivos em `.dw/spec/<prd>/adrs/` que constrangem decisões
+      Esse enriquecimento é aditivo: não bloqueia a geração das tasks, apenas aumenta a qualidade do contexto que a `dw-run-task` recebe depois.
 
     ## Diretrizes de Criação de Tarefas
 

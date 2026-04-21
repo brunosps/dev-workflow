@@ -9,6 +9,13 @@ You are an assistant specialized in sequential execution of development plans. Y
 ## Pipeline Position
 **Predecessor:** `/dw-create-tasks` | **Successor:** `/dw-code-review` then `/dw-generate-pr`
 
+## Complementary Skills
+
+| Skill | Trigger |
+|-------|---------|
+| `dw-memory` | **ALWAYS** — reads `MEMORY.md` before starting and applies promotion test + compaction between tasks |
+| `dw-verify` | **ALWAYS** — invoked before the Level 2 Final Review and before declaring "Plan Complete" |
+
 ## Objective
 
 Execute ALL pending tasks in a project sequentially and automatically, marking each as completed after successful implementation (each task already includes Level 1 validation), and performing a **final Level 2 review (PRD compliance) with a corrections cycle**.
@@ -62,9 +69,18 @@ For each pending task (in sequential order):
    - If there are errors, report and PAUSE for manual correction
    - If successful, continue to next task
 
+5. **Memory compaction between tasks**
+   - Invoke `dw-memory` with compaction flag on `MEMORY.md` every 3 completed tasks (or when the file exceeds ~150 lines)
+   - Ensure the next task reads a lean, up-to-date `MEMORY.md`
+
 ### 3. Final Comprehensive Review
 
 When all tasks are completed:
+
+0. **Final Verification (Required before Level 2)**
+   - Invoke `dw-verify` with the project's verify command (test + lint + build, or the documented gate command)
+   - Only proceed with Level 2 if the VERIFICATION REPORT is PASS
+   - If FAIL: fix the root cause, re-verify, and only then open the PRD-compliance review
 
 1. **Execute General Review**
    - Follow `.dw/commands/dw-review-implementation.md` for ALL tasks
@@ -102,7 +118,9 @@ When all tasks are completed:
      - No more recommendations, OR
      - User decides that remaining items are acceptable
 
-4. **Final Report**
+4. **Final Report (after final dw-verify PASS)**
+
+   <critical>Before declaring "PLAN COMPLETE" or "COMPLETE WITH PENDING ITEMS", invoke `dw-verify` one last time after the last correction. Without PASS, do not emit the final report.</critical>
 
    ```
    ===================================================

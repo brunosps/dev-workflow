@@ -9,6 +9,14 @@
     ## Posição no Pipeline
     **Antecessor:** `/dw-code-review` ou `/dw-commit` | **Sucessor:** (merge)
 
+    ## Skills Complementares
+
+    | Skill | Gatilho |
+    |-------|---------|
+    | `dw-verify` | **SEMPRE** — invocada antes do `git push`. Sem VERIFICATION REPORT PASS na sessão após a última edição de código, o PR **NÃO** pode ser criado. |
+
+    <critical>Hard gate: se a sessão atual não tem um VERIFICATION REPORT PASS de `dw-verify` produzido APÓS a última edição/commit, PARAR e invocar `dw-verify` antes de prosseguir. PR é um artefato permanente — exige o maior rigor de verificação.</critical>
+
     ## Uso
 
     ```

@@ -21,6 +21,8 @@ Typically invoked before creating PR via `/dw-generate-pr`
 
 When available in the project under `./.agents/skills/`, use these skills as analytical support without replacing this command:
 
+- `dw-review-rigor`: **ALWAYS** — applies de-duplication (same pattern in N files = 1 finding), severity ordering (critical → high → medium → low), verify-before-flag, skip-what-linter-catches, and signal-over-volume. The report's "Issues Found" table follows this discipline.
+- `dw-verify`: **ALWAYS** — invoked before emitting an `APPROVED` or `APPROVED WITH CAVEATS` verdict. Without a VERIFICATION REPORT PASS (test + lint + build), the verdict cannot be APPROVED.
 - `security-review`: use when auth, authorization, external input, upload, SQL, external integration, secrets, SSRF, XSS, or sensitive surfaces are present
 - `vercel-react-best-practices`: use when the diff touches React/Next.js to review rendering, fetching, bundle, hydration, and performance patterns
 
@@ -195,6 +197,22 @@ Verify:
 - [ ] Tests are meaningful (not just for coverage)
 
 <critical>THE REVIEW CANNOT BE APPROVED IF ANY TEST FAILS</critical>
+
+### 6.5. Apply `dw-review-rigor` (Required)
+
+Before writing the "Issues Found" table, invoke the `dw-review-rigor` skill and apply the five rules:
+
+1. **De-duplicate**: if the same pattern appears in N files, emit 1 finding with the list of affected files — never N identical findings.
+2. **Severity ordering**: always present in critical → high → medium → low order (not by file).
+3. **Verify intent before flagging**: check adjacent comments, ADRs in `.dw/spec/*/adrs/`, test coverage, rules in `.dw/rules/`. Do not flag patterns with documented justification.
+4. **Skip what the linter catches**: run the project linter first; anything it already reports is not a finding.
+5. **Signal over volume**: ~8 precise findings beats 30 marginal ones. Keep all critical/high; prune medium/low to the most impactful.
+
+If prior reviews exist in `{{PRD_PATH}}/reviews/` or a previous `{{PRD_PATH}}/dw-code-review.md` round, read them and emit **only NEW findings** — do not re-flag items already tracked.
+
+### 6.6. Final Verification (Required before verdict)
+
+<critical>Invoke `dw-verify` and include the VERIFICATION REPORT at the start of the report. Without PASS, the verdict can only be `REJECTED` — never `APPROVED` or `APPROVED WITH CAVEATS`.</critical>
 
 ### 7. Generate Code Review Report (Required)
 

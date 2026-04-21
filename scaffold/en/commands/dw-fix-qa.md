@@ -17,6 +17,7 @@ You are an AI assistant specialized in post-QA bug fixing with evidence-driven r
 
 When available in the project under `./.agents/skills/`, use these skills as operational support without replacing this command:
 
+- `dw-verify`: **ALWAYS** — invoked before marking any bug as `Fixed` or `Closed` in `QA/bugs.md`. Without a VERIFICATION REPORT PASS (test + lint + build) **and** retest evidence, status stays `Reopened` or `Under review`.
 - `webapp-testing`: support for structuring retests, captures, and scripts when complementary to Playwright MCP
 - `vercel-react-best-practices`: use only if the fix affects React/Next.js frontend and there is risk of rendering, hydration, fetching, or performance regression
 
@@ -87,6 +88,10 @@ For each fixed bug:
    - `QA/logs/network-retest.log`
 7. Record in the QA report which user/profile was used in the retest
 8. If the retest requires persistent auth, request inspection beyond MCP, or more faithful real-browser reproduction, record this in the report
+
+### 3.5. Final Verification Before Status Change
+
+<critical>Invoke the `dw-verify` skill before changing any bug's status to `Fixed` or `Closed`. The VERIFICATION REPORT (test + lint + build) must be PASS **and** Playwright retest evidence must be saved. Without both, the status does not change.</critical>
 
 ### 4. Update Artifacts
 

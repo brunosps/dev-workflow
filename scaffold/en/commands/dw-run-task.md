@@ -18,6 +18,8 @@ When available in the project at `./.agents/skills/`, use these skills as specia
 
 | Skill | Trigger |
 |-------|---------|
+| `dw-verify` | **ALWAYS** — invoked before the commit to produce a Verification Report with fresh evidence |
+| `dw-memory` | **ALWAYS** — reads workflow memory at task start and updates it at task end (promotion test) |
 | `vercel-react-best-practices` | Task touches React rendering, hydration, data fetching, bundle, cache, or performance |
 | `webapp-testing` | Task has interactive frontend needing E2E validation in a real browser |
 
@@ -51,6 +53,7 @@ If `.planning/intel/` does NOT exist:
 - Review the PRD context
 - Verify tech spec requirements (including testing strategy)
 - Understand dependencies from previous tasks
+- **Invoke `dw-memory`**: read `.dw/spec/prd-[name]/MEMORY.md` (shared) and `.dw/spec/prd-[name]/tasks/[num]_memory.md` (task-local, create if missing) — decisions, constraints and handoff notes from earlier tasks are mandatory context
 
 ### 2. Task Analysis
 Analyze considering:
@@ -170,9 +173,19 @@ Format in tasks.md (add after marking the task as completed):
 - **If FAILURE**: Fix the issues and re-execute the validation
 - **DO NOT generate a report file** - only output in the terminal
 
+## Final Verification (Required before commit)
+
+<critical>Invoke the `dw-verify` skill before any "task complete" claim. Produce a VERIFICATION REPORT with the project's real verify command (test + lint + build) and exit code 0. Without a PASS report, DO NOT proceed to the commit.</critical>
+
+## Memory Update (Required before commit)
+
+Invoke `dw-memory` to:
+- Update `tasks/[num]_memory.md` with files touched, non-obvious decisions, and handoff notes
+- Apply the **promotion test** (next task needs it? durable? not obvious from repo?) and only promote what passes to `MEMORY.md`
+
 ## Automatic Commit (Required)
 
-At the end of the task (after Level 1 validation passes), **always** commit (no push):
+At the end of the task (after Level 1 validation + dw-verify PASS + dw-memory update), **always** commit (no push):
 
 ```bash
 git status

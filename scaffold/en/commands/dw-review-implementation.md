@@ -23,6 +23,12 @@ This is **Review Level 2**:
 
 This command is called automatically by `/dw-run-plan` at the end of all tasks, but can also be executed manually.
 
+## Complementary Skills
+
+| Skill | Trigger |
+|-------|---------|
+| `dw-review-rigor` | **ALWAYS** — when listing gaps between PRD/TechSpec and code, apply de-duplication (same gap in N modules = 1 entry), severity ordering, and verify-intent-before-flag |
+
 ## Input Variables
 
 | Variable | Description | Example |

@@ -9,6 +9,13 @@ Você é um assistente especializado em execução sequencial de planos de desen
 ## Posição no Pipeline
 **Antecessor:** `/dw-create-tasks` | **Sucessor:** `/dw-code-review` e depois `/dw-generate-pr`
 
+## Skills Complementares
+
+| Skill | Gatilho |
+|-------|---------|
+| `dw-memory` | **SEMPRE** — lê `MEMORY.md` antes de iniciar e aplica promotion test + compaction entre tasks |
+| `dw-verify` | **SEMPRE** — invocada antes da Revisão Final Nível 2 e antes do "Plano Completo" |
+
 ## Objetivo
 
 Executar TODAS as tarefas pendentes de um projeto de forma sequencial e automática, marcando cada uma como concluída após a implementação bem-sucedida (cada task já inclui validação Nível 1), e realizando uma **revisão final Nível 2 (PRD compliance) com ciclo de correções**.
@@ -62,9 +69,18 @@ Para cada tarefa pendente (em ordem sequencial):
    - Se houver erros, reportar e PAUSAR para correção manual
    - Se bem-sucedido, continuar para próxima task
 
+5. **Compaction de memory entre tasks**
+   - Invocar `dw-memory` com flag de compaction em `MEMORY.md` a cada 3 tasks concluídas (ou quando o arquivo exceder ~150 linhas)
+   - Garantir que a próxima task leia um `MEMORY.md` enxuto e atualizado
+
 ### 3. Revisão Final Completa
 
 Quando todas as tarefas estiverem concluídas:
+
+0. **Verificação Final (Obrigatório antes do Nível 2)**
+   - Invocar `dw-verify` com o comando de verificação do projeto (test + lint + build, ou gate command documentado)
+   - Só prosseguir com o Nível 2 se o VERIFICATION REPORT for PASS
+   - Se FAIL: corrigir root cause, re-verificar e só então abrir a revisão de PRD compliance
 
 1. **Executar Revisão Geral**
    - Seguir `.dw/commands/dw-review-implementation.md` para TODAS as tasks
@@ -99,7 +115,9 @@ Quando todas as tarefas estiverem concluídas:
      - Não haver mais recomendações, OU
      - Usuário decidir que pendências restantes são aceitáveis
 
-4. **Relatório Final**
+4. **Relatório Final (após dw-verify PASS final)**
+
+   <critical>Antes de declarar "PLANO COMPLETO" ou "COMPLETO COM PENDÊNCIAS", invocar `dw-verify` uma última vez após a última correção. Sem PASS, não emita o relatório final.</critical>
 
    ```
    RELATÓRIO FINAL DO PLANO

@@ -11,6 +11,12 @@ Voce e um assistente de continuidade de sessao. Este comando existe para restaur
 ## Posicao no Pipeline
 **Antecessor:** (inicio de sessao) | **Sucessor:** qualquer comando dw-*
 
+## Skills Complementares
+
+| Skill | Gatilho |
+|-------|---------|
+| `dw-memory` | **SEMPRE** — para cada PRD ativo identificado, ler `.dw/spec/<prd>/MEMORY.md` (shared) para reconstituir constraints, decisoes e handoff notes da sessao anterior. Incluir no resumo apresentado ao usuario. |
+
 ## Comportamento Obrigatorio
 
 <critical>ANTES de qualquer analise, verifique se existe um autopilot interrompido. Procure por `autopilot-state.json` em TODOS os diretorios dentro de `.dw/spec/`. Se encontrar um com status diferente de "completed", a retomada do autopilot tem PRIORIDADE sobre qualquer outra sugestao.</critical>
@@ -29,9 +35,10 @@ Voce e um assistente de continuidade de sessao. Este comando existe para restaur
 1. Leia `.dw/spec/` e identifique PRDs com tasks pendentes (checkboxes `- [ ]` em tasks.md)
 2. Leia `git log --oneline -10` para identificar o ultimo trabalho realizado
 3. Identifique a branch ativa e se ha mudancas nao commitadas
-4. Cruze: ultimo PRD ativo, ultima task completada, proxima task pendente
-5. Apresente o resumo no formato abaixo
-6. Sugira o proximo comando a executar
+4. **Invoque `dw-memory`**: para o PRD ativo, leia `.dw/spec/<prd>/MEMORY.md` e a memory da proxima task pendente (`tasks/<N>_memory.md` se existir). Extraia decisoes durables, constraints cross-task e handoff notes.
+5. Cruze: ultimo PRD ativo, ultima task completada, proxima task pendente, contexto de memory
+6. Apresente o resumo no formato abaixo (incluindo bullets de "Do ponto onde paramos" com base na memory)
+7. Sugira o proximo comando a executar
 
 ## Integracao GSD
 

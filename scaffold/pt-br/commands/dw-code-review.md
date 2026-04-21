@@ -21,6 +21,8 @@ Normalmente invocado antes de criar PR via `/dw-generate-pr`
 
 Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apoio analítico sem substituir este comando:
 
+- `dw-review-rigor`: **SEMPRE** — aplica de-duplication (mesmo pattern em N arquivos = 1 finding), severity ordering (critical → high → medium → low), verify-before-flag, skip-what-linter-catches, e signal-over-volume. A tabela "Problemas Encontrados" do relatório segue essa disciplina.
+- `dw-verify`: **SEMPRE** — invocada antes de emitir verdict `APROVADO` ou `APROVADO COM RESSALVAS`. Sem VERIFICATION REPORT PASS (test + lint + build), o verdict não pode sair como APROVADO.
 - `security-review`: use quando auth, autorização, input externo, upload, SQL, integração externa, secrets, SSRF, XSS ou superfícies sensíveis estiverem presentes
 - `vercel-react-best-practices`: use quando o diff tocar React/Next.js para revisar padrões de renderização, fetching, bundle, hidratação e performance
 
@@ -179,6 +181,22 @@ Verificar:
 - [ ] Testes são significativos (não apenas para cobertura)
 
 <critical>O REVIEW NÃO PODE SER APROVADO SE ALGUM TESTE FALHAR</critical>
+
+### 6.5. Aplicar `dw-review-rigor` (Obrigatório)
+
+Antes de escrever a tabela "Problemas Encontrados" do relatório, invocar a skill `dw-review-rigor` e aplicar as cinco regras:
+
+1. **De-duplicação**: se o mesmo padrão aparece em N arquivos, emitir 1 finding com a lista de arquivos afetados — nunca N findings idênticos.
+2. **Severity ordering**: apresentar sempre na ordem critical → high → medium → low (não por arquivo).
+3. **Verify intent before flagging**: checar comentários adjacentes, ADRs em `.dw/spec/*/adrs/`, cobertura de testes, regras em `.dw/rules/`. Não flaggar o que tem justificativa documentada.
+4. **Skip what linter catches**: rodar o linter do projeto primeiro; nada que ele já reporta vira finding.
+5. **Signal over volume**: máximo ~8 findings precisos são mais úteis que 30 marginais. Manter todos os critical/high; podar medium/low para os mais impactantes.
+
+Se houver reviews anteriores em `{{PRD_PATH}}/reviews/` ou `{{PRD_PATH}}/dw-code-review.md` (round anterior), ler e emitir **apenas findings NOVOS** — não re-flaggar itens já tratados.
+
+### 6.6. Verificação Final (Obrigatório antes do verdict)
+
+<critical>Invocar `dw-verify` e incluir o VERIFICATION REPORT no início do relatório. Sem PASS, o verdict só pode ser `REPROVADO` — nunca `APROVADO` ou `APROVADO COM RESSALVAS`.</critical>
 
 ### 7. Gerar Relatório de Code Review (Obrigatório)
 

@@ -15,6 +15,7 @@
 
     When available in the project at `./.agents/skills/`, use these skills as contextual support without replacing this command:
 
+    - `dw-verify`: **ALWAYS** — in Direct mode, invoked before committing the fix. The VERIFICATION REPORT must show the original bug symptom no longer reproduces (not just that tests pass).
     - `vercel-react-best-practices`: use when the bug affects React/Next.js and there is suspicion of render, hydration, fetching, waterfall, bundle, or re-render issues
     - `webapp-testing`: use when the fix requires a reproducible E2E/retest flow in a web app
     - `security-review`: use when the root cause touches auth, authorization, external input, upload, secrets, SQL, XSS, SSRF, or other sensitive surfaces
@@ -280,6 +281,14 @@
     - `approve 1,3,5` - I execute only the selected tasks
     - `adjust` - Tell me what to modify in the plan
     ```
+
+    ### 5.5. Final Verification (Direct mode — required before commit)
+
+    <critical>After applying the approved tasks in Direct mode, invoke `dw-verify` before committing. The VERIFICATION REPORT must show:
+    1. The project's verify command (test + lint + build) with exit 0.
+    2. Original-symptom reproduction: the scenario that triggered the bug no longer triggers it.
+    
+    Without PASS on both, DO NOT commit. Report what failed and return to step 4 (root-cause analysis).</critical>
 
     ### 6. Generate Bugfix Document (Analysis Mode)
 

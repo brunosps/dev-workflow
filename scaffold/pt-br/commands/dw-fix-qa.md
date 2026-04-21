@@ -17,6 +17,7 @@ Você é um assistente IA especializado em correção de bugs pós-QA com retest
 
 Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como suporte operacional sem substituir este comando:
 
+- `dw-verify`: **SEMPRE** — invocada antes de marcar qualquer bug como `Corrigido` ou `Fechado` no `QA/bugs.md`. Sem VERIFICATION REPORT PASS (test + lint + build) + evidência de reteste, o status permanece `Reaberto` ou `Em análise`.
 - `webapp-testing`: suporte para estruturar retestes, capturas e scripts quando complementar ao Playwright MCP
 - `vercel-react-best-practices`: use apenas se a correção afetar frontend React/Next.js e houver risco de regressão de renderização, hidratação, fetching ou performance
 
@@ -87,6 +88,10 @@ Para cada bug corrigido:
    - `QA/logs/network-retest.log`
 7. Registrar no relatório de QA qual usuário/perfil foi usado no reteste
 8. Se o reteste exigir auth persistente, inspeção além do MCP, ou reprodução mais fiel em navegador real, registrar no relatório
+
+### 3.5. Verificação Final Antes de Atualizar Status
+
+<critical>Invocar a skill `dw-verify` antes de mudar o status de qualquer bug para `Corrigido` ou `Fechado`. O VERIFICATION REPORT (test + lint + build) deve ser PASS **e** a evidência de reteste do Playwright deve estar salva. Sem os dois, o status não muda.</critical>
 
 ### 4. Atualização de Artefatos
 

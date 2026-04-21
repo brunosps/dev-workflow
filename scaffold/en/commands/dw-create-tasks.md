@@ -42,10 +42,22 @@
     - Organize sequencing
     - Include unit tests as subtasks of each task
 
+    3.5. **Circular Dependency Check (Pre-flight)**
+    - Before writing any file, build the dependency graph (`blockedBy` field or "Depends on" between tasks)
+    - Detect cycles: if task A depends on B and B depends (directly or transitively) on A, there's a cycle
+    - If a cycle exists: **DO NOT write the files**. Present the cycle to the user and request restructuring (e.g., extract shared responsibility, invert dependency, merge tasks)
+    - If no cycle: proceed
+
     4. **Generate Individual Task Files**
     - Create a file for each main task
     - Detail subtasks and success criteria
     - Include mandatory unit tests
+    - **Codebase-aware enrichment (Optional but recommended)**: for tasks that touch known codebase areas, dispatch a parallel Agent Explore (one per task or one per area) to populate:
+      - "Relevant Files": paths and why they're relevant to the task
+      - "Dependent Files": paths that may need cascading changes
+      - "Applicable Rules": links to `.dw/rules/*.md` that constrain the task
+      - "Related ADRs": files in `.dw/spec/<prd>/adrs/` that constrain decisions
+      This enrichment is additive: it does not block task generation, it only improves the quality of the context `dw-run-task` receives later.
 
     ## Task Creation Guidelines
 

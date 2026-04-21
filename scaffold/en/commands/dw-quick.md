@@ -13,6 +13,12 @@ You are a quick task executor. This command exists to implement one-off changes 
 ## Pipeline Position
 **Predecessor:** (user's ad-hoc need) | **Successor:** `/dw-commit` (automatic)
 
+## Complementary Skills
+
+| Skill | Trigger |
+|-------|---------|
+| `dw-verify` | **ALWAYS** — invoked before the commit. Even small changes require a VERIFICATION REPORT PASS (minimal test + lint) before the atomic commit. |
+
 ## Input Variables
 
 | Variable | Description | Example |
@@ -27,7 +33,8 @@ You are a quick task executor. This command exists to implement one-off changes 
 4. Implement the change following project conventions
 5. Run relevant existing tests (unit, integration)
 6. Run lint if configured in the project
-7. Create atomic semantic commit with the change
+7. Invoke `dw-verify` and include the VERIFICATION REPORT in the output before committing. Without PASS, DO NOT commit.
+8. Create atomic semantic commit with the change
 
 ## GSD Integration
 

@@ -33,6 +33,13 @@ A step that invokes a `/dw-xxx` command is ONLY considered complete when the art
 ## Pipeline Position
 **Predecessor:** (user's wish) | **Successor:** (PR merge)
 
+## Complementary Skills
+
+| Skill | Trigger |
+|-------|---------|
+| `dw-memory` | **ALWAYS** — the memory thread runs through every phase (brainstorm -> PRD -> techspec -> tasks -> execution -> QA -> review -> PR). Decisions at one gate feed context into the next. |
+| `dw-verify` | **ALWAYS** — invoked at each gate (PRD, Tasks, PR) before asking user approval; and before the final commit + push. |
+
 ## Input Variables
 
 | Variable | Description | Example |

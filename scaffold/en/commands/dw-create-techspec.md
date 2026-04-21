@@ -96,6 +96,8 @@
     - Review project patterns in `{{RULES_PATH}}`
     - Confirm that the PRD exists at `{{PRD_PATH}}` or `spec/prd-[feature-name]/prd.md`
 
+    <critical>Hard gate: if the PRD has an "Open Questions" / "Questões em Aberto" section with unresolved items, STOP. Present the questions to the user and request resolution before writing the techspec. A techspec built on undefined requirements guarantees rework.</critical>
+
     ## Workflow
 
     ### 1. Analyze PRD (Required)

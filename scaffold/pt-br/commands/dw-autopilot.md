@@ -33,6 +33,13 @@ Uma etapa que invoca um comando `/dw-xxx` SO e considerada completa quando os ar
 ## Posicao no Pipeline
 **Antecessor:** (desejo do usuario) | **Sucessor:** (merge do PR)
 
+## Skills Complementares
+
+| Skill | Gatilho |
+|-------|---------|
+| `dw-memory` | **SEMPRE** — thread de memory atravessa todas as fases (brainstorm -> PRD -> techspec -> tasks -> execucao -> QA -> review -> PR). Decisoes de um gate alimentam o contexto do proximo. |
+| `dw-verify` | **SEMPRE** — invocada em cada gate (PRD, Tasks, PR) antes de pedir aprovacao do usuario; e antes do commit final + push. |
+
 ## Variaveis de Entrada
 
 | Variavel | Descricao | Exemplo |

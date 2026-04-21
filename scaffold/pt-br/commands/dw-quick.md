@@ -13,6 +13,12 @@ Voce e um executor de tasks rapidas. Este comando existe para implementar mudanc
 ## Posicao no Pipeline
 **Antecessor:** (necessidade pontual do usuario) | **Sucessor:** `/dw-commit` (automatico)
 
+## Skills Complementares
+
+| Skill | Gatilho |
+|-------|---------|
+| `dw-verify` | **SEMPRE** — invocada antes do commit. Mesmo mudancas pequenas exigem VERIFICATION REPORT PASS (test + lint minimos) antes de commit atomico. |
+
 ## Variaveis de Entrada
 
 | Variavel | Descricao | Exemplo |
@@ -27,7 +33,8 @@ Voce e um executor de tasks rapidas. Este comando existe para implementar mudanc
 4. Implemente a mudanca seguindo convencoes do projeto
 5. Execute testes existentes relevantes (unit, integration)
 6. Execute lint se configurado no projeto
-7. Crie commit atomico semantico com a mudanca
+7. Invoque `dw-verify` e inclua o VERIFICATION REPORT no output antes de commitar. Sem PASS, NAO commit.
+8. Crie commit atomico semantico com a mudanca
 
 ## Integracao GSD
 

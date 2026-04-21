@@ -23,6 +23,12 @@
 
     Este comando é chamado automaticamente pelo `/dw-run-plan` ao final de todas as tasks, mas também pode ser executado manualmente.
 
+    ## Skills Complementares
+
+    | Skill | Gatilho |
+    |-------|---------|
+    | `dw-review-rigor` | **SEMPRE** — ao listar gaps entre PRD/TechSpec e código, aplicar de-duplication (mesmo gap em N módulos = 1 entrada), severity ordering e verify-intent-before-flag |
+
     ## Variáveis de Entrada
 
     | Variável | Descrição | Exemplo |
