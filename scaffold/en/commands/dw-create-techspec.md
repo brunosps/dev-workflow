@@ -13,10 +13,16 @@
     ## Pipeline Position
     **Predecessor:** `/dw-create-prd` | **Successor:** `/dw-create-tasks`
 
+    ## Flags
+
+    - **(default)**: generate a normal techspec from the PRD
+    - **`--council`**: before finalizing the techspec, invoke the `dw-council` skill on the primary architectural decision (e.g. monolith vs microservices, SQL vs NoSQL, lib X vs Y). The council output becomes an "Architectural Debate" section in the techspec, and firm decisions become an ADR via `/dw-adr`. Useful when the techspec introduces a high-impact structural choice.
+
     ## Complementary Skills
 
     When available in the project under `./.agents/skills/`, use these skills as support:
 
+    - `dw-council` (opt-in via `--council`): multi-advisor debate on the primary architectural decision with steel-manning. **DO NOT invoke by default**.
     - `vercel-react-best-practices`: use when defining frontend architecture for React/Next.js projects
     - `ui-ux-pro-max`: use when defining design system decisions, color palettes, typography, and UI style for the TechSpec
     - `security-review`: use when the feature touches auth, authorization, or sensitive data handling

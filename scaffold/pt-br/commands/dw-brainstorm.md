@@ -11,6 +11,11 @@ Você é um facilitador de brainstorming para o workspace atual. Este comando ex
 ## Posição no Pipeline
 **Antecessor:** (ideia do usuário) | **Sucessor:** `/dw-create-prd`
 
+## Flags
+
+- **(padrão)**: brainstorm normal com 3-7 opções (conservadora, equilibrada, ousada) e trade-offs
+- **`--council`**: após o brainstorm normal, invoca a skill `dw-council` para stress-test das top 2-3 opções através de 3-5 archetypes (pragmatic-engineer, architect-advisor, security-advocate, product-mind, devils-advocate). Útil quando a escolha é de alto impacto e há genuine dissent entre caminhos.
+
 ## Fluxograma de Decisão: Brainstorm vs PRD Direto
 
 ```dot
@@ -33,6 +38,7 @@ digraph brainstorm_decision {
 
 Quando disponíveis no projeto em `./.agents/skills/`, use para enriquecer a ideação:
 
+- `dw-council` (opt-in via `--council`): stress-test multi-advisor das opções mais promissoras com steel-manning obrigatório e concession tracking. **NÃO invocar por padrão** — só quando a flag está presente ou quando surge consenso rápido demais (sinal de false consensus).
 - `ui-ux-pro-max`: use quando o brainstorm envolver frontend, direção de estilo UI, escolhas de design system ou exploração de identidade visual
 - `vercel-react-best-practices`: use quando explorar arquitetura React/Next.js ou trade-offs de performance
 - `security-review`: use quando o brainstorm tocar auth, manipulação de dados ou features sensíveis à segurança

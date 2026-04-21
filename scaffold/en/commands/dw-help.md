@@ -24,6 +24,7 @@ You are a workspace help assistant. When invoked, present the user with a comple
 | refactor, smell, fowler | `/dw-refactoring-analysis` | Prioritized code-smell audit |
 | design, ui, redesign | `/dw-redesign-ui` | Audit + propose + implement visual |
 | decision, adr, architecture | `/dw-adr` | Record an Architecture Decision Record |
+| debate, council, stress-test, opinions | `/dw-brainstorm --council` or `/dw-create-techspec --council` | Invokes `dw-council` for a multi-advisor debate |
 | revert, rollback task | `/dw-revert-task` | Safe revert with dependency checks |
 | hotfix, quick change | `/dw-quick` | One-off task with guarantees, no PRD |
 | resume, where I left off | `/dw-resume` | Restore previous session context |
@@ -182,6 +183,7 @@ Skills in `.agents/skills/` that commands above invoke transparently. You don't 
 | `dw-verify` | run-task, run-plan, fix-qa, bugfix, code-review, generate-pr, quick | Iron Law: no success claim without a PASS VERIFICATION REPORT |
 | `dw-memory` | run-task, run-plan, autopilot, resume, revert-task | Two-tier workflow memory (shared + task-local) with promotion test |
 | `dw-review-rigor` | code-review, review-implementation, refactoring-analysis | De-duplication, severity ordering, verify-intent-before-flag, signal-over-volume |
+| `dw-council` | brainstorm `--council`, create-techspec `--council` | Multi-advisor debate (3-5 archetypes) with steel-manning, concession tracking, and dissent-preserving synthesis. Opt-in. |
 
 Inspired by skills from the [Compozy](https://github.com/compozy/compozy) project (`cy-final-verify`, `cy-workflow-memory`, `cy-review-round`).
 

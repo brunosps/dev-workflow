@@ -19,6 +19,7 @@ O dev-workflow historicamente distribui prompts e templates. O Compozy trata ski
 | `dw-verify` | [`cy-final-verify`](https://github.com/compozy/compozy) | Iron Law — nenhuma claim de sucesso sem VERIFICATION REPORT fresco |
 | `dw-memory` | [`cy-workflow-memory`](https://github.com/compozy/compozy) | Memory em dois níveis (shared + task-local) com promotion test e compaction |
 | `dw-review-rigor` | [`cy-review-round`](https://github.com/compozy/compozy) | De-duplication, severity ordering, verify-intent-before-flag, signal-over-volume |
+| `dw-council` | [`cy-idea-factory`](https://github.com/compozy/compozy) council + archetypes | Debate multi-advisor (3-5 archetypes) com steel-manning, concession tracking e synthesis que preserva dissent. Opt-in via `--council`. |
 
 ### Padrões injetados em commands existentes
 
@@ -39,14 +40,18 @@ Templates de PRD, TechSpec, Task, Tasks-index e ADR ganharam frontmatter YAML co
 
 ## O que NÃO foi portado (e por quê)
 
-### `cy-idea-factory` (council de archetypes)
+### `the-thinker` archetype (problem-framing questioner)
 
-Compozy tem skill `council` com 5 archetypes (pragmatic-engineer, architect-advisor, security-advocate, product-mind, devils-advocate) que debatem decisões high-stakes com *steel-manning* obrigatório e *concession tracking*.
+Compozy tem seis archetypes; o `dw-council` foi entregue com **cinco**: pragmatic-engineer, architect-advisor, security-advocate, product-mind, devils-advocate.
 
-**Status**: planejado para **Fase 4** (opcional). Será adicionado como skill bundled `dw-council` com flag `--council` em `dw-brainstorm` e `dw-create-techspec` — **não** como command visível. Decisão adiada porque:
-- Fundação (verify/memory/review-rigor) precisa estabilizar primeiro
-- Valor marginal para a maioria dos fluxos; valor alto só em decisões arquiteturais grandes
-- Complexidade de orquestrar 3-5 subagents paralelos justifica implementação cuidadosa
+**O que não foi portado**: o archetype `the-thinker` (que questiona o framing do problema antes do debate). Razões:
+- Manter roster enxuto no release inicial
+- Na prática, o `devils-advocate` já cobre boa parte dessa função ao expor hidden assumptions
+- Pode ser adicionado em release futuro se houver demanda (basta criar `scaffold/skills/dw-council/agents/the-thinker.md` e atualizar o roster no SKILL.md)
+
+### Host-owned `run_agent` registry
+
+Compozy dispatcha archetypes por id através de um `run_agent` tool com registry sob `~/.compozy/agents/`. **Não portado**: dev-workflow usa o tool `Task` nativo do Claude Code/Codex para dispatchar subagents, lendo os archetypes diretamente de `scaffold/skills/dw-council/agents/*.md`. Mais simples, sem precisar de setup adicional.
 
 ### Runtime extension system (Go SDK + TypeScript SDK)
 
@@ -77,6 +82,8 @@ Compozy tem adapters para review providers externos. **Não portado**: dev-workf
 | `scaffold/pt-br/commands/dw-adr.md` + EN | `/tmp/compozy/.agents/skills/cy-create-adr/` (referencial) |
 | `scaffold/*/commands/dw-create-tasks.md` (circular-dep + enrichment) | `/tmp/compozy/.agents/skills/cy-create-tasks/SKILL.md` |
 | Templates com `schema_version` | Frontmatter v2 dos artifacts Compozy |
+| `scaffold/skills/dw-council/SKILL.md` | `/tmp/compozy/.agents/skills/cy-idea-factory/references/council.md` |
+| `scaffold/skills/dw-council/agents/*.md` | `/tmp/compozy/extensions/cy-idea-factory/agents/*/AGENT.md` |
 
 ## Contribuir para o Compozy
 
