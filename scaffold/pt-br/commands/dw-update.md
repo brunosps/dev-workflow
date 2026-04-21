@@ -10,7 +10,27 @@ Você é um utilitário de atualização. Quando invocado, atualize o dev-workfl
 ## Posição no Pipeline
 **Antecessor:** (qualquer) | **Sucessor:** (qualquer)
 
+## Modos
+
+- **Update (padrão)**: `/dw-update` — atualiza para a versão mais recente no npm
+- **Rollback**: `/dw-update --rollback` — restaura o snapshot mais recente em `.dw/.backup/` (cria antes de cada update)
+
 ## Comportamento
+
+### 0. Snapshot Antes do Update (Obrigatório no modo padrão)
+
+Antes de sobrescrever arquivos gerenciados, crie um snapshot:
+
+```bash
+SNAPSHOT_DIR=".dw/.backup/$(date -u +%Y%m%dT%H%M%SZ)"
+mkdir -p "$SNAPSHOT_DIR"
+cp -r .dw/commands .dw/templates .dw/references .dw/scripts "$SNAPSHOT_DIR/" 2>/dev/null
+# agents/skills (bundled) tambem fazem parte do update
+[ -d .agents/skills ] && cp -r .agents/skills "$SNAPSHOT_DIR/agents-skills" 2>/dev/null
+echo "Snapshot salvo em $SNAPSHOT_DIR"
+```
+
+Manter apenas os 3 snapshots mais recentes (remover os mais antigos) para evitar acumulo.
 
 ### 1. Registrar Versão Atual (Obrigatório)
 
@@ -83,6 +103,26 @@ Se comandos/skills foram atualizados, lembre o usuário:
 - Reinicie a sessão do agente (ou recarregue skills) para que as instruções novas tenham efeito — skills costumam ser carregadas no início da sessão
 - Rode `/dw-help` após o reload para ver o conjunto atualizado de comandos
 - Se o release mudou dependências de sistema (Playwright, MCPs), rode `npx dev-workflow install-deps` separadamente
+
+## Modo Rollback
+
+Se invocado com `--rollback`:
+
+1. Listar snapshots em `.dw/.backup/`
+2. Se nenhum existir: PARAR e reportar "Nenhum snapshot disponível"
+3. Se mais de um existir: perguntar ao usuário qual restaurar (padrão: mais recente)
+4. Confirmar com o usuário: "Restaurar snapshot `<path>`? Isso SOBRESCREVE `.dw/commands/`, `.dw/templates/`, `.dw/references/`, `.dw/scripts/` e `.agents/skills/`. Prosseguir? [s/N]"
+5. Somente após `s`: copiar de volta
+
+```bash
+cp -r "$SNAPSHOT_DIR/commands"   .dw/
+cp -r "$SNAPSHOT_DIR/templates"  .dw/
+cp -r "$SNAPSHOT_DIR/references" .dw/ 2>/dev/null
+cp -r "$SNAPSHOT_DIR/scripts"    .dw/ 2>/dev/null
+[ -d "$SNAPSHOT_DIR/agents-skills" ] && cp -r "$SNAPSHOT_DIR/agents-skills" .agents/skills 2>/dev/null
+```
+
+6. Reportar: snapshot restaurado, versão provavelmente recuperada (ler de `.dw/commands/dw-help.md` ou metadata se houver)
 
 ## Opções Avançadas
 

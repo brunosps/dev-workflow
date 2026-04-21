@@ -1,3 +1,9 @@
+---
+type: tasks-index
+schema_version: "1.0"
+status: draft
+---
+
 # Resumo de Tarefas de Implementação de [Funcionalidade]
 
 ## Branch

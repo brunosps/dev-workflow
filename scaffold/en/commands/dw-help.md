@@ -11,7 +11,25 @@ You are a workspace help assistant. When invoked, present the user with a comple
 ## Behavior
 
 - If invoked without arguments (`/dw-help`): show the complete guide below
-- If invoked with an argument (`/dw-help create-prd`): show only the detailed section for that command
+- If invoked with an argument matching a command (`/dw-help dw-create-prd`): show only that command's detailed section
+- If invoked with a **keyword that is not a command name** (`/dw-help bug`, `/dw-help review`, `/dw-help design`): perform contextual lookup — identify the most relevant command(s) for the keyword and present each with 1-2 lines of justification ("for bugs, use `/dw-bugfix` because..."). Use the mapping table below.
+
+### Contextual mapping (keyword → suggested command)
+
+| Keyword(s) | Suggested command | Why |
+|------------|-------------------|-----|
+| bug, error, failure, issue | `/dw-bugfix` | Auto-triage bug vs feature + fix |
+| review, quality | `/dw-code-review` | Formal Level-3 review with report |
+| qa, visual test, playwright | `/dw-run-qa` | E2E QA with browser automation |
+| refactor, smell, fowler | `/dw-refactoring-analysis` | Prioritized code-smell audit |
+| design, ui, redesign | `/dw-redesign-ui` | Audit + propose + implement visual |
+| decision, adr, architecture | `/dw-adr` | Record an Architecture Decision Record |
+| revert, rollback task | `/dw-revert-task` | Safe revert with dependency checks |
+| hotfix, quick change | `/dw-quick` | One-off task with guarantees, no PRD |
+| resume, where I left off | `/dw-resume` | Restore previous session context |
+| research | `/dw-deep-research` | Multi-source research with citations |
+| idea, brainstorm | `/dw-brainstorm` | Structured ideation with trade-offs |
+| update dev-workflow | `/dw-update` | Update to latest npm version |
 
 ---
 
@@ -137,6 +155,13 @@ This workspace uses an AI command system that automates the full development cyc
 | `/dw-commit` | Semantic commit (Conventional Commits) | - | Commit |
 | `/dw-commit-all` | Commit across all submodules (inside-out) | - | Commits |
 | `/dw-generate-pr` | Push + create PR + copy body + open URL | Target branch | PR on GitHub |
+| `/dw-revert-task` | Safely revert a specific task's commits (dependency checks + confirmation) | PRD path + task number | Reverted commits + updated `tasks.md` |
+
+### Architectural Decisions
+
+| Command | What it does | Input | Output |
+|---------|-------------|-------|--------|
+| `/dw-adr` | Record an Architecture Decision Record (ADR) for a non-trivial decision during a PRD | PRD path + title | `.dw/spec/<prd>/adrs/adr-NNN.md` + cross-refs updated |
 
 ### Maintenance
 
@@ -145,8 +170,20 @@ This workspace uses an AI command system that automates the full development cyc
 | `/dw-list-tasks` | Lists tasks and progress for a PRD | PRD path | Status table |
 | `/dw-task-summary` | Shows details of a task without executing | Number + path | Task summary |
 | `/dw-archive-prd` | Moves completed PRD to `.dw/archived/prd/` | PRD path | Archived PRD |
-| `/dw-help` | This command guide | (optional) command | This document |
-| `/dw-update` | Updates dev-workflow to the latest version on npm without leaving the agent | (none) | Updated managed files |
+| `/dw-help` | This command guide (supports keyword lookup: `/dw-help bug`) | (optional) command or keyword | This document or filtered section |
+| `/dw-update` | Updates dev-workflow to the latest version on npm without leaving the agent (supports `--rollback`) | (none) or `--rollback` | Updated or restored managed files |
+
+### Bundled Skills (invoked internally — not commands)
+
+Skills in `.agents/skills/` that commands above invoke transparently. You don't call them directly.
+
+| Skill | Invoked by | Role |
+|-------|------------|------|
+| `dw-verify` | run-task, run-plan, fix-qa, bugfix, code-review, generate-pr, quick | Iron Law: no success claim without a PASS VERIFICATION REPORT |
+| `dw-memory` | run-task, run-plan, autopilot, resume, revert-task | Two-tier workflow memory (shared + task-local) with promotion test |
+| `dw-review-rigor` | code-review, review-implementation, refactoring-analysis | De-duplication, severity ordering, verify-intent-before-flag, signal-over-volume |
+
+Inspired by skills from the [Compozy](https://github.com/compozy/compozy) project (`cy-final-verify`, `cy-workflow-memory`, `cy-review-round`).
 
 ## Review Architecture (3 Levels)
 

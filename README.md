@@ -10,12 +10,14 @@ npx @brunosps00/dev-workflow init
 
 This will:
 1. Ask you to select a language (English or Portuguese)
-2. Create `.dw/commands/` with 23 workflow commands
-3. Create `.dw/templates/` with document templates
+2. Create `.dw/commands/` with 26 workflow commands
+3. Create `.dw/templates/` with document templates (PRD, TechSpec, Tasks, ADR, etc.)
 4. Create `.dw/rules/` (populated by `/dw-analyze-project`)
-5. Install bundled skills (ui-ux-pro-max, security-review, etc.) to `.agents/skills/`
+5. Install bundled skills (`dw-verify`, `dw-memory`, `dw-review-rigor`, `ui-ux-pro-max`, `security-review`, etc.) to `.agents/skills/`
 6. Generate skill wrappers for Claude Code, Codex, Copilot, and OpenCode
 7. Configure MCP servers (Context7 + Playwright)
+
+> **Compozy-inspired disciplines.** Since 0.5.0, dev-workflow bundles three primitives — `dw-verify`, `dw-memory`, `dw-review-rigor` — adapted from the [Compozy](https://github.com/compozy/compozy) project and invoked internally by existing commands. See [docs/compozy-integration.md](docs/compozy-integration.md) for what was ported and what was not.
 
 Optional dependencies (Playwright browsers, react-doctor, GSD):
 ```bash
@@ -81,7 +83,15 @@ Audits the codebase for code smells and refactoring opportunities using Martin F
 Analyzes pending changes, groups them by feature or logical context, and creates atomic semantic commits following the Conventional Commits format. Uses allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`.
 
 #### `/dw-generate-pr`
-Pushes the branch to remote and creates a Pull Request on GitHub with a structured description. Collects information from the PRD and modified files, runs tests, then generates a PR body with summary, changes grouped by module, test plan, and deploy notes.
+Pushes the branch to remote and creates a Pull Request on GitHub with a structured description. Collects information from the PRD and modified files, runs tests, then generates a PR body with summary, changes grouped by module, test plan, and deploy notes. **Hard gate**: requires a fresh `dw-verify` PASS in the current session before the push.
+
+#### `/dw-revert-task`
+Safely reverts the commits of a specific task created by `/dw-run-task`, with dependency-aware checks (blocks if subsequent tasks already executed depend on it) and explicit user confirmation. Updates `tasks.md` to re-mark the task as pending.
+
+### Architectural Decisions
+
+#### `/dw-adr`
+Records an Architecture Decision Record (ADR) for a non-trivial decision during PRD execution. Creates `.dw/spec/<prd>/adrs/adr-NNN.md` with Context / Decision / Alternatives / Consequences, and updates cross-references in the PRD/TechSpec/Task. Inspired by the ADR pattern from [Compozy](https://github.com/compozy/compozy).
 
 ### Intelligence
 
@@ -154,7 +164,7 @@ All wrappers point to `.dw/commands/` as the single source of truth.
 ```
 your-project/
 ├── .dw/
-│   ├── commands/          # 23 workflow command files
+│   ├── commands/          # 26 workflow command files
 │   ├── templates/         # Document templates (PRD, TechSpec, etc.)
 │   ├── rules/             # Project-specific rules (run /dw-analyze-project)
 │   ├── references/        # Reference documentation
@@ -170,7 +180,19 @@ your-project/
 
 ## Bundled Skills
 
-Skills installed to `.agents/skills/` for use by all commands:
+Skills installed to `.agents/skills/` for use by all commands.
+
+### Workflow discipline (invoked internally by dw-* commands)
+
+These are not slash commands — they are primitives other commands call to enforce discipline. You never invoke them directly; the commands that need them do so transparently.
+
+| Skill | Description | Invoked by | Inspired by |
+|-------|-------------|------------|-------------|
+| **dw-verify** | Enforces fresh verification evidence before any completion, commit, or PR claim — with Iron Law, gate function, and Verification Report template | `dw-run-task`, `dw-run-plan`, `dw-fix-qa`, `dw-bugfix`, `dw-code-review`, `dw-generate-pr`, `dw-quick` | [Compozy](https://github.com/compozy/compozy) `cy-final-verify` |
+| **dw-memory** | Two-tier workflow memory (shared `MEMORY.md` + per-task `<N>_memory.md`) with promotion test and compaction rules, so cross-task context persists cleanly | `dw-run-task`, `dw-run-plan`, `dw-autopilot`, `dw-resume` | [Compozy](https://github.com/compozy/compozy) `cy-workflow-memory` |
+| **dw-review-rigor** | Review discipline: de-duplication, severity ordering, verify-intent-before-flagging, skip-linter-issues, signal-over-volume | `dw-code-review`, `dw-review-implementation`, `dw-refactoring-analysis` | [Compozy](https://github.com/compozy/compozy) `cy-review-round` |
+
+### Domain expertise
 
 | Skill | Description | Source | License |
 |-------|-------------|--------|---------|

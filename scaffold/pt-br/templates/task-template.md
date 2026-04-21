@@ -1,3 +1,9 @@
+---
+type: task
+schema_version: "1.0"
+status: pending
+---
+
 # Tarefa X.0: [Título da Tarefa Principal]
 
 <critical>Ler os arquivos de prd.md e techspec.md desta pasta, se você não ler esses arquivos sua tarefa será invalidada</critical>
@@ -60,3 +66,9 @@ git commit -m "feat([modulo]): [descrição]
 - [item 2]
 - Add unit tests"
 ```
+
+## Related ADRs
+
+[ADRs que restringem decisões desta task. Deixe vazio se não houver.
+
+- `adrs/adr-NNN.md` — [título curto, como a decisão afeta esta task]]

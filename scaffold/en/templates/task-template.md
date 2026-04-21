@@ -1,3 +1,9 @@
+---
+type: task
+schema_version: "1.0"
+status: pending
+---
+
 # Task X.0: [Main Task Title]
 
 <critical>Read the prd.md and techspec.md files in this folder. If you don't read these files your task will be invalidated.</critical>
@@ -60,3 +66,9 @@ git commit -m "feat([module]): [description]
 - [item 2]
 - Add unit tests"
 ```
+
+## Related ADRs
+
+[ADRs that constrain this task's decisions. Leave empty if none.
+
+- `adrs/adr-NNN.md` — [short title, how the decision affects this task]]

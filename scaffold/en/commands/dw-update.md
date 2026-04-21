@@ -10,7 +10,26 @@ You are an update utility. When invoked, update dev-workflow to the latest versi
 ## Pipeline Position
 **Predecessor:** (any) | **Successor:** (any)
 
+## Modes
+
+- **Update (default)**: `/dw-update` — updates to the latest version on npm
+- **Rollback**: `/dw-update --rollback` — restores the most recent snapshot in `.dw/.backup/` (created before each update)
+
 ## Behavior
+
+### 0. Snapshot Before Update (Required in default mode)
+
+Before overwriting managed files, create a snapshot:
+
+```bash
+SNAPSHOT_DIR=".dw/.backup/$(date -u +%Y%m%dT%H%M%SZ)"
+mkdir -p "$SNAPSHOT_DIR"
+cp -r .dw/commands .dw/templates .dw/references .dw/scripts "$SNAPSHOT_DIR/" 2>/dev/null
+[ -d .agents/skills ] && cp -r .agents/skills "$SNAPSHOT_DIR/agents-skills" 2>/dev/null
+echo "Snapshot saved to $SNAPSHOT_DIR"
+```
+
+Keep only the 3 most recent snapshots (remove older ones) to avoid buildup.
 
 ### 1. Record Current Version (Required)
 
@@ -83,6 +102,26 @@ If commands/skills were updated, remind the user:
 - Restart the agent session (or reload skills) so the new instructions take effect — skills are usually loaded at session start
 - Run `/dw-help` after the reload to see the updated command set
 - If the release changed system dependencies (Playwright, MCPs), run `npx dev-workflow install-deps` separately
+
+## Rollback Mode
+
+If invoked with `--rollback`:
+
+1. List snapshots in `.dw/.backup/`
+2. If none exist: STOP and report "No snapshot available"
+3. If more than one exists: ask the user which to restore (default: most recent)
+4. Confirm with the user: "Restore snapshot `<path>`? This OVERWRITES `.dw/commands/`, `.dw/templates/`, `.dw/references/`, `.dw/scripts/`, and `.agents/skills/`. Proceed? [y/N]"
+5. Only after `y`: copy back
+
+```bash
+cp -r "$SNAPSHOT_DIR/commands"   .dw/
+cp -r "$SNAPSHOT_DIR/templates"  .dw/
+cp -r "$SNAPSHOT_DIR/references" .dw/ 2>/dev/null
+cp -r "$SNAPSHOT_DIR/scripts"    .dw/ 2>/dev/null
+[ -d "$SNAPSHOT_DIR/agents-skills" ] && cp -r "$SNAPSHOT_DIR/agents-skills" .agents/skills 2>/dev/null
+```
+
+6. Report: snapshot restored, version likely recovered (read from `.dw/commands/dw-help.md` or metadata if present)
 
 ## Advanced Options
 

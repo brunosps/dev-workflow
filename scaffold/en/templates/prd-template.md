@@ -1,3 +1,9 @@
+---
+type: prd
+schema_version: "1.0"
+status: draft
+---
+
 # Product Requirements Document (PRD) Template
 
 ## Overview
@@ -68,3 +74,9 @@ Implementation details will be addressed in the Technical Specification.]
 - Questions about user needs or business goals
 - Dependencies on external business factors
 - Areas requiring design or user research]
+
+## Related ADRs
+
+[List ADRs that constrain or inform this feature. Leave empty if none. Use `/dw-adr` to record a decision that emerges during execution.
+
+- `adrs/adr-NNN.md` — [short title]]

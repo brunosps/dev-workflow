@@ -11,7 +11,25 @@ Você é um assistente de ajuda do workspace. Quando invocado, apresente ao usu�
 ## Comportamento
 
 - Se invocado sem argumentos (`/dw-help`): mostre o guia completo abaixo
-- Se invocado com argumento (`/dw-help dw-create-prd`): mostre apenas a seção detalhada daquele comando
+- Se invocado com argumento correspondente a um comando (`/dw-help dw-create-prd`): mostre apenas a seção detalhada daquele comando
+- Se invocado com **keyword que não é nome de comando** (`/dw-help bug`, `/dw-help review`, `/dw-help design`): faça lookup contextual — identifique o(s) comando(s) mais relevante(s) pela keyword e apresente cada um com 1-2 linhas de justificativa ("para bug, use `/dw-bugfix` porque..."). Use a tabela de mapeamento abaixo.
+
+### Mapeamento contextual (keyword → comando sugerido)
+
+| Keyword(s) | Comando sugerido | Justificativa |
+|------------|------------------|---------------|
+| bug, erro, falha, problema | `/dw-bugfix` | Triagem automática bug vs feature + correção |
+| review, revisão, qualidade | `/dw-code-review` | Review formal Nível 3 com relatório |
+| qa, teste visual, playwright | `/dw-run-qa` | QA E2E com browser automation |
+| refactor, smell, fowler | `/dw-refactoring-analysis` | Auditoria de code smells priorizada |
+| design, ui, redesign | `/dw-redesign-ui` | Auditoria + propostas + implementação visual |
+| decisão, adr, arquitetura | `/dw-adr` | Registrar Architecture Decision Record |
+| reverter, rollback de task | `/dw-revert-task` | Revert seguro com check de dependências |
+| hotfix, mudança rápida | `/dw-quick` | Task pontual com garantias sem PRD |
+| retomar, onde parei | `/dw-resume` | Restaura contexto da sessão anterior |
+| pesquisa, research | `/dw-deep-research` | Pesquisa multi-fonte com citações |
+| ideia, brainstorm | `/dw-brainstorm` | Ideação estruturada com trade-offs |
+| atualizar dev-workflow | `/dw-update` | Atualiza para versão npm mais recente |
 
 ---
 
@@ -123,13 +141,32 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 |---------|-----------|-------|--------|
 | `/dw-commit` | Commit semântico (Conventional Commits) | - | Commit |
 | `/dw-generate-pr` | Push + cria PR + copia body + abre URL | Branch alvo | PR no GitHub |
+| `/dw-revert-task` | Reverte com segurança os commits de uma task específica (check de dependências + confirmação) | Path do PRD + número da task | Commits revertidos + `tasks.md` atualizado |
+
+### Decisões Arquiteturais
+
+| Comando | O que faz | Input | Output |
+|---------|-----------|-------|--------|
+| `/dw-adr` | Registra um Architecture Decision Record (ADR) para decisão não-trivial durante o PRD | Path do PRD + título | `.dw/spec/<prd>/adrs/adr-NNN.md` + cross-refs atualizadas |
 
 ### Utilitários
 
 | Comando | O que faz | Input | Output |
 |---------|-----------|-------|--------|
-| `/dw-help` | Este guia de comandos | (opcional) comando | Este documento |
-| `/dw-update` | Atualiza o dev-workflow para a versão mais recente no npm sem sair do agente | (nenhum) | Arquivos gerenciados atualizados |
+| `/dw-help` | Este guia de comandos (suporta lookup por keyword: `/dw-help bug`) | (opcional) comando ou keyword | Este documento ou seção filtrada |
+| `/dw-update` | Atualiza o dev-workflow para a versão mais recente no npm sem sair do agente (suporta `--rollback`) | (nenhum) ou `--rollback` | Arquivos gerenciados atualizados ou restaurados |
+
+### Bundled Skills (invocadas internamente — não são commands)
+
+Skills em `.agents/skills/` que os commands acima invocam transparentemente. Você não as chama diretamente.
+
+| Skill | Invocada por | Papel |
+|-------|--------------|-------|
+| `dw-verify` | run-task, run-plan, fix-qa, bugfix, code-review, generate-pr, quick | Iron Law: nenhuma claim de sucesso sem VERIFICATION REPORT PASS |
+| `dw-memory` | run-task, run-plan, autopilot, resume, revert-task | Memory de workflow em dois níveis (shared + task-local) com promotion test |
+| `dw-review-rigor` | code-review, review-implementation, refactoring-analysis | De-duplication, severity ordering, verify-intent-before-flag, signal-over-volume |
+
+Inspiradas em skills do projeto [Compozy](https://github.com/compozy/compozy) (`cy-final-verify`, `cy-workflow-memory`, `cy-review-round`).
 
 ## Fluxos Comuns
 

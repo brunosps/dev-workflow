@@ -1,3 +1,9 @@
+---
+type: prd
+schema_version: "1.0"
+status: draft
+---
+
 # Template de Documento de Requisitos de Produto (PRD)
 
 ## Visão Geral
@@ -68,3 +74,9 @@ Detalhes de implementação serão abordados na Especificação Técnica.]
 - Perguntas sobre necessidades do usuário ou objetivos de negócio
 - Dependências de fatores de negócio externos
 - Áreas requerendo design ou pesquisa de usuário]
+
+## Related ADRs
+
+[Liste ADRs que constrangem ou informam esta feature. Deixe vazio se não houver. Use `/dw-adr` para registrar uma decisão que surgir durante a execução.
+
+- `adrs/adr-NNN.md` — [título curto]]

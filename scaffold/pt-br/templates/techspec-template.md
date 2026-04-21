@@ -1,3 +1,9 @@
+---
+type: techspec
+schema_version: "1.0"
+status: draft
+---
+
 # Template de Especificação Técnica
 
 ## Resumo Executivo
@@ -121,3 +127,9 @@ type NomeServico interface {
 ### Arquivos Relevantes
 
 [Liste aqui arquivos relevantes do projeto]
+
+## Related ADRs
+
+[Liste ADRs arquiteturais que constrangem ou informam este techspec. Deixe vazio se não houver. Use `/dw-adr` durante a execução para registrar decisões novas.
+
+- `adrs/adr-NNN.md` — [título curto]]

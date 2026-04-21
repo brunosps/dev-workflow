@@ -1,3 +1,9 @@
+---
+type: techspec
+schema_version: "1.0"
+status: draft
+---
+
 # Technical Specification Template
 
 ## Executive Summary
@@ -121,3 +127,9 @@ type ServiceName interface {
 ### Relevant Files
 
 [List relevant project files here]
+
+## Related ADRs
+
+[List architectural ADRs that constrain or inform this techspec. Leave empty if none. Use `/dw-adr` during execution to record new decisions.
+
+- `adrs/adr-NNN.md` — [short title]]
