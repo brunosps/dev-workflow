@@ -14,8 +14,11 @@ You are an assistant specialized in creating well-documented Pull Requests. Your
 | Skill | Trigger |
 |-------|---------|
 | `dw-verify` | **ALWAYS** — invoked before `git push`. Without a VERIFICATION REPORT PASS in the current session AFTER the last code edit, the PR **CANNOT** be created. |
+| `/dw-security-check` | **ALWAYS for TS/Python/C#/Rust projects** — `security-check.md` with status ≠ REJECTED is required for supported-language projects. |
 
-<critical>Hard gate: if the current session has no VERIFICATION REPORT PASS from `dw-verify` produced AFTER the last edit/commit, STOP and invoke `dw-verify` before proceeding. A PR is a permanent artifact — it demands the highest verification standard.</critical>
+<critical>Hard gate 1 (verify): if the current session has no VERIFICATION REPORT PASS from `dw-verify` produced AFTER the last edit/commit, STOP and invoke `dw-verify` before proceeding. A PR is a permanent artifact — it demands the highest verification standard.</critical>
+
+<critical>Hard gate 2 (security): for TS/Python/C#/Rust projects, if `{{PRD_PATH}}/security-check.md` is missing OR has REJECTED status, STOP and invoke `/dw-security-check` before proceeding. HIGH/CRITICAL vulnerabilities CANNOT reach the PR. For other languages (Go, Java, etc.), this gate is skipped with a note.</critical>
 
 ## Usage
 

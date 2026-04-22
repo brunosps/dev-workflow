@@ -28,6 +28,7 @@
     | Skill | Gatilho |
     |-------|---------|
     | `dw-review-rigor` | **SEMPRE** — ao listar gaps entre PRD/TechSpec e código, aplicar de-duplication (mesmo gap em N módulos = 1 entrada), severity ordering e verify-intent-before-flag |
+    | `/dw-security-check` | **SEMPRE para projetos TS/Python/C#/Rust com diff que toca código** — os findings viram uma categoria "Security Gaps" no ciclo interativo de correções. Se status REJECTED, os gaps são bloqueantes. |
 
     ## Variáveis de Entrada
 
@@ -42,6 +43,16 @@
     2. Especificações técnicas da TechSpec
     3. Tasks definidas no tasks.md
     4. Código efetivamente implementado (via git diff/status)
+    5. **Segurança do código implementado** (via `/dw-security-check` para projetos TS/Python/C#/Rust)
+
+    ## Camada de Segurança (Obrigatório para projetos TS/Python/C#/Rust)
+
+    <critical>Se o projeto usa TypeScript, Python, C# ou Rust e o diff toca código (não apenas docs), INVOCAR `/dw-security-check {{PRD_PATH}}` antes de listar gaps. O status e findings retornados alimentam a seção "Security Gaps" do relatório de Nível 2.</critical>
+
+    - Status **REJECTED** do security-check → os findings CRITICAL/HIGH viram gaps **bloqueantes** no ciclo interativo de correções (equivalente a gap de funcionalidade crítica não implementada)
+    - Status **PASSED WITH OBSERVATIONS** → os findings MEDIUM/LOW viram recomendações no ciclo
+    - Status **CLEAN** → seção "Security Gaps: Nenhum" no relatório
+    - Projeto em linguagem não suportada → nota no relatório indicando que a camada de segurança foi pulada
 
     ## Arquivos a Ler (Obrigatório)
 

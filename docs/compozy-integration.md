@@ -96,3 +96,10 @@ O projeto Compozy é mantido em aberto. Se você é usuário do dev-workflow e q
 ## Licença e atribuição
 
 Os ports são adaptações conceituais e textuais. Créditos ao projeto Compozy por fornecer padrões de referência bem pensados. Onde aplicável, cada skill portada inclui uma seção `## Inspired by` com link para o arquivo de origem.
+
+## Commands dev-workflow-native (não Compozy-inspired)
+
+Nem tudo no dev-workflow vem do Compozy. Alguns commands são nativos — preenchem gaps do próprio dev-workflow ou foram inspirados em skills do ecosistema skills.sh.
+
+- **`/dw-revert-task`** — sem análogo no Compozy. Padrão próprio, motivado pela necessidade de revert seguro de task com dependency checks.
+- **`/dw-security-check`** — dev-workflow-native. Conceitualmente inspirado em skills pesquisadas via `/find-skills` no skills.sh (`supercent-io/skills-template@security-best-practices`, `hoodini/ai-agents-skills@owasp-security`, `github/awesome-copilot@agent-owasp-compliance`) — mas implementado do zero com integração nativa a **Trivy** (SCA/IaC scanner não presente em Compozy), às primitivas `dw-verify`/`dw-review-rigor`/`security-review`, e a Context7 MCP para best practices de framework. Suporta **TypeScript, Python, C# e Rust** na release inicial.

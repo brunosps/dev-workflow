@@ -23,6 +23,7 @@ When available in the project under `./.agents/skills/`, use these skills as ana
 
 - `dw-review-rigor`: **ALWAYS** — applies de-duplication (same pattern in N files = 1 finding), severity ordering (critical → high → medium → low), verify-before-flag, skip-what-linter-catches, and signal-over-volume. The report's "Issues Found" table follows this discipline.
 - `dw-verify`: **ALWAYS** — invoked before emitting an `APPROVED` or `APPROVED WITH CAVEATS` verdict. Without a VERIFICATION REPORT PASS (test + lint + build), the verdict cannot be APPROVED.
+- `/dw-security-check`: **ALWAYS for TS/Python/C#/Rust projects** — invoked as step 6.7 (Security Layer) before emitting a verdict. If the project uses a supported language and `security-check.md` is missing OR has REJECTED status, the verdict is **REJECTED** — no exception.
 - `security-review`: use when auth, authorization, external input, upload, SQL, external integration, secrets, SSRF, XSS, or sensitive surfaces are present
 - `vercel-react-best-practices`: use when the diff touches React/Next.js to review rendering, fetching, bundle, hydration, and performance patterns
 
@@ -213,6 +214,15 @@ If prior reviews exist in `{{PRD_PATH}}/reviews/` or a previous `{{PRD_PATH}}/dw
 ### 6.6. Final Verification (Required before verdict)
 
 <critical>Invoke `dw-verify` and include the VERIFICATION REPORT at the start of the report. Without PASS, the verdict can only be `REJECTED` — never `APPROVED` or `APPROVED WITH CAVEATS`.</critical>
+
+### 6.7. Security Layer (Required for TS/Python/C#/Rust projects)
+
+<critical>For TypeScript/JavaScript, Python, C#, or Rust projects whose diff touches code, invoke `/dw-security-check` with the same `{{PRD_PATH}}`. Without a `security-check.md` present in the PRD OR with a status other than CLEAN / PASSED WITH OBSERVATIONS, the verdict is **REJECTED** — no exception.</critical>
+
+- If `/dw-security-check` returns **REJECTED**: automatic verdict **REJECTED**. Include the security-check's CRITICAL/HIGH findings with appropriate severity in the final report's "Issues Found" section.
+- If it returns **PASSED WITH OBSERVATIONS**: may proceed to APPROVED WITH CAVEATS, listing medium/low observations as caveats.
+- If it returns **CLEAN**: proceeds normally to a verdict based on the remaining criteria.
+- Projects in languages not supported by security-check (Go, Java, PHP, Ruby, etc.) → skip this step with a visible note in the code-review report.
 
 ### 7. Generate Code Review Report (Required)
 

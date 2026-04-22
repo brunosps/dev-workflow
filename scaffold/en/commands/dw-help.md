@@ -25,6 +25,7 @@ You are a workspace help assistant. When invoked, present the user with a comple
 | design, ui, redesign | `/dw-redesign-ui` | Audit + propose + implement visual |
 | decision, adr, architecture | `/dw-adr` | Record an Architecture Decision Record |
 | debate, council, stress-test, opinions | `/dw-brainstorm --council` or `/dw-create-techspec --council` | Invokes `dw-council` for a multi-advisor debate |
+| security, vulnerability, owasp, trivy, cve | `/dw-security-check` | Rigid multi-layer check (OWASP static + Trivy SCA/IaC + native audit) for TS/Python/C#/Rust |
 | revert, rollback task | `/dw-revert-task` | Safe revert with dependency checks |
 | hotfix, quick change | `/dw-quick` | One-off task with guarantees, no PRD |
 | resume, where I left off | `/dw-resume` | Restore previous session context |
@@ -148,6 +149,7 @@ This workspace uses an AI command system that automates the full development cyc
 | `/dw-review-implementation` | Compares PRD vs code (FRs, endpoints, tasks) | PRD path | Gap report |
 | `/dw-code-review` | Formal code review (quality, rules, tests) | PRD path | `code-review.md` |
 | `/dw-refactoring-analysis` | Audit code smells and refactoring opportunities (Fowler's catalog) | PRD path | `refactoring-analysis.md` |
+| `/dw-security-check` | Rigid security check (OWASP static + Trivy SCA/IaC + native audit) for TS/Python/C#/Rust | PRD path or code | `security-check.md` |
 
 ### Versioning
 

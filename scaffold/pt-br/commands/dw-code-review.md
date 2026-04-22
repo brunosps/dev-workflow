@@ -23,6 +23,7 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apo
 
 - `dw-review-rigor`: **SEMPRE** — aplica de-duplication (mesmo pattern em N arquivos = 1 finding), severity ordering (critical → high → medium → low), verify-before-flag, skip-what-linter-catches, e signal-over-volume. A tabela "Problemas Encontrados" do relatório segue essa disciplina.
 - `dw-verify`: **SEMPRE** — invocada antes de emitir verdict `APROVADO` ou `APROVADO COM RESSALVAS`. Sem VERIFICATION REPORT PASS (test + lint + build), o verdict não pode sair como APROVADO.
+- `/dw-security-check`: **SEMPRE para projetos TS/Python/C#/Rust** — invocado como step 6.7 (Camada de Segurança) antes de emitir verdict. Se o projeto usa linguagem suportada e `security-check.md` não existe OU tem status REJECTED, o verdict é **REPROVADO** — sem exceção.
 - `security-review`: use quando auth, autorização, input externo, upload, SQL, integração externa, secrets, SSRF, XSS ou superfícies sensíveis estiverem presentes
 - `vercel-react-best-practices`: use quando o diff tocar React/Next.js para revisar padrões de renderização, fetching, bundle, hidratação e performance
 
@@ -197,6 +198,15 @@ Se houver reviews anteriores em `{{PRD_PATH}}/reviews/` ou `{{PRD_PATH}}/dw-code
 ### 6.6. Verificação Final (Obrigatório antes do verdict)
 
 <critical>Invocar `dw-verify` e incluir o VERIFICATION REPORT no início do relatório. Sem PASS, o verdict só pode ser `REPROVADO` — nunca `APROVADO` ou `APROVADO COM RESSALVAS`.</critical>
+
+### 6.7. Camada de Segurança (Obrigatório para projetos TS/Python/C#/Rust)
+
+<critical>Para projetos em TypeScript/JavaScript, Python, C# ou Rust que tiveram código modificado no diff, invocar `/dw-security-check` com o mesmo `{{PRD_PATH}}`. Sem `security-check.md` presente no PRD OU com status diferente de CLEAN/PASSED WITH OBSERVATIONS, o verdict é **REPROVADO** — sem exceção.</critical>
+
+- Se `/dw-security-check` retornar **REJECTED**: verdict automático **REPROVADO**. Incluir na seção "Problemas Encontrados" do relatório final os findings CRITICAL/HIGH do security-check com severity apropriada.
+- Se retornar **PASSED WITH OBSERVATIONS**: pode seguir para APROVADO COM RESSALVAS, listando as observations medium/low como ressalvas.
+- Se retornar **CLEAN**: prossegue normalmente para o verdict baseado nos demais critérios.
+- Projetos em linguagens não suportadas pelo security-check (Go, Java, PHP, Ruby etc.) → pular este step com nota visível no relatório de code-review.
 
 ### 7. Gerar Relatório de Code Review (Obrigatório)
 

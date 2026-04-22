@@ -10,7 +10,7 @@ npx @brunosps00/dev-workflow init
 
 This will:
 1. Ask you to select a language (English or Portuguese)
-2. Create `.dw/commands/` with 26 workflow commands
+2. Create `.dw/commands/` with 27 workflow commands
 3. Create `.dw/templates/` with document templates (PRD, TechSpec, Tasks, ADR, etc.)
 4. Create `.dw/rules/` (populated by `/dw-analyze-project`)
 5. Install bundled skills (`dw-verify`, `dw-memory`, `dw-review-rigor`, `ui-ux-pro-max`, `security-review`, etc.) to `.agents/skills/`
@@ -76,6 +76,9 @@ Performs a formal Level 3 code review before PR creation, verifying PRD complian
 
 #### `/dw-refactoring-analysis`
 Audits the codebase for code smells and refactoring opportunities using Martin Fowler's catalog. Detects bloaters, change preventers, dispensables, couplers, conditional complexity, and DRY violations, then maps each to a concrete refactoring technique with before/after code sketches. Includes coupling/cohesion metrics, SOLID analysis, and a prioritized action plan (P0-P3).
+
+#### `/dw-security-check`
+Rigid multi-layer security check for **TypeScript, Python, C#, and Rust** projects. Combines OWASP static review (language-aware, via the bundled `security-review` skill), Trivy SCA/secret/IaC scanning (`trivy fs` + `trivy config`), and native lockfile audit (`npm audit` / `pip-audit` / `dotnet list package --vulnerable` / `cargo audit`). Consults Context7 MCP for framework-version-specific best practices (Next.js, Django, ASP.NET Core, Actix/Axum/Rocket, etc.). Hard gates: any CRITICAL or HIGH finding produces REJECTED status, blocking `/dw-code-review`, `/dw-review-implementation`, and `/dw-generate-pr`. No bypass flag. Requires Trivy (install via `install-deps`).
 
 ### Git & PR
 
@@ -164,7 +167,7 @@ All wrappers point to `.dw/commands/` as the single source of truth.
 ```
 your-project/
 ├── .dw/
-│   ├── commands/          # 26 workflow command files
+│   ├── commands/          # 27 workflow command files
 │   ├── templates/         # Document templates (PRD, TechSpec, etc.)
 │   ├── rules/             # Project-specific rules (run /dw-analyze-project)
 │   ├── references/        # Reference documentation
@@ -214,6 +217,7 @@ Installed via `npx @brunosps00/dev-workflow install-deps`:
 | **Context7 MCP** | Contextual documentation lookup for AI assistants | [upstash/context7-mcp](https://github.com/upstash/context7-mcp) |
 | **react-doctor** | Health score and diagnostics for React projects | [react.doctor](https://www.react.doctor/) |
 | **GSD (get-shit-done-cc)** | Optional engine: parallel execution, plan verification, codebase intelligence, cross-session persistence | [gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done) |
+| **Trivy** | Native binary scanner used by `/dw-security-check` for CVE, secret, and IaC scanning. `install-deps` detects presence and prints OS-specific install instructions (brew / curl script / choco / Docker) — does not install automatically. | [aquasecurity.github.io/trivy](https://aquasecurity.github.io/trivy/) |
 
 ## Options
 

@@ -28,6 +28,7 @@ This command is called automatically by `/dw-run-plan` at the end of all tasks, 
 | Skill | Trigger |
 |-------|---------|
 | `dw-review-rigor` | **ALWAYS** — when listing gaps between PRD/TechSpec and code, apply de-duplication (same gap in N modules = 1 entry), severity ordering, and verify-intent-before-flag |
+| `/dw-security-check` | **ALWAYS for TS/Python/C#/Rust projects whose diff touches code** — findings become a "Security Gaps" category in the interactive corrections cycle. If status is REJECTED, the gaps are blocking. |
 
 ## Input Variables
 
@@ -42,6 +43,16 @@ Analyze the implementation by comparing:
 2. Technical specifications from the TechSpec
 3. Tasks defined in tasks.md
 4. Actually implemented code (via git diff/status)
+5. **Security of the implemented code** (via `/dw-security-check` for TS/Python/C#/Rust projects)
+
+## Security Layer (Required for TS/Python/C#/Rust projects)
+
+<critical>If the project uses TypeScript, Python, C#, or Rust and the diff touches code (not just docs), INVOKE `/dw-security-check {{PRD_PATH}}` before listing gaps. The status and findings returned feed the "Security Gaps" section of the Level 2 report.</critical>
+
+- **REJECTED** status from security-check → CRITICAL/HIGH findings become **blocking** gaps in the interactive corrections cycle (equivalent to a critical missing feature)
+- **PASSED WITH OBSERVATIONS** → MEDIUM/LOW findings become recommendations in the cycle
+- **CLEAN** → "Security Gaps: None" section in the report
+- Project in an unsupported language → note in the report indicating the security layer was skipped
 
 ## Files to Read (Required)
 
