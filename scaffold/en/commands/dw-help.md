@@ -26,6 +26,7 @@ You are a workspace help assistant. When invoked, present the user with a comple
 | decision, adr, architecture | `/dw-adr` | Record an Architecture Decision Record |
 | debate, council, stress-test, opinions | `/dw-brainstorm --council` or `/dw-create-techspec --council` | Invokes `dw-council` for a multi-advisor debate |
 | security, vulnerability, owasp, trivy, cve | `/dw-security-check` | Rigid multi-layer check (OWASP static + Trivy SCA/IaC + native audit) for TS/Python/C#/Rust |
+| refine, refinement, idea, one-pager | `/dw-brainstorm --onepager` | Idea refinement with Product Inventory + classification (IMPROVES/CONSOLIDATES/NEW) + durable one-pager |
 | revert, rollback task | `/dw-revert-task` | Safe revert with dependency checks |
 | hotfix, quick change | `/dw-quick` | One-off task with guarantees, no PRD |
 | resume, where I left off | `/dw-resume` | Restore previous session context |

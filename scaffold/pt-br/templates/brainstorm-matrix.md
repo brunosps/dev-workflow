@@ -4,16 +4,24 @@
 
 {{CONTEXT_DESCRIPTION}}
 
+## Product Inventory
+
+<!-- Features existentes mapeadas no produto (nível de produto, não de código). Preencher lendo .dw/spec/prd-*/prd.md e .dw/rules/index.md. Se greenfield, escrever "greenfield". -->
+
+- **[feature 1]** — `.dw/spec/prd-<slug>/prd.md` — status
+- **[feature 2]** — `.dw/rules/index.md#modulo-Y`
+- ...
+
 ## Matriz de Opções
 
 | Critério | Opção A: {{NAME_A}} | Opção B: {{NAME_B}} | Opção C: {{NAME_C}} |
 |----------|---------------------|---------------------|---------------------|
-| **Abordagem** | | | |
+| **Tipo & Feature Relacionada** | `[IMPROVES: <feat>]` \| `[CONSOLIDATES: <A>+<B>]` \| `[NEW]` | idem | idem |
+| **Abordagem (produto)** | | | |
 | **Esforço** | Baixo / Médio / Alto | Baixo / Médio / Alto | Baixo / Médio / Alto |
 | **Risco** | Baixo / Médio / Alto | Baixo / Médio / Alto | Baixo / Médio / Alto |
-| **Escalabilidade** | | | |
-| **Manutenibilidade** | | | |
-| **Dependências** | | | |
+| **Valor para usuário** | | | |
+| **Dependências (outras features)** | | | |
 
 ## Trade-offs
 

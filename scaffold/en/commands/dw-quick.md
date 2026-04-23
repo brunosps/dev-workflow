@@ -7,6 +7,7 @@ You are a quick task executor. This command exists to implement one-off changes 
 ## When to Use
 - Use for small changes that don't justify the full pipeline (PRD -> TechSpec -> Tasks)
 - Use for hotfixes, config adjustments, dependency updates, one-off refactors
+- Use when invoked after `/dw-brainstorm --onepager` and the one-pager carries `[IMPROVES]` classification with an MVP Scope fitting in ≤3 files (skip-PRD path)
 - Do NOT use for new features with multiple requirements (use `/dw-create-prd`)
 - Do NOT use for complex bugs (use `/dw-bugfix`)
 
@@ -28,13 +29,14 @@ You are a quick task executor. This command exists to implement one-off changes 
 ## Required Behavior
 
 1. Read `.dw/rules/` to understand project patterns and conventions
-2. Summarize the change in 1-2 sentences and confirm scope with the user
-3. If the change seems too large (>3 files, >100 lines), warn and suggest `/dw-create-prd`
-4. Implement the change following project conventions
-5. Run relevant existing tests (unit, integration)
-6. Run lint if configured in the project
-7. Invoke `dw-verify` and include the VERIFICATION REPORT in the output before committing. Without PASS, DO NOT commit.
-8. Create atomic semantic commit with the change
+2. **If a one-pager exists** at `.dw/spec/ideas/<slug>.md` and was passed as input, read it first. If classification is `[IMPROVES]` and MVP Scope fits in ≤3 files, proceed. If `[NEW]` or `[CONSOLIDATES]` with larger scope, warn and redirect to `/dw-create-prd`.
+3. Summarize the change in 1-2 sentences and confirm scope with the user
+4. If the change seems too large (>3 files, >100 lines), warn and suggest `/dw-create-prd`
+5. Implement the change following project conventions
+6. Run relevant existing tests (unit, integration)
+7. Run lint if configured in the project
+8. Invoke `dw-verify` and include the VERIFICATION REPORT in the output before committing. Without PASS, DO NOT commit.
+9. Create atomic semantic commit with the change
 
 ## GSD Integration
 

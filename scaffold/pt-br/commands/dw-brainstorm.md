@@ -13,8 +13,10 @@ Você é um facilitador de brainstorming para o workspace atual. Este comando ex
 
 ## Flags
 
-- **(padrão)**: brainstorm normal com 3-7 opções (conservadora, equilibrada, ousada) e trade-offs
+- **(padrão)**: brainstorm normal com 3-7 opções (conservadora, equilibrada, ousada) e trade-offs. Se o produto tem PRDs ou rules, **Product Inventory** é produzido automaticamente e cada opção recebe tag de classificação.
+- **`--onepager`**: ao final do brainstorm, gera um one-pager durável em `.dw/spec/ideas/<slug>.md` (usando `.dw/templates/idea-onepager.md`) com Feature Inventory + Classification & Rationale + MVP Scope + Not Doing + Assumptions. Use quando quiser um artefato de produto persistido antes de seguir para `/dw-create-prd`.
 - **`--council`**: após o brainstorm normal, invoca a skill `dw-council` para stress-test das top 2-3 opções através de 3-5 archetypes (pragmatic-engineer, architect-advisor, security-advocate, product-mind, devils-advocate). Útil quando a escolha é de alto impacto e há genuine dissent entre caminhos.
+- Flags são combináveis: `--onepager --council` produz one-pager após debate do council.
 
 ## Fluxograma de Decisão: Brainstorm vs PRD Direto
 
@@ -46,6 +48,7 @@ Quando disponíveis no projeto em `./.agents/skills/`, use para enriquecer a ide
 ## Referência do Template
 
 - Template da matriz de brainstorm: `.dw/templates/brainstorm-matrix.md` (relativo ao workspace root)
+- Template do one-pager durável: `.dw/templates/idea-onepager.md` (usado com flag `--onepager`)
 
 Use este comando quando o usuario quiser:
 - gerar ideias para produto, UX, arquitetura ou automacao
@@ -56,37 +59,57 @@ Use este comando quando o usuario quiser:
 
 ## Comportamento obrigatorio
 
+<critical>O brainstorm é fase **nível de produto**, não técnica. NÃO entre em arquitetura, stack, endpoints, schemas. Isso é trabalho do techspec. Aqui trabalhamos jornada do usuário, valor, features e fronteiras.</critical>
+
 1. Comece resumindo o problema em 1 a 3 frases.
-2. Se faltar contexto essencial, faca perguntas curtas e objetivas antes de expandir.
-3. Estruture o brainstorming em multiplas direcoes, evitando fixar cedo demais em uma unica resposta.
-4. Para cada direcao, explicite:
-   - ideia central
-   - beneficios
-   - riscos ou limitacoes
-   - nivel de esforco aproximado
-5. Sempre que fizer sentido, inclua alternativas conservadora, equilibrada e ousada.
-6. Se o tema envolver o workspace atual, use contexto do repositorio para deixar as ideias mais concretas.
-7. Feche com recomendacao pragmatica e proximos passos claros.
+2. **Reformule como "How Might We"**: transforme a ideia bruta em `How might we [verbo] para [usuário] de forma que [resultado]?`. Isso tira o time de "solution mode" prematuro.
+3. **Product Inventory (obrigatório se o produto existe)**:
+   - Se `.dw/spec/prd-*/` tem PRDs OU `.dw/rules/index.md` existe, leia esses artefatos para mapear o **inventário de features do produto atual** (nível de produto, não de código).
+   - Fontes a consultar: `.dw/spec/prd-*/prd.md` (seções Overview / Main Features / User Stories), `.dw/rules/index.md` e `.dw/rules/<modulo>.md`, `.planning/intel/` se existir.
+   - Produza um **Feature Inventory curto (5-12 bullets)** antes de divergir: "o produto hoje faz X, Y, Z".
+   - Se o projeto é greenfield (sem PRDs nem rules), registre: "Feature Inventory: greenfield — nenhum artefato de produto ainda".
+4. Se faltar contexto essencial para o usuário (problema, persona, valor esperado), faça perguntas curtas e objetivas antes de expandir.
+5. Estruture o brainstorming em multiplas direcoes, evitando fixar cedo demais em uma unica resposta.
+6. Para cada direção (3-7), explicite:
+   - **Tag de classificação obrigatória**: `[IMPROVES: <feature existente>]` | `[CONSOLIDATES: <feat A> + <feat B>]` | `[NEW]`
+   - ideia central (em linguagem de produto — jornada, valor, fronteira)
+   - benefícios
+   - riscos ou limitações
+   - nível de esforço aproximado
+7. Sempre que fizer sentido, inclua alternativas conservadora, equilibrada e ousada.
+8. Feche com recomendação pragmática e próximos passos claros.
+9. **Se a flag `--onepager` estiver presente**: ao final, gerar `.dw/spec/ideas/<slug>.md` usando `.dw/templates/idea-onepager.md`, preenchendo Feature Inventory, Classification & Rationale, Recommended Direction (linguagem de produto), MVP Scope (user stories), Not Doing, Key Assumptions e Open Questions. Apresentar path ao usuário ao final.
 
 ## Formato de resposta preferido
 
-### 1. Enquadramento
+### 1. How Might We
+- frase reformulada
+
+### 2. Product Inventory
+- 5-12 bullets de features existentes mapeadas (ou "greenfield")
+
+### 3. Enquadramento
 - objetivo
 - restricoes
 - criterios de decisao
 
-### 2. Opcoes
-- apresente de 3 a 7 opcoes distintas
-- evite listar variacoes superficiais da mesma ideia
+### 4. Opções (matriz `brainstorm-matrix.md`)
+- 3 a 7 opções distintas
+- cada opção com tag `[IMPROVES] / [CONSOLIDATES] / [NEW]`
+- evite listar variações superficiais da mesma ideia
 
-### 3. Convergencia
+### 5. Convergência
 - recomende 1 ou 2 caminhos
 - diga por que eles vencem no contexto atual
 
-### 4. Proximos passos
+### 6. One-pager (se `--onepager`)
+- path do arquivo criado em `.dw/spec/ideas/<slug>.md`
+
+### 7. Próximos passos
 - lista curta e executavel
 - se apropriado, sugira qual comando usar em seguida:
-  - `/dw-create-prd`
+  - `/dw-create-prd` (principal sucessor; aceita one-pager como input reduzindo perguntas de clarificação)
+  - `/dw-quick` (se é IMPROVES pequeno que cabe em task única, ≤3 arquivos)
   - `/dw-create-techspec`
   - `/dw-create-tasks`
   - `/dw-bugfix`
@@ -113,8 +136,20 @@ Dependendo do pedido, o comando pode produzir:
 ## Encerramento
 
 Ao final, sempre deixe o usuario em uma destas situacoes:
-- com uma recomendacao clara
+- com uma recomendacao clara (incluindo classificação IMPROVES/CONSOLIDATES/NEW)
 - com perguntas melhores para decidir
 - com um proximo comando do workspace para seguir
+- com o one-pager em `.dw/spec/ideas/<slug>.md` (se `--onepager` foi usado)
+
+## Inspired by
+
+O padrão de codebase-grounded idea refinement é inspirado em [`addyosmani/agent-skills@idea-refine`](https://skills.sh/addyosmani/agent-skills/idea-refine) (Addy Osmani, Google — 1.4K+ installs). Adaptações para o dev-workflow:
+
+- **Nível de produto, não de código**: enquanto `idea-refine` usa Glob/Grep/Read em `src/*`, aqui lemos **PRDs + rules + intel** para mapear o **inventário de features** do produto. O brainstorm continua sendo produtual.
+- **Classificação explícita** (IMPROVES / CONSOLIDATES / NEW) como disciplina dev-workflow-nativa — força o time a decidir se a ideia é feature nova, consolidação ou melhoria de algo existente, antes de abrir um PRD.
+- Output em `.dw/spec/ideas/<slug>.md` (irmão de `prd-<slug>/`) em vez de `docs/ideas/` — mantém a convenção de paths do dev-workflow.
+- Integração com o pipeline existente: `/dw-create-prd` aceita o one-pager como input, reduzindo perguntas de clarificação.
+
+Crédito: Addy Osmani e o padrão `idea-refine`.
 
 </system_instructions>

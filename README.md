@@ -29,7 +29,7 @@ npx @brunosps00/dev-workflow install-deps
 ### Planning
 
 #### `/dw-brainstorm`
-Facilitates structured ideation before opening a PRD or implementation. Explores multiple directions — conservative, balanced, and bold — with trade-offs for each, then converges on concrete next steps. No code is written or files modified.
+Facilitates structured ideation before opening a PRD or implementation. Explores multiple directions — conservative, balanced, and bold — with trade-offs for each, then converges on concrete next steps. **Product-aware**: when PRDs or rules exist, automatically reads them to produce a Feature Inventory and tags each option as `[IMPROVES: <feature>]`, `[CONSOLIDATES: <A>+<B>]`, or `[NEW]`. With optional `--onepager` flag, generates a durable one-pager at `.dw/spec/ideas/<slug>.md` that `/dw-create-prd` can consume to reduce clarification questions. Inspired by [`addyosmani/agent-skills@idea-refine`](https://skills.sh/addyosmani/agent-skills/idea-refine), adapted to product-level (features) rather than code-level grounding. No code is written or project files modified by the brainstorm itself.
 
 #### `/dw-autopilot`
 Full pipeline orchestrator that takes a wish and automatically runs the entire development flow: codebase intelligence, research (conditional), brainstorm, PRD, techspec, tasks, execution, QA, review, and commit. Stops at 3 gates: PRD approval, tasks approval, and PR confirmation. With GSD installed, leverages plan verification and parallel execution.

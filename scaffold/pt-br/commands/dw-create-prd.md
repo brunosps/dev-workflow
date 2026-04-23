@@ -9,7 +9,15 @@
     - NÃO use quando os requisitos ainda estão vagos e inexplorados (use `/dw-brainstorm` primeiro)
 
     ## Posição no Pipeline
-    **Antecessor:** `/dw-brainstorm` (opcional) | **Sucessor:** `/dw-create-techspec`
+    **Antecessor:** `/dw-brainstorm` (opcional; pode passar one-pager como input) | **Sucessor:** `/dw-create-techspec`
+
+    ## One-pager como Input (opcional)
+
+    Se existir `.dw/spec/ideas/<slug>.md` produzido por `/dw-brainstorm --onepager`, **leia-o antes de fazer perguntas**. O one-pager já traz: Problem Statement, Feature Inventory do produto, Classification (IMPROVES/CONSOLIDATES/NEW), Recommended Direction, MVP Scope, Not Doing, Key Assumptions e Open Questions.
+
+    Com um one-pager válido (todos os campos preenchidos), **reduza o mínimo de perguntas de clarificação de 7 para 4** — foque apenas em lacunas remanescentes (ex: acceptance criteria específicos, métricas de sucesso concretas, fluxos de erro, edge cases). NÃO repita perguntas já respondidas no one-pager.
+
+    No PRD final, adicionar seção "Origem da Ideia" citando o one-pager e preservando a classification tag.
 
     ## Guia de Clareza de Requisitos
 
@@ -71,6 +79,7 @@
     - O que NÃO está no escopo
     - **Projetos impactados** (consulte `.dw/rules/index.md` para identificar quais sistemas são afetados)
     - <critical>NÃO GERE O PRD SEM ANTES FAZER NO MINIMO 7 PERGUNTAS DE CLARIFICAÇÃO</critical>
+    - <critical>**EXCEÇÃO**: Se um one-pager `.dw/spec/ideas/<slug>.md` foi passado como input e tem todos os campos preenchidos, o mínimo cai para **4 perguntas** — foque em lacunas (acceptance criteria, métricas, edge cases). NÃO repita perguntas já respondidas no one-pager.</critical>
 
     ### 2. Planejar (Obrigatório)
     Crie um plano de desenvolvimento do PRD incluindo:

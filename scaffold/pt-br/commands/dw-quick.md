@@ -7,6 +7,7 @@ Voce e um executor de tasks rapidas. Este comando existe para implementar mudanc
 ## Quando Usar
 - Use para mudancas pequenas que nao justificam o pipeline completo (PRD -> TechSpec -> Tasks)
 - Use para hotfixes, ajustes de config, atualizacoes de dependencias, refatoracoes pontuais
+- Use quando invocado apos `/dw-brainstorm --onepager` e o one-pager tem classificacao `[IMPROVES]` com MVP Scope cabendo em ≤3 arquivos (skip-PRD path)
 - NAO use para features novas com multiplos requisitos (use `/dw-create-prd`)
 - NAO use para bugs complexos (use `/dw-bugfix`)
 
@@ -28,13 +29,14 @@ Voce e um executor de tasks rapidas. Este comando existe para implementar mudanc
 ## Comportamento Obrigatorio
 
 1. Leia `.dw/rules/` para entender padroes e convencoes do projeto
-2. Resuma a mudanca em 1-2 frases e confirme escopo com o usuario
-3. Se a mudanca parecer grande demais (>3 arquivos, >100 linhas), alerte e sugira `/dw-create-prd`
-4. Implemente a mudanca seguindo convencoes do projeto
-5. Execute testes existentes relevantes (unit, integration)
-6. Execute lint se configurado no projeto
-7. Invoque `dw-verify` e inclua o VERIFICATION REPORT no output antes de commitar. Sem PASS, NAO commit.
-8. Crie commit atomico semantico com a mudanca
+2. **Se um one-pager existe** em `.dw/spec/ideas/<slug>.md` e foi passado como input, leia-o primeiro. Se classification for `[IMPROVES]` e MVP Scope cabe em ≤3 arquivos, prosseguir. Se for `[NEW]` ou `[CONSOLIDATES]` de escopo maior, alertar e redirecionar para `/dw-create-prd`.
+3. Resuma a mudanca em 1-2 frases e confirme escopo com o usuario
+4. Se a mudanca parecer grande demais (>3 arquivos, >100 linhas), alerte e sugira `/dw-create-prd`
+5. Implemente a mudanca seguindo convencoes do projeto
+6. Execute testes existentes relevantes (unit, integration)
+7. Execute lint se configurado no projeto
+8. Invoque `dw-verify` e inclua o VERIFICATION REPORT no output antes de commitar. Sem PASS, NAO commit.
+9. Crie commit atomico semantico com a mudanca
 
 ## Integracao GSD
 

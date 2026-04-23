@@ -9,7 +9,15 @@
     - Do NOT use when requirements are still vague and unexplored (use `/dw-brainstorm` first)
 
     ## Pipeline Position
-    **Predecessor:** `/dw-brainstorm` (optional) | **Successor:** `/dw-create-techspec`
+    **Predecessor:** `/dw-brainstorm` (optional; may pass a one-pager as input) | **Successor:** `/dw-create-techspec`
+
+    ## One-pager as Input (optional)
+
+    If `.dw/spec/ideas/<slug>.md` exists (produced by `/dw-brainstorm --onepager`), **read it before asking questions**. The one-pager already provides: Problem Statement, product Feature Inventory, Classification (IMPROVES/CONSOLIDATES/NEW), Recommended Direction, MVP Scope, Not Doing, Key Assumptions, and Open Questions.
+
+    With a valid one-pager (all fields filled), **reduce the minimum clarification questions from 7 to 4** — focus only on remaining gaps (e.g., specific acceptance criteria, concrete success metrics, error flows, edge cases). DO NOT repeat questions already answered in the one-pager.
+
+    In the final PRD, add an "Idea Origin" section citing the one-pager and preserving the classification tag.
 
     ## Requirement Clarity Guide
 
@@ -71,6 +79,7 @@
     - What is NOT in scope
     - **Impacted projects** (consult `.dw/rules/index.md` to identify which systems are affected)
     - <critical>DO NOT GENERATE THE PRD WITHOUT FIRST ASKING AT LEAST 7 CLARIFICATION QUESTIONS</critical>
+    - <critical>**EXCEPTION**: If a one-pager at `.dw/spec/ideas/<slug>.md` was passed as input and all its fields are filled, the minimum drops to **4 questions** — focus on gaps (acceptance criteria, metrics, edge cases). DO NOT repeat questions already answered in the one-pager.</critical>
 
     ### 2. Plan (Required)
     Create a PRD development plan including:

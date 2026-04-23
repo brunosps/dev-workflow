@@ -26,6 +26,7 @@ Você é um assistente de ajuda do workspace. Quando invocado, apresente ao usu�
 | decisão, adr, arquitetura | `/dw-adr` | Registrar Architecture Decision Record |
 | debate, council, stress-test, opiniões | `/dw-brainstorm --council` ou `/dw-create-techspec --council` | Invoca `dw-council` para debate multi-advisor |
 | security, segurança, vulnerabilidade, owasp, trivy, cve | `/dw-security-check` | Check multi-camada rígido (OWASP estático + Trivy SCA/IaC + audit nativo) para TS/Python/C#/Rust |
+| refinamento, refine, idea, one-pager, ideia | `/dw-brainstorm --onepager` | Refinamento de ideia com Product Inventory + classification (IMPROVES/CONSOLIDATES/NEW) + one-pager durável |
 | reverter, rollback de task | `/dw-revert-task` | Revert seguro com check de dependências |
 | hotfix, mudança rápida | `/dw-quick` | Task pontual com garantias sem PRD |
 | retomar, onde parei | `/dw-resume` | Restaura contexto da sessão anterior |
