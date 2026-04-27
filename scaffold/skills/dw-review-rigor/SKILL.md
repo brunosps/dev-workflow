@@ -1,12 +1,6 @@
 ---
 name: dw-review-rigor
-description: |
-  Applies review discipline to code-review and analysis commands:
-  de-duplicates issues, orders by severity, verifies intent before flagging,
-  prioritizes signal over volume, and skips concerns that linters already
-  catch. Invoked from dw-code-review, dw-review-implementation, and
-  dw-refactoring-analysis. Do not use for fetching reviews from external
-  providers or for executing fixes.
+description: Five rules for review output — dedupe, severity-order, verify intent, skip linter noise, prefer signal over volume.
 allowed-tools:
   - Read
   - Grep

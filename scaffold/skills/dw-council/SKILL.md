@@ -1,13 +1,6 @@
 ---
 name: dw-council
-description: |
-  Orchestrates a multi-advisor debate (3-5 archetypes) to stress-test
-  high-stakes product, architecture, or scope decisions. Uses parallel
-  subagents with steel-manning, concession tracking, and dissent-preserving
-  synthesis. Invoked opt-in via `--council` flag from dw-brainstorm and
-  dw-create-techspec, or standalone when the user explicitly needs a
-  rigorous debate. Do not use for small decisions, routine implementation,
-  or when a single answer is already obvious.
+description: Multi-advisor debate (3-5 archetypes) with steel-manning and dissent preserved, for high-stakes product or architecture calls.
 allowed-tools:
   - Read
   - Task

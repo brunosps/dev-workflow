@@ -1,13 +1,6 @@
 ---
 name: dw-memory
-description: |
-  Maintains workflow-scoped memory for dev-workflow PRD runs using
-  .dw/spec/prd-<name>/MEMORY.md (shared) and .dw/spec/prd-<name>/tasks/<N>_memory.md
-  (task-local). Use when a dev-workflow command needs to persist or recall
-  durable cross-task context (decisions, constraints, risks) across task
-  executions. Invoked from dw-run-task, dw-run-plan, dw-autopilot, and
-  dw-resume. Do not use for PR review remediation, user preferences, or
-  event-log summarization.
+description: Two-tier workflow memory (shared + per-task) with promotion test, so cross-task context survives without bloating files.
 allowed-tools:
   - Read
   - Write
