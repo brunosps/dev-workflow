@@ -10,7 +10,7 @@ npx @brunosps00/dev-workflow init
 
 This will:
 1. Ask you to select a language (English or Portuguese)
-2. Create `.dw/commands/` with 27 workflow commands
+2. Create `.dw/commands/` with 29 workflow commands
 3. Create `.dw/templates/` with document templates (PRD, TechSpec, Tasks, ADR, etc.)
 4. Create `.dw/rules/` (populated by `/dw-analyze-project`)
 5. Install bundled skills (`dw-verify`, `dw-memory`, `dw-review-rigor`, `ui-ux-pro-max`, `security-review`, etc.) to `.agents/skills/`
@@ -80,6 +80,9 @@ Audits the codebase for code smells and refactoring opportunities using Martin F
 #### `/dw-security-check`
 Rigid multi-layer security check for **TypeScript, Python, C#, and Rust** projects. Combines OWASP static review (language-aware, via the bundled `security-review` skill), Trivy SCA/secret/IaC scanning (`trivy fs` + `trivy config`), and native lockfile audit (`npm audit` / `pip-audit` / `dotnet list package --vulnerable` / `cargo audit`). Consults Context7 MCP for framework-version-specific best practices (Next.js, Django, ASP.NET Core, Actix/Axum/Rocket, etc.). Hard gates: any CRITICAL or HIGH finding produces REJECTED status, blocking `/dw-code-review`, `/dw-review-implementation`, and `/dw-generate-pr`. No bypass flag. Requires Trivy (install via `install-deps`).
 
+#### `/dw-deps-audit`
+Supply-chain remediation orchestrator for **TypeScript, Python, C#, and Rust** projects. Runs three detection signals — `npm/pnpm/pip-audit/dotnet/cargo audit` for known CVEs, the `outdated` companions for stale versions, and an OSV.dev + GitHub Advisories cross-check (with a hardcoded fallback list of historical malicious-package incidents like `event-stream`, `ua-parser-js`, `node-ipc`) for supply-chain attacks. Classifies findings into COMPROMISED / CRITICAL / HIGH / OUTDATED-MAJOR / OUTDATED-MINOR tiers, maps each affected package to the files that import it and the tests that cover those files, then drafts a per-package update plan with three options (Conservative / Balanced / Bold) and trade-offs. Modes: `--scan-only` (CI), `--plan` (default — no file writes), `--execute` (applies updates with scoped tests, one `/dw-fix-qa` retry, atomic commits, and `/dw-run-qa` as final gate; reverts and marks BLOCKED if recovery fails). Complementary to `/dw-security-check`: that one is the single-shot gate, this one is the planner-and-remediator.
+
 ### Git & PR
 
 #### `/dw-commit`
@@ -115,6 +118,9 @@ Generates a functional documentation dossier with screen mapping, E2E flows, and
 
 #### `/dw-help`
 Displays the complete guide of available commands, integration flows, and when to use each one. Can be invoked without arguments for the full guide or with a specific command name for a detailed section.
+
+#### `/dw-find-skills`
+Discovers skills from the open agent skills ecosystem (`npx skills` / [skills.sh](https://skills.sh/)) when no `dw-*` already covers the request. Checks the leaderboard first, then runs `npx skills find <query>` if needed, vets each candidate (install count, source reputation, GitHub stars), and presents 1–3 options with the install commands. Asks whether to install globally (`-g`, lands in `~/.agents/skills/`) or locally (this repo) before running `npx skills add`. Falls back to `/dw-brainstorm` or `/dw-quick` when no skill matches. Ports the `find-skills` Claude superpowers skill into a `dw-*` command so every supported platform gets the same discovery on-ramp.
 
 ## Workflow
 
@@ -167,7 +173,7 @@ All wrappers point to `.dw/commands/` as the single source of truth.
 ```
 your-project/
 ├── .dw/
-│   ├── commands/          # 27 workflow command files
+│   ├── commands/          # 29 workflow command files
 │   ├── templates/         # Document templates (PRD, TechSpec, etc.)
 │   ├── rules/             # Project-specific rules (run /dw-analyze-project)
 │   ├── references/        # Reference documentation

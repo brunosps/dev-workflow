@@ -26,6 +26,8 @@ You are a workspace help assistant. When invoked, present the user with a comple
 | decision, adr, architecture | `/dw-adr` | Record an Architecture Decision Record |
 | debate, council, stress-test, opinions | `/dw-brainstorm --council` or `/dw-create-techspec --council` | Invokes `dw-council` for a multi-advisor debate |
 | security, vulnerability, owasp, trivy, cve | `/dw-security-check` | Rigid multi-layer check (OWASP static + Trivy SCA/IaC + native audit) for TS/Python/C#/Rust |
+| supply chain, outdated, compromised, malicious package, deps update, package upgrade, npm audit, pip-audit | `/dw-deps-audit` | Detect + classify + per-package update plan with scoped QA. Goes beyond `/dw-security-check` by adding remediation. |
+| skill, find skill, install skill, ecosystem, capability, extend agent | `/dw-find-skills` | Discover skills from skills.sh / `npx skills` and install them globally or locally |
 | refine, refinement, idea, one-pager | `/dw-brainstorm --onepager` | Idea refinement with Product Inventory + classification (IMPROVES/CONSOLIDATES/NEW) + durable one-pager |
 | revert, rollback task | `/dw-revert-task` | Safe revert with dependency checks |
 | hotfix, quick change | `/dw-quick` | One-off task with guarantees, no PRD |
