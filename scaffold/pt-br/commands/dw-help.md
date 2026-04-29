@@ -28,6 +28,8 @@ Você é um assistente de ajuda do workspace. Quando invocado, apresente ao usu�
 | security, segurança, vulnerabilidade, owasp, trivy, cve | `/dw-security-check` | Check multi-camada rígido (OWASP estático + Trivy SCA/IaC + audit nativo) para TS/Python/C#/Rust |
 | supply chain, outdated, comprometido, pacote malicioso, atualizar deps, npm audit, pip-audit | `/dw-deps-audit` | Detecta + classifica + plano de update por pacote com QA escopada. Vai além do `/dw-security-check` adicionando remediação. |
 | skill, achar skill, instalar skill, ecossistema, capacidade, estender agente | `/dw-find-skills` | Descobre skills no skills.sh / `npx skills` e instala global ou local |
+| projeto novo, scaffold, bootstrap, comecar, iniciar projeto, fullstack, monorepo | `/dw-new-project` | Entrevista de stack + tools create-* + docker-compose para dev. Roda apos `npx dev-workflow init`. |
+| dockerize, docker, dockerfile, compose, container, imagem prod, multi-stage | `/dw-dockerize` | Le projeto existente, brainstorm de base, gera Dockerfile + docker-compose para dev/prod/ambos, ou audita artefatos existentes. |
 | refinamento, refine, idea, one-pager, ideia | `/dw-brainstorm --onepager` | Refinamento de ideia com Product Inventory + classification (IMPROVES/CONSOLIDATES/NEW) + one-pager durável |
 | reverter, rollback de task | `/dw-revert-task` | Revert seguro com check de dependências |
 | hotfix, mudança rápida | `/dw-quick` | Task pontual com garantias sem PRD |

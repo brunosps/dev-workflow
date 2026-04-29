@@ -10,7 +10,7 @@ npx @brunosps00/dev-workflow init
 
 This will:
 1. Ask you to select a language (English or Portuguese)
-2. Create `.dw/commands/` with 29 workflow commands
+2. Create `.dw/commands/` with 31 workflow commands
 3. Create `.dw/templates/` with document templates (PRD, TechSpec, Tasks, ADR, etc.)
 4. Create `.dw/rules/` (populated by `/dw-analyze-project`)
 5. Install bundled skills (`dw-verify`, `dw-memory`, `dw-review-rigor`, `ui-ux-pro-max`, `security-review`, etc.) to `.agents/skills/`
@@ -94,6 +94,16 @@ Pushes the branch to remote and creates a Pull Request on GitHub with a structur
 #### `/dw-revert-task`
 Safely reverts the commits of a specific task created by `/dw-run-task`, with dependency-aware checks (blocks if subsequent tasks already executed depend on it) and explicit user confirmation. Updates `tasks.md` to re-mark the task as pending.
 
+### Project Bootstrap
+
+#### `/dw-new-project`
+Bootstraps a new project from an empty directory. Runs a wide stack interview (frontend/backend/fullstack, language, framework, db, cache, queue, email, storage, search, auth, observability, reverse proxy, scheduler, CI, linter), then wraps the right official `create-*` tools (`pnpm create next-app`, `pnpm create vite`, `pnpm dlx create-t3-app`, `dotnet new webapi`, `cargo new`, etc.) to scaffold the apps. Composes a `docker-compose.dev.yml` from the bundled `docker-compose-recipes` skill (postgres, redis, mailhog by default for email-in-dev, minio, meilisearch, jaeger, traefik, etc.), seeds `.env.example`, root scripts (`dev:up`/`down`/`logs`/`reset`), `.gitignore`/`.dockerignore`, GitHub Action, README with port table, and a minimal `.dw/rules/index.md`. Hard gate: presents a one-pager + plan and waits for explicit approval before touching disk.
+
+### Containerization
+
+#### `/dw-dockerize`
+Reads an existing project, detects language / framework / package manager / runtime infra deps (postgres, redis, queue, email, storage, search, OTel) by parsing manifests and import statements, then proposes Docker artifacts. Modes: `--dev` (default if no Dockerfile exists) generates `docker-compose.dev.yml` + `Dockerfile.dev` from the bundled `docker-compose-recipes` skill; `--prod` generates a multi-stage `Dockerfile` (Conservative slim / Balanced alpine / Bold distroless — brainstormed with trade-offs) + optional `docker-compose.prod.yml` with non-root user, healthcheck, no secrets baked in; `--both` ships both; `--audit` (default if Docker artifacts already exist) reports findings against `security-review/infrastructure/docker.md` without overwriting. Hard gate: presents the file tree and waits for approval before any write. Sister command to `/dw-new-project` — they share the `docker-compose-recipes` bundled skill.
+
 ### Architectural Decisions
 
 #### `/dw-adr`
@@ -173,7 +183,7 @@ All wrappers point to `.dw/commands/` as the single source of truth.
 ```
 your-project/
 ├── .dw/
-│   ├── commands/          # 29 workflow command files
+│   ├── commands/          # 31 workflow command files
 │   ├── templates/         # Document templates (PRD, TechSpec, etc.)
 │   ├── rules/             # Project-specific rules (run /dw-analyze-project)
 │   ├── references/        # Reference documentation
