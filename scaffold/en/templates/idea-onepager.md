@@ -22,7 +22,7 @@ Focus on the problem, not the solution. Avoid jumping into "how to implement".]
 Sources:
 - PRDs in `.dw/spec/prd-*/prd.md` (features already delivered or in development)
 - `.dw/rules/index.md` (product overview)
-- `.planning/intel/` if GSD is installed
+- `.dw/intel/` (queryable index — built by `/dw-map-codebase`, queried via `/dw-intel`)
 
 Format:]
 
