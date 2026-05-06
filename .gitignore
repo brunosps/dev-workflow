@@ -1,0 +1,16 @@
+# Local AI-platform install footprints (created by `npx dev-workflow init`
+# in this repo when used as a self-host harness during development).
+# Each user's local setup; not part of the dev-workflow source.
+.claude/
+.codex/
+.github/
+.opencode/
+
+# Node
+node_modules/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
