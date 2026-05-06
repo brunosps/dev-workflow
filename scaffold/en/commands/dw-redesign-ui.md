@@ -64,17 +64,13 @@ Use diagnostic tools based on the project's framework:
 7. **VALIDATE**: capture after-state in BOTH resolutions (mobile and desktop), compare before/after, verify accessibility (WCAG 2.2 via `ui-ux-pro-max`), run react-doctor `--diff` if React. If `webapp-testing` is available, capture screenshots at 375px viewport (mobile) and 1440px viewport (desktop).
 8. **PERSIST CONTRACT**: if the user approved a direction, generate `design-contract.md` in the PRD directory (`.dw/spec/prd-[name]/design-contract.md`) with: approved direction, color palette, typography pairing, layout rules, accessibility rules, and component rules. This contract will be read by `dw-run-task` and `dw-run-plan` to ensure visual consistency.
 
-## GSD Integration
+## Codebase Intelligence
 
-<critical>When GSD is installed, registering the design contract in .planning/ and querying .planning/intel/ are MANDATORY.</critical>
+<critical>If `.dw/intel/` exists, querying it via `/dw-intel` is MANDATORY in the audit phase to surface existing UI patterns.</critical>
 
-If GSD (get-shit-done-cc) is installed in the project:
-- After generating the design contract, register in `.planning/` for cross-session persistence
-- Query `.planning/intel/` in the audit phase for existing UI patterns
-
-If GSD is NOT installed:
-- The design contract works normally (file-based in `.dw/spec/`)
-- Audit uses only `.dw/rules/` for context
+- Audit phase: internally run `/dw-intel "UI components, design patterns, layout conventions"` before proposing redesign directions
+- The design contract (`.dw/spec/prd-[name]/design-contract.md`) is the single source of truth for visual consistency — it's read by `/dw-run-task` and `/dw-run-plan` and persists across sessions naturally (no separate registration needed)
+- If `.dw/intel/` does NOT exist, fall back to `.dw/rules/` and direct grep over `apps/web/src/` (or equivalent frontend root)
 
 ## Preferred Response Format
 

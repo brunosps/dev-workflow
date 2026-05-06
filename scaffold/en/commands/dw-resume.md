@@ -40,17 +40,19 @@ You are a session continuity assistant. This command exists to restore context f
 6. Present the summary in the format below (including a "From where we left off" bullet list based on memory)
 7. Suggest the next command to execute
 
-## GSD Integration
+## Cross-Session State
 
-<critical>When GSD is installed, delegation to /gsd-resume-work is MANDATORY, not optional.</critical>
+<critical>If `.dw/spec/active-session.md` exists (written by `/dw-execute-phase` at checkpoint), reading it is MANDATORY to restore the last-known position.</critical>
 
-If GSD (get-shit-done-cc) is installed in the project:
-- Delegate to `/gsd-resume-work` for cross-session state restoration from `.planning/STATE.md`
-- Incorporate additional context: persistent threads, backlog, notes
+Read order for cross-session context:
 
-If GSD is NOT installed:
-- Use only `.dw/spec/` and git log as context sources
-- Full functionality, just without advanced cross-session persistence
+1. `.dw/spec/active-session.md` — last completed task, next task, blockers, open deviations (written by `/dw-execute-phase` when it checkpoints at 70% context budget OR when the user signals stop)
+2. `.dw/spec/prd-*/SUMMARY.md` — completed phase summaries (most recent ones)
+3. Latest commits via `git log --oneline -20` — what landed on the current branch
+4. Open deviations via `.dw/spec/prd-*/deviations.md` — any unresolved Rule 1/2/3 entries
+5. Active PRD detection — the directory under `.dw/spec/` whose `tasks.md` has the most recent uncompleted task
+
+If `.dw/spec/active-session.md` is absent (no checkpoint was written; clean session boundary), fall back to git log + `tasks.md` state across active PRDs.
 
 ## Response Format
 

@@ -42,12 +42,13 @@
 
     ## Inteligência do Codebase
 
-    <critical>Se `.planning/intel/` existir, a consulta é OBRIGATÓRIA antes de redigir os requisitos. NÃO pule este passo.</critical>
-    - Execute internamente: `/gsd-intel "features existentes no domínio de [tópico do PRD]"`
+    <critical>Se `.dw/intel/` existir, a consulta via `/dw-intel` é OBRIGATÓRIA antes de redigir os requisitos. NÃO pule este passo.</critical>
+    - Execute internamente: `/dw-intel "features existentes no domínio de [tópico do PRD]"`
     - Use os findings para evitar duplicar funcionalidade existente e referenciar padrões já estabelecidos
 
-    Se `.planning/intel/` NÃO existir:
-    - Use `.dw/rules/` como contexto (comportamento atual)
+    Se `.dw/intel/` NÃO existir:
+    - Use `.dw/rules/` como contexto, caindo para grep
+    - Sugira rodar `/dw-map-codebase` para enriquecer contexto downstream
 
     ## Features Multi-Projeto
 

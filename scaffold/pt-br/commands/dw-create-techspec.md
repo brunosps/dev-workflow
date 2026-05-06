@@ -29,12 +29,13 @@
 
     ## Inteligência do Codebase
 
-    <critical>Se `.planning/intel/` existir, a consulta é OBRIGATÓRIA antes de redigir os requisitos. NÃO pule este passo.</critical>
-    - Execute internamente: `/gsd-intel "padrões arquiteturais e decisões técnicas do projeto"`
+    <critical>Se `.dw/intel/` existir, a consulta via `/dw-intel` é OBRIGATÓRIA antes de redigir o techspec. NÃO pule este passo.</critical>
+    - Execute internamente: `/dw-intel "padrões arquiteturais e decisões técnicas do projeto"`
     - Alinhe propostas com padrões existentes; sinalize desvios explicitamente
 
-    Se `.planning/intel/` NÃO existir:
-    - Use `.dw/rules/` como contexto (comportamento atual)
+    Se `.dw/intel/` NÃO existir:
+    - Use `.dw/rules/` como contexto, caindo para grep
+    - Sugira rodar `/dw-map-codebase` para enriquecer contexto downstream
 
     ## Fluxograma de Decisão Multi-Projeto
 

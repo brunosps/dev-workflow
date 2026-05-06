@@ -188,7 +188,7 @@ Adapte o `dev:db:migrate` por ORM (Prisma: `pnpm prisma migrate dev`; Alembic: `
 
 Por stack, anexe ao que `create-*` gerou:
 - `.gitignore` deve excluir `.env`.
-- Inclua `.dw/spec/`, `.planning/` se o usuario tambem usa GSD.
+- O diretorio `.dw/` e preservado entre updates pelo `/dw-update` (rules, spec, intel sao dados do usuario).
 - `.dockerignore`: exclua `.git`, `node_modules`, `.dw`, `.agents`, `tests`, `*.md` (em imagens prod).
 
 #### 3.7 Gerar GitHub Actions CI

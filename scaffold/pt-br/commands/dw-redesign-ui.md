@@ -64,17 +64,13 @@ Utilize ferramentas de diagnóstico conforme o framework do projeto:
 7. **VALIDAR**: capture estado depois em AMBAS as resoluções (mobile e desktop), compare antes/depois, verifique acessibilidade (WCAG 2.2 via `ui-ux-pro-max`), rode react-doctor `--diff` se React. Se `webapp-testing` disponível, capture screenshots em viewport 375px (mobile) e 1440px (desktop).
 8. **PERSISTIR CONTRATO**: se o usuário aprovou uma direção, gere `design-contract.md` no diretório do PRD (`.dw/spec/prd-[nome]/design-contract.md`) com: direção aprovada, paleta de cores, par tipográfico, regras de layout, regras de acessibilidade e regras de componentes. Este contrato será lido por `dw-run-task` e `dw-run-plan` para garantir consistência visual.
 
-## Integração GSD
+## Inteligência do Codebase
 
-<critical>Quando o GSD estiver instalado, o registro do design contract em .planning/ e a consulta de .planning/intel/ são OBRIGATÓRIOS.</critical>
+<critical>Se `.dw/intel/` existir, a consulta via `/dw-intel` é OBRIGATÓRIA na fase de auditoria para identificar UI patterns existentes.</critical>
 
-Se o GSD (get-shit-done-cc) estiver instalado no projeto:
-- Após gerar o design contract, registre em `.planning/` para persistência cross-sessão
-- Consulte `.planning/intel/` na fase de auditoria para UI patterns existentes
-
-Se o GSD NÃO estiver instalado:
-- O design contract funciona normalmente (file-based em `.dw/spec/`)
-- Auditoria usa apenas `.dw/rules/` para contexto
+- Fase de auditoria: execute internamente `/dw-intel "componentes UI, padrões de design, convenções de layout"` antes de propor direções de redesign
+- O design contract (`.dw/spec/prd-[nome]/design-contract.md`) é a fonte única de verdade para consistência visual — lido por `/dw-run-task` e `/dw-run-plan` e persiste cross-sessão naturalmente (sem registro separado)
+- Se `.dw/intel/` NÃO existir, caia para `.dw/rules/` e grep direto sobre `apps/web/src/` (ou frontend root equivalente)
 
 ## Formato de Resposta Preferido
 

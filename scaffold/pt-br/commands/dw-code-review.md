@@ -29,13 +29,14 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apo
 
 ## Inteligência do Codebase
 
-<critical>Se `.planning/intel/` existir, a consulta é OBRIGATÓRIA antes de redigir os requisitos. NÃO pule este passo.</critical>
-- Execute internamente: `/gsd-intel "convenções, anti-patterns e decision spaces documentados"`
+<critical>Se `.dw/intel/` existir, a consulta via `/dw-intel` é OBRIGATÓRIA antes do review. NÃO pule este passo.</critical>
+- Execute internamente: `/dw-intel "convenções e anti-patterns documentados"`
 - Priorize findings que violem convenções documentadas
-- Verifique se decisões arquiteturais questionáveis são intencionais (documentadas como decision spaces)
+- Verifique se decisões arquiteturais questionáveis são intencionais (documentadas em `.dw/rules/`)
 
-Se `.planning/intel/` NÃO existir:
-- Use `.dw/rules/` como contexto (comportamento atual)
+Se `.dw/intel/` NÃO existir:
+- Use `.dw/rules/` como contexto, caindo para grep
+- Sugira rodar `/dw-map-codebase` após o review para enriquecer contexto downstream
 
 ## Variáveis de Entrada
 

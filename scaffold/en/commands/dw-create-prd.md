@@ -42,12 +42,13 @@
 
     ## Codebase Intelligence
 
-    <critical>If `.planning/intel/` exists, querying it is MANDATORY before writing requirements. Do NOT skip this step.</critical>
-    - Internally run: `/gsd-intel "existing features in the [PRD topic] domain"`
+    <critical>If `.dw/intel/` exists, querying it via `/dw-intel` is MANDATORY before writing requirements. Do NOT skip this step.</critical>
+    - Internally run: `/dw-intel "existing features in the [PRD topic] domain"`
     - Use findings to avoid duplicating existing functionality and reference established patterns
 
-    If `.planning/intel/` does NOT exist:
-    - Use `.dw/rules/` as context (current behavior)
+    If `.dw/intel/` does NOT exist:
+    - Use `.dw/rules/` as context, falling back to grep
+    - Suggest running `/dw-map-codebase` for richer downstream context
 
     ## Multi-Project Features
 

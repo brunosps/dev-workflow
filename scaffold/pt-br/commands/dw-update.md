@@ -79,7 +79,9 @@ npx -y @brunosps00/dev-workflow@latest update --lang=$DETECTED_LANG
 O comando `update` sobrescreve arquivos gerenciados e PRESERVA:
 - `.dw/rules/` (rules do usuário)
 - `.dw/spec/` (PRDs e tasks em andamento)
-- `.planning/` (dados do usuário)
+- `.dw/intel/` (índice de codebase do `/dw-map-codebase`)
+
+O comando `update` também roda o passo de migração GSD automaticamente — se o projeto tem `.planning/` legado (de uso prévio do GSD), o conteúdo é migrado para `.dw/intel/`, `.dw/spec/active-session.md`, `.dw/spec/quick/`, etc., e `.planning/` é renomeado para `.planning.gsd-archive-<DATA>/` para inspeção. Os arquivos `.claude/commands/gsd/`, `.claude/agents/gsd-*.md`, `.claude/hooks/gsd-*.js` e `.claude/gsd-file-manifest.json` são removidos durante a migração.
 
 Se o update falhar (erro de rede, permissão, pacote indisponível): reporte o erro ao usuário e PARE. NÃO tente workarounds manuais como copiar arquivos.
 

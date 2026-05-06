@@ -338,8 +338,8 @@ workspace/
 **Q: O `/dw-redesign-ui` funciona com Angular?**
 - Sim. O comando é framework-agnostic. Para React usa react-doctor e `vercel-react-best-practices`; para Angular usa `ng lint` e Angular DevTools. Design visual (`ui-ux-pro-max`) funciona com qualquer framework.
 
-**Q: O que é o GSD e preciso instalar?**
-- GSD (get-shit-done-cc) é uma engine opcional que habilita features avançadas: execução paralela, verificação de planos, inteligência do codebase e persistência cross-sessão. Instale com `npx dev-workflow install-deps`. Sem GSD, todos os comandos funcionam normalmente.
+**Q: Como obtenho inteligência do codebase e execução paralela?**
+- Os dois são nativos do dev-workflow desde a v0.9.0. Rode `/dw-map-codebase` para construir o índice queryable em `.dw/intel/`, depois `/dw-intel "<pergunta>"` para consultá-lo. Para execução paralela, `/dw-execute-phase` dispatcha tasks em waves com commits atômicos por task. Sem dependência externa.
 
 **Q: O `/dw-quick` substitui o `/dw-run-task`?**
 - Não. `/dw-quick` é para mudanças pontuais sem PRD. `/dw-run-task` executa tasks de um plano estruturado com PRD e TechSpec.

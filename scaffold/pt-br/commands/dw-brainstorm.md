@@ -65,7 +65,7 @@ Use este comando quando o usuario quiser:
 2. **Reformule como "How Might We"**: transforme a ideia bruta em `How might we [verbo] para [usuário] de forma que [resultado]?`. Isso tira o time de "solution mode" prematuro.
 3. **Product Inventory (obrigatório se o produto existe)**:
    - Se `.dw/spec/prd-*/` tem PRDs OU `.dw/rules/index.md` existe, leia esses artefatos para mapear o **inventário de features do produto atual** (nível de produto, não de código).
-   - Fontes a consultar: `.dw/spec/prd-*/prd.md` (seções Overview / Main Features / User Stories), `.dw/rules/index.md` e `.dw/rules/<modulo>.md`, `.planning/intel/` se existir.
+   - Fontes a consultar: `.dw/spec/prd-*/prd.md` (seções Overview / Main Features / User Stories), `.dw/rules/index.md` e `.dw/rules/<modulo>.md`, `.dw/intel/` se existir (queryable via `/dw-intel`).
    - Produza um **Feature Inventory curto (5-12 bullets)** antes de divergir: "o produto hoje faz X, Y, Z".
    - Se o projeto é greenfield (sem PRDs nem rules), registre: "Feature Inventory: greenfield — nenhum artefato de produto ainda".
 4. Se faltar contexto essencial para o usuário (problema, persona, valor esperado), faça perguntas curtas e objetivas antes de expandir.

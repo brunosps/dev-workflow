@@ -218,19 +218,14 @@ Para cada projeto/módulo detectado, identificar:
 Quando React for detectado, execute `npx react-doctor@latest --verbose` e inclua o health score nas rules geradas como métrica baseline.
 Para projetos Angular, execute `ng lint` e documente warnings como baseline.
 
-<critical>Se o GSD estiver instalado, a execução do /gsd-map-codebase é OBRIGATÓRIA. O comando NÃO pode ser considerado completo sem executar TODOS os passos aplicáveis, incluindo a geração do índice em .planning/intel/.</critical>
+<critical>A execução do /dw-map-codebase para gerar o índice queryable em .dw/intel/ é OBRIGATÓRIA. O comando NÃO pode ser considerado completo sem ela.</critical>
 
-#### Inteligência do Codebase (GSD)
+#### Inteligência do Codebase (nativo)
 
-Se o GSD (get-shit-done-cc) estiver instalado no projeto:
-- Após gerar as rules em `.dw/rules/`, delegue para `/gsd-map-codebase` para criar índice rico em `.planning/intel/`
-- O índice inclui: architectural assumptions, decision spaces, behavioral references, UI patterns
-- O índice é incremental — re-executar adiciona ao existente, não substitui
-- Outros comandos dw-* podem consultar o índice via `/gsd-intel` internamente
-
-Se o GSD NÃO estiver instalado:
-- Gere apenas `.dw/rules/` (comportamento atual)
-- Sugira: "Para inteligência queryable do codebase, instale GSD via `npx dev-workflow install-deps`"
+Após gerar as rules em `.dw/rules/`, delegue para `/dw-map-codebase` para criar o índice queryable em `.dw/intel/`:
+- O índice inclui: stack (`stack.json`), grafo de arquivos (`files.json`), superfície de API (`apis.json`), dependências (`deps.json`), overview de arquitetura (`arch.md`)
+- O índice é incremental — `/dw-map-codebase --files <list>` atualiza só os entries tocados; full scan só quando preciso
+- Outros comandos dw-* consultam o índice via `/dw-intel` (veja a skill bundled `dw-codebase-intel` para schemas)
 
 ### Passo 4: Ler Arquivos Fonte Representativos (Obrigatório)
 

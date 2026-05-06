@@ -230,19 +230,14 @@ For each module/project detected, identify:
 When React is detected, run `npx react-doctor@latest --verbose` and include the health score in the generated rules as a baseline metric.
 For Angular projects, run `ng lint` and document any warnings as baseline.
 
-<critical>If GSD is installed, running /gsd-map-codebase is MANDATORY. The command CANNOT be considered complete without executing ALL applicable steps, including generating the index in .planning/intel/.</critical>
+<critical>Running /dw-map-codebase to generate the queryable index in .dw/intel/ is MANDATORY. The command CANNOT be considered complete without it.</critical>
 
-#### Codebase Intelligence (GSD)
+#### Codebase Intelligence (native)
 
-If GSD (get-shit-done-cc) is installed in the project:
-- After generating rules in `.dw/rules/`, delegate to `/gsd-map-codebase` to create a rich index in `.planning/intel/`
-- The index includes: architectural assumptions, decision spaces, behavioral references, UI patterns
-- The index is incremental — re-running adds to the existing index, does not replace
-- Other dw-* commands can query the index via `/gsd-intel` internally
-
-If GSD is NOT installed:
-- Generate only `.dw/rules/` (current behavior)
-- Suggest: "For queryable codebase intelligence, install GSD via `npx dev-workflow install-deps`"
+After generating rules in `.dw/rules/`, delegate to `/dw-map-codebase` to create the queryable index in `.dw/intel/`:
+- The index includes: stack (`stack.json`), file graph (`files.json`), API surface (`apis.json`), dependencies (`deps.json`), architecture overview (`arch.md`)
+- The index is incremental — `/dw-map-codebase --files <list>` updates only the touched entries; full scan only when needed
+- Other dw-* commands query the index via `/dw-intel` (see the `dw-codebase-intel` bundled skill for schemas)
 
 ### Step 4: Detect Code Patterns and Conventions
 

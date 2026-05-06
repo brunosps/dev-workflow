@@ -31,13 +31,14 @@ For Angular projects, use `ng lint` as an analytical complement.
 
 ## Codebase Intelligence
 
-<critical>If `.planning/intel/` exists, querying it is MANDATORY before writing requirements. Do NOT skip this step.</critical>
-- Internally run: `/gsd-intel "tech debt, decision spaces, and known technical debt"`
-- Contextualize findings with already documented decisions
+<critical>If `.dw/intel/` exists, querying it via `/dw-intel` is MANDATORY before flagging refactoring opportunities. Do NOT skip this step.</critical>
+- Internally run: `/dw-intel "tech debt and known technical decisions"`
+- Contextualize findings with documented decisions in `.dw/rules/`
 - Avoid flagging as a smell something that is an intentional recorded decision
 
-If `.planning/intel/` does NOT exist:
-- Use `.dw/rules/` as context (current behavior)
+If `.dw/intel/` does NOT exist:
+- Use `.dw/rules/` as context, falling back to grep
+- Suggest running `/dw-map-codebase` to enrich downstream context
 
 ## Input Variables
 

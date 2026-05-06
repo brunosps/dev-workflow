@@ -31,13 +31,14 @@ Para projetos Angular, use `ng lint` como complemento analítico.
 
 ## Inteligência do Codebase
 
-<critical>Se `.planning/intel/` existir, a consulta é OBRIGATÓRIA antes de redigir os requisitos. NÃO pule este passo.</critical>
-- Execute internamente: `/gsd-intel "tech debt, decision spaces e dívida técnica conhecida"`
-- Contextualize findings com decisões já documentadas
+<critical>Se `.dw/intel/` existir, a consulta via `/dw-intel` é OBRIGATÓRIA antes de sinalizar oportunidades de refactoring. NÃO pule este passo.</critical>
+- Execute internamente: `/dw-intel "tech debt e decisões técnicas conhecidas"`
+- Contextualize findings com decisões já documentadas em `.dw/rules/`
 - Evite sinalizar como smell algo que é uma decisão intencional registrada
 
-Se `.planning/intel/` NÃO existir:
-- Use `.dw/rules/` como contexto (comportamento atual)
+Se `.dw/intel/` NÃO existir:
+- Use `.dw/rules/` como contexto, caindo para grep
+- Sugira rodar `/dw-map-codebase` para enriquecer contexto downstream
 
 ## Variáveis de Entrada
 

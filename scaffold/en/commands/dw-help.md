@@ -399,8 +399,8 @@ Commands work across multiple AI tools, all pointing to the same source `.dw/com
 **Q: Does `/dw-redesign-ui` work with Angular?**
 - Yes. The command is framework-agnostic. For React it uses react-doctor and `vercel-react-best-practices`; for Angular it uses `ng lint` and Angular DevTools. Visual design (`ui-ux-pro-max`) works with any framework.
 
-**Q: What is GSD and do I need to install it?**
-- GSD (get-shit-done-cc) is an optional engine that enables advanced features: parallel execution, plan verification, codebase intelligence, and cross-session persistence. Install with `npx dev-workflow install-deps`. Without GSD, all commands work normally.
+**Q: How do I get codebase intelligence and parallel execution?**
+- Both are native to dev-workflow as of v0.9.0. Run `/dw-map-codebase` to build the queryable index in `.dw/intel/`, then `/dw-intel "<question>"` to query it. For parallel execution, `/dw-execute-phase` dispatches tasks in waves with atomic commits per task. No external dependency needed.
 
 **Q: Does `/dw-quick` replace `/dw-run-task`?**
 - No. `/dw-quick` is for one-off changes without a PRD. `/dw-run-task` executes tasks from a structured plan with PRD and TechSpec.

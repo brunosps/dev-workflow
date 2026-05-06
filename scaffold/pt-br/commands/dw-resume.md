@@ -40,17 +40,19 @@ Voce e um assistente de continuidade de sessao. Este comando existe para restaur
 6. Apresente o resumo no formato abaixo (incluindo bullets de "Do ponto onde paramos" com base na memory)
 7. Sugira o proximo comando a executar
 
-## Integracao GSD
+## Estado Cross-Sessao
 
-<critical>Quando o GSD estiver instalado, a delegação para /gsd-resume-work é OBRIGATÓRIA, não opcional.</critical>
+<critical>Se `.dw/spec/active-session.md` existir (escrito pelo `/dw-execute-phase` em checkpoint), a leitura e OBRIGATORIA para restaurar a ultima posicao conhecida.</critical>
 
-Se o GSD (get-shit-done-cc) estiver instalado no projeto:
-- Delegue para `/gsd-resume-work` para restaurar estado cross-sessao de `.planning/STATE.md`
-- Incorpore contexto adicional: threads persistentes, backlog, notas
+Ordem de leitura para contexto cross-sessao:
 
-Se o GSD NAO estiver instalado:
-- Use apenas `.dw/spec/` e git log como fontes de contexto
-- Funcionalidade completa, apenas sem persistencia cross-sessao avancada
+1. `.dw/spec/active-session.md` — ultima task completa, proxima task, blockers, deviations abertas (escrito pelo `/dw-execute-phase` em checkpoint a 70% de budget de contexto OU quando o usuario sinaliza stop)
+2. `.dw/spec/prd-*/SUMMARY.md` — resumos de fases concluidas (mais recentes)
+3. Commits recentes via `git log --oneline -20` — o que aterrissou na branch atual
+4. Deviations abertas via `.dw/spec/prd-*/deviations.md` — Rule 1/2/3 entries nao resolvidas
+5. Deteccao de PRD ativo — diretorio sob `.dw/spec/` cujo `tasks.md` tem a task uncompleted mais recente
+
+Se `.dw/spec/active-session.md` esta ausente (sem checkpoint escrito; boundary limpa de sessao), caia para git log + estado de `tasks.md` em PRDs ativos.
 
 ## Formato de Resposta
 

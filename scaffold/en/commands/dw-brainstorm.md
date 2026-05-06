@@ -65,7 +65,7 @@ Use this command when the user wants to:
 2. **Reframe as "How Might We"**: turn the raw idea into `How might we [verb] for [user] so that [outcome]?`. This pulls the team out of premature "solution mode".
 3. **Product Inventory (required if the product exists)**:
    - If `.dw/spec/prd-*/` has PRDs OR `.dw/rules/index.md` exists, read these artifacts to map the **current product's feature inventory** (product level, not code level).
-   - Sources to consult: `.dw/spec/prd-*/prd.md` (Overview / Main Features / User Stories sections), `.dw/rules/index.md` and `.dw/rules/<module>.md`, `.planning/intel/` if present.
+   - Sources to consult: `.dw/spec/prd-*/prd.md` (Overview / Main Features / User Stories sections), `.dw/rules/index.md` and `.dw/rules/<module>.md`, `.dw/intel/` if present (queryable via `/dw-intel`).
    - Produce a **short Feature Inventory (5-12 bullets)** before diverging: "the product today does X, Y, Z".
    - If the project is greenfield (no PRDs or rules), record: "Feature Inventory: greenfield — no product artifacts yet".
 4. If essential context is missing for the user (problem, persona, expected value), ask short and objective questions before expanding.

@@ -188,7 +188,7 @@ Adapt `dev:db:migrate` per chosen ORM (Prisma: `pnpm prisma migrate dev`; Alembi
 
 Per stack, append to whatever `create-*` tools already generated:
 - Add `.env` (gitignore must exclude it).
-- Add `.dw/spec/`, `.planning/` if user is also using GSD (preserved by dev-workflow conventions).
+- The `.dw/` directory is preserved across updates by `/dw-update` (rules, spec, intel are user data).
 - For `.dockerignore`: exclude `.git`, `node_modules`, `.dw`, `.agents`, `tests`, `*.md` (in prod images).
 
 #### 3.7 Generate GitHub Actions CI workflow

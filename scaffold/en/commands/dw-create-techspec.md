@@ -29,12 +29,13 @@
 
     ## Codebase Intelligence
 
-    <critical>If `.planning/intel/` exists, querying it is MANDATORY before writing requirements. Do NOT skip this step.</critical>
-    - Internally run: `/gsd-intel "architectural patterns and technical decisions in the project"`
+    <critical>If `.dw/intel/` exists, querying it via `/dw-intel` is MANDATORY before writing the techspec. Do NOT skip this step.</critical>
+    - Internally run: `/dw-intel "architectural patterns and technical decisions in the project"`
     - Align proposals with existing patterns; flag deviations explicitly
 
-    If `.planning/intel/` does NOT exist:
-    - Use `.dw/rules/` as context (current behavior)
+    If `.dw/intel/` does NOT exist:
+    - Use `.dw/rules/` as context, falling back to grep
+    - Suggest running `/dw-map-codebase` to enrich downstream context
 
     ## Multi-Project Decision Flowchart
 

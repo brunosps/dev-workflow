@@ -29,13 +29,14 @@ When available in the project under `./.agents/skills/`, use these skills as ana
 
 ## Codebase Intelligence
 
-<critical>If `.planning/intel/` exists, querying it is MANDATORY before writing requirements. Do NOT skip this step.</critical>
-- Internally run: `/gsd-intel "documented conventions, anti-patterns, and decision spaces"`
+<critical>If `.dw/intel/` exists, querying it via `/dw-intel` is MANDATORY before reviewing. Do NOT skip this step.</critical>
+- Internally run: `/dw-intel "documented conventions and anti-patterns"`
 - Prioritize findings that violate documented conventions
-- Check if questionable architectural decisions are intentional (documented as decision spaces)
+- Check if questionable architectural decisions are intentional (documented in `.dw/rules/`)
 
-If `.planning/intel/` does NOT exist:
-- Use `.dw/rules/` as context (current behavior)
+If `.dw/intel/` does NOT exist:
+- Use `.dw/rules/` as context, falling back to grep
+- Suggest running `/dw-map-codebase` after the review for richer downstream context
 
 ## Input Variables
 
