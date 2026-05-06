@@ -19,7 +19,7 @@ This will:
 
 > **Compozy-inspired disciplines.** Since 0.5.0, dev-workflow bundles three primitives — `dw-verify`, `dw-memory`, `dw-review-rigor` — adapted from the [Compozy](https://github.com/compozy/compozy) project and invoked internally by existing commands. See [docs/compozy-integration.md](docs/compozy-integration.md) for what was ported and what was not.
 
-Optional dependencies (Playwright browsers, react-doctor, GSD):
+Optional dependencies (Playwright browsers, react-doctor, Trivy, Docker):
 ```bash
 npx @brunosps00/dev-workflow install-deps
 ```
@@ -32,7 +32,7 @@ npx @brunosps00/dev-workflow install-deps
 Facilitates structured ideation before opening a PRD or implementation. Explores multiple directions — conservative, balanced, and bold — with trade-offs for each, then converges on concrete next steps. **Product-aware**: when PRDs or rules exist, automatically reads them to produce a Feature Inventory and tags each option as `[IMPROVES: <feature>]`, `[CONSOLIDATES: <A>+<B>]`, or `[NEW]`. With optional `--onepager` flag, generates a durable one-pager at `.dw/spec/ideas/<slug>.md` that `/dw-create-prd` can consume to reduce clarification questions. Inspired by [`addyosmani/agent-skills@idea-refine`](https://skills.sh/addyosmani/agent-skills/idea-refine), adapted to product-level (features) rather than code-level grounding. No code is written or project files modified by the brainstorm itself.
 
 #### `/dw-autopilot`
-Full pipeline orchestrator that takes a wish and automatically runs the entire development flow: codebase intelligence, research (conditional), brainstorm, PRD, techspec, tasks, execution, QA, review, and commit. Stops at 3 gates: PRD approval, tasks approval, and PR confirmation. With GSD installed, leverages plan verification and parallel execution.
+Full pipeline orchestrator that takes a wish and automatically runs the entire development flow: codebase intelligence (`/dw-map-codebase` + `/dw-intel`), research (conditional), brainstorm, PRD, techspec, tasks, execution (with `/dw-plan-checker` gate and `/dw-execute-phase` wave-based parallel dispatch), QA, review, and commit. Stops at 3 gates: PRD approval, tasks approval, and PR confirmation.
 
 #### `/dw-create-prd`
 Creates a Product Requirements Document by first asking at least 7 clarification questions to fully understand the feature. Generates a structured PRD with numbered functional requirements focused on what and why, saved to `.dw/spec/prd-[feature-name]/prd.md`.
@@ -49,7 +49,7 @@ Breaks down the PRD and TechSpec into implementable tasks with a target of ~6 ta
 Executes a single task from the task list, implementing code that follows project patterns and includes mandatory unit tests. Performs Level 1 validation (acceptance criteria + tests + standards check) and creates a commit upon completion.
 
 #### `/dw-run-plan`
-Executes all pending tasks sequentially and automatically, with Level 1 validation after each task. After all tasks are complete, performs a final Level 2 review (PRD compliance) with an interactive corrections cycle until no gaps remain or the user accepts pending items. With GSD installed, supports plan verification gates and wave-based parallel execution for independent tasks.
+Executes all pending tasks via `/dw-execute-phase`, which gates on `/dw-plan-checker` (6-dimension goal-backward verification) before any code is touched. Wave-based parallel dispatch for independent tasks; atomic commit per task; deviation handling. After all tasks complete, performs a final Level 2 review (PRD compliance) with an interactive corrections cycle until no gaps remain or the user accepts pending items.
 
 #### `/dw-bugfix`
 Analyzes and fixes bugs with automatic triage that distinguishes between bugs, feature requests, and excessive scope. Asks exactly 3 clarification questions before proposing a solution. Supports Direct mode (executes fix immediately) and Analysis mode (`--analysis`) that generates a document for the techspec/tasks pipeline.
@@ -112,13 +112,13 @@ Records an Architecture Decision Record (ADR) for a non-trivial decision during 
 ### Intelligence
 
 #### `/dw-resume`
-Restores context from the last session by reading pending tasks, recent git history, and active branches. Suggests the next command to execute. With GSD installed, also restores cross-session state from `.planning/STATE.md`.
+Restores context from the last session by reading `.dw/spec/active-session.md` (written by `/dw-execute-phase` at checkpoint), pending tasks, recent git history, and active branches. Suggests the next command to execute.
 
 #### `/dw-intel`
-Queries codebase intelligence to answer questions about patterns, conventions, and architecture. Uses `.planning/intel/` (if GSD) or `.dw/rules/` as knowledge sources, complemented with direct codebase search. Always cites sources with file paths and line numbers.
+Queries codebase intelligence to answer questions about patterns, conventions, and architecture. Reads `.dw/intel/` (built by `/dw-map-codebase`) as primary source, falls back to `.dw/rules/` and direct grep when absent. Surfaces stale-index warnings (>7 days). Always cites sources with file paths and line numbers.
 
 #### `/dw-analyze-project`
-Scans the repository to identify tech stack, architectural patterns, naming conventions, and anti-patterns. Generates structured documentation in `.dw/rules/` with a project overview (`index.md`) and per-module rule files containing real code examples. With GSD installed, also creates a queryable index in `.planning/intel/`.
+Scans the repository to identify tech stack, architectural patterns, naming conventions, and anti-patterns. Generates structured documentation in `.dw/rules/` with a project overview (`index.md`) and per-module rule files containing real code examples. Also invokes `/dw-map-codebase` to build the queryable index in `.dw/intel/` (the two are complementary — rules are human-readable, intel is machine-queryable).
 
 #### `/dw-deep-research`
 Conducts multi-source research with citation tracking and verification across quick, standard, deep, and ultradeep modes. Executes parallel information gathering, triangulation, and cross-reference verification through 8+ phases, producing a professional report with complete bibliography.
@@ -149,7 +149,7 @@ Discovers skills from the open agent skills ecosystem (`npx skills` / [skills.sh
                             |
                         /dw-run-task (one at a time)
                             |       or
-                        /dw-run-plan (all tasks — parallel with GSD)
+                        /dw-run-plan (all tasks — wave-based parallel native)
                             |
                         /dw-run-qa  -->  .dw/spec/prd-{name}/QA/
                             |
@@ -193,8 +193,7 @@ your-project/
 │   ├── skills/            # Claude Code wrappers
 │   └── settings.json      # MCP servers (Context7, Playwright)
 ├── .agents/skills/        # Codex/Copilot wrappers + bundled skills
-├── .opencode/commands/    # OpenCode wrappers
-└── .planning/             # GSD state (if installed via install-deps)
+└── .opencode/commands/    # OpenCode wrappers
 ```
 
 ## Bundled Skills
@@ -232,8 +231,8 @@ Installed via `npx @brunosps00/dev-workflow install-deps`:
 | **Playwright** | Browser automation for QA, E2E tests, and visual validation | [playwright.dev](https://playwright.dev/) |
 | **Context7 MCP** | Contextual documentation lookup for AI assistants | [upstash/context7-mcp](https://github.com/upstash/context7-mcp) |
 | **react-doctor** | Health score and diagnostics for React projects | [react.doctor](https://www.react.doctor/) |
-| **GSD (get-shit-done-cc)** | Optional engine: parallel execution, plan verification, codebase intelligence, cross-session persistence | [gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done) |
 | **Trivy** | Native binary scanner used by `/dw-security-check` for CVE, secret, and IaC scanning. `install-deps` detects presence and prints OS-specific install instructions (brew / curl script / choco / Docker) — does not install automatically. | [aquasecurity.github.io/trivy](https://aquasecurity.github.io/trivy/) |
+| **Docker + Docker Compose** | Required by `/dw-new-project` and `/dw-dockerize` for dev dependency seeding and image generation. `install-deps` detects presence and prints OS-specific install instructions — does not install automatically. | [docs.docker.com](https://docs.docker.com/engine/install/) |
 
 ## Options
 
@@ -243,7 +242,7 @@ npx @brunosps00/dev-workflow init --lang=en        # English, skip prompt
 npx @brunosps00/dev-workflow init --lang=pt-br     # Portuguese, skip prompt
 npx @brunosps00/dev-workflow init --force          # Overwrite existing files
 npx @brunosps00/dev-workflow update                # Update commands/templates only
-npx @brunosps00/dev-workflow install-deps          # Install Playwright, react-doctor, GSD
+npx @brunosps00/dev-workflow install-deps          # Install Playwright, react-doctor; check Trivy, Docker
 npx @brunosps00/dev-workflow help                  # Show help
 ```
 
@@ -254,7 +253,12 @@ After running `npx @brunosps00/dev-workflow init`:
 1. **Run `/dw-analyze-project`** in your AI assistant to generate project rules
 2. **Run `/dw-brainstorm`** to start planning a new feature
 3. **Run `/dw-help`** to see all available commands and workflows
-4. **(Optional) Run `npx @brunosps00/dev-workflow install-deps`** for Playwright, react-doctor, and GSD
+4. **(Optional) Run `npx @brunosps00/dev-workflow install-deps`** to install Playwright + react-doctor and check Trivy + Docker
+5. **Run `/dw-map-codebase`** once your project has source files to build the queryable index in `.dw/intel/`
+
+## Acknowledgements
+
+Codebase intelligence (`/dw-intel`, `/dw-map-codebase`, the `dw-codebase-intel` bundled skill) and phase execution patterns (`/dw-execute-phase`, `/dw-plan-checker`, the `dw-execute-phase` bundled skill) were adapted from [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) by gsd-build (MIT). Schemas (`stack.json`, `files.json`, `apis.json`, `deps.json`, `arch.md`), the goal-backward verification protocol, and the wave-based parallel execution pattern come from there. dev-workflow specifics: `.dw/` namespace instead of `.planning/`, agent-driven runtime instead of `gsd-sdk` CLI, integration with the rest of the `dw-*` command surface.
 
 ## License
 
