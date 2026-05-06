@@ -9,7 +9,7 @@ Você é um assistente IA especializado em Quality Assurance. Sua tarefa é vali
 ## Posição no Pipeline
 **Antecessor:** `/dw-run-plan` ou `/dw-run-task` | **Sucessor:** `/dw-code-review` (auto-fixes bugs internally before completing)
 
-<critical>Utilize o Playwright MCP para executar todos os testes E2E</critical>
+<critical>Em modo UI, use o Playwright MCP para todos os testes E2E. Em modo API (sem UI no projeto OU flag `--api`), use a skill bundled `api-testing-recipes` para gerar scripts `.http` / pytest+httpx / supertest / WebApplicationFactory / reqwest e capturar logs de request/response como evidência.</critical>
 <critical>Verifique TODOS os requisitos do PRD e TechSpec antes de aprovar</critical>
 <critical>O QA NÃO está completo até que TODAS as verificações passem</critical>
 <critical>Documente TODOS os bugs encontrados com screenshots de evidência</critical>
@@ -20,9 +20,10 @@ Você é um assistente IA especializado em Quality Assurance. Sua tarefa é vali
 
 Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apoio operacional sem substituir este comando:
 
-- `webapp-testing`: apoio para estruturar fluxos de teste, retestes, screenshots e logs quando complementar ao Playwright MCP
-- `vercel-react-best-practices`: use apenas se o frontend sob teste for React/Next.js e houver indicação de regressão relacionada a renderização, fetching, hidratação ou performance percebida
-- `ui-ux-pro-max`: use quando validar consistência de design, paletas de cores, tipografia, espaçamento e hierarquia visual contra padrões da indústria
+- `webapp-testing`: (modo UI) apoio para estruturar fluxos de teste, retestes, screenshots e logs quando complementar ao Playwright MCP
+- `vercel-react-best-practices`: (modo UI) use apenas se o frontend sob teste for React/Next.js e houver indicação de regressão relacionada a renderização, fetching, hidratação ou performance percebida
+- `ui-ux-pro-max`: (modo UI) use quando validar consistência de design, paletas de cores, tipografia, espaçamento e hierarquia visual contra padrões da indústria
+- `api-testing-recipes`: **(modo API — SEMPRE)** snippets validados para `.http`, pytest+httpx, supertest, WebApplicationFactory, reqwest. Compõe um arquivo de teste por RF em `QA/scripts/api/` e logs JSONL em `QA/logs/api/` segundo seus references
 
 ## Ferramentas de Análise
 
@@ -38,12 +39,13 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apo
 ## Objetivos
 
 1. Validar implementação contra PRD, TechSpec e Tasks
-2. Executar testes E2E com Playwright MCP
-3. Cobrir cenários positivos, negativos, limites e regressões relevantes
-4. Verificar acessibilidade (WCAG 2.2)
-5. Realizar verificações visuais
-6. Documentar bugs encontrados
-7. Gerar relatório final de QA
+2. **Detectar modo** (UI vs API-only) e escolher o caminho de execução certo
+3. Executar testes E2E via Playwright MCP (modo UI) OU via skill `api-testing-recipes` (modo API)
+4. Cobrir cenários positivos, negativos, limites e regressões relevantes
+5. Verificar acessibilidade (modo UI = WCAG 2.2; modo API = formato de erro e contratos de superfície)
+6. Realizar verificações visuais (somente modo UI — pulado em modo API)
+7. Documentar bugs encontrados
+8. Gerar relatório final de QA
 
 ## Localização dos Arquivos
 
@@ -56,10 +58,13 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apo
 - Pasta de evidências QA (obrigatória): `{{PRD_PATH}}/QA/`
 - Relatório de Saída: `{{PRD_PATH}}/QA/qa-report.md`
 - Bugs encontrados: `{{PRD_PATH}}/QA/bugs.md`
-- Screenshots: `{{PRD_PATH}}/QA/screenshots/`
-- Logs (console/rede): `{{PRD_PATH}}/QA/logs/`
-- Scripts de teste Playwright: `{{PRD_PATH}}/QA/scripts/`
+- Screenshots (modo UI): `{{PRD_PATH}}/QA/screenshots/`
+- Logs — UI (console/rede): `{{PRD_PATH}}/QA/logs/`
+- Logs — API (JSONL request/response): `{{PRD_PATH}}/QA/logs/api/`
+- Scripts de teste Playwright (modo UI): `{{PRD_PATH}}/QA/scripts/`
+- Scripts de teste API (modo API — `.http` / pytest+httpx / supertest / etc.): `{{PRD_PATH}}/QA/scripts/api/`
 - Checklist consolidado: `{{PRD_PATH}}/QA/checklist.md`
+- Receitas de API testing (skill): `.agents/skills/api-testing-recipes/`
 
 ## Contexto Multi-Projeto
 
@@ -73,6 +78,43 @@ Identifique os projetos com frontend testável via Playwright verificando a conf
 Consulte `.dw/rules/` para URLs e frameworks específicos do projeto.
 
 ## Etapas do Processo
+
+### 0. Detecção de Modo (UI vs API) — Obrigatório PRIMEIRO
+
+Decida se o projeto tem UI testável ou e API-only antes de qualquer setup de browser/API. O modo escolhido dirige todas as etapas seguintes.
+
+**Auto-detecção (mesma matriz usada por `/dw-dockerize`):**
+
+| Sinal | Modo UI | Modo API |
+|-------|---------|----------|
+| `package.json` deps | `next`, `vite`, `react`, `vue`, `svelte`, `@angular/*`, `nuxt`, `astro`, `solid-js`, `remix` | nenhum dos acima |
+| `pyproject.toml` / `requirements*.txt` | `jinja2`, `django` (full), `flask` + `flask_login`/`render_template` | `fastapi`, `flask` (so JSON), `starlette`, `litestar` |
+| `*.csproj` | `Microsoft.AspNetCore.Mvc`, Razor, Blazor | `Microsoft.AspNetCore.Mvc.Core` so, templates de minimal API |
+| `Cargo.toml` | `yew`, `leptos`, `dioxus`, `sycamore` | `axum`, `actix-web`, `rocket`, `warp` (sem template engine) |
+
+Se NENHUM sinal de UI bater → **modo API**. Se pelo menos um bate → **modo UI** (default).
+
+**Override manual (flags):**
+
+- `--api` força modo API (útil para rodar testes API headless dentro de um projeto fullstack onde a UI nao importa nesta rodada).
+- `--ui` força modo UI (gera erro claro se nenhuma dep de UI for detectada — evita rodar testes de browser contra repo backend-only sem querer).
+- `--from-openapi <path-or-url>` adiciona baseline OpenAPI em cima do modo API (veja `.agents/skills/api-testing-recipes/references/openapi-driven.md`).
+
+**Efeito nas etapas seguintes:**
+
+| Etapa | Modo UI | Modo API |
+|-------|---------|----------|
+| 2 — Preparação do Ambiente | Playwright + browser setup completo | Setup de cliente API, sem browser; cria `QA/scripts/api/` e `QA/logs/api/` |
+| 3 — Verificação de Páginas do Menu | obrigatório, bloqueante | **pulado** |
+| 4 — Testes E2E | Playwright MCP | skill `api-testing-recipes` (recipe por stack) |
+| 5 — Acessibilidade | WCAG 2.2 com browser tools | checks de superfície API (formato de erro, semântica de status, detecção de leak) |
+| 6 — Verificações Visuais | obrigatório (mobile + desktop) | **pulado** |
+| 7-8 — Documentação de Bugs + Relatório | screenshots como evidência | logs JSONL como evidência (`evidence_type: api-log`) |
+| 9 — Loop Fix-Retest | mesmo formato; replay do Playwright | mesmo formato; replay da recipe e gravação de nova linha de log |
+
+Registre o modo escolhido no frontmatter do relatório QA (`mode: ui | api | mixed`). Em caso de dúvida, pergunte ao usuário antes de prosseguir — nunca caia em fallback silencioso.
+
+<critical>Se nenhum sinal de UI nem de API for detectável (ex.: repo vazio), aborte com: "Não é possivel determinar o modo do QA. Rode `/dw-analyze-project` primeiro OU passe `--ui` ou `--api` explicitamente."</critical>
 
 ### 1. Análise de Documentação (Obrigatório)
 
@@ -109,9 +151,11 @@ Se NENHUMA credencial for encontrada, PARE e pergunte ao usuário antes de conti
 - Confirmar que a página carregou corretamente com `browser_snapshot`
 - Se sessão persistente, import de auth, inspeção de rede além do MCP ou reprodução browser-first forem necessários, complementar com `webapp-testing`
 
-### 3. Verificação de Páginas do Menu (Obrigatório — Executar ANTES dos testes de RF)
+### 3. Verificação de Páginas do Menu (Somente modo UI — Obrigatório, Executar ANTES dos testes de RF)
 
-<critical>ANTES de testar RFs individuais, verificar que CADA item do menu do módulo leva a uma página FUNCIONAL e ÚNICA. Esta verificação é bloqueante — se falhar, o QA NÃO pode ser aprovado.</critical>
+**Em modo API, esta etapa é PULADA.** Superfícies de API não têm menus; o check equivalente (todo endpoint anunciado existe e responde) está dobrado dentro da Etapa 4-API.
+
+<critical>(modo UI) ANTES de testar RFs individuais, verificar que CADA item do menu do módulo leva a uma página FUNCIONAL e ÚNICA. Esta verificação é bloqueante — se falhar, o QA NÃO pode ser aprovado.</critical>
 
 Para cada item do menu do módulo:
 1. Navegar para a página via `browser_navigate`
@@ -146,7 +190,11 @@ digraph menu_check {
 }
 ```
 
-### 4. Testes E2E com Playwright MCP (Obrigatório)
+### 4. Testes E2E (Obrigatório, mode-aware)
+
+Esta etapa tem dois branches; escolha conforme o modo da Etapa 0.
+
+#### 4-UI (modo UI) — Playwright MCP
 
 Utilize as ferramentas do Playwright MCP para testar cada fluxo:
 
@@ -179,6 +227,39 @@ Para cada requisito funcional do PRD:
 <critical>Não basta validar apenas o caminho feliz. Cada requisito deve ser exercitado contra seus estados de borda e suas regressões mais prováveis</critical>
 <critical>Se um requisito não puder ser completamente validado via E2E, o QA deve ser marcado como REJEITADO ou BLOQUEADO, nunca APROVADO</critical>
 
+#### 4-API (modo API) — skill `api-testing-recipes`
+
+Use a skill bundled `api-testing-recipes` para compor os testes. A skill escolhe a recipe certa por stack (default `.http` / REST Client; `pytest+httpx`, `supertest`, `WebApplicationFactory`, `reqwest` por linguagem) e grava scripts e logs JSONL como evidência.
+
+Processo:
+
+1. **Leia** `.agents/skills/api-testing-recipes/SKILL.md` e selecione a recipe que casa com o stack backend primário do projeto. Default em `recipes/http-rest-client.md` a menos que o projeto já rode `pytest`/`vitest`/`dotnet test`/`cargo test`, caso em que prefira a recipe especifica do stack para os testes QA viverem ao lado dos testes unitários.
+2. **Para cada requisito funcional (RF-XX) do PRD**, derive a matriz seguindo `.agents/skills/api-testing-recipes/references/matrix-conventions.md`:
+   - 200 happy path
+   - 4xx — validação (campo faltando, tipo errado, fora de range)
+   - 4xx — auth (sem token, expirado, malformado)
+   - 4xx — autorização (token válido, role errada)
+   - 4xx — not found
+   - 4xx — conflict
+   - 5xx — server error (so se reproduzível sinteticamente)
+   - **Contract drift** (formato da response vs OpenAPI / TS types) — obrigatório
+   - **Authorization cross-tenant** (token de outra org) — obrigatório se multi-tenant
+3. **Gere um arquivo por RF** em `{{PRD_PATH}}/QA/scripts/api/RF-XX-[slug].<ext>` usando a estrutura da recipe. Encaminhe credenciais segundo os padrões em `.agents/skills/api-testing-recipes/references/auth-patterns.md` (NUNCA hardcode tokens).
+4. **Execute** cada request (`curl` para `.http`; o runner do projeto para stack-specific). Para CADA request, anexe uma linha JSONL em `{{PRD_PATH}}/QA/logs/api/RF-XX-[slug].log` segundo `references/log-conventions.md`. Redact headers `Authorization`/`Cookie`/`X-API-Key` e qualquer campo de response que case com `password*`/`secret*`/`*_hash`/`token*`.
+5. **Asserte** por expectativa da matriz:
+   - Status code casa com o esperado
+   - Response body casa com o schema (use `jq` em `.http`, matchers do framework por stack)
+   - Headers obrigatórios presentes (ex.: `Content-Type: application/json`)
+   - Sem campos internos vazados
+6. **Marque o requisito** como APROVADO ou REPROVADO com resumo de uma linha citando o caminho do log e (se REPROVADO) o número da linha JSONL que falhou.
+7. **Opcional**: se o projeto expõe spec OpenAPI (`openapi.yaml`, `openapi.json`, runtime `/openapi.json`), siga `references/openapi-driven.md` para gerar baseline. Use a flag `--from-openapi <path-or-url>` para deixar explícito.
+
+Nota sobre baseline OpenAPI: se `--from-openapi` for usado, os testes gerados ficam ao lado dos derivados a mão, com filename `openapi-RF-XX-[path-slug].<ext>`. Endpoints da spec sem mapeamento para nenhum RF viram lacuna documental no relatório QA (`openapi-no-rf-*`).
+
+<critical>(modo API) Todo endpoint que muta ou lê dados tenant-scoped DEVE ter teste de negacao cross-tenant. Pular so e permitido em sistemas explicitamente single-tenant e tem que ser registrado como `pytest.skip`/`it.skip`/equivalente com motivo.</critical>
+<critical>(modo API) Logs sao evidência. Toda afirmacao de PASS ou FAIL no relatorio QA deve citar uma linha JSONL em `QA/logs/api/`. Sem log = sem evidência = QA nao pode ser APROVADO.</critical>
+<critical>(modo API) NUNCA hardcode tokens ou credenciais em scripts commitados. Use referencias `@variavel`/env-var.</critical>
+
 ### 4.1. Matriz mínima obrigatória por requisito
 
 Para cada RF, o QA deve responder explicitamente:
@@ -201,9 +282,9 @@ Exemplos de edge cases que devem ser considerados sempre que relevantes:
 - reentrada/ações repetidas
 - falhas de API, loading e estados intermediários
 
-### 5. Verificações de Acessibilidade (Obrigatório)
+### 5. Acessibilidade / Checks de Superfície API (Obrigatório, mode-aware)
 
-Verificar para cada tela/componente (WCAG 2.2):
+Em **modo UI**, verificar para cada tela/componente (WCAG 2.2):
 
 - [ ] Navegação por teclado funciona (Tab, Enter, Escape)
 - [ ] Elementos interativos têm labels descritivos
@@ -217,13 +298,26 @@ Verificar para cada tela/componente (WCAG 2.2):
 Use `browser_press_key` para testar navegação por teclado.
 Use `browser_snapshot` para verificar labels e estrutura semântica.
 
-### 6. Verificações Visuais (Obrigatório)
+**Em modo API**, o checklist WCAG acima é SUBSTITUÍDO por checks de superfície API:
+
+- [ ] Todo endpoint retorna o `Content-Type` correto
+- [ ] Erros seguem formato consistente (ex.: `{ "error": { "code": "...", "message": "..." } }`)
+- [ ] `401` (auth missing/invalid) é distinto de `403` (auth presente mas não autorizado)
+- [ ] Responses de erro NÃO vazam stack traces, IDs internos, fragmentos SQL ou pistas de ambiente
+- [ ] Campos sensíveis (`password*`, `*_hash`, `secret*`, `token*`) NUNCA aparecem em response body
+- [ ] Endpoints com rate limit retornam `429` com header `Retry-After` (quando aplicável)
+
+Cada check FALHADO vira bug HIGH em `QA/bugs.md` com `evidence_type: api-log` apontando para a linha JSONL do erro.
+
+### 6. Verificações Visuais (Somente modo UI — Obrigatório)
+
+**Em modo API, esta etapa é PULADA.** O relatório QA omite a seção "Visual" inteira.
 
 - Capturar screenshots das telas principais com `browser_take_screenshot` e salvar em `{{PRD_PATH}}/QA/screenshots/`
 - Verificar layouts em diferentes estados (vazio, com dados, erro, loading)
 - Documentar inconsistências visuais encontradas
 
-### 6.1. Validação Mobile (Obrigatório)
+### 6.1. Validação Mobile (Somente modo UI — Obrigatório)
 
 <critical>TODA verificação visual DEVE incluir testes em viewport mobile (375px) ALÉM do desktop (1440px). A aprovação do QA REQUER que AMBAS as resoluções estejam funcionais e visualmente aceitáveis. Se o layout mobile estiver quebrado, inutilizável ou visualmente degradado, o QA NÃO pode ser aprovado.</critical>
 
@@ -246,13 +340,15 @@ Para cada bug encontrado, criar entrada em `{{PRD_PATH}}/QA/bugs.md`:
 
 - **Severidade:** Alta/Média/Baixa
 - **RF Afetado:** RF-XX
-- **Componente:** [componente/página]
+- **Componente:** [componente/página ou caminho do endpoint]
+- **Modo:** ui | api
 - **Passos para Reproduzir:**
   1. [passo 1]
   2. [passo 2]
 - **Resultado Esperado:** [o que deveria acontecer]
 - **Resultado Atual:** [o que acontece]
-- **Screenshot:** `QA/screenshots/[arquivo].png`
+- **Tipo de evidência:** screenshot | api-log
+- **Caminho da evidência:** `QA/screenshots/[arquivo].png` (modo UI) OU `QA/logs/api/RF-XX-[slug].log#L<linha>` (modo API)
 - **Status:** Aberto
 ```
 
@@ -294,9 +390,14 @@ Gerar relatório em `{{PRD_PATH}}/QA/qa-report.md`:
 [Parecer final do QA]
 ```
 
-### 9. Loop QA Fix-Retest (Automático)
+### 9. Loop QA Fix-Retest (Automático, mode-aware)
 
 <critical>O QA NÃO termina no primeiro relatório. Se bugs forem encontrados, entre em um loop automático de fix-retest até que o QA seja APROVADO ou explicitamente BLOQUEADO.</critical>
+
+**Comportamento mode-aware:** a estrutura do loop (max 5 ciclos, commit atômico por fix, regression checks, critérios de saída) é idêntica nos dois modos. O que muda é a EVIDÊNCIA replayada:
+
+- modo UI: re-executar o fluxo Playwright, capturar nova screenshot `BUG-NN-retest.png`.
+- modo API: re-executar a mesma `.http`/recipe via runner da recipe, anexar nova linha em `QA/logs/api/BUG-NN-retest.log` com `verdict: "PASS"` (fecha o bug) ou `verdict: "FAIL"` (segue o ciclo).
 
 Após gerar o relatório inicial de QA:
 

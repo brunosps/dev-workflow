@@ -63,10 +63,10 @@ Executes a one-off change with workflow guarantees (validation, atomic commit) w
 ### Quality
 
 #### `/dw-run-qa`
-Validates the implementation against PRD, TechSpec, and Tasks using Playwright MCP for E2E browser automation. Tests happy paths, edge cases, negative flows, and regressions while verifying WCAG 2.2 accessibility compliance. Generates a QA report, documents bugs with screenshot evidence, and detects stub/placeholder pages.
+Validates the implementation against PRD, TechSpec, and Tasks. **Mode-aware**: in UI mode, drives Playwright MCP for E2E browser tests with happy paths, edge cases, negative flows, regressions, WCAG 2.2 accessibility, and screenshot evidence. In API mode (auto-detected when no UI deps are in the manifest, or forced via `--api`), composes per-RF `.http` / pytest+httpx / supertest / WebApplicationFactory / reqwest scripts from the bundled `api-testing-recipes` skill, executes them, and writes JSONL request/response logs to `QA/logs/api/` as evidence. The matrix expands to {200 happy / 4xx validation/auth/authz/not-found/conflict / 5xx / contract drift / cross-tenant denial}. Optional `--from-openapi` adds a baseline derived from the project's OpenAPI spec. Generates a QA report, documents bugs with mode-aware evidence, and detects stub/placeholder pages (UI) or unmapped spec endpoints (API).
 
 #### `/dw-fix-qa`
-Fixes bugs found during QA testing with evidence-driven retesting via Playwright MCP. Runs iterative cycles of identify, fix, retest, updating `QA/bugs.md` and `QA/qa-report.md` with status and retest evidence including screenshots and logs.
+Fixes bugs found during QA testing with evidence-driven retesting. **Mode-aware**: in UI mode replays the failing flow via Playwright MCP and saves a retest screenshot; in API mode replays the failing `.http`/recipe and appends a `verdict: PASS|FAIL` JSONL line to `QA/logs/api/BUG-NN-retest.log`. Runs iterative cycles of identify, fix, retest, updating `QA/bugs.md` and `QA/qa-report.md` with status and mode-correct evidence.
 
 #### `/dw-review-implementation`
 Compares documented requirements (PRD + TechSpec + Tasks) against actual code as a Level 2 review. Maps each requirement to endpoints and tasks with evidence, identifies gaps, partial implementations, and extra undocumented code. Does not execute fixes — waits for user instruction.
