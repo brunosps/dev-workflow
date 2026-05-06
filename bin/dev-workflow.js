@@ -30,7 +30,7 @@ const HELP_TEXT = `
                    Preserves: .dw/rules/, .dw/spec/, user data
     install-deps   Install system dependencies (Playwright browsers, MCP servers)
     uninstall      Remove all managed files (commands, templates, wrappers, skills, MCPs)
-                   Preserves: .dw/rules/, .dw/spec/, .planning/ (user data)
+                   Preserves: .dw/rules/, .dw/spec/, .dw/intel/ (user data)
     help           Show this help message
 
   Options:
