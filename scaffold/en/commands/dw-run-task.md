@@ -25,15 +25,16 @@ When available in the project at `./.agents/skills/`, use these skills as specia
 
 ## Codebase Intelligence
 
-<critical>If `.planning/intel/` exists, querying it is MANDATORY before writing requirements. Do NOT skip this step.</critical>
-- Internally run: `/gsd-intel "implementation patterns in [task target area]"`
+<critical>If `.dw/intel/` exists, querying it via `/dw-intel` is MANDATORY before writing code. Do NOT skip this step.</critical>
+- Internally run: `/dw-intel "implementation patterns in [task target area]"`
 - Follow conventions found for file structure, naming, and error handling
 
 If `design-contract.md` exists in the PRD directory:
 - Read the contract and ensure all frontend implementation follows the approved design rules
 
-If `.planning/intel/` does NOT exist:
-- Use `.dw/rules/` as context (current behavior)
+If `.dw/intel/` does NOT exist:
+- Use `.dw/rules/` as context, falling back to direct grep
+- Suggest running `/dw-map-codebase` after the task to enrich downstream context
 
 ## File Locations
 

@@ -31,6 +31,8 @@ Você é um assistente de ajuda do workspace. Quando invocado, apresente ao usu�
 | projeto novo, scaffold, bootstrap, comecar, iniciar projeto, fullstack, monorepo | `/dw-new-project` | Entrevista de stack + tools create-* + docker-compose para dev. Roda apos `npx dev-workflow init`. |
 | dockerize, docker, dockerfile, compose, container, imagem prod, multi-stage | `/dw-dockerize` | Le projeto existente, brainstorm de base, gera Dockerfile + docker-compose para dev/prod/ambos, ou audita artefatos existentes. |
 | mapear codebase, indice intel, code map, knowledge graph, indice queryable | `/dw-map-codebase` | Constroi .dw/intel/ (stack/files/apis/deps/arch) para /dw-intel e outros comandos pararem de re-explorar o codebase. |
+| executar fase, tasks paralelas, wave, dispatch, commits atomicos | `/dw-execute-phase` | Roda uma fase de PRD em waves com commits atomicos por task, deviation handling e gate hard de plan-checker antes de tocar codigo. |
+| plan check, verificar plano, validacao de plano, goal backward | `/dw-plan-checker` | Verificacao goal-backward de tasks.md antes da execucao. PASS / REVISE / BLOCK em 6 dimensoes. |
 | refinamento, refine, idea, one-pager, ideia | `/dw-brainstorm --onepager` | Refinamento de ideia com Product Inventory + classification (IMPROVES/CONSOLIDATES/NEW) + one-pager durável |
 | reverter, rollback de task | `/dw-revert-task` | Revert seguro com check de dependências |
 | hotfix, mudança rápida | `/dw-quick` | Task pontual com garantias sem PRD |

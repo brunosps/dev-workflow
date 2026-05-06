@@ -68,10 +68,11 @@ Se este comando for invocado para retomar um autopilot interrompido (via `/dw-re
 
 ### Etapa 1: Inteligencia do Codebase
 
-<critical>Se `.planning/intel/` existir, a consulta e OBRIGATORIA antes de iniciar.</critical>
+<critical>Se `.dw/intel/` existir, a consulta via `/dw-intel` e OBRIGATORIA antes de iniciar. Cai para `.dw/rules/` e grep direto se ausente.</critical>
 
-- Consulte `.planning/intel/` via `/gsd-intel` (se disponivel) ou `.dw/rules/` para entender o contexto do projeto
+- Consulte `.dw/intel/` via `/dw-intel` para entender o contexto do projeto
 - Identifique: stack tecnologica, padroes existentes, features relacionadas
+- Se `.dw/intel/` esta ausente, sugira rodar `/dw-map-codebase` primeiro para contexto downstream mais rico
 
 ### Etapa 2: Pesquisa (Condicional)
 
@@ -148,7 +149,7 @@ Avalie se as tasks envolvem frontend:
 ### Etapa 8: Execucao
 
 Execute `/dw-run-plan` com o path do PRD.
-- Siga TODAS as instrucoes do comando, incluindo integracao GSD (verificacao de plano, execucao paralela)
+- Siga TODAS as instrucoes do comando, incluindo o gate nativo do plan-checker (PASS obrigatorio) e execucao paralela em waves via `/dw-execute-phase`
 - Cada task segue `/dw-run-task` com validacao Level 1
 
 ### Etapa 9: Review de Implementacao (Loop)
@@ -247,17 +248,9 @@ Pergunte ao usuario: **"Commits realizados. Deseja gerar o Pull Request?"**
 - **SIM**: execute `/dw-generate-pr` com o branch alvo
 - **NAO**: informe que os commits estao prontos e o usuario pode gerar o PR manualmente depois
 
-## Integracao GSD
+## Engine Nativo
 
-<critical>Quando o GSD estiver instalado, TODAS as integracoes GSD de cada comando individual DEVEM ser executadas. O autopilot nao e desculpa para pular passos do GSD.</critical>
-
-Se o GSD (get-shit-done-cc) estiver instalado:
-- Etapa 1: use `/gsd-intel` para consulta
-- Etapa 8: use verificacao de plano + execucao paralela
-- Todos os comandos: sigam suas secoes GSD individuais
-
-Se o GSD NAO estiver instalado:
-- Todos os comandos funcionam normalmente sem GSD
+O autopilot depende de infraestrutura dev-workflow-native para inteligencia de codebase (`/dw-map-codebase` + `/dw-intel`), verificacao de plano (`/dw-plan-checker`), e execucao paralela (`/dw-execute-phase`). Os quatro vem bundled e nao precisam de dependencias externas. Veja as skills bundled `dw-codebase-intel` e `dw-execute-phase` em `.agents/skills/` para detalhes.
 
 ## Persistencia de Estado
 

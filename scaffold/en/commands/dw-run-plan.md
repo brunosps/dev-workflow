@@ -159,36 +159,30 @@ If a task FAILS during execution:
 4. Wait for manual intervention from the user
 5. **DO NOT** automatically continue to the next task
 
-## GSD Integration
+## Plan Verification + Parallel Execution
 
-<critical>When GSD is installed, plan verification and parallel execution are MANDATORY, not optional. The command MUST NOT skip these steps.</critical>
+<critical>Plan verification and wave-based parallel execution are MANDATORY, not optional. Both are now native to dev-workflow via the `dw-execute-phase` bundled skill.</critical>
 
 ### Plan Verification (Pre-Execution)
 
-If GSD (get-shit-done-cc) is installed in the project:
-- Before starting execution, delegate to GSD's plan-checker agent
-- The verifier analyzes: cyclic dependencies, task viability, risks, PRD requirements coverage
-- If FAIL: present issues found and suggest fixes. Maximum 3 correction cycles
+Before starting execution, delegate to `/dw-plan-checker {{PRD_PATH}}`:
+- The plan-checker agent verifies the 6 dimensions (requirement coverage, task completeness, dependency soundness, artifact wiring, context budget, constraint compliance)
+- If REVISE: present issues found and suggest fixes. Maximum 3 correction cycles via `/dw-create-tasks --revise`
+- If BLOCK: surface conflict to user, do NOT auto-replan
 - If PASS: proceed to execution
-
-If GSD is NOT installed:
-- Skip verification and execute directly (current behavior)
 
 ### Parallel Execution (Wave-Based)
 
-If GSD (get-shit-done-cc) is installed in the project:
-- Analyze each task's `blockedBy` field to build the dependency graph
-- Group tasks into waves:
-  - Wave 1: tasks with no dependencies (can run in parallel)
+After plan-checker PASS, delegate to `/dw-execute-phase {{PRD_PATH}}`:
+- The executor agent analyzes each task's `Depends on:` field to build the dependency graph
+- Groups tasks into waves:
+  - Wave 1: tasks with no dependencies (run in parallel)
   - Wave 2: tasks that depend on Wave 1 tasks
   - Wave N: and so on
-- Delegate each wave to GSD's parallel execution engine (`/gsd-execute-phase`)
-- Each task runs in an isolated worktree with fresh context
-- Results are merged after the wave completes
-- If any task in a wave fails: pause the wave, report, await user decision
-
-If GSD is NOT installed:
-- Execute sequentially as today (current behavior)
+- Each wave dispatches subagents in parallel (one per task)
+- Results merged after the wave completes
+- If any task in a wave fails permanently (Rule 3 deviation): pause the wave, report, await user decision
+- The executor commits atomically per task and writes `SUMMARY.md` after the final wave
 
 ### Design Contracts
 

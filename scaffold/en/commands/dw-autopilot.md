@@ -68,10 +68,11 @@ If this command is invoked to resume an interrupted autopilot (via `/dw-resume`)
 
 ### Step 1: Codebase Intelligence
 
-<critical>If `.planning/intel/` exists, querying it is MANDATORY before starting.</critical>
+<critical>If `.dw/intel/` exists, querying it via `/dw-intel` is MANDATORY before starting. Falls back to `.dw/rules/` and direct grep if absent.</critical>
 
-- Query `.planning/intel/` via `/gsd-intel` (if available) or `.dw/rules/` to understand project context
+- Query `.dw/intel/` via `/dw-intel` to understand project context
 - Identify: tech stack, existing patterns, related features
+- If `.dw/intel/` is absent, suggest running `/dw-map-codebase` first for richer downstream context
 
 ### Step 2: Research (Conditional)
 
@@ -148,7 +149,7 @@ Evaluate whether tasks involve frontend:
 ### Step 8: Execution
 
 Run `/dw-run-plan` with the PRD path.
-- Follow ALL command instructions, including GSD integration (plan verification, parallel execution)
+- Follow ALL command instructions, including the native plan-checker gate (PASS required) and wave-based parallel execution via `/dw-execute-phase`
 - Each task follows `/dw-run-task` with Level 1 validation
 
 ### Step 9: Implementation Review (Loop)
@@ -247,17 +248,9 @@ Ask the user: **"Commits completed. Do you want to generate the Pull Request?"**
 - **YES**: run `/dw-generate-pr` with the target branch
 - **NO**: inform that commits are ready and the user can generate the PR manually later
 
-## GSD Integration
+## Native Engine
 
-<critical>When GSD is installed, ALL GSD integrations from each individual command MUST be executed. The autopilot is not an excuse to skip GSD steps.</critical>
-
-If GSD (get-shit-done-cc) is installed:
-- Step 1: use `/gsd-intel` for querying
-- Step 8: use plan verification + parallel execution
-- All commands: follow their individual GSD sections
-
-If GSD is NOT installed:
-- All commands work normally without GSD
+The autopilot relies on dev-workflow-native infrastructure for codebase intelligence (`/dw-map-codebase` + `/dw-intel`), plan verification (`/dw-plan-checker`), and parallel execution (`/dw-execute-phase`). All four are bundled and require no external dependencies. See the `dw-codebase-intel` and `dw-execute-phase` bundled skills under `.agents/skills/` for details.
 
 ## State Persistence
 

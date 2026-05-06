@@ -38,26 +38,44 @@ You are a quick task executor. This command exists to implement one-off changes 
 8. Invoke `dw-verify` and include the VERIFICATION REPORT in the output before committing. Without PASS, DO NOT commit.
 9. Create atomic semantic commit with the change
 
-## GSD Integration
+## Task Tracking
 
-<critical>When GSD is installed, delegation to /gsd-quick is MANDATORY for tracking.</critical>
+<critical>Every `/dw-quick` execution writes a tracking entry to `.dw/spec/quick/<slug>.md` so the change is discoverable later.</critical>
 
-If GSD (get-shit-done-cc) is installed in the project:
-- Delegate to `/gsd-quick` for tracking in `.planning/quick/`
-- The task is registered in history for future lookup via `/dw-intel`
+Tracking format (single file per quick task):
 
-If GSD is NOT installed:
-- Execute directly with Level 1 validation
-- No history tracking (only git log)
+```markdown
+---
+type: quick-task
+schema_version: "1.0"
+status: COMPLETE | PARTIAL | ABORTED
+date: YYYY-MM-DD
+files_touched: [...]
+commit: <SHA>
+---
+
+# Quick Task — <slug>
+
+## Description
+<one-line description from the user's prompt>
+
+## Files
+<list>
+
+## Verification
+<dw-verify report excerpt>
+```
+
+Subsequent `/dw-intel` queries surface these via the file index.
 
 ## Codebase Intelligence
 
-If `.planning/intel/` exists, query before implementing:
-- Internally run: `/gsd-intel "implementation patterns in [target area]"`
+If `.dw/intel/` exists, query before implementing:
+- Internally run: `/dw-intel "implementation patterns in [target area]"`
 - Follow the patterns found
 
-If `.planning/intel/` does NOT exist:
-- Use only `.dw/rules/` as context
+If `.dw/intel/` does NOT exist:
+- Use only `.dw/rules/` as context (or grep directly if `.dw/rules/` is also absent)
 
 ## Response Format
 

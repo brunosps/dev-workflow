@@ -25,15 +25,16 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como sup
 
 ## Inteligência do Codebase
 
-<critical>Se `.planning/intel/` existir, a consulta é OBRIGATÓRIA antes de redigir os requisitos. NÃO pule este passo.</critical>
-- Execute internamente: `/gsd-intel "padrões de implementação em [área alvo da task]"`
+<critical>Se `.dw/intel/` existir, a consulta via `/dw-intel` é OBRIGATÓRIA antes de codar. NÃO pule este passo.</critical>
+- Execute internamente: `/dw-intel "padrões de implementação em [área alvo da task]"`
 - Siga convenções encontradas para estrutura de arquivos, nomenclatura e tratamento de erros
 
 Se `design-contract.md` existir no diretório do PRD:
 - Leia o contrato e garanta que toda implementação frontend siga as regras de design aprovadas
 
-Se `.planning/intel/` NÃO existir:
-- Use `.dw/rules/` como contexto (comportamento atual)
+Se `.dw/intel/` NÃO existir:
+- Use `.dw/rules/` como contexto, caindo para grep direto se necessário
+- Sugira rodar `/dw-map-codebase` após a task para enriquecer contexto downstream
 
 ## Localização dos Arquivos
 

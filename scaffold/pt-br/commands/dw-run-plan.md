@@ -152,36 +152,30 @@ Se uma tarefa FALHAR durante a execução:
 4. Aguardar intervenção manual do usuário
 5. **NÃO** continuar automaticamente para próxima task
 
-## Integração GSD
+## Verificação de Plano + Execução Paralela
 
-<critical>Quando o GSD estiver instalado, a verificação de plano e a execução paralela são OBRIGATÓRIAS, não opcionais. O comando NÃO pode pular estes passos.</critical>
+<critical>Verificação de plano e execução paralela em waves são OBRIGATÓRIAS, não opcionais. Ambas são agora nativas no dev-workflow via skill bundled `dw-execute-phase`.</critical>
 
 ### Verificação de Plano (Pré-Execução)
 
-Se o GSD (get-shit-done-cc) estiver instalado no projeto:
-- Antes de iniciar a execução, delegue para o agente plan-checker do GSD
-- O verificador analisa: dependências cíclicas, viabilidade das tasks, riscos, cobertura dos requisitos do PRD
-- Se FALHAR: apresente os problemas encontrados e sugira correções. Máximo 3 ciclos de correção
-- Se PASSAR: prossiga para a execução
-
-Se o GSD NÃO estiver instalado:
-- Pule a verificação e execute diretamente (comportamento atual)
+Antes de iniciar execução, delegue para `/dw-plan-checker {{PRD_PATH}}`:
+- O agente plan-checker verifica as 6 dimensões (cobertura de requisitos, completude da task, soundness de dependência, wiring de artefatos, budget de contexto, compliance de constraints)
+- Se REVISE: apresente os issues e sugira correções. Máximo 3 ciclos via `/dw-create-tasks --revise`
+- Se BLOCK: suba o conflito para o usuário, NÃO auto-replan
+- Se PASS: prossiga para execução
 
 ### Execução Paralela (Wave-Based)
 
-Se o GSD (get-shit-done-cc) estiver instalado no projeto:
-- Analise o campo `blockedBy` de cada task para montar o grafo de dependências
-- Agrupe tasks em waves:
-  - Wave 1: tasks sem dependências (podem executar em paralelo)
-  - Wave 2: tasks que dependem de tasks da Wave 1
+Após PASS do plan-checker, delegue para `/dw-execute-phase {{PRD_PATH}}`:
+- O agente executor analisa o campo `Depends on:` de cada task para montar o grafo de dependências
+- Agrupa tasks em waves:
+  - Wave 1: tasks sem dependências (rodam em paralelo)
+  - Wave 2: tasks que dependem das tasks da Wave 1
   - Wave N: assim por diante
-- Delegue cada wave para o engine de execução paralela do GSD (`/gsd-execute-phase`)
-- Cada task executa em worktree isolado com contexto fresh
-- Resultados são mergeados após a wave completar
-- Se qualquer task de uma wave falhar: pause a wave, reporte, aguarde decisão do usuário
-
-Se o GSD NÃO estiver instalado:
-- Execute sequencialmente como hoje (comportamento atual)
+- Cada wave dispatcha subagentes em paralelo (um por task)
+- Resultados mergeados após a wave completar
+- Se qualquer task em uma wave falha permanentemente (deviation Rule 3): pausa a wave, reporta, aguarda decisão do usuário
+- O executor commita atomicamente por task e escreve `SUMMARY.md` após a wave final
 
 ### Design Contracts
 
