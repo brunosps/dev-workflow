@@ -30,6 +30,7 @@ You are a workspace help assistant. When invoked, present the user with a comple
 | skill, find skill, install skill, ecosystem, capability, extend agent | `/dw-find-skills` | Discover skills from skills.sh / `npx skills` and install them globally or locally |
 | new project, scaffold, bootstrap, start, kickoff, init project, fullstack, monorepo | `/dw-new-project` | Stack interview + create-* tools + docker-compose for dev. Runs after `npx dev-workflow init`. |
 | dockerize, docker, dockerfile, compose, container, prod image, multi-stage | `/dw-dockerize` | Reads existing project, brainstorms base image, generates Dockerfile + docker-compose for dev/prod/both, or audits existing artifacts. |
+| map codebase, intel index, code map, knowledge graph, queryable index | `/dw-map-codebase` | Builds .dw/intel/ (stack/files/apis/deps/arch) so /dw-intel and other commands stop re-exploring the codebase. |
 | refine, refinement, idea, one-pager | `/dw-brainstorm --onepager` | Idea refinement with Product Inventory + classification (IMPROVES/CONSOLIDATES/NEW) + durable one-pager |
 | revert, rollback task | `/dw-revert-task` | Safe revert with dependency checks |
 | hotfix, quick change | `/dw-quick` | One-off task with guarantees, no PRD |
