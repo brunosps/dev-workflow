@@ -313,6 +313,25 @@
 
     <critical>NÃO APROVE requisitos sem evidência concreta no código</critical>
     <critical>ANALISE o código real, não confie apenas nos checkboxes do tasks.md</critical>
-    <critical>Se 100% dos requisitos foram implementados e NÃO há gaps: NÃO entre em plan mode, NÃO crie tasks. Apenas apresente o relatório e ENCERRE.</critical>
-    <critical>Se gaps forem encontrados, entre no loop de fix-review automaticamente. NÃO aguarde instruções do usuário para corrigir gaps. Máximo de 3 ciclos antes de marcar como BLOCKED.</critical>
+    <critical>Se 100% dos requisitos foram implementados e NÃO há gaps: NÃO entre em plan mode, NÃO crie tasks. Apresente o relatório Level 2 e siga para Level 3 (próxima seção).</critical>
+    <critical>Se gaps forem encontrados, entre no loop de fix-review automaticamente. NÃO aguarde instruções do usuário para corrigir gaps. Máximo de 3 ciclos antes de marcar como BLOCKED. Level 3 só roda após o loop chegar em APPROVED no Level 2.</critical>
+
+## Level 3 — Camada de Qualidade (auto-invocada no fim)
+
+Após Level 2 (cobertura do PRD) chegar em APPROVED, **invoque automaticamente `/dw-code-review`** para adicionar a camada formal de qualidade (best practices, SOLID, DRY, complexity, security, convenções). Resolve a expectativa do usuário de que um review único cubra tanto "entregamos tudo?" (Level 2) quanto "o que entregamos está bem feito?" (Level 3).
+
+Pipeline:
+
+1. Após Level 2 APPROVED, rode `/dw-code-review {{PRD_PATH}}` com o mesmo escopo de PRD.
+2. Aguarde `/dw-code-review` produzir veredito (APPROVED / APPROVED WITH CAVEATS / REJECTED).
+3. Escreva resumo consolidado em `{{PRD_PATH}}/QA/review-consolidated.md` referenciando ambos.
+4. Status final combina os dois vereditos:
+   - Level 2 APPROVED + Level 3 APPROVED → consolidado APPROVED
+   - Level 2 APPROVED + Level 3 APPROVED WITH CAVEATS → consolidado APPROVED WITH CAVEATS
+   - Level 2 APPROVED + Level 3 REJECTED → consolidado REJECTED (Level 3 vence)
+
+### Flag para pular Level 3
+
+`/dw-review-implementation --no-code-review` pula Level 3 e emite só Level 2.
+
 </system_instructions>

@@ -318,6 +318,32 @@ git diff <commit> -- path/to/file
 
 <critical>DO NOT APPROVE requirements without concrete evidence in the code</critical>
 <critical>ANALYZE the actual code, do not trust only the checkboxes in tasks.md</critical>
-<critical>If 100% of requirements were implemented and there are NO gaps: DO NOT enter plan mode, DO NOT create tasks, DO NOT dispatch agents. Just present the report and END.</critical>
-<critical>If gaps are found, enter the fix-review loop automatically. Do NOT wait for user instructions to fix gaps. Maximum 3 cycles before marking as BLOCKED.</critical>
+<critical>If 100% of requirements were implemented and there are NO gaps: DO NOT enter plan mode, DO NOT create tasks, DO NOT dispatch agents. Just present the Level 2 report, then proceed to Level 3 (next section).</critical>
+<critical>If gaps are found, enter the fix-review loop automatically. Do NOT wait for user instructions to fix gaps. Maximum 3 cycles before marking as BLOCKED. Level 3 only runs after the loop reaches APPROVED on Level 2.</critical>
+
+## Level 3 — Quality Layer (auto-invoked at the end)
+
+After Level 2 (PRD coverage) reaches APPROVED, **automatically invoke `/dw-code-review`** to add the formal quality layer (best practices, SOLID, DRY, complexity, security, conventions). Addresses the user expectation that a single review covers both "did we deliver everything?" (Level 2) and "is what we delivered well-built?" (Level 3).
+
+Pipeline:
+
+1. After Level 2 APPROVED, run `/dw-code-review {{PRD_PATH}}` with the same PRD scope.
+2. Wait for `/dw-code-review` to produce its verdict (APPROVED / APPROVED WITH CAVEATS / REJECTED).
+3. Write a consolidated summary at `{{PRD_PATH}}/QA/review-consolidated.md` referencing both:
+   - Level 2: `{{PRD_PATH}}/QA/review-coverage.md` (PRD compliance map)
+   - Level 3: `{{PRD_PATH}}/QA/dw-code-review.md` (formal review)
+4. Final status combines both verdicts:
+   - Level 2 APPROVED + Level 3 APPROVED → consolidated APPROVED
+   - Level 2 APPROVED + Level 3 APPROVED WITH CAVEATS → consolidated APPROVED WITH CAVEATS
+   - Level 2 APPROVED + Level 3 REJECTED → consolidated REJECTED (Level 3 wins)
+   - Level 2 REJECTED → never reaches Level 3 (loop fixes coverage first)
+
+### Flag to skip Level 3
+
+If the user runs `/dw-review-implementation --no-code-review`, skip Level 3 and emit only the Level 2 report. Use case: re-running coverage after a small targeted gap fix when a full Level 3 sweep was just done.
+
+### Why this auto-chain exists
+
+`dw-review-implementation` historically returned only Level 2 (coverage). Users expected a single review to also cover quality. Splitting the natural intent into two separate commands created friction. The auto-chain restores the natural "review the implementation" semantics: cover + quality, by default, in one invocation. Standalone `/dw-code-review` remains available for cases where only Level 3 is wanted (e.g., reviewing a cherry-picked refactor branch with no PRD).
+
 </system_instructions>
