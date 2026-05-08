@@ -30,13 +30,8 @@ You are a workspace help assistant. When invoked, present the user with a comple
 | skill, find skill, install skill, ecosystem, capability, extend agent | `/dw-find-skills` | Discover skills from skills.sh / `npx skills` and install them globally or locally |
 | new project, scaffold, bootstrap, start, kickoff, init project, fullstack, monorepo | `/dw-new-project` | Stack interview + create-* tools + docker-compose for dev. Runs after `npx dev-workflow init`. |
 | dockerize, docker, dockerfile, compose, container, prod image, multi-stage | `/dw-dockerize` | Reads existing project, brainstorms base image, generates Dockerfile + docker-compose for dev/prod/both, or audits existing artifacts. |
-| map codebase, intel index, code map, knowledge graph, queryable index | `/dw-map-codebase` | Builds .dw/intel/ (stack/files/apis/deps/arch) so /dw-intel and other commands stop re-exploring the codebase. |
-| execute phase, parallel tasks, wave, dispatch, atomic commits | `/dw-execute-phase` | Runs a PRD phase in waves with atomic commits per task, deviation handling, and a hard plan-checker gate before any code is touched. |
-| plan check, verify plan, plan validation, goal backward | `/dw-plan-checker` | Goal-backward verification of tasks.md before execution. PASS / REVISE / BLOCK across 6 dimensions. |
 | refine, refinement, idea, one-pager | `/dw-brainstorm --onepager` | Idea refinement with Product Inventory + classification (IMPROVES/CONSOLIDATES/NEW) + durable one-pager |
 | revert, rollback task | `/dw-revert-task` | Safe revert with dependency checks |
-| hotfix, quick change | `/dw-quick` | One-off task with guarantees, no PRD |
-| resume, where I left off | `/dw-resume` | Restore previous session context |
 | research | `/dw-deep-research` | Multi-source research with citations |
 | idea, brainstorm | `/dw-brainstorm` | Structured ideation with trade-offs |
 | update dev-workflow | `/dw-update` | Update to latest npm version |
@@ -130,9 +125,6 @@ This workspace uses an AI command system that automates the full development cyc
 | `/dw-bugfix` | Analyzes and fixes bugs (bug vs feature triage) | Target + description | Fix + commit OR PRD (if feature) |
 | `/dw-fix-qa` | Fixes documented QA bugs and retests with evidence | PRD path | Code + `QA/bugs.md` + `QA/qa-report.md` updated |
 | `/dw-redesign-ui` | Audits, proposes, and implements visual redesign of pages/components | Target page/component | Redesign brief + code |
-| `/dw-quick` | Execute a one-off task with workflow guarantees without PRD | Change description | Code + commit |
-| `/dw-resume` | Restore session context and suggest next step | (none) | Summary + suggestion |
-| `/dw-intel` | Query codebase intelligence about patterns and architecture | Question | Answer with sources |
 | `/dw-autopilot` | Full pipeline orchestrator: from a wish to a PR with minimal intervention | Wish description | PRD + code + commits + PR |
 
 ### Research
@@ -293,16 +285,6 @@ LEVEL 3 - Formal Code Review (/dw-code-review)
 /dw-autopilot "description of what you want to build"  # Research → PRD → Tasks → Code → QA → PR
 ```
 
-### Quick Task
-```bash
-/dw-quick "change description"                     # Implement + validate + commit
-```
-
-### Resume Session
-```bash
-/dw-resume                                         # Restore context + suggest next step
-```
-
 ### Query Codebase
 ```bash
 /dw-intel "how does X work in this project?"       # Answer with sources
@@ -334,9 +316,7 @@ your-project/
 │   │   ├── dw-autopilot.md
 │   │   ├── dw-deep-research.md
 │   │   ├── dw-intel.md
-│   │   ├── dw-quick.md
 │   │   ├── dw-redesign-ui.md
-│   │   ├── dw-resume.md
 │   │   ├── dw-bugfix.md
 │   │   ├── dw-commit.md
 │   │   ├── dw-functional-doc.md
@@ -400,10 +380,7 @@ Commands work across multiple AI tools, all pointing to the same source `.dw/com
 - Yes. The command is framework-agnostic. For React it uses react-doctor and `vercel-react-best-practices`; for Angular it uses `ng lint` and Angular DevTools. Visual design (`ui-ux-pro-max`) works with any framework.
 
 **Q: How do I get codebase intelligence and parallel execution?**
-- Both are native to dev-workflow as of v0.9.0. Run `/dw-map-codebase` to build the queryable index in `.dw/intel/`, then `/dw-intel "<question>"` to query it. For parallel execution, `/dw-execute-phase` dispatches tasks in waves with atomic commits per task. No external dependency needed.
-
-**Q: Does `/dw-quick` replace `/dw-run-task`?**
-- No. `/dw-quick` is for one-off changes without a PRD. `/dw-run-task` executes tasks from a structured plan with PRD and TechSpec.
+- Both are native to dev-workflow. Run `/dw-map-codebase` to build the queryable index in `.dw/intel/`, then `/dw-intel "<question>"` to query it. For parallel execution, `/dw-run-plan` invokes the bundled phase-execution agents (executor + plan-checker) directly to dispatch tasks in waves with atomic commits per task. No external dependency needed.
 
 **Q: Does `/dw-autopilot` replace all other commands?**
 - No. It orchestrates existing commands in sequence. You can still use each command individually for manual control. Autopilot is for when you want to go from a wish to a PR with minimal intervention.

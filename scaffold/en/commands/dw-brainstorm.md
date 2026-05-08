@@ -109,7 +109,7 @@ Use this command when the user wants to:
 - Short and actionable list
 - If appropriate, suggest which command to use next:
   - `/dw-create-prd` (main successor; accepts the one-pager as input, reducing clarification questions)
-  - `/dw-quick` (if it's a small IMPROVES that fits in a single task, ≤3 files)
+  - `/dw-run-task` (if it's a small IMPROVES that fits in a single task with a quick PRD)
   - `/dw-create-techspec`
   - `/dw-create-tasks`
   - `/dw-bugfix`

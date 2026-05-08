@@ -165,7 +165,7 @@ If a task FAILS during execution:
 
 ### Plan Verification (Pre-Execution)
 
-Before starting execution, delegate to `/dw-plan-checker {{PRD_PATH}}`:
+Before starting execution, spawn the **plan-checker agent** from `.agents/skills/dw-execute-phase/agents/plan-checker.md`:
 - The plan-checker agent verifies the 6 dimensions (requirement coverage, task completeness, dependency soundness, artifact wiring, context budget, constraint compliance)
 - If REVISE: present issues found and suggest fixes. Maximum 3 correction cycles via `/dw-create-tasks --revise`
 - If BLOCK: surface conflict to user, do NOT auto-replan
@@ -173,7 +173,7 @@ Before starting execution, delegate to `/dw-plan-checker {{PRD_PATH}}`:
 
 ### Parallel Execution (Wave-Based)
 
-After plan-checker PASS, delegate to `/dw-execute-phase {{PRD_PATH}}`:
+After plan-checker PASS, spawn the **executor agent** from `.agents/skills/dw-execute-phase/agents/executor.md`:
 - The executor agent analyzes each task's `Depends on:` field to build the dependency graph
 - Groups tasks into waves:
   - Wave 1: tasks with no dependencies (run in parallel)

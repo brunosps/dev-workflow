@@ -26,7 +26,7 @@ A step that invokes a `/dw-xxx` command is ONLY considered complete when the art
 ## When to Use
 - Use when you want to go from an idea to a PR with minimal manual intervention
 - Use for complete features that go through the entire pipeline (research, planning, execution, quality)
-- Do NOT use for one-off changes (use `/dw-quick`)
+- Do NOT use for small, well-scoped one-off tasks — use `/dw-run-task` directly with a quick PRD instead
 - Do NOT use to fix bugs (use `/dw-bugfix`)
 - Do NOT use when you want manual control between each phase (use individual commands)
 
@@ -56,7 +56,7 @@ The autopilot stops ONLY at these 3 moments:
 
 ## Session Resumption
 
-If this command is invoked to resume an interrupted autopilot (via `/dw-resume`):
+If this command is re-invoked on the same PRD after interruption:
 
 <critical>Read the `autopilot-state.json` file in the PRD directory. Skip ALL steps listed in `completed_steps`. Resume execution from `current_step`. Gates already passed (listed in `gates_passed`) MUST NOT be re-presented.</critical>
 
@@ -149,7 +149,7 @@ Evaluate whether tasks involve frontend:
 ### Step 8: Execution
 
 Run `/dw-run-plan` with the PRD path.
-- Follow ALL command instructions, including the native plan-checker gate (PASS required) and wave-based parallel execution via `/dw-execute-phase`
+- Follow ALL command instructions, including the native plan-checker gate (PASS required) and wave-based parallel execution via the bundled `dw-execute-phase` skill agents
 - Each task follows `/dw-run-task` with Level 1 validation
 
 ### Step 9: Implementation Review (Loop)
@@ -250,11 +250,11 @@ Ask the user: **"Commits completed. Do you want to generate the Pull Request?"**
 
 ## Native Engine
 
-The autopilot relies on dev-workflow-native infrastructure for codebase intelligence (`/dw-map-codebase` + `/dw-intel`), plan verification (`/dw-plan-checker`), and parallel execution (`/dw-execute-phase`). All four are bundled and require no external dependencies. See the `dw-codebase-intel` and `dw-execute-phase` bundled skills under `.agents/skills/` for details.
+The autopilot relies on dev-workflow-native infrastructure for codebase intelligence (`/dw-map-codebase` + `/dw-intel`) and bundled phase execution agents (plan-checker + executor in `.agents/skills/dw-execute-phase/agents/`). All bundled and require no external dependencies. See the `dw-codebase-intel` and `dw-execute-phase` bundled skills under `.agents/skills/` for details.
 
 ## State Persistence
 
-<critical>The autopilot MUST save its state after each completed step to allow resumption via `/dw-resume` in case of interruption.</critical>
+<critical>The autopilot MUST save its state after each completed step to allow re-invocation on the same PRD after interruption.</critical>
 
 Save the file `.dw/spec/prd-[name]/autopilot-state.json` with the following format:
 
@@ -286,7 +286,7 @@ Save the file `.dw/spec/prd-[name]/autopilot-state.json` with the following form
 
 - Update `current_step`, `completed_steps`, and `step_artifacts` BEFORE moving to the next step
 - A step ONLY moves to `completed_steps` after verifying its artifacts exist on disk
-- If the session drops, `/dw-resume` will read this file and continue from the correct step — and revalidate artifacts before trusting `completed_steps`
+- If the session drops, re-invoke `/dw-autopilot` on the same PRD; the command reads `autopilot-state.json` and continues from the correct step, revalidating artifacts before trusting `completed_steps`
 - When the pipeline finishes (after commit or PR), remove the file or mark `"status": "completed"`
 
 <critical>After EACH completed step, display the updated progress block to the user. This is MANDATORY — the user MUST see what was done and what comes next. If a step was skipped, the reason MUST appear in the progress block.</critical>

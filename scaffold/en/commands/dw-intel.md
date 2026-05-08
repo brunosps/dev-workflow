@@ -10,7 +10,7 @@ You are a codebase intelligence assistant. This command answers questions about 
 - Use to understand how something works in the project (auth flow, data model, route surface)
 - Use to find patterns, conventions, or architectural decisions
 - Use to verify if something already exists before implementing
-- Do NOT use to implement changes (use `/dw-quick` or `/dw-run-task`)
+- Do NOT use to implement changes (use `/dw-run-task`)
 
 ## Pipeline Position
 

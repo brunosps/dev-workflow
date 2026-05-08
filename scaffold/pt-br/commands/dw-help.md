@@ -30,13 +30,8 @@ Você é um assistente de ajuda do workspace. Quando invocado, apresente ao usu�
 | skill, achar skill, instalar skill, ecossistema, capacidade, estender agente | `/dw-find-skills` | Descobre skills no skills.sh / `npx skills` e instala global ou local |
 | projeto novo, scaffold, bootstrap, comecar, iniciar projeto, fullstack, monorepo | `/dw-new-project` | Entrevista de stack + tools create-* + docker-compose para dev. Roda apos `npx dev-workflow init`. |
 | dockerize, docker, dockerfile, compose, container, imagem prod, multi-stage | `/dw-dockerize` | Le projeto existente, brainstorm de base, gera Dockerfile + docker-compose para dev/prod/ambos, ou audita artefatos existentes. |
-| mapear codebase, indice intel, code map, knowledge graph, indice queryable | `/dw-map-codebase` | Constroi .dw/intel/ (stack/files/apis/deps/arch) para /dw-intel e outros comandos pararem de re-explorar o codebase. |
-| executar fase, tasks paralelas, wave, dispatch, commits atomicos | `/dw-execute-phase` | Roda uma fase de PRD em waves com commits atomicos por task, deviation handling e gate hard de plan-checker antes de tocar codigo. |
-| plan check, verificar plano, validacao de plano, goal backward | `/dw-plan-checker` | Verificacao goal-backward de tasks.md antes da execucao. PASS / REVISE / BLOCK em 6 dimensoes. |
 | refinamento, refine, idea, one-pager, ideia | `/dw-brainstorm --onepager` | Refinamento de ideia com Product Inventory + classification (IMPROVES/CONSOLIDATES/NEW) + one-pager durável |
 | reverter, rollback de task | `/dw-revert-task` | Revert seguro com check de dependências |
-| hotfix, mudança rápida | `/dw-quick` | Task pontual com garantias sem PRD |
-| retomar, onde parei | `/dw-resume` | Restaura contexto da sessão anterior |
 | pesquisa, research | `/dw-deep-research` | Pesquisa multi-fonte com citações |
 | ideia, brainstorm | `/dw-brainstorm` | Ideação estruturada com trade-offs |
 | atualizar dev-workflow | `/dw-update` | Atualiza para versão npm mais recente |
@@ -117,9 +112,6 @@ Este workspace utiliza um sistema de comandos AI que automatiza o ciclo completo
 | `/dw-bugfix` | Analisa e corrige bugs (triagem bug vs feature) | Target + descrição | Fix + commit OU PRD (se feature) |
 | `/dw-fix-qa` | Corrige bugs documentados no QA e retesta com evidências | Path do PRD | Código + `QA/bugs.md` + `QA/qa-report.md` atualizados |
 | `/dw-redesign-ui` | Audita, propõe e implementa redesign visual de páginas/componentes | Página/componente alvo | Brief de redesign + código |
-| `/dw-quick` | Executa task pontual com garantias do workflow sem PRD | Descrição da mudança | Código + commit |
-| `/dw-resume` | Restaura contexto da sessão e sugere próximo passo | (nenhum) | Resumo + sugestão |
-| `/dw-intel` | Consulta inteligência do codebase sobre padrões e arquitetura | Pergunta | Resposta com fontes |
 | `/dw-autopilot` | Orquestrador completo: de um desejo até o PR com mínima intervenção | Descrição do desejo | PRD + código + commits + PR |
 
 ### Análise e Pesquisa
@@ -245,16 +237,6 @@ Inspiradas em skills do projeto [Compozy](https://github.com/compozy/compozy) (`
 /dw-autopilot "descrição do que quer construir"    # Pesquisa → PRD → Tasks → Código → QA → PR
 ```
 
-### Task Rápida
-```bash
-/dw-quick "descrição da mudança"                   # Implementa + valida + commit
-```
-
-### Retomar Sessão
-```bash
-/dw-resume                                         # Restaura contexto + sugere próximo passo
-```
-
 ### Consultar Codebase
 ```bash
 /dw-intel "como funciona X neste projeto?"         # Resposta com fontes
@@ -287,9 +269,7 @@ workspace/
 │   │   ├── dw-review-implementation.md
 │   │   ├── dw-deep-research.md
 │   │   ├── dw-intel.md
-│   │   ├── dw-quick.md
 │   │   ├── dw-redesign-ui.md
-│   │   ├── dw-resume.md
 │   │   ├── dw-bugfix.md
 │   │   ├── dw-fix-qa.md
 │   │   ├── dw-commit.md
@@ -339,10 +319,7 @@ workspace/
 - Sim. O comando é framework-agnostic. Para React usa react-doctor e `vercel-react-best-practices`; para Angular usa `ng lint` e Angular DevTools. Design visual (`ui-ux-pro-max`) funciona com qualquer framework.
 
 **Q: Como obtenho inteligência do codebase e execução paralela?**
-- Os dois são nativos do dev-workflow desde a v0.9.0. Rode `/dw-map-codebase` para construir o índice queryable em `.dw/intel/`, depois `/dw-intel "<pergunta>"` para consultá-lo. Para execução paralela, `/dw-execute-phase` dispatcha tasks em waves com commits atômicos por task. Sem dependência externa.
-
-**Q: O `/dw-quick` substitui o `/dw-run-task`?**
-- Não. `/dw-quick` é para mudanças pontuais sem PRD. `/dw-run-task` executa tasks de um plano estruturado com PRD e TechSpec.
+- Os dois são nativos do dev-workflow. Rode `/dw-map-codebase` para construir o índice queryable em `.dw/intel/`, depois `/dw-intel "<pergunta>"` para consultá-lo. Para execução paralela, `/dw-run-plan` invoca os agentes bundled de execução de fase (executor + plan-checker) diretamente para dispatcha tasks em waves com commits atômicos por task. Sem dependência externa.
 
 **Q: O `/dw-autopilot` substitui todos os outros comandos?**
 - Não. Ele orquestra os comandos existentes em sequência. Você ainda pode usar cada comando individualmente para controle manual. O autopilot é para quando quer ir do desejo ao PR com mínima intervenção.

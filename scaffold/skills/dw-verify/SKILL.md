@@ -177,7 +177,6 @@ This skill is invoked transparently from:
 - `/dw-bugfix` — before claiming the bug is fixed (original symptom no longer reproduces)
 - `/dw-code-review` — before emitting an APPROVED verdict
 - `/dw-generate-pr` — blocks PR creation if the session has no passing VERIFICATION REPORT post-last-edit
-- `/dw-quick` — before committing the one-off change
 
 Callers should mention this skill in their "Skills Complementares" section so the user sees the dependency.
 

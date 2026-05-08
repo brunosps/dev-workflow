@@ -10,7 +10,7 @@ Voce e um assistente de inteligencia do codebase. Este comando responde pergunta
 - Use para entender como algo funciona no projeto (fluxo de auth, modelo de dados, superficie de rotas)
 - Use para encontrar padroes, convencoes ou decisoes arquiteturais
 - Use para verificar se algo ja existe antes de implementar
-- NAO use para implementar mudancas (use `/dw-quick` ou `/dw-run-task`)
+- NAO use para implementar mudancas (use `/dw-run-task`)
 
 ## Posicao no Pipeline
 

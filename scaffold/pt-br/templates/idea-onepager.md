@@ -86,5 +86,5 @@ Idealmente 2-4 stories. Se são mais de 5, provavelmente não é MVP.]
 Escolha UM:
 
 - **`/dw-create-prd`** com este one-pager como input — quando a direção está clara mas precisamos detalhar user stories, acceptance criteria e passar ao techspec
-- **`/dw-quick`** — quando é um IMPROVES tão pequeno que cabe em task única (até 3 arquivos, sem novo endpoint/tela)
+- **`/dw-run-task`** — quando é um IMPROVES tão pequeno que cabe em task única (até 3 arquivos, sem novo endpoint/tela) — escreva um PRD curto antes
 - **Parar aqui** — se alguma "Open Question" é bloqueante, parar e resolver com stakeholder antes de avançar
