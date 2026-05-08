@@ -23,7 +23,6 @@ You are a workspace help assistant. When invoked, present the user with a comple
 | qa, visual test, playwright | `/dw-run-qa` | E2E QA with browser automation |
 | refactor, smell, fowler | `/dw-refactoring-analysis` | Prioritized code-smell audit |
 | design, ui, redesign | `/dw-redesign-ui` | Audit + propose + implement visual |
-| decision, adr, architecture | `/dw-adr` | Record an Architecture Decision Record |
 | debate, council, stress-test, opinions | `/dw-brainstorm --council` or `/dw-create-techspec --council` | Invokes `dw-council` for a multi-advisor debate |
 | security, vulnerability, owasp, trivy, cve | `/dw-security-check` | Rigid multi-layer check (OWASP static + Trivy SCA/IaC + native audit) for TS/Python/C#/Rust |
 | supply chain, outdated, compromised, malicious package, deps update, package upgrade, npm audit, pip-audit | `/dw-deps-audit` | Detect + classify + per-package update plan with scoped QA. Goes beyond `/dw-security-check` by adding remediation. |
@@ -160,11 +159,15 @@ This workspace uses an AI command system that automates the full development cyc
 | `/dw-generate-pr` | Push + create PR + copy body + open URL | Target branch | PR on GitHub |
 | `/dw-revert-task` | Safely revert a specific task's commits (dependency checks + confirmation) | PRD path + task number | Reverted commits + updated `tasks.md` |
 
-### Architectural Decisions
+### Internal commands (used by other dw-* commands; rarely invoked directly)
 
-| Command | What it does | Input | Output |
-|---------|-------------|-------|--------|
-| `/dw-adr` | Record an Architecture Decision Record (ADR) for a non-trivial decision during a PRD | PRD path + title | `.dw/spec/<prd>/adrs/adr-NNN.md` + cross-refs updated |
+| Command | What it does | Typically invoked by |
+|---------|-------------|----------------------|
+| `/dw-adr` | Record an Architecture Decision Record during PRD execution | `/dw-create-techspec`, `/dw-run-task` when a non-trivial decision arises |
+| `/dw-intel` | Query the codebase index built in `.dw/intel/` | `/dw-create-prd`, `/dw-create-techspec`, `/dw-code-review`, etc. |
+| `/dw-map-codebase` | Build/refresh the queryable codebase index in `.dw/intel/` | `/dw-analyze-project` (auto-runs after rules generation) |
+
+These are exposed as slash commands for occasional manual use (e.g., quickly recording an ADR mid-session, ad-hoc codebase queries) but most users never invoke them directly — they're called by the higher-level commands above.
 
 ### Maintenance
 
