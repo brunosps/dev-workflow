@@ -41,7 +41,7 @@ digraph brainstorm_decision {
 Quando disponíveis no projeto em `./.agents/skills/`, use para enriquecer a ideação:
 
 - `dw-council` (opt-in via `--council`): stress-test multi-advisor das opções mais promissoras com steel-manning obrigatório e concession tracking. **NÃO invocar por padrão** — só quando a flag está presente ou quando surge consenso rápido demais (sinal de false consensus).
-- `ui-ux-pro-max`: use quando o brainstorm envolver frontend, direção de estilo UI, escolhas de design system ou exploração de identidade visual
+- `dw-ui-discipline`: use quando o brainstorm envolver frontend ou direção de UI — o hard-gate (scene sentence, surface job) é forcing function generativa durante ideação, não só check de review
 - `vercel-react-best-practices`: use quando explorar arquitetura React/Next.js ou trade-offs de performance
 - `security-review`: use quando o brainstorm tocar auth, manipulação de dados ou features sensíveis à segurança
 

@@ -319,7 +319,7 @@ workspace/
 - Sim, é recomendado para projetos novos. Ele gera as rules em `.dw/rules/` que todos os outros comandos utilizam.
 
 **Q: O `/dw-redesign-ui` funciona com Angular?**
-- Sim. O comando é framework-agnostic. Para React usa react-doctor e `vercel-react-best-practices`; para Angular usa `ng lint` e Angular DevTools. Design visual (`ui-ux-pro-max`) funciona com qualquer framework.
+- Sim. O comando é framework-agnostic. Para React usa react-doctor e `vercel-react-best-practices`; para Angular usa `ng lint` e Angular DevTools. Disciplina de UI (`dw-ui-discipline`) funciona com qualquer framework — enforça o hard-gate, anti-slop catalog e WCAG floor independente do stack.
 
 **Q: Como obtenho inteligência do codebase e execução paralela?**
 - Os dois são nativos do dev-workflow. Rode `/dw-map-codebase` para construir o índice queryable em `.dw/intel/`, depois `/dw-intel "<pergunta>"` para consultá-lo. Para execução paralela, `/dw-run-plan` invoca os agentes bundled de execução de fase (executor + plan-checker) diretamente para dispatcha tasks em waves com commits atômicos por task. Sem dependência externa.

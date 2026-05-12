@@ -20,9 +20,9 @@ Você é um assistente IA especializado em Quality Assurance. Sua tarefa é vali
 
 Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apoio operacional sem substituir este comando:
 
-- `webapp-testing`: (modo UI) apoio para estruturar fluxos de teste, retestes, screenshots e logs quando complementar ao Playwright MCP
+- `dw-testing-discipline`: (modo UI) **SEMPRE** — Iron Laws e 25 anti-patterns valem pra todo teste de QA autorado. `references/playwright-recipes.md` pra patterns táticos. `references/three-workflow-patterns.md` pra escolher o modo certo (UI / network / perf). `references/security-boundary.md` pra qualquer fluxo que cruza boundary de auth.
 - `vercel-react-best-practices`: (modo UI) use apenas se o frontend sob teste for React/Next.js e houver indicação de regressão relacionada a renderização, fetching, hidratação ou performance percebida
-- `ui-ux-pro-max`: (modo UI) use quando validar consistência de design, paletas de cores, tipografia, espaçamento e hierarquia visual contra padrões da indústria
+- `dw-ui-discipline`: (modo UI) use ao validar consistência de design — o catálogo anti-slop e o floor de acessibilidade WCAG são checados como parte da evidência de QA
 - `api-testing-recipes`: **(modo API — SEMPRE)** snippets validados para `.http`, pytest+httpx, supertest, WebApplicationFactory, reqwest. Compõe um arquivo de teste por RF em `QA/scripts/api/` e logs JSONL em `QA/logs/api/` segundo seus references
 
 ## Ferramentas de Análise
@@ -149,7 +149,7 @@ Se NENHUMA credencial for encontrada, PARE e pergunte ao usuário antes de conti
 - Verificar se a aplicação está rodando em localhost
 - Usar `browser_navigate` do Playwright MCP para acessar a aplicação
 - Confirmar que a página carregou corretamente com `browser_snapshot`
-- Se sessão persistente, import de auth, inspeção de rede além do MCP ou reprodução browser-first forem necessários, complementar com `webapp-testing`
+- Se sessão persistente, import de auth, inspeção de rede além do MCP ou reprodução browser-first forem necessários, complementar com `dw-testing-discipline/references/playwright-recipes.md`
 
 ### 3. Verificação de Páginas do Menu (Somente modo UI — Obrigatório, Executar ANTES dos testes de RF)
 
@@ -222,7 +222,7 @@ Para cada requisito funcional do PRD:
 8. Marcar como PASSOU ou FALHOU
 9. Salvar o script Playwright do fluxo em `{{PRD_PATH}}/QA/scripts/` com nome padronizado: `RF-XX-[slug].spec.ts` (ou `.js`)
 10. Registrar no relatório quais credenciais (usuário/perfil) foram usadas em cada fluxo sensível a permissões
-11. Quando o fluxo MCP ficar instável ou insuficiente para evidência operacional, complementar com `webapp-testing`, registrando isso explicitamente no relatório
+11. Quando o fluxo MCP ficar instável ou insuficiente para evidência operacional, complementar com `dw-testing-discipline/references/playwright-recipes.md`, registrando isso explicitamente no relatório
 
 <critical>Não basta validar apenas o caminho feliz. Cada requisito deve ser exercitado contra seus estados de borda e suas regressões mais prováveis</critical>
 <critical>Se um requisito não puder ser completamente validado via E2E, o QA deve ser marcado como REJEITADO ou BLOQUEADO, nunca APROVADO</critical>

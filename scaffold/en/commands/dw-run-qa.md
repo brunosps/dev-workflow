@@ -20,9 +20,9 @@ You are an AI assistant specialized in Quality Assurance. Your task is to valida
 
 When available in the project under `./.agents/skills/`, use these skills as operational support without replacing this command:
 
-- `webapp-testing`: (UI mode) support for structuring test flows, retests, screenshots, and logs when complementary to Playwright MCP
+- `dw-testing-discipline`: (UI mode) **ALWAYS** — Iron Laws and 25 anti-patterns apply to every QA test authored. `references/playwright-recipes.md` for tactical patterns. `references/three-workflow-patterns.md` to pick the right verification mode (UI / network / perf). `references/security-boundary.md` for any flow that crosses an auth boundary.
 - `vercel-react-best-practices`: (UI mode) use only if the frontend under test is React/Next.js and there is indication of regression related to rendering, fetching, hydration, or perceived performance
-- `ui-ux-pro-max`: (UI mode) use when validating design consistency, color palettes, typography, spacing, and visual hierarchy against industry standards
+- `dw-ui-discipline`: (UI mode) use when validating design consistency — the anti-slop catalog and WCAG accessibility floor are checked as part of QA evidence
 - `api-testing-recipes`: **(API mode — ALWAYS)** validated snippets for `.http`, pytest+httpx, supertest, WebApplicationFactory, reqwest. Composes per-RF test files in `QA/scripts/api/` and JSONL logs in `QA/logs/api/` per its references
 
 ## Analysis Tools
@@ -149,7 +149,7 @@ If NO credentials are found, STOP and ask the user before continuing. Do NOT gue
 - Verify the application is running on localhost
 - Use `browser_navigate` from Playwright MCP to access the application
 - Confirm the page loaded correctly with `browser_snapshot`
-- If persistent session, auth import, or network inspection beyond MCP is needed, complement with `webapp-testing`
+- If persistent session, auth import, or network inspection beyond MCP is needed, complement with `dw-testing-discipline/references/playwright-recipes.md`
 
 ### 3. Menu Page Verification (UI mode only -- Required, Execute BEFORE RF tests)
 
@@ -222,7 +222,7 @@ For each functional requirement from the PRD:
 8. Mark as PASSED or FAILED
 9. Save the Playwright flow script in `{{PRD_PATH}}/QA/scripts/` with standardized name: `RF-XX-[slug].spec.ts` (or `.js`)
 10. Record in the report which credentials (user/profile) were used in each permission-sensitive flow
-11. When the MCP flow becomes unstable or insufficient for operational evidence, complement with `webapp-testing`, recording this explicitly in the report
+11. When the MCP flow becomes unstable or insufficient for operational evidence, complement with `dw-testing-discipline/references/playwright-recipes.md`, recording this explicitly in the report
 
 <critical>It is not enough to validate only the happy path. Each requirement must be exercised against its boundary states and most likely regressions</critical>
 <critical>If a requirement cannot be fully validated via E2E, QA must be marked as REJECTED or BLOCKED, never APPROVED</critical>

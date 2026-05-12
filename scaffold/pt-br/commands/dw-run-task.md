@@ -21,7 +21,7 @@ Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como sup
 | `dw-verify` | **SEMPRE** — invocada antes do commit para produzir Verification Report com evidence fresca |
 | `dw-memory` | **SEMPRE** — lê memory da workflow no início e atualiza ao final da task (promotion test) |
 | `vercel-react-best-practices` | Task envolve renderização React, hidratação, data fetching, bundle, cache ou performance |
-| `webapp-testing` | Task tem frontend interativo que necessita validação E2E em navegador real |
+| `dw-testing-discipline` | Task precisa de testes (qualquer layer) — aplica Iron Laws, 7 AI Gates, catálogo de anti-patterns. Use `references/playwright-recipes.md` quando a task tem frontend interativo precisando de validação E2E. |
 
 ## Inteligência do Codebase
 
@@ -93,7 +93,7 @@ Após fornecer o resumo e abordagem, **comece imediatamente** a implementar a ta
 - Seguir padrões estabelecidos do projeto
 - Garantir que todos os requisitos sejam atendidos
 - **Rodar testes**: use o comando de teste do projeto
-- Se houver frontend interativo, valide também o comportamento real com `webapp-testing` quando isso reduzir o risco de regressão invisível nos testes unitários
+- Se houver frontend interativo, valide também o comportamento real usando `dw-testing-discipline/references/playwright-recipes.md` quando isso reduzir o risco de regressão invisível nos testes unitários
 
 **VOCÊ DEVE** iniciar a implementação logo após o processo acima.
 

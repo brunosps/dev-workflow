@@ -18,7 +18,7 @@
     - `dw-debug-protocol`: **SEMPRE** — conduz o bug pelo six-step triage (Reproduzir → Localizar → Reduzir → Fix Root Cause → Guardar → Verificar End-to-End). Stop-the-line discipline; root-cause sobre symptom; regression test commitado no mesmo commit atômico. Bugs não-reprodutíveis seguem o sub-protocolo instrument-first — sem fix por palpite a não ser com acknowledgement explícito.
     - `dw-verify`: **SEMPRE** — em modo Direto, invocada antes do commit da correção. O VERIFICATION REPORT deve mostrar que o sintoma original do bug não se reproduz mais (não apenas que os testes passam).
     - `vercel-react-best-practices`: use quando o bug afeta React/Next.js e há suspeita de problemas de render, hidratação, fetching, waterfall, bundle ou re-render
-    - `webapp-testing`: use quando a correção requer fluxo E2E/reteste reproduzível em uma web app
+    - `dw-testing-discipline`: use quando a correção requer fluxo E2E/reteste reproduzível em web app — `references/playwright-recipes.md` pra recipes, Iron Laws + 7 AI Gates pra qualquer teste que o fix adicione, flaky-discipline se o bug aparece de forma intermitente.
     - `security-review`: use quando a causa raiz toca auth, autorização, input externo, upload, secrets, SQL, XSS, SSRF ou outras superfícies sensíveis
 
     ## Variáveis de Entrada
@@ -153,7 +153,7 @@
     - Mensagens de erro relacionadas
     - Stack traces
     - Arquivos modificados recentemente
-    - Se o bug for relacionado a UI ou depender de fluxo no navegador, complemente a coleta com `webapp-testing`
+    - Se o bug for relacionado a UI ou depender de fluxo no navegador, complemente a coleta com `dw-testing-discipline` (playwright-recipes + three-workflow-patterns pra escolher o modo certo de verificação)
 
     ### 3. Perguntas de Clarificação (OBRIGATÓRIO - EXATAMENTE 3)
 
@@ -180,7 +180,7 @@
     - **Causa Provável**: Baseado nas evidências
     - **Arquivos Afetados**: Lista de arquivos a modificar
     - **Impacto**: Outros componentes que podem ser afetados
-    - **Skills utilizadas**: registre explicitamente se a análise usou `vercel-react-best-practices`, `webapp-testing` ou `security-review`
+    - **Skills utilizadas**: registre explicitamente se a análise usou `vercel-react-best-practices`, `dw-testing-discipline` ou `security-review`
 
     ### 4.1 Checkpoint de Escopo (OBRIGATÓRIO)
 

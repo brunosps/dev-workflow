@@ -40,9 +40,9 @@ digraph redesign_decision {
 
 Quando disponíveis no projeto em `./.agents/skills/`, use para guiar o redesign:
 
-- `ui-ux-pro-max`: **OBRIGATÓRIO** — use para todas as decisões de design (paleta de cores, tipografia, estilo visual, layout, acessibilidade WCAG)
+- `dw-ui-discipline`: **OBRIGATÓRIO** — roda o hard-gate de 4 checkpoints (brand authorities OU curated defaults; surface job sentence; state matrix completa; scene sentence) ANTES de qualquer proposta. Os 14 anti-slop patterns são checados contra cada direção. O WCAG 2.2 AA floor é não-negociável no step de validate.
 - `vercel-react-best-practices`: use quando o projeto for React/Next.js para padrões de performance e implementação
-- `webapp-testing`: use para capturar screenshots antes/depois e validação visual com Playwright
+- `dw-testing-discipline`: consulte `references/playwright-recipes.md` para captura de screenshots antes/depois e validação visual. Iron Laws + hierarquia de seletores valem pra qualquer teste gerado junto com o redesign.
 - `security-review`: use se o redesign tocar flows de autenticação ou formulários sensíveis
 
 ## Ferramentas de Análise
@@ -56,12 +56,12 @@ Utilize ferramentas de diagnóstico conforme o framework do projeto:
 ## Comportamento Obrigatório
 
 1. Identifique o alvo: página, componente ou rota que será redesenhada.
-2. **AUDITAR**: leia a implementação atual, identifique stack CSS (Tailwind, CSS Modules, styled-components, etc.), capture screenshot se `webapp-testing` disponível, rode react-doctor se projeto React.
+2. **AUDITAR**: leia a implementação atual, identifique stack CSS (Tailwind, CSS Modules, styled-components, etc.), capture screenshot usando `dw-testing-discipline`/playwright-recipes se disponível, rode react-doctor se projeto React.
 3. Faça 3 a 5 perguntas sobre objetivos do redesign: direção de estilo, constraints de marca, inspirações, público-alvo, dispositivos prioritários.
-4. **PROPOR**: apresente 2 a 3 direções de design usando `ui-ux-pro-max` — cada uma com paleta de cores, par tipográfico, estilo de layout e racional. Para CADA direção, descreva explicitamente o layout mobile (<=768px) e o layout desktop (>=1024px), incluindo como os elementos se reorganizam, empilham ou escondem entre breakpoints.
+4. **PROPOR**: apresente 2 a 3 direções de design depois de passar pelo hard-gate de `dw-ui-discipline` (brand authorities ou curated defaults; surface job sentence; state matrix enumerada; scene sentence). Cada direção lista paleta de cores, par tipográfico, estilo de layout e racional. Self-check de cada direção contra os 14 anti-slop patterns. Para CADA direção, descreva explicitamente o layout mobile (<=768px) e o layout desktop (>=1024px), incluindo como os elementos se reorganizam, empilham ou escondem entre breakpoints.
 5. Espere aprovação explícita do usuário antes de implementar.
 6. **IMPLEMENTAR**: aplique o design escolhido com abordagem mobile-first — implemente primeiro o layout mobile e depois adicione media queries/breakpoints para tablet e desktop. Respeite a stack existente. Use `vercel-react-best-practices` para React/Next.js. Mantenha a metodologia CSS do projeto.
-7. **VALIDAR**: capture estado depois em AMBAS as resoluções (mobile e desktop), compare antes/depois, verifique acessibilidade (WCAG 2.2 via `ui-ux-pro-max`), rode react-doctor `--diff` se React. Se `webapp-testing` disponível, capture screenshots em viewport 375px (mobile) e 1440px (desktop).
+7. **VALIDAR**: capture estado depois em AMBAS as resoluções (mobile e desktop), compare antes/depois, verifique acessibilidade contra `dw-ui-discipline/references/accessibility-floor.md` (WCAG 2.2 AA — não-negociável: contraste, focus-visible, keyboard nav, ARIA, sem traps), rode react-doctor `--diff` se React. Use `dw-testing-discipline/references/playwright-recipes.md` para capturar screenshots em viewport 375px (mobile) e 1440px (desktop).
 8. **PERSISTIR CONTRATO**: se o usuário aprovou uma direção, gere `design-contract.md` no diretório do PRD (`.dw/spec/prd-[nome]/design-contract.md`) com: direção aprovada, paleta de cores, par tipográfico, regras de layout, regras de acessibilidade e regras de componentes. Este contrato será lido por `dw-run-task` e `dw-run-plan` para garantir consistência visual.
 
 ## Inteligência do Codebase
@@ -82,8 +82,8 @@ Utilize ferramentas de diagnóstico conforme o framework do projeto:
 
 ### 2. Proposta de Design
 - 2 a 3 direções com racional visual
-- Paleta de cores (via `ui-ux-pro-max`)
-- Par tipográfico (via `ui-ux-pro-max`)
+- Paleta de cores (de brand authority OU `dw-ui-discipline/references/curated-defaults.md`)
+- Par tipográfico (mesma fonte)
 - Padrão de layout
 - Nível de esforço por direção
 

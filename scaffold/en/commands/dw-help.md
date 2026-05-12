@@ -380,7 +380,7 @@ Commands work across multiple AI tools, all pointing to the same source `.dw/com
 - For comprehensive multi-source analysis, technology comparisons, state-of-the-art reviews, or any topic requiring cited evidence. Not for simple lookups or debugging.
 
 **Q: Does `/dw-redesign-ui` work with Angular?**
-- Yes. The command is framework-agnostic. For React it uses react-doctor and `vercel-react-best-practices`; for Angular it uses `ng lint` and Angular DevTools. Visual design (`ui-ux-pro-max`) works with any framework.
+- Yes. The command is framework-agnostic. For React it uses react-doctor and `vercel-react-best-practices`; for Angular it uses `ng lint` and Angular DevTools. UI discipline (`dw-ui-discipline`) works with any framework — enforces the hard-gate, anti-slop catalog, and WCAG floor regardless of stack.
 
 **Q: How do I get codebase intelligence and parallel execution?**
 - Both are native to dev-workflow. Run `/dw-map-codebase` to build the queryable index in `.dw/intel/`, then `/dw-intel "<question>"` to query it. For parallel execution, `/dw-run-plan` invokes the bundled phase-execution agents (executor + plan-checker) directly to dispatch tasks in waves with atomic commits per task. No external dependency needed.

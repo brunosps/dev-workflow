@@ -141,7 +141,7 @@ Apresente ao usuario:
 ### Etapa 7: Design Contract (Condicional)
 
 Avalie se as tasks envolvem frontend:
-- **SIM** (execute `/dw-redesign-ui`): se houver tasks com componentes visuais E a skill `ui-ux-pro-max` estiver disponivel
+- **SIM** (execute `/dw-redesign-ui`): se houver tasks com componentes visuais E a skill `dw-ui-discipline` estiver disponivel
   - Gere o design contract em `.dw/spec/prd-[nome]/design-contract.md`
   - Apresente um resumo do design contract ao usuario (paleta, tipografia, layout mobile/desktop) como checkpoint visual antes de prosseguir
 - **NAO** (pule para etapa 8): tasks puramente backend/infra

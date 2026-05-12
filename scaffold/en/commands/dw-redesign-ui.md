@@ -40,9 +40,9 @@ digraph redesign_decision {
 
 When available in the project under `./.agents/skills/`, use these to guide the redesign:
 
-- `ui-ux-pro-max`: **REQUIRED** — use for all design decisions (color palette, typography, visual style, layout, WCAG accessibility)
+- `dw-ui-discipline`: **REQUIRED** — runs the 4-checkpoint hard-gate (brand authorities OR curated defaults; surface job sentence; complete state matrix; scene sentence) BEFORE any design proposal. The 14 anti-slop patterns are checked against each proposed direction. The WCAG 2.2 AA floor is non-negotiable at the validate step.
 - `vercel-react-best-practices`: use when the project is React/Next.js for performance and implementation patterns
-- `webapp-testing`: use to capture before/after screenshots and visual validation with Playwright
+- `dw-testing-discipline`: consult `references/playwright-recipes.md` for before/after screenshot capture and visual validation. Iron Laws + selector hierarchy apply to any tests generated alongside the redesign.
 - `security-review`: use if the redesign touches authentication flows or sensitive forms
 
 ## Analysis Tools
@@ -56,12 +56,12 @@ Use diagnostic tools based on the project's framework:
 ## Required Behavior
 
 1. Identify the target: page, component, or route to be redesigned.
-2. **AUDIT**: read the current implementation, identify the CSS stack (Tailwind, CSS Modules, styled-components, etc.), capture screenshot if `webapp-testing` is available, run react-doctor if React project.
+2. **AUDIT**: read the current implementation, identify the CSS stack (Tailwind, CSS Modules, styled-components, etc.), capture screenshot using `dw-testing-discipline`/playwright-recipes if available, run react-doctor if React project.
 3. Ask 3 to 5 questions about redesign goals: style direction, brand constraints, inspirations, target audience, priority devices.
-4. **PROPOSE**: present 2 to 3 design directions using `ui-ux-pro-max` — each with color palette, typography pairing, layout style, and rationale. For EACH direction, explicitly describe the mobile layout (<=768px) and desktop layout (>=1024px), including how elements reorganize, stack, or hide between breakpoints.
+4. **PROPOSE**: present 2 to 3 design directions after passing the `dw-ui-discipline` hard-gate (brand authorities or curated defaults selected; surface job sentence written; state matrix enumerated; scene sentence written). Each direction lists color palette, typography pairing, layout style, and rationale. Self-check each direction against the 14 anti-slop patterns. For EACH direction, explicitly describe the mobile layout (<=768px) and desktop layout (>=1024px), including how elements reorganize, stack, or hide between breakpoints.
 5. Wait for explicit user approval before implementing.
 6. **IMPLEMENT**: apply the chosen design with a mobile-first approach — implement the mobile layout first, then add media queries/breakpoints for tablet and desktop. Respect the existing stack. Use `vercel-react-best-practices` for React/Next.js. Maintain the project's CSS methodology.
-7. **VALIDATE**: capture after-state in BOTH resolutions (mobile and desktop), compare before/after, verify accessibility (WCAG 2.2 via `ui-ux-pro-max`), run react-doctor `--diff` if React. If `webapp-testing` is available, capture screenshots at 375px viewport (mobile) and 1440px viewport (desktop).
+7. **VALIDATE**: capture after-state in BOTH resolutions (mobile and desktop), compare before/after, verify accessibility against `dw-ui-discipline/references/accessibility-floor.md` (WCAG 2.2 AA — non-negotiable: contrast, focus-visible, keyboard nav, ARIA, no traps), run react-doctor `--diff` if React. Use `dw-testing-discipline/references/playwright-recipes.md` to capture screenshots at 375px viewport (mobile) and 1440px viewport (desktop).
 8. **PERSIST CONTRACT**: if the user approved a direction, generate `design-contract.md` in the PRD directory (`.dw/spec/prd-[name]/design-contract.md`) with: approved direction, color palette, typography pairing, layout rules, accessibility rules, and component rules. This contract will be read by `dw-run-task` and `dw-run-plan` to ensure visual consistency.
 
 ## Codebase Intelligence
@@ -82,8 +82,8 @@ Use diagnostic tools based on the project's framework:
 
 ### 2. Design Proposal
 - 2 to 3 directions with visual rationale
-- Color palette (via `ui-ux-pro-max`)
-- Typography pairing (via `ui-ux-pro-max`)
+- Color palette (from brand authority OR `dw-ui-discipline/references/curated-defaults.md`)
+- Typography pairing (same source)
 - Layout pattern
 - Effort level per direction
 

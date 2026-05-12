@@ -18,7 +18,7 @@
     - `dw-debug-protocol`: **ALWAYS** — runs the bug through the six-step triage (Reproduce → Localize → Reduce → Fix Root Cause → Guard → Verify End-to-End). Stop-the-line discipline; root-cause over symptom; regression test committed in the same atomic commit. Non-reproducible bugs follow the instrument-first sub-protocol — no guess fixes without explicit acknowledgement.
     - `dw-verify`: **ALWAYS** — in Direct mode, invoked before committing the fix. The VERIFICATION REPORT must show the original bug symptom no longer reproduces (not just that tests pass).
     - `vercel-react-best-practices`: use when the bug affects React/Next.js and there is suspicion of render, hydration, fetching, waterfall, bundle, or re-render issues
-    - `webapp-testing`: use when the fix requires a reproducible E2E/retest flow in a web app
+    - `dw-testing-discipline`: use when the fix requires a reproducible E2E/retest flow in a web app — `references/playwright-recipes.md` for recipes, Iron Laws + 7 AI Gates for any test the fix adds, flaky-discipline if the bug surfaces intermittently.
     - `security-review`: use when the root cause touches auth, authorization, external input, upload, secrets, SQL, XSS, SSRF, or other sensitive surfaces
 
     ## Input Variables
@@ -159,7 +159,7 @@
     - Related error messages
     - Stack traces
     - Recently modified files
-    - If the bug is UI-related or depends on browser flow, supplement collection with `webapp-testing`
+    - If the bug is UI-related or depends on browser flow, supplement collection with `dw-testing-discipline` (playwright-recipes + three-workflow-patterns to pick the right verification mode)
 
     ### 3. Clarification Questions (MANDATORY - EXACTLY 3)
 
@@ -197,7 +197,7 @@
     - **Probable Cause**: Based on the evidence
     - **Affected Files**: List of files to modify
     - **Impact**: Other components that may be affected
-    - **Skills used**: explicitly record if the analysis used `vercel-react-best-practices`, `webapp-testing`, or `security-review`
+    - **Skills used**: explicitly record if the analysis used `vercel-react-best-practices`, `dw-testing-discipline`, or `security-review`
 
     ### 4.1 Scope Checkpoint (MANDATORY)
 

@@ -55,10 +55,10 @@ Funciona melhor com projeto analisado por `/dw-analyze-project`
 
 Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apoio operacional, sem substituir este comando como fonte de verdade:
 
-- `webapp-testing`: apoio para estruturar fluxos E2E, retestes locais e coleta de evidências
+- `dw-testing-discipline`: apoio para estruturar fluxos E2E (`references/playwright-recipes.md`), padrões de coleta de evidência, e aplicar Iron Laws + hierarquia de seletores em qualquer teste referenciado pelo doc
 - `remotion-best-practices`: apoio obrigatório quando houver vídeo humano final, legendas, composição, transições, FFmpeg ou Remotion
 - `humanizer`: apoio obrigatório para revisar e naturalizar todas as legendas, captions `.srt`, textos descritivos e qualquer redação voltada a leitura humana antes da entrega final
-- `ui-ux-pro-max`: use quando documentar padrões visuais, escolhas de design system e consistência de estilo UI entre telas
+- `dw-ui-discipline`: use ao documentar padrões visuais — state matrix e scene sentence viram parte da seção de overview de cada tela
 
 ## Ferramentas obrigatórias para browser
 
