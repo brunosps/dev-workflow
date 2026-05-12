@@ -183,6 +183,34 @@ A **constitution** is a declarative list of principles your team commits to (e.g
 
 Customize templates locally without losing dev-workflow updates. Drop a file at `.dw/templates/overrides/<name>.md`; the override is used in place of the bundled core template on every `update`. Subdirectories work too (e.g., `.dw/templates/overrides/functional-doc/e2e-runbook.md`). See `.dw/templates/overrides/README.md` (created on init) for the workflow and `diff` cadence guidance.
 
+## Auto-Trigger (CLAUDE.md / AGENTS.md)
+
+`dev-workflow init` seeds two files at the project root with the same content: `CLAUDE.md` (read by Claude Code) and `AGENTS.md` (read by Codex CLI, Copilot CLI, and OpenCode). Together they tell the agent **when to invoke each `dw-*` command without being explicitly asked**.
+
+**What's inside:**
+
+- **Trigger Map** — 15 mappings from user intent ("Implement X", "Bug in Y", "Review my PR", ...) to the `dw-*` command the agent should run. `/dw-autopilot` is the safest default for non-trivial feature requests.
+- **Hard Gates** — reminders that constitution violations (high/critical), missing `dw-verify` PASS, and security failures block downstream commands.
+- **Escape Hatches** — explicit cases where the agent should NOT auto-trigger (typos, exploration, aesthetic edits, user opt-out).
+
+**Why two files:** Claude Code, Codex, Copilot, and OpenCode all support agent-instruction conventions but use different filenames. Shipping both means every supported platform picks up the same trigger logic out of the box.
+
+**Why descriptions, too:** every `dw-*` command's description leads with `Trigger when <user signal>...` so the agent can pick the right one even without consulting the trigger map. Both mechanisms reinforce each other.
+
+**Merge-aware update.** The content lives between `<!-- dev-workflow:start -->` and `<!-- dev-workflow:end -->` markers. Anything you add **outside** the markers (your own house rules, project-specific guidelines) is preserved on every `dev-workflow update` — only the block inside is refreshed.
+
+```bash
+# After init, both files exist at project root
+ls CLAUDE.md AGENTS.md
+
+# Edit OUTSIDE the markers freely — survives updates
+echo "## My team's house rules" >> CLAUDE.md
+echo "..." >> CLAUDE.md
+
+# Run update — block is refreshed, your additions stay
+npx @brunosps00/dev-workflow update
+```
+
 ## Platform Support
 
 | Platform | Wrapper Location | Status |
@@ -207,6 +235,8 @@ your-project/
 │   ├── references/        # Reference documentation
 │   ├── scripts/           # Utility scripts
 │   └── spec/              # PRD directories — each contains tasks-validation.md
+├── CLAUDE.md              # Auto-trigger decision tree for Claude Code (merge-aware)
+├── AGENTS.md              # Same content for Codex / Copilot / OpenCode
 ├── .claude/
 │   ├── skills/            # Claude Code wrappers
 │   └── settings.json      # MCP servers (Context7, Playwright)
