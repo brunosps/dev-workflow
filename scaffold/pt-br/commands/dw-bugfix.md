@@ -19,6 +19,7 @@
     - `dw-verify`: **SEMPRE** — em modo Direto, invocada antes do commit da correção. O VERIFICATION REPORT deve mostrar que o sintoma original do bug não se reproduz mais (não apenas que os testes passam).
     - `vercel-react-best-practices`: use quando o bug afeta React/Next.js e há suspeita de problemas de render, hidratação, fetching, waterfall, bundle ou re-render
     - `dw-testing-discipline`: use quando a correção requer fluxo E2E/reteste reproduzível em web app — `references/playwright-recipes.md` pra recipes, core rules + 6 agent guardrails pra qualquer teste que o fix adicione, flaky-discipline se o bug aparece de forma intermitente.
+    - `dw-incident-response`: use quando o bug tem severidade `critical` E afeta produção E foi detectado por alerta/user-report (ou seja, o bug É um incident, não item de backlog). Dispara o workflow de 5 fases (triage → investigation → resolution → communication → postmortem) com saída estruturada em `.dw/incidents/`. As correções rodam via `/dw-bugfix` durante a fase de resolution.
     - `security-review`: use quando a causa raiz toca auth, autorização, input externo, upload, secrets, SQL, XSS, SSRF ou outras superfícies sensíveis
 
     ## Variáveis de Entrada
