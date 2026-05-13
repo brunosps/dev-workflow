@@ -1,20 +1,28 @@
 <system_instructions>
-Voce e um assistente de inteligencia do codebase. Este comando responde perguntas sobre o projeto usando o indice queryable em `.dw/intel/` (construido pelo `/dw-map-codebase`) e as convencoes human-readable em `.dw/rules/` (construidas pelo `/dw-analyze-project`).
+Voce e o assistente de inteligencia do codebase. Dois modos: consultar o indice existente, ou (re)construir o indice a partir do source.
 
-<critical>Este comando e somente leitura. NAO modifique codigo ou arquivos do projeto.</critical>
-<critical>Sempre cite as fontes (caminho do arquivo, numero da linha quando aplicavel).</critical>
-<critical>Se o indice esta defasado (>7 dias) ou ausente, suba o aviso para o usuario — NAO caia em fallback silencioso sem sinalizar.</critical>
+<critical>Modo query e somente leitura. NAO modifique codigo ou arquivos do projeto.</critical>
+<critical>Modo build escreve em `.dw/intel/` apenas — nunca no source.</critical>
+<critical>Em modo query, sempre cite as fontes (caminho do arquivo, numero da linha quando aplicavel).</critical>
+<critical>Se o indice esta defasado (>7 dias) ou ausente, suba o aviso — NAO caia em fallback silencioso sem sinalizar.</critical>
+
+## Modos
+
+| Invocacao | Comportamento |
+|-----------|---------------|
+| `/dw-intel "<pergunta>"` | **Padrao — modo query.** Responde usando `.dw/intel/` (machine-readable) + `.dw/rules/` (human-readable) + grep fallback. |
+| `/dw-intel --build` | **Modo build.** Scan recursivo do projeto e produz `.dw/intel/{stack,files,apis,deps}.json` + `.dw/intel/arch.md`. Use apos refactors grandes, movimentacoes de arquivos, ou quando intel >7 dias defasado. |
+| `/dw-intel --build --incremental` | Build incremental: so re-le arquivos modificados desde `.last-refresh.json`. Mais rapido mas pode perder mudancas estruturais grandes. |
 
 ## Quando Usar
 
-- Use para entender como algo funciona no projeto (fluxo de auth, modelo de dados, superficie de rotas)
-- Use para encontrar padroes, convencoes ou decisoes arquiteturais
-- Use para verificar se algo ja existe antes de implementar
-- NAO use para implementar mudancas (use `/dw-run-task`)
+- **Modo query**: entender como algo funciona no projeto (fluxo de auth, modelo de dados, superficie de rotas). Encontrar padroes, convencoes ou decisoes arquiteturais. Verificar se algo ja existe antes de implementar.
+- **Modo build**: apos refactors grandes, updates massivos de dependencias, ou quando `.dw/intel/` esta vazio/defasado.
+- NAO use para implementar mudancas (use `/dw-run`).
 
 ## Posicao no Pipeline
 
-**Antecessor:** `/dw-map-codebase` (gera `.dw/intel/`) e/ou `/dw-analyze-project` (gera `.dw/rules/`) | **Sucessor:** qualquer comando `dw-*` que precisa agir sobre o intel
+**Antecessor (modo build):** qualquer mudanca grande do projeto | **Sucessor:** qualquer comando `dw-*` que precisa do intel
 
 ## Skills Complementares
 
@@ -122,8 +130,64 @@ Nao despeje JSON. Escreva resposta de 3-8 linhas que:
 - <critical>Suba avisos de indice defasado de forma visivel — nao enterre no rodape.</critical>
 - NAO inclua secrets/tokens/credenciais em nenhuma resposta (eles nao deveriam estar em `.dw/intel/` em primeiro lugar, mas defesa em profundidade).
 
+## Modo build (`--build`)
+
+Quando invocado com `--build`, o comando produz ou atualiza o indice queryable de intel. Anteriormente era `/dw-map-codebase`, agora consolidado.
+
+### Comportamento
+
+1. **Detectar estrutura do projeto.** Scan recursivo por entry points: package.json, requirements.txt, pyproject.toml, Cargo.toml, *.csproj, etc.
+2. **Detectar orquestradores de monorepo.** pnpm/nx/turborepo workspaces, lerna config, git submodules.
+3. **Identificar stack.** Para cada modulo detectado, identificar linguagem, framework, package manager, build tool. Output em `.dw/intel/stack.json`.
+4. **Inventario de arquivos.** Para arquivos source (pular `node_modules/`, `.git/`, `dist/`, `build/`, `.dw/`): catalogar com path, exports, proposito. Output em `.dw/intel/files.json`. Budget ≤2K tokens (priorizar cobertura de arquivos-chave sobre listagem exaustiva em repos grandes).
+5. **Extracao de API.** Routes, RPC handlers, GraphQL resolvers, superficie de CLI publica. Output em `.dw/intel/apis.json`. Budget ≤1.5K tokens.
+6. **Mapa de dependencias.** Imports internos cross-module + pacotes externos com arrays `used_by`. Output em `.dw/intel/deps.json`. Budget ≤1K tokens.
+7. **Sumario de arquitetura.** Documento em prosa descrevendo a forma do projeto, padroes-chave, request flows, topologia de deployment. Output em `.dw/intel/arch.md`. Budget ≤1.5K tokens.
+8. **Metadata de refresh.** Escrever `.dw/intel/.last-refresh.json` com `updated_at`, `version`, `mode` (full ou incremental), contagem de arquivos scanned.
+
+### Skill complementar para build mode
+
+| Skill | Gatilho |
+|-------|---------|
+| `dw-codebase-intel` | **SEMPRE em modo build** — provê schema `.dw/intel/`, protocolo de incremental-update (quais arquivos re-ler, como mergear com entradas existentes), regras de budget por arquivo. |
+
+### Proibido em modo build
+
+- Nunca ler `.env*` (exceto `.env.example` / `.env.template`), `*.key`, `*.pem`, `*.pfx`, `*.p12`, `*.keystore`, `*.jks`, `id_rsa`, `id_ed25519`, ou arquivos com `*credential*`/`*secret*` no nome. Pular silenciosamente.
+- Nunca incluir secrets/tokens/credenciais em nenhum arquivo de intel.
+- Nunca usar Bash `ls`/`find`/`cat` (sensibilidade cross-platform); usar Glob/Read/Grep.
+
+### Modo incremental (`--build --incremental`)
+
+Le `.dw/intel/.last-refresh.json` pra achar timestamp do ultimo build. So re-le arquivos modificados desde entao. Mais rapido mas pode perder:
+- Diretorios novos nao previamente catalogados.
+- Arquivos removidos (permanecem em `files.json` ate full build).
+
+Use full `--build` trimestralmente ou apos mudancas estruturais; incremental pra refresh rotineiro.
+
+### Estrutura de output
+
+```
+.dw/intel/
+├── stack.json            # Stack detectado por modulo
+├── files.json            # Inventario de arquivos source com exports + propositos
+├── apis.json             # Superficie publica de API
+├── deps.json             # Grafo de dependencias (internas + externas)
+├── arch.md               # Sumario de arquitetura (prosa)
+└── .last-refresh.json    # Metadata: updated_at, version, mode
+```
+
+### Por que este skill existe
+
+Anteriormente dois comandos: `/dw-intel` (query) e `/dw-map-codebase` (build). O split era historico — um escrevia, outro lia, mas ambos compartilham schema e mesmo `.dw/intel/`. Consolidar reduz:
+- Confusao ("qual rodar?").
+- Burden de manutencao de dois arquivos de command.
+- Docs duplicados.
+
+Mesmas operacoes, um unico mental entry point.
+
 ## Inspirado em
 
-O mapeamento de query-patterns (where-is / what-uses / architecture-of / etc.) e o schema JSON do intel sao adaptados do projeto [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) (licenca MIT). Convencoes de path mudaram de `.planning/intel/` para `.dw/intel/`.
+O mapeamento de query-patterns (where-is / what-uses / architecture-of / etc.) e o schema JSON do intel sao adaptados do projeto [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) (licenca MIT). Convencoes de path mudaram de `.planning/intel/` para `.dw/intel/`. Comportamento de modo build anteriormente vivia em `/dw-map-codebase` (mesmo upstream).
 
 </system_instructions>
