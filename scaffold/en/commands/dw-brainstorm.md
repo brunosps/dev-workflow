@@ -14,9 +14,11 @@ You are a brainstorming facilitator for the current workspace. This command exis
 ## Flags
 
 - **(default)**: normal brainstorm with 3-7 options (conservative, balanced, bold) and trade-offs. If the product has PRDs or rules, a **Product Inventory** is produced automatically and each option carries a classification tag.
-- **`--onepager`**: at the end of the brainstorm, generate a durable one-pager at `.dw/spec/ideas/<slug>.md` (using `.dw/templates/idea-onepager.md`) with Feature Inventory + Classification & Rationale + MVP Scope + Not Doing + Assumptions. Use when you want a persisted product artifact before moving to `/dw-create-prd`.
+- **`--onepager`**: at the end of the brainstorm, generate a durable one-pager at `.dw/spec/ideas/<slug>.md` (using `.dw/templates/idea-onepager.md`) with Feature Inventory + Classification & Rationale + MVP Scope + Not Doing + Assumptions. Use when you want a persisted product artifact before moving to `/dw-plan prd`.
 - **`--council`**: after the normal brainstorm, invoke the `dw-council` skill to stress-test the top 2-3 options via 3-5 archetypes (pragmatic-engineer, architect-advisor, security-advocate, product-mind, devils-advocate). Useful when the choice is high-impact and there is genuine dissent between paths.
-- Flags are composable: `--onepager --council` produces the one-pager after the council debate.
+- **`--research`**: heavyweight multi-source research mode. Pipeline: scope → plan → retrieve (parallel sources) → triangulate → outline-refine → synthesize → critique → refine → report. Output: cited research document. Use for state-of-the-art reviews, technology comparisons, regulatory landscape mapping. Sub-modes: `quick` (3 phases, 2-5min), `standard` (default, 6 phases, 5-10min), `deep` (8 phases, 10-20min), `ultradeep` (8+ phases, 20-45min).
+- **`--refactor`**: code-smell catalog mode. Audits a target directory or PRD scope for code smells using Martin Fowler's taxonomy (bloaters, change preventers, dispensables, couplers, conditional complexity, DRY violations). Maps each smell to a concrete refactoring technique with before/after sketches. Severity-ordered P0-P3 plan. Output: refactoring opportunities document.
+- Flags are composable where it makes sense: `--onepager --council` produces the one-pager after the council debate. `--research --onepager` saves the research output as a durable one-pager. `--refactor --onepager` saves the refactor plan as a durable one-pager. `--research --refactor` is NOT supported (pick one or the other — different ideation surfaces).
 
 ## Decision Flowchart: Brainstorm vs Direct PRD
 
@@ -140,6 +142,155 @@ At the end, always leave the user in one of these situations:
 - With better questions to decide
 - With a next workspace command to follow
 - With the one-pager at `.dw/spec/ideas/<slug>.md` (if `--onepager` was used)
+- With the research report at `~/Documents/<Topic>_Research_<date>/` (if `--research`)
+- With the refactor plan at `<target>/refactor-plan.md` (if `--refactor`)
+
+## Mode: `--research` (multi-source research)
+
+Activated by the `--research` flag. Replaces the default brainstorm with a structured research pipeline that produces a cited document with verified claims.
+
+<critical>Every factual claim MUST be cited immediately with [N] in the same sentence</critical>
+<critical>NEVER fabricate citations — if no source is found, say so explicitly</critical>
+<critical>The bibliography MUST contain EVERY citation used in the body, no abbreviations or ranges</critical>
+
+### When to use research mode
+- Multi-source comparisons (e.g., "compare React Server Components vs Astro Islands").
+- State-of-the-art reviews of a topic.
+- Regulatory or industry context mapping.
+- Decisions needing cited evidence (not just an opinion).
+- Do NOT use research mode for simple lookups, debugging, or questions answerable in 1-2 web searches.
+
+### Sub-modes (research depth)
+
+```
+Selection
+├── Initial exploration → quick (3 phases, 2-5 min)
+├── Standard research → standard (6 phases, 5-10 min) [DEFAULT for --research]
+├── Critical decision → deep (8 phases, 10-20 min)
+└── Comprehensive review → ultradeep (8+ phases, 20-45 min)
+```
+
+### Required reading
+
+Complementary skill **`dw-source-grounding`**: **ALWAYS** — apply Detect → Fetch → Implement → Cite protocol with strict source hierarchy (official versioned docs > changelogs > web standards > compat tables; Stack Overflow / blogs / training data are discovery only). Every finding ends with `[source: <url>, version: X.Y, retrieved: YYYY-MM-DD]`; bibliography built from these citations.
+
+### Pipeline phases
+
+**Phase 1 — SCOPE** | Frame the question. Decompose into core components. Identify stakeholder perspectives. Define scope boundaries. List key assumptions to validate.
+
+**Phase 2 — PLAN** | Identify primary + secondary sources. Map knowledge dependencies. Create search strategy with variants. Plan triangulation approach. Define quality gates.
+
+**Phase 3 — RETRIEVE** | Parallel information gathering. Decompose into 5-10 independent search angles (semantic, keyword, date-filtered, academic, alternative perspectives, statistics, industry analysis, critical analysis). Execute ALL searches in parallel via multiple tool calls in a single message. First Finish Search pattern: proceed when first threshold reached (quick: 10+ sources avg credibility >60/100; standard: 15+ >60; deep: 25+ >70; ultradeep: 30+ >75).
+
+**Phase 4 — TRIANGULATE** | Identify claims requiring verification. Cross-check facts across 3+ independent sources. Flag contradictions. Document verification status per claim.
+
+**Phase 5 — OUTLINE REFINEMENT** | Compare initial scope to actual findings. Adapt structure based on evidence. Targeted searches to fill gaps.
+
+**Phase 6 — SYNTHESIZE** | Identify cross-source patterns. Map concept relationships. Generate insights beyond source material. Build evidence hierarchies.
+
+**Phase 7 — CRITIQUE** (deep/ultradeep only) | Review logical consistency. Verify citation completeness. Identify gaps or weaknesses. Simulate 2-3 critic personas.
+
+**Phase 8 — REFINE** (deep/ultradeep) | Strengthen weak arguments. Add missing perspectives. Resolve contradictions.
+
+**Phase 9 — PACKAGE** | Generate report progressively, section by section.
+
+### Output
+
+Saved to `~/Documents/<Topic>_Research_<YYYYMMDD>/`. Mandatory sections:
+1. Executive Summary (200-400 words)
+2. Introduction (scope, methodology, assumptions)
+3. Main Analysis (4-8 findings, 600-2000 words each, all cited)
+4. Synthesis and Insights
+5. Limitations and Caveats
+6. Recommendations
+7. Bibliography (COMPLETE — every citation, no placeholders)
+8. Methodological Appendix
+
+Target lengths: quick 2-4k words; standard 4-8k; deep 8-15k; ultradeep 15-20k+.
+
+### Quality standards
+- Narrative: flowing prose, beginning/middle/end. Min 80% prose, max 20% bullets.
+- Each factual statement cited immediately with [N].
+- Distinguish fact from synthesis.
+- No vague attributions ("studies show...", "experts believe..." without citation).
+- Label speculation explicitly.
+- Admit uncertainty: "No sources found for X."
+
+## Mode: `--refactor` (code-smell catalog)
+
+Activated by the `--refactor` flag. Audits a target codebase area for refactoring opportunities using Martin Fowler's smell taxonomy.
+
+<critical>ASK EXACTLY 3 CLARIFICATION QUESTIONS BEFORE STARTING THE ANALYSIS</critical>
+
+### When to use refactor mode
+- Pre-implementation audit of tech debt in the area you're about to touch.
+- Quarterly code-health review.
+- Pre-migration scoping (e.g., before a framework upgrade).
+- Do NOT use refactor mode if `/dw-review` already flagged the same area (avoid duplicate findings).
+
+### Required reading
+
+Complementary skills:
+- **`dw-review-rigor`**: **ALWAYS** — applies de-duplication (same smell in N files = 1 entry with affected list), severity ordering P0-P3, signal-over-volume (max ~20 findings; keep criticals, prune marginal ones). Smells with a justifying ADR drop to `low` at most.
+- **`dw-simplification`**: **ALWAYS** — every flagged smell is filtered through Chesterton's Fence (what does the construct DO, why was it added, what breaks if removed). Smells with no clear "why-was-it-there" answer get downgraded to `info` with a research note instead of a refactor proposal. Complexity metrics (cognitive complexity ≥16 or nesting depth ≥4 = `high` candidate; <10 = `low` at most) anchor severity.
+- **`security-review`**: defer security concerns to this skill — do not duplicate.
+- **`vercel-react-best-practices`** + its `perf-discipline.md`: defer React/Next.js performance patterns to this skill.
+
+### Pipeline
+
+1. Three clarification questions (scope, priorities, constraints).
+2. Identify the target area (PRD-scoped directory, specific module, or whole codebase).
+3. Scan for smells using Fowler's taxonomy:
+   - **Bloaters** — Long Method, Large Class, Long Parameter List, Data Clumps, Primitive Obsession.
+   - **Object-Orientation Abusers** — Switch Statements, Refused Bequest, Alternative Classes with Different Interfaces, Temporary Field.
+   - **Change Preventers** — Divergent Change, Shotgun Surgery, Parallel Inheritance Hierarchies.
+   - **Dispensables** — Comments, Duplicate Code, Lazy Class, Data Class, Dead Code, Speculative Generality.
+   - **Couplers** — Feature Envy, Inappropriate Intimacy, Message Chains, Middle Man.
+   - **Conditional complexity** — high cyclomatic/cognitive, deep nesting.
+4. Apply `dw-review-rigor` de-duplication + `dw-simplification` Chesterton filter.
+5. For each surviving smell, map to a refactoring technique with before/after sketches.
+6. Severity-order P0-P3 (impact × likelihood × maintenance cost).
+7. Plus: coupling/cohesion metrics, SOLID analysis.
+
+### Output
+
+Saved to `<target>/refactor-plan.md`:
+
+```markdown
+# Refactoring Opportunities — <target>
+
+## Summary
+- Smells found: N (after de-dup)
+- P0 (do this sprint): N
+- P1 (this quarter): N
+- P2 (when convenient): N
+- P3 (informational): N
+
+## Findings (severity-ordered)
+
+### P0 — <smell name>
+**Files:** <list> (de-duplicated)
+**Symptom:** <description>
+**Why fix:** <impact analysis>
+**Suggested refactor:** <Fowler technique>
+**Before:** <code sketch>
+**After:** <code sketch>
+**Effort:** S / M / L
+**Risk:** Low / Medium / High
+**Tests required:** <list>
+
+...
+```
+
+### Analysis tools
+- React projects: `npx react-doctor@latest --verbose` for health score.
+- Angular projects: `ng lint` for static issues.
+
+### Anti-patterns
+- Listing every cyclomatic complexity hit > threshold without context → noise.
+- Suggesting "extract method" everywhere a function is over N lines → mechanical, not insight.
+- Proposing refactors that aren't tested or testable → high risk, won't ship.
+- Ignoring documented architectural decisions in `.dw/rules/` → flagging intentional design as smell.
 
 ## Inspired by
 

@@ -14,9 +14,11 @@ Você é um facilitador de brainstorming para o workspace atual. Este comando ex
 ## Flags
 
 - **(padrão)**: brainstorm normal com 3-7 opções (conservadora, equilibrada, ousada) e trade-offs. Se o produto tem PRDs ou rules, **Product Inventory** é produzido automaticamente e cada opção recebe tag de classificação.
-- **`--onepager`**: ao final do brainstorm, gera um one-pager durável em `.dw/spec/ideas/<slug>.md` (usando `.dw/templates/idea-onepager.md`) com Feature Inventory + Classification & Rationale + MVP Scope + Not Doing + Assumptions. Use quando quiser um artefato de produto persistido antes de seguir para `/dw-create-prd`.
+- **`--onepager`**: ao final do brainstorm, gera one-pager durável em `.dw/spec/ideas/<slug>.md` (usando `.dw/templates/idea-onepager.md`) com Feature Inventory + Classification & Rationale + MVP Scope + Not Doing + Assumptions. Use quando quiser artefato persistido antes de seguir para `/dw-plan prd`.
 - **`--council`**: após o brainstorm normal, invoca a skill `dw-council` para stress-test das top 2-3 opções através de 3-5 archetypes (pragmatic-engineer, architect-advisor, security-advocate, product-mind, devils-advocate). Útil quando a escolha é de alto impacto e há genuine dissent entre caminhos.
-- Flags são combináveis: `--onepager --council` produz one-pager após debate do council.
+- **`--research`**: modo de research multi-source. Pipeline: scope → plan → retrieve (sources paralelos) → triangulate → outline-refine → synthesize → critique → refine → report. Output: documento citado. Use pra state-of-the-art reviews, comparações de tech, regulatory landscape mapping. Sub-modos: `quick` (3 fases, 2-5min), `standard` (default, 6 fases, 5-10min), `deep` (8 fases, 10-20min), `ultradeep` (8+ fases, 20-45min).
+- **`--refactor`**: modo catálogo de code smells. Audita um diretório-alvo ou escopo de PRD por smells usando taxonomia de Martin Fowler (bloaters, change preventers, dispensables, couplers, complexidade condicional, violações DRY). Mapeia cada smell pra técnica de refactoring com sketches before/after. Plano severity-ordered P0-P3. Output: documento de oportunidades de refactor.
+- Flags combináveis onde faz sentido: `--onepager --council` produz one-pager após debate. `--research --onepager` salva research como one-pager durável. `--refactor --onepager` salva plano de refactor como one-pager. `--research --refactor` NÃO suportado (escolha um — surfaces de ideação diferentes).
 
 ## Fluxograma de Decisão: Brainstorm vs PRD Direto
 
@@ -140,6 +142,155 @@ Ao final, sempre deixe o usuario em uma destas situacoes:
 - com perguntas melhores para decidir
 - com um proximo comando do workspace para seguir
 - com o one-pager em `.dw/spec/ideas/<slug>.md` (se `--onepager` foi usado)
+- com o relatório de research em `~/Documents/<Tópico>_Research_<data>/` (se `--research`)
+- com o plano de refactor em `<target>/refactor-plan.md` (se `--refactor`)
+
+## Modo: `--research` (research multi-fonte)
+
+Ativado pela flag `--research`. Substitui o brainstorm padrão por um pipeline estruturado de research que produz documento citado com claims verificados.
+
+<critical>Cada afirmação factual DEVE ser citada imediatamente com [N] na mesma frase</critical>
+<critical>NUNCA fabrique citações — se não encontrar fonte, diga explicitamente</critical>
+<critical>A bibliografia DEVE conter TODAS as citações usadas no corpo, sem abreviações ou ranges</critical>
+
+### Quando usar modo research
+- Comparações multi-fonte (ex: "compare React Server Components vs Astro Islands").
+- State-of-the-art reviews de um tópico.
+- Mapeamento de contexto regulatório ou industrial.
+- Decisões precisando de evidência citada (não opinião).
+- NÃO use research mode pra lookups simples, debugging ou perguntas respondíveis em 1-2 web searches.
+
+### Sub-modos (research depth)
+
+```
+Seleção
+├── Exploração inicial → quick (3 fases, 2-5 min)
+├── Research padrão → standard (6 fases, 5-10 min) [DEFAULT pra --research]
+├── Decisão crítica → deep (8 fases, 10-20 min)
+└── Review abrangente → ultradeep (8+ fases, 20-45 min)
+```
+
+### Required reading
+
+Skill complementar **`dw-source-grounding`**: **SEMPRE** — aplica protocolo Detect → Fetch → Implement → Cite com hierarquia estrita (docs oficiais versionados > changelogs > web standards > compat tables; Stack Overflow / blogs / training data são só discovery). Cada finding termina com `[source: <url>, version: X.Y, retrieved: YYYY-MM-DD]`; bibliografia construída dessas citações.
+
+### Fases do pipeline
+
+**Fase 1 — SCOPE** | Enquadrar a questão. Decompor em componentes. Identificar perspectivas de stakeholders. Definir limites. Listar assumptions a validar.
+
+**Fase 2 — PLAN** | Identificar fontes primárias + secundárias. Mapear dependências de conhecimento. Estratégia de busca com variantes. Plano de triangulação. Quality gates.
+
+**Fase 3 — RETRIEVE** | Coleta paralela. Decompor em 5-10 ângulos independentes (semantic, keyword, date-filtered, academic, alternative perspectives, statistics, industry analysis, critical analysis). Executar TODAS as buscas em paralelo via múltiplas tool calls numa mensagem. First Finish Search: prosseguir quando primeiro threshold atingido (quick: 10+ sources avg credibilidade >60/100; standard: 15+ >60; deep: 25+ >70; ultradeep: 30+ >75).
+
+**Fase 4 — TRIANGULATE** | Identificar claims que requerem verificação. Cross-check em 3+ fontes independentes. Flagar contradições. Documentar status de verificação por claim.
+
+**Fase 5 — REFINAMENTO DO OUTLINE** | Comparar escopo inicial com findings reais. Adaptar estrutura baseada em evidência. Buscas direcionadas pra preencher gaps.
+
+**Fase 6 — SYNTHESIZE** | Identificar patterns cross-source. Mapear relações de conceitos. Gerar insights além do material fonte. Construir hierarquias de evidência.
+
+**Fase 7 — CRITIQUE** (só deep/ultradeep) | Review de consistência lógica. Verificar completude de citações. Identificar gaps ou fraquezas. Simular 2-3 personas críticas.
+
+**Fase 8 — REFINE** (deep/ultradeep) | Fortalecer argumentos fracos. Adicionar perspectivas ausentes. Resolver contradições.
+
+**Fase 9 — PACKAGE** | Gerar relatório progressivamente, seção por seção.
+
+### Output
+
+Salvo em `~/Documents/<Tópico>_Research_<YYYYMMDD>/`. Seções obrigatórias:
+1. Sumário Executivo (200-400 palavras)
+2. Introdução (escopo, metodologia, premissas)
+3. Análise Principal (4-8 achados, 600-2000 palavras cada, todos citados)
+4. Síntese e Insights
+5. Limitações e Ressalvas
+6. Recomendações
+7. Bibliografia (COMPLETA — toda citação, sem placeholders)
+8. Apêndice Metodológico
+
+Tamanhos-alvo: quick 2-4k palavras; standard 4-8k; deep 8-15k; ultradeep 15-20k+.
+
+### Padrões de qualidade
+- Narrativo: prosa fluida, com início/meio/fim. Min 80% prosa, max 20% bullets.
+- Cada afirmação factual citada imediatamente com [N].
+- Distinguir fato de síntese.
+- Sem atribuições vagas ("estudos mostram...", "especialistas acreditam..." sem citação).
+- Rotular especulação explicitamente.
+- Admitir incerteza: "Sem fontes encontradas para X."
+
+## Modo: `--refactor` (catálogo de code smells)
+
+Ativado pela flag `--refactor`. Audita uma área-alvo do codebase por oportunidades de refactoring usando taxonomia de smells de Martin Fowler.
+
+<critical>FAÇA EXATAMENTE 3 PERGUNTAS DE CLARIFICAÇÃO ANTES DE INICIAR ANÁLISE</critical>
+
+### Quando usar modo refactor
+- Audit pre-implementação de tech debt na área que vai mexer.
+- Code-health review trimestral.
+- Scoping pre-migration (ex: antes de upgrade de framework).
+- NÃO use refactor mode se `/dw-review` já flagou a mesma área (evita findings duplicados).
+
+### Required reading
+
+Skills complementares:
+- **`dw-review-rigor`**: **SEMPRE** — aplica de-duplication (mesmo smell em N arquivos = 1 entrada com affected list), severity ordering P0-P3, signal-over-volume (max ~20 findings; manter críticos, podar marginais). Smells com ADR justificatório caem para `low` no máximo.
+- **`dw-simplification`**: **SEMPRE** — todo smell flagueado passa pelo filtro Chesterton's Fence (o que o construto FAZ, por que foi adicionado, o que quebra se removido). Smells sem resposta clara para "por que isso está aqui" caem para `info` com nota de investigação. Métricas de complexidade (complexidade cognitiva ≥16 ou nesting depth ≥4 = candidato `high`; <10 = `low` no máximo) ancoram severity.
+- **`security-review`**: delegue preocupações de segurança para este skill — não duplique.
+- **`vercel-react-best-practices`** + seu `perf-discipline.md`: delegue padrões de performance React/Next.js para este skill.
+
+### Pipeline
+
+1. Três perguntas de clarificação (escopo, prioridades, restrições).
+2. Identificar área-alvo (diretório PRD-scoped, módulo específico, ou codebase inteiro).
+3. Scan por smells usando taxonomia Fowler:
+   - **Bloaters** — Long Method, Large Class, Long Parameter List, Data Clumps, Primitive Obsession.
+   - **Object-Orientation Abusers** — Switch Statements, Refused Bequest, Alternative Classes with Different Interfaces, Temporary Field.
+   - **Change Preventers** — Divergent Change, Shotgun Surgery, Parallel Inheritance Hierarchies.
+   - **Dispensables** — Comments, Duplicate Code, Lazy Class, Data Class, Dead Code, Speculative Generality.
+   - **Couplers** — Feature Envy, Inappropriate Intimacy, Message Chains, Middle Man.
+   - **Conditional complexity** — alta cyclomatic/cognitive, nesting profundo.
+4. Aplicar de-duplication `dw-review-rigor` + filtro Chesterton `dw-simplification`.
+5. Pra cada smell sobrevivente, mapear pra técnica de refactoring com sketches before/after.
+6. Severity-order P0-P3 (impacto × likelihood × custo de manutenção).
+7. Mais: coupling/cohesion metrics, análise SOLID.
+
+### Output
+
+Salvo em `<target>/refactor-plan.md`:
+
+```markdown
+# Oportunidades de Refactoring — <target>
+
+## Resumo
+- Smells encontrados: N (após de-dup)
+- P0 (fazer neste sprint): N
+- P1 (este trimestre): N
+- P2 (quando conveniente): N
+- P3 (informacional): N
+
+## Findings (severity-ordered)
+
+### P0 — <smell name>
+**Arquivos:** <lista> (de-duplicados)
+**Sintoma:** <descrição>
+**Por que corrigir:** <análise de impacto>
+**Refactor sugerido:** <técnica Fowler>
+**Before:** <code sketch>
+**After:** <code sketch>
+**Esforço:** S / M / L
+**Risco:** Baixo / Médio / Alto
+**Testes necessários:** <lista>
+
+...
+```
+
+### Ferramentas de análise
+- Projetos React: `npx react-doctor@latest --verbose` pra health score.
+- Projetos Angular: `ng lint` pra issues estáticos.
+
+### Anti-patterns
+- Listar todo hit de complexidade ciclomática > threshold sem contexto → ruído.
+- Sugerir "extract method" em toda função maior que N linhas → mecânico, não insight.
+- Propor refactors sem teste ou não-testáveis → alto risco, não shippa.
+- Ignorar decisões arquiteturais documentadas em `.dw/rules/` → flagar design intencional como smell.
 
 ## Inspired by
 
