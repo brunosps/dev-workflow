@@ -5,11 +5,27 @@ Este projeto usa [`@brunosps00/dev-workflow`](https://www.npmjs.com/package/@bru
 
 **Objetivo deste arquivo:** quando o usuário expressar uma intenção que casa com a Trigger Map abaixo, rode o comando `dw-*` correspondente **sem pedir permissão** — exceto se a mudança for genuinamente trivial (veja Escape Hatches).
 
+## Matriz de Auto-Sizing
+
+Antes de escolher um comando da Trigger Map, dimensione o escopo real da mudança. A mesma intenção ("conserta isso", "adiciona isso") pode significar quantidades muito diferentes de trabalho; a matriz nomeia quatro tamanhos e roteia cada um para uma entrada diferente. **Escolha o menor que cabe — sub-rotear desperdiça cerimônia, super-rotear esconde o escopo.**
+
+| Tamanho | Como se parece | Rotear para |
+|---------|----------------|-------------|
+| **Pequeno** | ≤3 arquivos, sem migration, sem novo endpoint, descritível em uma frase. Exemplos: typo, log message, config de uma linha, bump de dependência, version pin. | Faça inline. Nenhum comando `dw-*`. |
+| **Médio** | Feature ou bug claro, <10 tasks numeradas esperadas, único componente ou serviço, sem decisões arquiteturais. Exemplos: adicionar campo de form com validação, corrigir regressão em módulo conhecido, ligar novo endpoint num handler existente. | `/dw-bugfix` (bugs) ou `/dw-plan` (features) — direto, não via `/dw-autopilot`. |
+| **Grande** | Feature multi-componente, ≥10 tasks esperadas, toca múltiplos módulos, tem superfície UX user-visible E backend. Exemplos: adicionar nova entidade end-to-end (model + migration + API + UI), introduzir integração de terceiro, redesenhar fluxo. | `/dw-autopilot "<wish>"` — pipeline completo PRD → TechSpec → Tasks → Run → QA → Review → Commit → PR com três gates. |
+| **Complexo** | Domínio novo, requisitos ambíguos, decisão arquitetural exigida, superfície regulatória ou de compliance, ou escopo que cruza múltiplos PRDs. Exemplos: introduzir event sourcing, reconstruir auth, multi-tenancy, nova linha de produto. | `/dw-brainstorm "<ideia>"` primeiro (auto-dispatch de modos research/council), depois `/dw-plan --council` para a etapa de techspec rodar o debate multi-advisor. |
+
+**Safety valve:** se você começou em Pequeno ou Médio mas o trabalho revela que é Grande de fato (a listagem inline passa de 5 passos, ou `/dw-bugfix` dispara seu `Step 5.0`), PARE e escale. Não existe flag para bypass. Escalar é o desfecho correto.
+
+**Adaptado de** [`tech-leads-club/agent-skills/tlc-spec-driven`](https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/skills/(development)/tlc-spec-driven) (CC-BY-4.0). A matriz de quatro tamanhos é de lá; o mapeamento para comandos `dw-*` é específico do dev-workflow.
+
 ## Trigger Map
 
 | Intenção do usuário (literal ou parafraseada) | Auto-trigger |
 |------------------------------------------------|--------------|
 | "Implementa X" / "Cria Y" / "Adiciona feature Z" / "Preciso de..." | `/dw-autopilot "X"` |
+| "Autopilota esse PRD" / "Leva esse PRD pra PR" / continua escalação de bugfix autonomamente | `/dw-autopilot --from-prd <slug>` (PRD existente em `.dw/spec/<slug>/`) |
 | Erro colado / "X está quebrado" / "Bug em Y" / screenshot de teste falhando | `/dw-bugfix "X"` |
 | "Planeja essa feature" / "Escreve PRD + techspec + tasks" | `/dw-plan "X"` |
 | "Escreve PRD pra X" / "Especifica Y" | `/dw-plan prd "X"` |
@@ -18,9 +34,14 @@ Este projeto usa [`@brunosps00/dev-workflow`](https://www.npmjs.com/package/@bru
 | "Roda essa task" (com ID da task) | `/dw-run <ID>` |
 | "Roda todas as tasks pendentes" / "Executa o plano" | `/dw-run` |
 | "Continue de onde parei" | `/dw-run --resume` |
+| "Pausa o trabalho" / "Encerra a sessão" / "Salva onde paramos" | `/dw-pause` |
+| "Retoma" / "Onde paramos?" / "Volta de onde parei" | `/dw-resume` |
 | "QA dessa feature" / "Roda o test plan" | `/dw-qa` |
 | "Corrige os bugs do QA" | `/dw-qa --fix` |
 | "Avalia a feature AI" / "Testa o RAG / classifier" | `/dw-qa --ai` |
+| "Caminha comigo pela feature" / "UAT comigo" / "Vamos fazer um run-through manual" | `/dw-qa --uat` |
+| "Revisa esse bugfix" / "Code-review do fix `<slug>`" | `/dw-review --bugfix <slug>` |
+| "QA desse bugfix" / "Valida o fix `<slug>`" | `/dw-qa --bugfix <slug>` |
 | "Revisa meu PR" / "Checa qualidade" / "Tá pronto pra subir?" | `/dw-review` |
 | "Só checagem de cobertura PRD" | `/dw-review --coverage-only` |
 | "Só code review qualidade" | `/dw-review --code-only` |

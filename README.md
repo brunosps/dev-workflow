@@ -26,13 +26,13 @@ npx @brunosps00/dev-workflow install-deps
 
 ## Commands
 
-dev-workflow v1.0.0 ships **20 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v1.0.2 ships **22 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
 ### Tier 1 — Gateway (3)
 
 | Command | When |
 |---------|------|
-| **`/dw-autopilot "wish"`** | Default entry point. Full pipeline (PRD → TechSpec → Tasks → Run → QA → Review → Commit → PR) with 3 approval gates. |
+| **`/dw-autopilot "wish"`** | Default entry point. Full pipeline (PRD → TechSpec → Tasks → Run → QA → Review → Commit → PR) with 3 approval gates. Use `--from-prd <slug>` to resume from an existing PRD (e.g., after a `/dw-bugfix` safety-valve escalation): skips Steps 1–4 and starts at GATE 1. |
 | **`/dw-bugfix "description"`** | A bug report or pasted error. Triages bug-vs-feature-vs-scope, surgical fix or routes to a PRD. |
 | **`/dw-help [keyword]`** | Discover commands. Pass a keyword for shortcuts; `--advanced` reveals internal commands. |
 
@@ -45,8 +45,10 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 | **`/dw-brainstorm "idea"`** | Refine an idea before PRD. Flags: `--onepager` (durable artifact), `--council` (multi-advisor debate), `--research` (multi-source cited research), `--refactor` (Fowler code-smell catalog). |
 | **`/dw-plan "feature"`** | PRD → TechSpec → Tasks sequentially with checkpoints. Stages: `prd`, `techspec`, `tasks`. Mandatory clarification questions, source-grounding, constitution gate, final consistency check. |
 | **`/dw-run [task-id]`** | Execute tasks. Default: all pending in dependency order with wave-based parallel dispatch. Single-task: pass an ID. `--resume` continues an interrupted plan. |
-| **`/dw-review`** | Level 2 (PRD coverage mapping) + Level 3 (code quality). Hard gates on dw-verify PASS, secure-audit, constitution violations. Flags: `--coverage-only`, `--code-only`. |
-| **`/dw-qa`** | Mode-aware QA. Auto-detects UI vs API. Flags: `--fix` (iterative QA + fix-retest loop), `--api`, `--ai` (run AI eval against reference dataset). |
+| **`/dw-review`** | Level 2 (PRD coverage mapping) + Level 3 (code quality). Hard gates on dw-verify PASS, secure-audit, constitution violations. Flags: `--coverage-only`, `--code-only`, `--bugfix <slug>` (review a bugfix at `.dw/bugfixes/<slug>/`). |
+| **`/dw-qa`** | Mode-aware QA. Auto-detects UI vs API. Flags: `--fix` (iterative QA + fix-retest loop), `--api`, `--ai` (AI eval against reference dataset), `--uat` (human-in-the-loop walkthrough), `--bugfix <slug>` (QA a bugfix). |
+| **`/dw-pause`** | Consolidate the current session's mental state into `.dw/STATE.md` (Decisions, Blockers, Todos, Deferred, Lessons, Open Loops). Used before long breaks or context-window compactions. |
+| **`/dw-resume`** | Read `.dw/STATE.md`, present a TLDR of where work left off, and suggest the next `dw-*` command. Never auto-executes. |
 | **`/dw-commit`** | Atomic Conventional Commits for pending changes. Applies `dw-git-discipline` (one intent per commit, lint+tests+build green before). |
 | **`/dw-generate-pr [target]`** | Push the branch, draft a PR body with summary + test plan, open the browser. Hard gates: dw-verify PASS + secure-audit. |
 
@@ -54,7 +56,7 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 
 | Command | What |
 |---------|------|
-| **`/dw-analyze-project`** | Scans the repo, writes `.dw/rules/` (per-module conventions, anti-patterns, naming). Step 8 offers to generate `.dw/constitution.md` (declarative principles the team commits to). Run once per project; refresh after major refactors. |
+| **`/dw-analyze-project`** | Scans the repo, writes `.dw/rules/` (per-module conventions, anti-patterns, naming). Step 8 offers to generate `.dw/constitution.md` (declarative principles the team commits to). Step 9 generates `.dw/rules/concerns.md` (risk map: hot spots, fragile integrations, hostile code, bug history). Run once per project; refresh after major refactors. |
 | **`/dw-redesign-ui "target"`** | Audits a frontend page, runs the `dw-ui-discipline` 4-question grounding, proposes 2-3 design directions, ships the redesign. WCAG 2.2 AA accessibility floor is non-negotiable. |
 | **`/dw-functional-doc`** | Maps screens + user flows into a functional doc, validated end-to-end with Playwright. |
 | **`/dw-new-project`** | Bootstrap a new project from empty directory. Stack interview, wraps official `create-*` tools, composes docker-compose for dev, seeds `.env`, scripts, CI, `.dw/rules/`. |
@@ -163,15 +165,18 @@ All wrappers point to `.dw/commands/` as the single source of truth.
 ```
 your-project/
 ├── .dw/
-│   ├── commands/          # 20 workflow command files (v1.0.0)
-│   ├── templates/         # Document templates (PRD, TechSpec, etc.)
+│   ├── commands/          # 22 workflow command files (v1.0.2)
+│   ├── templates/         # Document templates (PRD, TechSpec, state, concerns, bugfix-summary, etc.)
 │   │   └── overrides/     # Project-local template customizations (override > core)
 │   ├── rules/             # Project-specific rules (run /dw-analyze-project)
+│   │   └── concerns.md    # Risk map: hot spots, fragile integrations, bug history (Step 9 of /dw-analyze-project)
 │   ├── constitution.md    # Declarative principles (auto-installed when missing)
 │   ├── references/        # Reference documentation
 │   ├── scripts/           # Utility scripts
-│   └── spec/              # PRD directories — each contains tasks-validation.md
-├── CLAUDE.md              # Auto-trigger decision tree for Claude Code (merge-aware)
+│   ├── spec/              # PRD directories — each contains tasks-validation.md
+│   ├── bugfixes/          # Persistent bugfix records: NNN-<slug>/{TASK.md, SUMMARY.md, fix-report.md} + review/, QA/
+│   └── STATE.md           # Session state: Decisions, Blockers, Todos, Open Loops, Deferred Ideas, Lessons, Preferences (managed by /dw-pause + /dw-resume)
+├── CLAUDE.md              # Auto-trigger decision tree for Claude Code (merge-aware, includes Auto-Sizing Matrix)
 ├── AGENTS.md              # Same content for Codex / Copilot / OpenCode
 ├── .claude/
 │   ├── skills/            # Claude Code wrappers
@@ -261,6 +266,8 @@ UI discipline (`dw-ui-discipline`) and testing doctrine (`dw-testing-discipline`
 Incident response (`dw-incident-response`) adapted from [`wilsto/claude-code-starter-kit/incident-response`](https://github.com/wilsto/claude-code-starter-kit) (MIT). The 5-phase workflow structure and runbook templates come from there. wilsto credits the upstream `wshobson/agents` plugin `incident-response` (v1.3.0); attribution chain preserved. Additional reading cited in the skill: Google SRE Book, Etsy Debriefing Facilitation Guide, PagerDuty Incident Response Documentation.
 
 LLM evaluation (`dw-llm-eval`) trajectory-match modes (strict / unordered / subset / superset) and tool-argument matching strategies adapted from [`langchain-ai/agentevals`](https://github.com/langchain-ai/agentevals) (MIT). The broader oracle-ladder framing, judge-calibration discipline, and reference-dataset principle are distilled from the open evaluations literature (OpenAI evals cookbook, Anthropic evals guidance, the academic eval-of-LLM body of work) and rewritten in our voice.
+
+Session continuity and adaptive routing patterns adapted from [`tech-leads-club/agent-skills/tlc-spec-driven`](https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/skills/(development)/tlc-spec-driven) by Felipe Rodrigues (CC-BY-4.0, v1.0.2). Eight patterns were absorbed selectively after a comparative analysis confirmed that the majority of the skill duplicates existing dev-workflow capabilities (PRD/TechSpec/Tasks pipeline, constitution discipline, source-grounding, two-tier memory, verify-before-complete, brownfield mapping, sub-agent delegation, atomic commits). Patterns adopted: (1) `STATE.md` cross-session working memory at `.dw/STATE.md` + new `/dw-pause` and `/dw-resume` commands; (2) Auto-Sizing Matrix (Small/Medium/Large/Complex) formalized in `CLAUDE.md`/`AGENTS.md` above the Trigger Map; (3) Concerns Map (`.dw/rules/concerns.md`) generated by a new Step 9 in `/dw-analyze-project` and consumed on-demand by `/dw-plan`, `/dw-run`, and `/dw-bugfix`; (4) Context Budget discipline as a new section in `dw-memory` with reference `dw-memory/references/context-budget.md`; (5) Interactive UAT walkthrough as `/dw-qa --uat`; (6) Quick-mode persistence — bugfixes now land in `.dw/bugfixes/NNN-<slug>/{TASK.md, SUMMARY.md, fix-report.md}` and remain queryable via `/dw-intel`; (7) Safety valve in `/dw-bugfix` Step 5.0 that forces escalation to `/dw-plan` when scope exceeds 5 tasks or has cross-dependencies; (8) Cross-skill awareness — `/dw-intel --build` now indexes `.dw/bugfixes/*/SUMMARY.md` into `bugfixes.json`, and `dw-codebase-intel` documents the new `bugfix-history` and `risk-area` query shapes. Patterns explicitly REJECTED: `.specs/` directory structure (dev-workflow uses `.dw/`), Knowledge Verification Chain (already covered by `dw-source-grounding`), Specify/Design/Tasks/Execute naming (dev-workflow keeps PRD/TechSpec/Tasks/Run), Skill Integrations pattern with mermaid-studio/codenavi delegation, and literal text copying (everything is clean-room reimplementation from the conceptual patterns; CC-BY-4.0 attribution is for derivative ideas, not borrowed prose).
 
 Four patterns from [`mattpocock/skills`](https://github.com/mattpocock/skills) by Matt Pocock (MIT) were integrated **without adding new commands or skills** — instead they fold into the existing surface as internal modes and inline guidance: (1) **grill-with-docs** → `/dw-brainstorm` `grill` mode (interview discipline that stress-tests plan vocabulary against `.dw/rules/`); (2) **prototype** → `/dw-brainstorm` `prototype` mode (LOGIC terminal app or UI variant dispatch); (3) **improve-codebase-architecture** → `dw-simplification/references/deep-modules.md` (deletion test, locality, leverage, seam, adapter diagnostic invoked by the `refactor-audit` mode); (4) **zoom-out** → one-paragraph guidance in `agent-instructions.md`. The same release also collapses `/dw-brainstorm`'s six legacy flags into a single full-flow entry point that auto-dispatches modes based on project signals.
 

@@ -19,6 +19,8 @@ Você é o orquestrador de QA. Dois modos: rodar QA contra a implementação (UI
 | `/dw-qa --fix` | QA pass seguido de loop iterativo fix+retest. Cada bug detectado → root-cause → fix → retest com evidência → marcar resolvido. Continua até todos os bugs marcados Closed ou usuário aceitar lista deferida. |
 | `/dw-qa --api` | Força modo API-only (pula UI mesmo com frontend deps). Útil pra sub-features backend-only em repos fullstack. |
 | `/dw-qa --ai` | Adiciona avaliação de feature AI contra reference dataset em `.dw/eval/datasets/<feature>/`. Computa precision@k / faithfulness / outcome accuracy. Loga JSONL em `QA/logs/ai/`. |
+| `/dw-qa --uat` | **Walkthrough UAT interativo.** O agent conduz o usuário pela feature passo a passo, fazendo perguntas direcionadas ("isso bate com a expectativa?", "qual o comportamento esperado no caso X?"). Sem Playwright auto, sem AI eval. Output: `QA/uat-report.md`. Usar após `--fix` (ou no lugar de `/dw-qa` para features predominantemente baseadas em julgamento humano). |
+| `/dw-qa --bugfix <NNN-slug>` | Aponta para um bugfix em `.dw/bugfixes/NNN-slug/` em vez de um PRD. Roda o fluxo de QA padrão escopado aos arquivos tocados pelo fix; output em `.dw/bugfixes/NNN-slug/QA/`. Combina com `--fix`/`--api`/`--ai`/`--uat`. |
 
 ## Auto-detecção de modo
 
@@ -32,8 +34,17 @@ Default `/dw-qa` inspeciona projeto pra escolher UI vs API:
 
 | Variável | Descrição | Exemplo |
 |----------|-----------|---------|
-| `{{PRD_PATH}}` | Caminho do dir PRD com tasks (auto-detect da branch ativa se omitido) | `.dw/spec/prd-invoice-export` |
-| `{{MODE}}` | `--fix` / `--api` / `--ai` (opcional; default = auto-detect) | — |
+| `{{PRD_PATH}}` | Caminho do dir PRD com tasks (auto-detect da branch ativa se omitido; ignorado quando `--bugfix` é usado) | `.dw/spec/prd-invoice-export` |
+| `{{BUGFIX_SLUG}}` | Slug do bugfix quando a flag `--bugfix` é usada | `001-login-nao-funciona` |
+| `{{MODE}}` | `--fix` / `--api` / `--ai` / `--uat` / `--bugfix <slug>` (opcional; default = auto-detect, target = PRD) | — |
+
+## Resolução de Target
+
+Compute `<target>` UMA VEZ no início; substitua onde aparecer `<target>` abaixo.
+
+1. **Target PRD (padrão):** `<target>` = `{{PRD_PATH}}`. Artefatos lidos: `prd.md` (FRs), `techspec.md`, `tasks.md`, per-task files. Output em `<target>/QA/`.
+
+2. **Target Bugfix (`--bugfix <slug>`):** `<target>` = `.dw/bugfixes/<slug>/`. Artefatos lidos: `TASK.md` (tasks numeradas + arquivos tocados), `fix-report.md` (evidência verify + trace de reprodução), `SUMMARY.md`. QA escopado aos arquivos da tabela `Arquivos Tocados` e às superfícies adjacentes que esses arquivos expõem. Output em `<target>/QA/`. O `qa-report.md` é mais curto — há no máximo 5 tasks e uma única causa raiz a validar, não uma matriz de FR completa.
 
 ## Skills Complementares
 
@@ -50,19 +61,20 @@ Quando disponíveis em `./.agents/skills/`, invocadas operacionalmente:
 ## Estrutura de Output
 
 ```
-.dw/spec/<prd>/QA/
-├── qa-report.md                  # Test plan + execution summary
-├── bugs.md                       # Catálogo de bugs com status
+<target>/QA/                          # <target> = .dw/spec/<prd>/ OU .dw/bugfixes/<NNN-slug>/
+├── qa-report.md                      # Test plan + execution summary
+├── bugs.md                           # Catálogo de bugs com status
+├── uat-report.md                     # (apenas modo --uat) Log do walkthrough + observações do usuário
 ├── scripts/
-│   ├── ui/<RF>-<slug>.spec.ts    # Playwright scripts (modo UI)
-│   ├── api/<RF>-<slug>.http      # API test files
-│   └── ai/<feature>-eval.ts      # AI eval scripts (--ai)
+│   ├── ui/<RF>-<slug>.spec.ts        # Playwright scripts (modo UI)
+│   ├── api/<RF>-<slug>.http          # API test files
+│   └── ai/<feature>-eval.ts          # AI eval scripts (--ai)
 ├── evidence/
-│   ├── ui/                       # Screenshots per RF + retests
+│   ├── ui/                           # Screenshots per RF + retests
 │   └── ...
 └── logs/
-    ├── api/<RF>-<slug>.log       # JSONL request/response per call
-    └── ai/<feature>-<date>.jsonl # AI eval results
+    ├── api/<RF>-<slug>.log           # JSONL request/response per call
+    └── ai/<feature>-<date>.jsonl     # AI eval results
 ```
 
 ## Modo 1: Default (`/dw-qa`)
@@ -104,6 +116,70 @@ Quando disponíveis em `./.agents/skills/`, invocadas operacionalmente:
 3. Logar JSONL em `QA/logs/ai/<feature>-<date>.jsonl`.
 4. Comparar com JSONL da run anterior — alertar em regressão >10% em qualquer métrica.
 5. Anexar seção modo-AI em `qa-report.md`.
+
+## Modo 1.5: UAT Interativo (`/dw-qa --uat`)
+
+O modo UAT é um **walkthrough humano-no-loop**. Não há Playwright auto, não há AI eval. O agent é o navegador; o usuário é o verificador. Use quando o comportamento é baseado em julgamento — um redesign, um fluxo de muito conteúdo, um fluxo novo cujos critérios de aceitação são parcialmente estéticos, ou um bugfix cuja manifestação user-facing precisa de olho humano para confirmar.
+
+### Pre-flight
+
+1. **Target Bugfix:** ler `<target>/SUMMARY.md` → Sintoma + Resolução. O walkthrough é o trace de reprodução do `fix-report.md` (antes → depois), agora confirmado ao vivo.
+2. **Target PRD:** ler `<target>/prd.md` → para cada FR, esboçar uma pergunta de uma linha "o que você deveria ver quando X acontece?".
+3. Suba o dev server do projeto (ou instrua o usuário a subir se precisar credenciais interativas).
+
+### Loop do walkthrough
+
+Para cada FR (target PRD) ou cada task numerada em `TASK.md` (target Bugfix):
+
+1. **Agent descreve o próximo passo em palavras claras.** Exemplo: "Abra `/invoices/export` logado como viewer. O botão de export deve estar desabilitado e um tooltip explicar por quê."
+2. **Usuário executa o passo no browser/app** e reporta o que observou.
+3. **Agent faz uma pergunta de follow-up direcionada** casada com a FR/task — nunca mais que uma pergunta aberta por turno:
+   - "O estado disabled comunica visualmente o porquê? (texto, ícone, contraste — você decide)"
+   - "Se você tabula até o botão, o tooltip fica acessível por teclado?"
+   - "O que apareceu no network panel?" (só se comportamento de backend for relevante)
+4. **Agent registra a resposta verbatim** em `uat-report.md` sob a seção dessa FR/task. Sem interpretação, sem paráfrase.
+5. **Agent sinaliza um finding** quando o usuário reportar comportamento inesperado. O finding vai para `bugs.md` com `source: uat` e `severity: <escolha do usuário>`.
+6. **Repita até todas as FRs / tasks numeradas terem sido percorridas.**
+
+### Output
+
+Salvar em `<target>/QA/uat-report.md`:
+
+```markdown
+# Walkthrough UAT — <target>
+
+Data: YYYY-MM-DD
+Conduzido por: <identificador do usuário ou "usuário">
+Browser/env: <conforme reportado>
+
+## FR-1.1 (ou Task 1) — <escopo em uma linha>
+
+- Passo: <o que o agent pediu>
+- Observação do usuário: <verbatim>
+- Veredicto: PASS / FAIL / NEEDS-DESIGN-INPUT
+- Notas: <follow-up>
+
+## FR-1.2 (ou Task 2) — ...
+...
+
+## Sumário
+
+- Percorridas: N FRs / tasks
+- PASS: N
+- FAIL: N (cross-ref entradas no bugs.md com source:uat)
+- NEEDS-DESIGN-INPUT: N (não é bug; spec estava sub-definida ali)
+```
+
+### Comportamento obrigatório
+
+<critical>
+- NUNCA dirija o browser automaticamente em modo `--uat`. O usuário navega; você observa.
+- NUNCA parafraseie a observação do usuário. Cite verbatim sob cada FR/task.
+- NUNCA marque um finding como bug sem o usuário dizer explicitamente "sim, é bug" — findings de UAT também podem indicar specs ambíguas (NEEDS-DESIGN-INPUT), que não são bugs.
+- Limite cada FR a uma pergunta aberta por turno. UAT é interativo, não interrogatório.
+</critical>
+
+UAT compõe com `--bugfix <slug>` (percorre o caminho do teste de regressão com o usuário em vez de FRs) e com `--fix` (após um fix aterrissar, UAT é o green-light humano antes do commit).
 
 ## Modo 2: Fix loop (`/dw-qa --fix`)
 

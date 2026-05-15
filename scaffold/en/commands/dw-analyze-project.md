@@ -766,6 +766,67 @@ Three options:
 - Never write `.dw/constitution.md` without explicit user approval (option A) or explicit choice (options B/C).
 - Constitution file is committed to the repository like any other project artifact — never gitignored.
 
+### Step 9: Concerns Map Generation (Risk Map)
+
+After the constitution step, generate `.dw/rules/concerns.md` — the project's **risk map**. While `.dw/rules/` describes how the code IS and `.dw/constitution.md` describes what it SHOULD BE, the concerns map answers a third question: **where is it dangerous to mess around?**
+
+**Difference from the other two:**
+- `.dw/rules/*.md` — analytical (observed patterns).
+- `.dw/constitution.md` — declarative (committed principles).
+- `.dw/rules/concerns.md` — operational risk (load-bearing fragility, hot spots, hostile code).
+
+**Behavior:**
+
+If `.dw/rules/concerns.md` already exists with hand-edited entries between `<!-- preserved:start -->` and `<!-- preserved:end -->` markers, preserve those entries. Refresh the auto-generated sections (Hot Spots churn data, Known Bug History from `.dw/bugfixes/`).
+
+Otherwise (first run), build the file from scratch using `.dw/templates/concerns-template.md` as the base.
+
+**Data to collect:**
+
+1. **Hot Spots — churn analysis.** For each module discovered in Step 5, compute the count of commits touching files in that module over the last 90 days (`git log --since="90 days ago" --name-only -- <module-path> | wc -l`). Modules in the top 20% by churn are candidates. Cross-reference with `.dw/bugfixes/` (next item) — modules that also appear there are confirmed Hot Spots; the rest are flagged "high churn — verify with team."
+
+2. **Known Bug History — bugfix aggregation.** If `.dw/bugfixes/` exists, scan every `SUMMARY.md` in it. For each, parse the `Files Touched` table; aggregate file paths by their top-level module (e.g. `src/auth/session.ts` -> `src/auth/`). Any module with `>= 2` historical fixes lands in the Known Bug History section with the count and the recent bugfix slugs.
+
+3. **Fragile Integrations.** Look for telltale patterns in code and config:
+   - External SDK clients with retry/backoff scaffolding (suggests prior failures).
+   - Comments like `// FIXME: vendor returns 200 with empty body sometimes`, `// HACK: legacy API workaround`, `// TODO: handle vendor X edge case`.
+   - Hand-rolled retry loops around fetch/axios/HTTP clients.
+   - `.dw/incidents/` directory — every incident postmortem that names an external system goes in here.
+   List these candidates. Don't fabricate — only what you observe.
+
+4. **Hostile Code.** Heuristics for code that needs full understanding before modification:
+   - Regex literals longer than 80 characters with no explanatory comment.
+   - Functions over 100 lines with cyclomatic complexity that resists quick reading (rough heuristic: lots of nested `if`/`switch`/loops).
+   - Manual transaction/locking code outside an ORM's idiomatic layer.
+   - Custom serializers/parsers (e.g. hand-written JSON, CSV, binary formats) without a corresponding test file.
+   Flag candidates and let the user confirm.
+
+5. **Tech Debt — Acknowledged.** Scan README, CONTRIBUTING, docs/, and code comments for `TODO`, `FIXME`, `XXX`, `HACK`, `DEPRECATED` markers older than 90 days (use `git blame` to date them). Cluster by area. Present as candidates; the user decides which deserve acknowledgement (some are stale comments, some are real debt).
+
+**Procedure:**
+
+1. **Show candidates in chat first** (do NOT write the file yet). Format as a markdown table per section with a count and the strongest evidence for each entry. Cap each section at 10 entries — if more, list "+N more (see full analysis)" and let the user request expansion.
+
+2. Ask: "Approve as-is, drop specific entries (give the row labels), or skip this step entirely?" Wait for explicit response.
+
+3. On approval, write `.dw/rules/concerns.md` using `.dw/templates/concerns-template.md`. Fill in:
+   - Frontmatter `last_refreshed: <today's ISO date>`.
+   - Hot Spots table.
+   - Fragile Integrations table.
+   - Hostile Code table.
+   - Known Bug History table.
+   - Tech Debt — Acknowledged table.
+
+4. If a `<!-- preserved:start --> ... <!-- preserved:end -->` block existed in a prior version, append it back at the end of the file (the team's hand-curated entries).
+
+5. Print: "Wrote `.dw/rules/concerns.md`. Loaded on-demand by `/dw-plan`, `/dw-run`, and `/dw-bugfix` when their target touches a listed area. Never blocks — it informs, surfaces, and suggests an ADR for deviations."
+
+**Special case — no signals found:**
+
+If after the heuristics nothing crosses the bar (small codebase, low churn, no incidents, no bugfix history), write a minimal `concerns.md` with all sections empty (just headers) and a note: "No risk signals at this time. Re-run after the project accumulates more history."
+
+**Refresh cadence:** users re-run `/dw-analyze-project` whenever rules drift. Step 9 refreshes auto sections while keeping preserved entries. There is no separate refresh-only command.
+
 ## Quality Checklist
 
 Before declaring the analysis complete, verify:
@@ -787,6 +848,9 @@ Before declaring the analysis complete, verify:
 - [ ] Generated one `.dw/rules/{project}.md` per leaf project discovered
 - [ ] Generated `.dw/rules/integrations.md` (if 2+ projects)
 - [ ] All file paths in rules reference real, existing files
+- [ ] Step 8 (constitution) offered and resolved (A/B/C)
+- [ ] Step 9 (concerns map) presented candidates, awaited approval, wrote `.dw/rules/concerns.md` (or noted no signals)
+- [ ] Preserved-marker blocks in concerns.md kept verbatim on refresh
 - [ ] Topology analysis completed (god nodes, coupling metrics, dependency graph)
 - [ ] Critical nodes table generated with Ca, Ce, instability
 - [ ] Circular dependencies identified and documented

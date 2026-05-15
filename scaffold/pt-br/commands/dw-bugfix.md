@@ -9,7 +9,30 @@
     - NÃO use para corrigir bugs encontrados durante testes de QA (use `/dw-qa --fix` em vez disso)
 
     ## Posição no Pipeline
-    **Antecessor:** (bug report) | **Sucessor:** `/dw-commit` e depois `/dw-generate-pr`
+    **Antecessor:** (bug report) | **Sucessor:** `/dw-commit` e depois `/dw-generate-pr` (opcionalmente `/dw-review --bugfix <slug>` e `/dw-qa --bugfix <slug>` no meio para rigor extra)
+
+    ## Localização dos Arquivos
+
+    Todo bugfix tem uma entrada de índice em `.dw/bugfixes/`. Modo Direto mantém o artefato completo lá. Modo Análise e escalações via safety valve dividem: a entrada de índice fica em `.dw/bugfixes/`, mas o `prd.md` que o `/dw-plan` vai consumir é colocado em `.dw/spec/prd-bugfix-<slug>/` (o path que `/dw-plan techspec` e `/dw-plan tasks` já esperam).
+
+    **Casa do índice — sempre criada:**
+
+    - Diretório de índice do bugfix: `.dw/bugfixes/NNN-<slug>/` (NNN com 3 dígitos, sequencial em todos os bugfixes já registrados)
+    - Artefatos modo Direto aqui: `TASK.md` (triagem + plano), `fix-report.md` (evidência de verify), `SUMMARY.md` (registro de uma página)
+    - Artefatos modo Análise / escalação aqui: `TASK.md` (triagem + plano que seria executado), `escalated.md` (uma linha apontando para o diretório do spec que assumiu)
+    - Saída de review downstream (quando `/dw-review --bugfix <slug>` roda): `.dw/bugfixes/NNN-<slug>/review/`
+    - Saída de QA downstream (quando `/dw-qa --bugfix <slug>` roda): `.dw/bugfixes/NNN-<slug>/QA/`
+
+    **Casa do spec — criada apenas em Análise ou escalação via safety valve:**
+
+    - Diretório de spec: `.dw/spec/prd-bugfix-<slug>/`
+    - `prd.md` mora aqui (NÃO em `.dw/bugfixes/`) para que `/dw-plan techspec prd-bugfix-<slug>` e `/dw-plan tasks prd-bugfix-<slug>` operem contra o path que foram desenhados, sem nenhuma modificação ao `/dw-plan`.
+
+    **Templates:** `.dw/templates/bugfix-template.md` (para `TASK.md`/`prd.md`), `.dw/templates/bugfix-summary-template.md` (para `SUMMARY.md`), `.dw/templates/pr-bugfix-template.md` (para o corpo do PR).
+
+    **Descoberta do próximo NNN:** liste `.dw/bugfixes/`, parseie o prefixo de 3 dígitos de cada diretório, tome `max + 1` (ou `1` se vazio). Crie o diretório antes de escrever qualquer coisa. O mesmo `NNN-<slug>` é usado para nomear a parte slug do diretório de spec (ex: bugfix `007-stripe-webhook-retry` escala para spec `.dw/spec/prd-bugfix-stripe-webhook-retry/`).
+
+    **Slug:** kebab-case derivado de `{{BUG_DESCRIPTION}}` (ex: "login-nao-funciona", "erro-500-salvar-usuario").
 
     ## Skills Complementares
 
@@ -34,23 +57,23 @@
 
     | Modo | Quando Usar | Resultado |
     |------|-------------|-----------|
-    | **Direto** (padrão) | Bug simples, <=5 arquivos, sem migration | Executa correção imediata |
-    | **Análise** (`--análise`) | Bug complexo, precisa planejamento | Gera `.dw/spec/dw-bugfix-*/prd.md` para techspec -> tasks |
+    | **Direto** (padrão) | Bug simples, <=5 arquivos, sem migration, <=5 tasks numeradas | Executa correção imediata; persiste `TASK.md` + `fix-report.md` + `SUMMARY.md` em `.dw/bugfixes/NNN-<slug>/` |
+    | **Análise** (`--análise`) | Bug complexo, precisa planejamento | Divide: `.dw/bugfixes/NNN-<slug>/{TASK.md, escalated.md}` como entrada de índice + `.dw/spec/prd-bugfix-<slug>/prd.md` para o pipeline techspec -> tasks |
 
     ### Modo Análise
 
-    Quando o usuário especificar `--análise` ou quando detectar que o bug precisa de mais planejamento:
+    Quando o usuário especificar `--análise` ou quando o safety valve (passo 5.0) disparar:
 
     ```
     /dw-bugfix meu-projeto "Login não funciona" --análise
     ```
 
     Neste modo:
-    1. Segue o fluxo normal de perguntas e análise
-    2. Em vez de executar, gera documento em `.dw/spec/dw-bugfix-[nome]/prd.md`
-    3. O arquivo é nomeado `prd.md` para manter compatibilidade com o pipeline dw-create-techspec/dw-plan tasks
-    4. Depois o usuário pode rodar `/dw-plan techspec .dw/spec/dw-bugfix-[nome]`
-    5. E então `/dw-plan tasks .dw/spec/dw-bugfix-[nome]`
+    1. Segue o fluxo normal de perguntas e análise.
+    2. Aloca `NNN` e cria `.dw/bugfixes/NNN-<slug>/`. Escreve `TASK.md` (a triagem + respostas + plano que seria executado mas não roda aqui).
+    3. Cria o diretório de spec `.dw/spec/prd-bugfix-<slug>/` e escreve `prd.md` lá (usando `.dw/templates/bugfix-template.md`). Este é o path que `/dw-plan techspec` e `/dw-plan tasks` já sabem operar.
+    4. Escreve `.dw/bugfixes/NNN-<slug>/escalated.md` com exatamente uma linha: `Escalated to /dw-plan on <YYYY-MM-DD> → see .dw/spec/prd-bugfix-<slug>/`. Esse cross-reference permite que `/dw-intel --build` inclua o bugfix em `bugfixes.json` mesmo com o planejamento ativo acontecendo em `.dw/spec/`.
+    5. Avise ao usuário os próximos comandos: `/dw-plan techspec prd-bugfix-<slug>` e `/dw-plan tasks prd-bugfix-<slug>`.
 
     ## Fluxo de Trabalho
 
@@ -141,6 +164,27 @@
     - {{TARGET}}/.dw/rules/*.md
     ```
 
+    ### 1.5. Carregar Concerns (Obrigatório quando concerns.md existe)
+
+    Se `.dw/rules/concerns.md` existir:
+    - Leia uma vez.
+    - Para cada arquivo ou módulo referenciado em `{{BUG_DESCRIPTION}}` ou na área suspeita do fix, cruze com Hot Spots, Integrações Frágeis, Código Hostil e Histórico de Bugs Conhecidos.
+    - Se houver match, sinalize ANTES das 3 perguntas de clarificação:
+
+    ```
+    ## Concern detectada
+
+    A área que você está tocando está flagada em `.dw/rules/concerns.md`:
+
+    > [entrada verbatim do concerns.md]
+
+    Isso significa: [traduzir a concern para o que implica neste fix — teste extra, revisor extra, ADR, etc.]
+
+    Prosseguindo — mas o fix-report.md precisa registrar explicitamente qual concern foi tocada e como foi tratada.
+    ```
+
+    Se `.dw/rules/concerns.md` não existir, NÃO crie automaticamente (isso é trabalho do Step 9 do `/dw-analyze-project`). Anote no chat: "ainda sem mapa de concerns — considere rodar `/dw-analyze-project` depois do fix para construir um." Continue.
+
     ### 2. Coletar Evidências (Obrigatório)
 
     Execute comandos para entender o estado atual:
@@ -199,6 +243,40 @@
     | Afeta múltiplos projetos? | Redirecionar para PRD |
     | Estimativa > 2 horas de implementação? | Redirecionar para PRD |
 
+    ### 5.0. Safety Valve (OBRIGATÓRIO antes do passo 5)
+
+    <critical>
+    ANTES de desenhar a lista numerada do passo 5, esboce inline os passos que pretende escrever.
+    Se esse esboço revelar **mais de 5 tasks numeradas distintas**, OU **qualquer dependência cross-file que obrigue ordem específica de execução**, OU **uma task que requeira rodar migration / refactor / novo endpoint / alteração de contrato de API**, então o escopo do bugfix foi SUBESTIMADO e você DEVE escalar.
+    </critical>
+
+    **Por que isso existe:** a triagem do passo 0 pega problemas de escopo a partir da descrição do sintoma. O checkpoint 4.1 pega depois da análise de causa raiz. Esta válvula pega o caso que sobra — quando o fix em si, uma vez listado, revela mais complexidade do que triagem e RCA previram. NÃO existe flag de bypass. Escalar é o desfecho correto.
+
+    **Procedimento de escalação:**
+
+    1. Aloque `NNN` para `.dw/bugfixes/NNN-<slug>/`. Escreva `TASK.md` com a triagem, clarificações, causa raiz e plano que seria executado.
+    2. Crie `.dw/spec/prd-bugfix-<slug>/` e escreva `prd.md` lá (use `.dw/templates/bugfix-template.md`). Este é o path que `/dw-plan` espera.
+    3. Escreva `.dw/bugfixes/NNN-<slug>/escalated.md` com: `Escalated to /dw-plan on <YYYY-MM-DD> — reason: <qual critério da válvula disparou> → see .dw/spec/prd-bugfix-<slug>/`.
+    4. Reporte ao usuário:
+
+    ```
+    ## Escopo maior que bugfix
+
+    Listando o fix produziu [N] tasks / [deps cross-file] / [tipo de mudança proibida].
+    Pelo safety valve, isso não é mais um bugfix cirúrgico.
+
+    Índice do bugfix preservado em `.dw/bugfixes/NNN-<slug>/{TASK.md, escalated.md}`.
+    PRD criado em `.dw/spec/prd-bugfix-<slug>/prd.md`.
+
+    Próximo — escolha um:
+      - Cadeia manual: `/dw-plan techspec prd-bugfix-<slug>` → `/dw-plan tasks prd-bugfix-<slug>` → `/dw-run` → `/dw-qa` → `/dw-review` → `/dw-commit` → `/dw-generate-pr`.
+      - Entregar pro autopilot: `/dw-autopilot --from-prd prd-bugfix-<slug>` — retoma no GATE 1 (aprovação do PRD) e roda o resto automaticamente com os três gates usuais.
+    ```
+
+    5. Pare este comando. Não avance para o passo 5. O usuário (ou autopilot) invoca `/dw-plan` ou `/dw-autopilot --from-prd` em seguida.
+
+    **Se a válvula NÃO disparar:** Continue para o passo 5.
+
     ### 5. Propor Tarefas Numeradas (Obrigatório)
 
     <critical>
@@ -222,13 +300,23 @@
     - `ajustar` - me diga o que modificar no plano
     ```
 
-    ### 5.5. Verificação Final (Modo Direto — obrigatório antes do commit)
+    ### 5.5. Verificação Final + Persistência (Modo Direto — obrigatório antes do commit)
 
     <critical>Após aplicar as tarefas aprovadas em modo Direto, invocar `dw-verify` antes do commit. O VERIFICATION REPORT deve mostrar:
     1. O comando de verificação do projeto (test + lint + build) com exit 0.
     2. Reprodução do sintoma original: o cenário que disparava o bug já NÃO dispara mais.
-    
+
     Sem PASS nos dois, NÃO commit. Reportar o que falhou e retomar da etapa 4 (análise de causa raiz).</critical>
+
+    **Em caso de PASS, persistir o artefato do bugfix (sempre — inclusive em modo Direto):**
+
+    1. Descubra o próximo `NNN` (ver seção Localização dos Arquivos).
+    2. Crie `.dw/bugfixes/NNN-<slug>/` se ainda não foi criado no passo 5.0.
+    3. Escreva `TASK.md` com a triagem, clarificações, causa raiz e plano aprovado como executado (use `.dw/templates/bugfix-template.md` como base).
+    4. Escreva `fix-report.md` com o VERIFICATION REPORT verbatim do `dw-verify` mais o trace antes/depois da reprodução.
+    5. Escreva `SUMMARY.md` usando `.dw/templates/bugfix-summary-template.md`. Preencha slug, data, status `Fixed`, severidade, related_concerns (do passo 1.5), Sintoma (verbatim), Causa Raiz (uma frase), Resolução (2-4 bullets), Arquivos Tocados, Verificação, Relacionado, Followups.
+    6. Se o fix tocou uma concern listada em `.dw/rules/concerns.md`, anexe uma linha à coluna `Last incident` da row daquela concern (ou adicione uma row nova sob Histórico de Bugs Conhecidos) — preserve entradas escritas a mão entre `<!-- preserved:start -->`.
+    7. Reporte os paths dos três arquivos no chat antes do passo de commit.
 
     ### 6. Gerar Documento Bugfix (Modo Análise)
 
@@ -236,15 +324,40 @@
     Este passo é executado quando:
     - Usuário especificou `--análise` no início
     - Checkpoint 4.1 detectou escopo excessivo e usuário escolheu `análise`
+    - Safety valve 5.0 disparou
     </critical>
 
     **Ações:**
-    1. Criar diretório: `.dw/spec/dw-bugfix-[nome-do-bug]/`
-    2. Preencher com todas as informações coletadas nos passos anteriores
-    3. Salvar como: `.dw/spec/dw-bugfix-[nome-do-bug]/prd.md` (usa nome `prd.md` para compatibilidade com pipeline)
+    1. Descubra o próximo `NNN` e crie `.dw/bugfixes/NNN-<slug>/`.
+    2. Escreva `TASK.md` no diretório do bugfix (a triagem, clarificações, causa raiz e saída da análise) usando `.dw/templates/bugfix-template.md` como base.
+    3. Crie `.dw/spec/prd-bugfix-<slug>/` e escreva `prd.md` lá usando `.dw/templates/bugfix-template.md`. Este é o path que `/dw-plan` já entende — sem modificação no `/dw-plan`.
+    4. Escreva `.dw/bugfixes/NNN-<slug>/escalated.md` com: `Analysis mode on <YYYY-MM-DD> → see .dw/spec/prd-bugfix-<slug>/`.
 
-    **IMPORTANTE:** O arquivo deve ser nomeado `prd.md` para que os comandos
-    `/dw-plan techspec` e `/dw-plan tasks` funcionem sem modificação.
+    **Slug do bug:** kebab-case da descrição (ex: "login-nao-funciona", "erro-500-salvar-usuario").
+
+    **Por que o split:** `/dw-plan techspec` e `/dw-plan tasks` já hardcodam `.dw/spec/prd-<slug>/prd.md` como entrada. Para manter `/dw-plan` intocado, o PRD vai pra lá; `.dw/bugfixes/NNN-<slug>/` continua a entrada de índice queryable (consumida por `/dw-intel`, `/dw-review --bugfix`, `/dw-qa --bugfix`). O `escalated.md` é o cross-reference.
+
+    **Formato de saída:**
+    ```
+    ## Documento de Bugfix Gerado
+
+    Índice do bugfix: `.dw/bugfixes/NNN-<slug>/{TASK.md, escalated.md}`
+    PRD de planejamento: `.dw/spec/prd-bugfix-<slug>/prd.md`
+
+    **Próximos passos — escolha um:**
+
+    Opção A (cadeia manual, controle completo):
+    1. Revise `.dw/spec/prd-bugfix-<slug>/prd.md`
+    2. Rode: `/dw-plan techspec prd-bugfix-<slug>`
+    3. Rode: `/dw-plan tasks prd-bugfix-<slug>`
+    4. Execute tasks com: `/dw-run` (ou por task ID contra o spec)
+
+    Opção B (entregar pro autopilot):
+    1. Rode: `/dw-autopilot --from-prd prd-bugfix-<slug>`
+    2. Autopilot retoma no GATE 1 (aprovação do PRD) e roda TechSpec, Tasks, Run, QA, Review, Commit, PR com os três gates usuais.
+
+    O índice do bugfix continua queryable via `/dw-intel "bugfix history in <module>"`. Downstream `/dw-review --bugfix <slug>` e `/dw-qa --bugfix <slug>` ainda apontam para `.dw/bugfixes/NNN-<slug>/` quando quiser uma revisão focada apenas no patch cirúrgico final.
+    ```
 
     ## Tipos de Tarefa (permitidos em bugfix)
 
@@ -295,18 +408,21 @@
 
     ## Checklist de Qualidade
 
-    - [ ] **Triagem Bug vs Feature realizada**
-    - [ ] **Checkpoint de escopo realizado (passo 4.1)**
+    - [ ] **Triagem Bug vs Feature realizada (passo 0)**
+    - [ ] **Mapa de concerns consultado se presente (passo 1.5)**
     - [ ] Contexto do projeto/PRD carregado
     - [ ] Evidências coletadas (git log, erros)
     - [ ] **EXATAMENTE 3 perguntas feitas**
     - [ ] Respostas recebidas e analisadas
     - [ ] Causa raiz identificada
+    - [ ] **Checkpoint de escopo realizado (passo 4.1)**
+    - [ ] **Safety valve checado (passo 5.0) — escalado para `/dw-plan` se disparou**
     - [ ] Tarefas numeradas sequencialmente
     - [ ] **Máximo 5 arquivos afetados**
     - [ ] **Sem migrations**
     - [ ] **Tarefa de teste incluída (framework correto do projeto)**
     - [ ] Aguardando aprovação antes de executar
+    - [ ] **`.dw/bugfixes/NNN-<slug>/{TASK,fix-report,SUMMARY}.md` escritos após verify PASS**
 
     <critical>
     PRIMEIRO: Avalie se é bug ou feature (Passo 0).

@@ -16,6 +16,8 @@ The command classifies the query into one of these shapes before searching:
 | **api-list** | "list endpoints", "what routes exist?" | `apis.json` | — |
 | **find-export** | "where is `createServer` exported from?", "find the `userSchema` symbol" | `files.json` (search `exports` arrays) | grep fallback |
 | **convention** | "what's the file naming convention?", "are tests co-located?" | `arch.md` | `.dw/rules/` if available |
+| **bugfix-history** | "bugs in `src/auth/`?", "recent fixes touching login?", "what broke in payments?", "fix history for the export feature" | `bugfixes.json` | `.dw/rules/concerns.md`, `.dw/bugfixes/<NNN-slug>/SUMMARY.md` for top hits |
+| **risk-area** | "is `src/auth/session.ts` risky?", "what's fragile here?", "where are the hot spots?", "tech debt in payments?" | `.dw/rules/concerns.md` | `bugfixes.json` (cross-ref bug history for the same module) |
 
 ## Match algorithm
 
@@ -120,6 +122,56 @@ Users (5)
 - DELETE /api/users/:id    — Delete user
 
 Orders (5) ...
+```
+
+### Query: "bugs in src/auth/?"
+
+**Shape:** bugfix-history
+
+**Process:**
+1. Read `bugfixes.json`, look up `by_module["src/auth/"]`.
+2. For each slug returned, fetch the matching `fixes[]` entry (one-line symptom + root cause + date).
+3. Cross-reference `.dw/rules/concerns.md` — if `src/auth/` appears under Hot Spots or Known Bug History, surface that callout.
+4. Return chronological list with paths to the full SUMMARY.md for the top 3.
+
+**Output:**
+```
+3 historical fixes touched src/auth/ (concerns.md flags it as a Hot Spot — 4 fixes in 60d):
+
+- 007-refresh-token-leak   (2026-03-12, Fixed, High)
+  Symptom: refresh token survived sign-out
+  Root cause: session map keyed by user id, not session id
+  → .dw/bugfixes/007-refresh-token-leak/SUMMARY.md
+
+- 003-mfa-skip-on-redirect (2026-02-04, Fixed, Medium)
+  Symptom: redirect chain bypassed MFA check
+  → .dw/bugfixes/003-mfa-skip-on-redirect/SUMMARY.md
+
+- 001-login-not-working    (2026-01-20, Fixed, Medium)
+  Symptom: 500 on POST /login when email casing varied
+  → .dw/bugfixes/001-login-not-working/SUMMARY.md
+
+Consider adding a regression-test guard before further changes here.
+```
+
+### Query: "what's fragile in payments?"
+
+**Shape:** risk-area
+
+**Process:**
+1. Read `.dw/rules/concerns.md`. Search each section (Hot Spots, Fragile Integrations, Hostile Code, Known Bug History, Tech Debt) for `payments`.
+2. For Known Bug History matches, cross-reference `bugfixes.json` `by_module["src/payments/"]` to enumerate recent slugs.
+3. Return one paragraph per concerns.md section that matched, with cross-ref to the bugfix slugs.
+
+**Output:**
+```
+Three risk signals for src/payments/:
+
+Hot Spot: 5 commits in last 30 days; 2 historical bugfixes (refund-rounding, stripe-webhook-retry).
+Fragile Integration: Stripe webhook delivery — concerns.md notes "silent 200 OK when signature header is absent".
+Hostile Code: src/payments/parseInvoice.ts:parseLine — 900-char regex, no comments; original author flagged "rewrite if it breaks".
+
+See: .dw/rules/concerns.md, .dw/bugfixes/{002-stripe-webhook-retry,007-refund-rounding}/SUMMARY.md
 ```
 
 ## Stale-index handling

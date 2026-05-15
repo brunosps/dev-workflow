@@ -38,9 +38,10 @@ You are the codebase intelligence assistant. Two modes: query the existing index
 
 ## File Locations
 
-- Machine-readable intel (queried first): `.dw/intel/{stack,files,apis,deps}.json` + `.dw/intel/arch.md`
+- Machine-readable intel (queried first): `.dw/intel/{stack,files,apis,deps,bugfixes}.json` + `.dw/intel/arch.md`
 - Refresh metadata: `.dw/intel/.last-refresh.json`
-- Human-readable rules (queried second): `.dw/rules/{index,<module>,integrations}.md`
+- Human-readable rules (queried second): `.dw/rules/{index,<module>,integrations,concerns}.md`
+- Bugfix history source: `.dw/bugfixes/*/SUMMARY.md`
 - Direct grep fallback (queried last): the project source files
 
 ## Required Behavior
@@ -67,6 +68,8 @@ Classify the user's `{{QUERY}}` into one of the shapes documented in `.agents/sk
 - **api-list** — primary: `apis.json`
 - **find-export** — primary: `files.json` (search `exports` arrays)
 - **convention** — primary: `arch.md`, secondary: `.dw/rules/`
+- **bugfix-history** — primary: `bugfixes.json`, secondary: `.dw/rules/concerns.md` (triggers: "bugs in <module>", "recent fixes", "what broke in X", "fix history for Y")
+- **risk-area** — primary: `.dw/rules/concerns.md`, secondary: `bugfixes.json` (triggers: "is X risky", "what's fragile", "hot spots", "tech debt")
 
 ### 3. Search execution
 
@@ -143,7 +146,31 @@ When invoked with `--build`, the command produces or refreshes the queryable int
 5. **API extraction.** Routes, RPC handlers, GraphQL resolvers, public CLI surface. Output to `.dw/intel/apis.json`. Budget ≤1.5K tokens.
 6. **Dependency map.** Internal cross-module imports + external packages with `used_by` arrays. Output to `.dw/intel/deps.json`. Budget ≤1K tokens.
 7. **Architecture summary.** Prose document describing the project's shape, key patterns, request flows, deployment topology. Output to `.dw/intel/arch.md`. Budget ≤1.5K tokens.
-8. **Refresh metadata.** Write `.dw/intel/.last-refresh.json` with `updated_at`, `version`, `mode` (full or incremental), files-scanned count.
+8. **Bugfix history.** If `.dw/bugfixes/` exists and is non-empty, scan every `SUMMARY.md` and build `.dw/intel/bugfixes.json` (budget ≤1K tokens). Schema:
+   ```json
+   {
+     "schema_version": "1.0",
+     "fixes": [
+       {
+         "slug": "001-login-not-working",
+         "date": "YYYY-MM-DD",
+         "status": "Fixed",
+         "severity": "Medium",
+         "symptom_one_line": "...",
+         "root_cause_one_line": "...",
+         "modules_touched": ["src/auth/", "src/api/login/"],
+         "files_touched": ["src/auth/session.ts", "src/auth/session.test.ts"],
+         "related_concerns": ["src/auth/session.ts"],
+         "path": ".dw/bugfixes/001-login-not-working/"
+       }
+     ],
+     "by_module": {
+       "src/auth/": ["001-login-not-working", "007-refresh-token-leak"]
+     }
+   }
+   ```
+   Skip if `.dw/bugfixes/` does not exist. Reject SUMMARY.md files that fail frontmatter validation; log them in the build report. **Escalated bugfixes** (those with `escalated.md` but no `SUMMARY.md` because the fix lives under `.dw/spec/prd-bugfix-<slug>/`) are skipped from `bugfixes.json` until the spec ships a fix — they re-enter the index when their SUMMARY.md is eventually written. The escalated `TASK.md` remains queryable by direct grep; the index only tracks completed fixes.
+9. **Refresh metadata.** Write `.dw/intel/.last-refresh.json` with `updated_at`, `version`, `mode` (full or incremental), files-scanned count, and `bugfixes_indexed` count.
 
 ### Complementary skill for build mode
 

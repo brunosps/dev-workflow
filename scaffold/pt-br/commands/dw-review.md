@@ -15,16 +15,28 @@ Você é o orquestrador de review. Roda Level 2 (PRD compliance / cobertura) e L
 
 | Invocação | O que roda |
 |-----------|------------|
-| `/dw-review` | **Padrão.** Level 2 (cobertura PRD) + Level 3 (qualidade de código) em sequência. Relatório consolidado em `.dw/spec/<prd>/QA/review-consolidated.md`. |
-| `/dw-review --coverage-only` | Apenas Level 2 — mapeia cada requisito do PRD para o código que entrega. Pula qualidade. |
-| `/dw-review --code-only` | Apenas Level 3 — qualidade / convenção / security checks. Pula mapeamento PRD. |
+| `/dw-review` | **Padrão.** Level 2 (cobertura PRD) + Level 3 (qualidade de código) em sequência. Relatório consolidado em `<target>/QA/review-consolidated.md` (target resolve pra dir do PRD ou do bugfix; ver Resolução de Target). |
+| `/dw-review --coverage-only` | Apenas Level 2 — mapeia cada requisito do PRD (ou escopo do bugfix) para o código que entrega. Pula qualidade. |
+| `/dw-review --code-only` | Apenas Level 3 — qualidade / convenção / security checks. Pula mapeamento de PRD/escopo. |
+| `/dw-review --bugfix <NNN-slug>` | Aponta para um bugfix em `.dw/bugfixes/NNN-slug/` em vez de um PRD. Level 2 mapeia o escopo do bugfix (TASK.md + fix-report.md + SUMMARY.md) para o código que entrega o fix; Level 3 checa o diff. Output: `.dw/bugfixes/NNN-slug/review/`. |
 
 ## Entradas
 
 | Variável | Descrição | Exemplo |
 |----------|-----------|---------|
-| `{{PRD_PATH}}` | Caminho do dir PRD (auto-detect da branch ativa se omitido) | `.dw/spec/prd-invoice-export` |
-| `{{MODE}}` | `--coverage-only` / `--code-only` (opcional; default = ambos) | — |
+| `{{PRD_PATH}}` | Caminho do dir PRD (auto-detect da branch ativa se omitido; ignorado quando `--bugfix` é usado) | `.dw/spec/prd-invoice-export` |
+| `{{BUGFIX_SLUG}}` | Slug do bugfix quando a flag `--bugfix` é usada | `001-login-nao-funciona` |
+| `{{MODE}}` | `--coverage-only` / `--code-only` / `--bugfix <slug>` (opcional; default = ambos, target = PRD) | — |
+
+## Resolução de Target
+
+O review roda contra um de dois tipos de target. Compute `<target>` UMA VEZ no início; substitua onde aparecer `<target>` abaixo.
+
+1. **Target PRD (padrão):** `<target>` = `{{PRD_PATH}}` (auto-detectado da branch ativa quando omitido). Artefatos lidos: `prd.md`, `techspec.md`, `tasks.md`, `tasks/<N>_task.md`, `tasks-validation.md`. Output em `<target>/QA/`. Nomes de arquivo: `review-coverage.md`, `dw-code-review.md`, `review-consolidated.md`.
+
+2. **Target Bugfix (`--bugfix <slug>`):** `<target>` = `.dw/bugfixes/<slug>/`. Artefatos lidos: `TASK.md` (o plano de fix com tasks numeradas 1..≤5), `fix-report.md` (evidência de verify), `SUMMARY.md` (registro de uma página). Não há FRs no sentido de PRD — em vez disso, cada task numerada em `TASK.md` é a unidade de cobertura. Output em `<target>/review/`. Nomes: `review-coverage.md`, `dw-code-review.md`, `review-consolidated.md`.
+
+Quando o target Bugfix é usado, o mapeamento de cobertura (Level 2) opera sobre as tasks numeradas do `TASK.md` (não FR-N.M); uma task é ENTREGUE quando (a) os arquivos que ela alegou tocar estão no diff e (b) o teste de regressão referenciado em `fix-report.md` existe e roda. Código órfão em modo bugfix é qualquer coisa no diff que não corresponde a uma task numerada — sinal forte de que o safety valve deveria ter escalado para `/dw-plan`.
 
 ## Skills Complementares
 
@@ -59,10 +71,8 @@ Quando disponíveis em `./.agents/skills/`, são invocadas como apoio analítico
 ### Comportamento
 
 1. **Carregar artefatos:**
-   - `.dw/spec/<prd>/prd.md` → extrair requisitos funcionais.
-   - `.dw/spec/<prd>/techspec.md` → extrair decisões arquiteturais.
-   - `.dw/spec/<prd>/tasks.md` + per-task files → extrair trabalho commitado.
-   - `tasks-validation.md` → trazer status das dimensões.
+   - **Target PRD:** `<target>/prd.md` → extrair requisitos funcionais. `<target>/techspec.md` → extrair decisões arquiteturais. `<target>/tasks.md` + per-task files → extrair trabalho commitado. `<target>/tasks-validation.md` → trazer status das dimensões.
+   - **Target Bugfix:** `<target>/TASK.md` → extrair as tasks numeradas (1..≤5) e seus arquivos-alvo. `<target>/fix-report.md` → extrair evidência de verify e referência do teste de regressão. `<target>/SUMMARY.md` → extrair Sintoma, Causa Raiz, Arquivos Tocados, Verificação.
 
 2. **Mapear cada FR para código:**
    - Para cada `FR-N.M`, encontrar código que entrega (file path + line range + commit SHA).
@@ -78,7 +88,7 @@ Quando disponíveis em `./.agents/skills/`, são invocadas como apoio analítico
 
 ### Output
 
-Salvo em `.dw/spec/<prd>/QA/review-coverage.md`:
+Salvo em `<target>/QA/review-coverage.md` (target PRD) ou `<target>/review/review-coverage.md` (target Bugfix):
 
 ```markdown
 # Coverage Review
@@ -145,14 +155,14 @@ Se FALTANDO > 0, o veredicto sugere revisitar `/dw-plan tasks` pra escopar ou `/
 
 ### Output
 
-Salvo em `.dw/spec/<prd>/QA/dw-review --code-only.md`. Linha de verdict é uma de:
+Salvo em `<target>/QA/dw-code-review.md` (target PRD) ou `<target>/review/dw-code-review.md` (target Bugfix). Linha de verdict é uma de:
 - **APROVADO** — todos os gates verdes; pronto pra commit + PR.
 - **APROVADO COM RESSALVAS** — verde mas findings valem corrigir em follow-up (filed com severities).
 - **REPROVADO** — ao menos um hard gate falhou. Especifique qual.
 
 ## Output consolidado (modo padrão)
 
-Quando ambos níveis rodam, relatório consolidado em `.dw/spec/<prd>/QA/review-consolidated.md`:
+Quando ambos níveis rodam, relatório consolidado em `<target>/QA/review-consolidated.md` (target PRD) ou `<target>/review/review-consolidated.md` (target Bugfix):
 
 ```markdown
 # Review Consolidado

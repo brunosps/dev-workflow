@@ -44,13 +44,22 @@ A step that invokes a `/dw-xxx` command is ONLY considered complete when the art
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `{{WISH}}` | Description of what the user wants to build | "push notification system with per-channel preferences" |
+| `{{WISH}}` | Description of what the user wants to build (default mode) | "push notification system with per-channel preferences" |
+| `{{PRD_SLUG}}` | Existing PRD slug to autopilot from (when `--from-prd` is used) | `prd-bugfix-stripe-webhook-retry` |
+| `{{MODE}}` | Optional invocation flag | `--from-prd <slug>` |
+
+## Invocation Modes
+
+| Invocation | Behavior |
+|------------|----------|
+| `/dw-autopilot "<wish>"` | **Default.** Full pipeline from scratch: Codebase Intelligence → Research → Brainstorm → PRD → TechSpec → Tasks → Run → QA → Review → Commit → PR. |
+| `/dw-autopilot --from-prd <slug>` | **Resume-from-PRD mode.** Skips Steps 1–4 (Intel, Research, Brainstorm, PRD). Starts at GATE 1 (presents the existing PRD for approval), then continues through TechSpec → Tasks → Run → QA → Review → Commit → PR. Used when `/dw-bugfix` has escalated via its safety valve and written a PRD to `.dw/spec/<slug>/`, or when the user previously authored a PRD by hand and wants the rest automated. |
 
 ## Approval Gates
 
 The autopilot stops ONLY at these 3 moments:
 
-1. **GATE 1 — PRD**: Presents the generated PRD and awaits user approval before generating techspec/tasks
+1. **GATE 1 — PRD**: Presents the generated PRD (default mode) or the existing PRD (--from-prd mode) and awaits user approval before generating techspec/tasks
 2. **GATE 2 — Tasks**: Presents the task list and awaits approval before starting execution
 3. **GATE 3 — PR**: After automatic commit, asks if the user wants to generate the Pull Request
 
@@ -65,6 +74,22 @@ If this command is re-invoked on the same PRD after interruption:
 3. Continue execution normally from the indicated step
 
 ## Full Pipeline
+
+### Step 0: Resolve invocation mode (MANDATORY first action)
+
+Before Step 1, decide which mode is in effect:
+
+1. **If `--from-prd <slug>` is present in the invocation:**
+   - Resolve `{{PRD_SLUG}}` to `.dw/spec/<slug>/`.
+   - Verify the directory exists and contains a `prd.md`. If either is missing, STOP and report: `--from-prd target .dw/spec/<slug>/prd.md not found. Run /dw-plan prd or fix the slug.`
+   - Check whether `.dw/bugfixes/*/escalated.md` references this slug. If yes, note in the progress block: `Resuming from bugfix escalation: <NNN-bugfix-slug> → <slug>`.
+   - Set `mode: "from-prd"` in `autopilot-state.json` and `skipped_steps: [1, 2, 3, 4]` with `skip_reason: "from-prd-mode"`.
+   - Jump directly to **GATE 1** (PRD approval) using the existing `prd.md`.
+
+2. **Otherwise (default mode):**
+   - Set `mode: "autopilot"` and proceed to Step 1 normally.
+
+<critical>In `--from-prd` mode, Steps 1–4 MUST be marked as `skipped_steps` with `skip_reason: "from-prd-mode"`. The pre-commit audit (Step 14) MUST honor this — a skipped step is not the same as a missing step.</critical>
 
 ### Step 1: Codebase Intelligence
 
@@ -104,12 +129,15 @@ Run `/dw-plan prd` using brainstorm findings.
 
 ### === GATE 1: PRD Approval ===
 
+**In default mode:** the PRD was just written in Step 4.
+**In `--from-prd` mode:** the PRD already existed on disk before this autopilot run started (typically authored by `/dw-bugfix --analysis` or by a safety-valve escalation, or hand-edited).
+
 Present to the user:
 - Summary of functional requirements
-- Decisions made automatically
+- Decisions made automatically (default mode) OR origin note: "PRD authored by /dw-bugfix escalation on <date>" / "PRD pre-existing on disk" (--from-prd mode)
 - Open questions (if any)
 
-**Wait for explicit approval.** If the user requests changes, adjust and re-present.
+**Wait for explicit approval.** If the user requests changes, adjust and re-present. In `--from-prd` mode, edits go directly into the existing `.dw/spec/<slug>/prd.md` — there is no separate draft.
 
 ### Step 5: TechSpec (Interactive — 7+ Questions)
 
@@ -216,6 +244,34 @@ Run `/dw-review --coverage-only` again to confirm QA fixes did not break PRD com
 Run `/dw-review --code-only` (Level 3) for formal review.
 - Generate persisted report
 
+### Step 13.5: Close the bugfix loop (Conditional)
+
+<critical>This step runs only when `mode == "from-prd"` AND the `prd_path` matches `.dw/spec/prd-bugfix-*`. Otherwise skip with `skip_reason: "not a bugfix escalation"`.</critical>
+
+When the autopilot is finishing a bugfix that was escalated by `/dw-bugfix`, the index entry in `.dw/bugfixes/NNN-<slug>/` still has only `TASK.md` and `escalated.md` — no `SUMMARY.md` was written because the surgical bugfix flow never reached step 5.5 (the spec-driven flow did the work instead). Without `SUMMARY.md`, `/dw-intel --build` skips this bugfix forever, so `bugfix-history` queries never surface the lesson learned.
+
+This step closes that loop **before** Step 14 (Commit) so the SUMMARY lands in the same commit as the fix.
+
+**Procedure:**
+
+1. **Find the index entry.** Glob `.dw/bugfixes/*/escalated.md`. For each, read the one-line content and check whether it references the current PRD slug (e.g., `→ see .dw/spec/prd-bugfix-stripe-webhook-retry/` matches the active PRD `prd-bugfix-stripe-webhook-retry`). The match is the target `NNN-<slug>/` directory.
+2. **If no match is found:** the bugfix index doesn't expect a back-write. Skip silently and continue to Step 14.
+3. **If `SUMMARY.md` already exists in the matched directory:** do not overwrite. Continue to Step 14 — the human or a previous run already closed the loop.
+4. **Otherwise, write `SUMMARY.md`** using `.dw/templates/bugfix-summary-template.md`. Source fields from:
+   - **Symptom (verbatim):** the `Symptom` section of `<prd_path>/prd.md`, or the first paragraph of the original `TASK.md` if the PRD doesn't carry it.
+   - **Root Cause:** the original `TASK.md` Root Cause section.
+   - **Resolution (2–4 bullets):** distilled from `<prd_path>/techspec.md` decisions + actual `git diff <base>...HEAD --stat` summary.
+   - **Files Touched:** parsed from `git diff <base>...HEAD --name-only` (exclude `.dw/` paths). If >5 files, that's expected for an escalated bugfix — list them all and add a note "escalated from bugfix because of scope".
+   - **Verification:** point to `<prd_path>/QA/qa-report.md` and the verify report referenced in Step 9's session output.
+   - **Related — Concerns touched:** copy from the corresponding entries in `.dw/rules/concerns.md` if any rows reference modules in `Files Touched`.
+   - **Frontmatter:** `slug: NNN-<slug>`, `created: <today's ISO date>`, `status: Fixed`, `severity: <inferred from PRD priority or default Medium>`, `related_concerns: [list from above]`.
+5. **Append a final-line note** to `escalated.md`: `Closed by /dw-autopilot --from-prd on <YYYY-MM-DD>; SUMMARY.md written.` Preserve the original escalation line above it.
+6. **Record the artifact** in `autopilot-state.json` `step_artifacts["13.5"] = [".dw/bugfixes/NNN-<slug>/SUMMARY.md", ".dw/bugfixes/NNN-<slug>/escalated.md"]`.
+
+<critical>NEVER fabricate verification evidence. If the QA report is empty or the diff is empty, do not invent files in `Files Touched`. Write the SUMMARY.md sections that are grounded and mark the rest as `_(not available — see <prd_path>/QA/ for details)_`.</critical>
+
+After this step, the bugfix becomes visible to `/dw-intel "bugfix history in <module>"` on the next `/dw-intel --build` run.
+
 ### Step 14: Commit
 
 <critical>MANDATORY PRE-COMMIT AUDIT — execute BEFORE invoking `/dw-commit`:
@@ -230,7 +286,7 @@ Run `ls` on each path below and confirm existence. If ANY is missing, DO NOT com
 - Evidence of the last `/dw-review --coverage-only` run with RF-by-RF matrix (session output or reference in `autopilot-state.json`)
 
 Also verify `autopilot-state.json`:
-- Every step 1 through 13 that is NOT in `skipped_steps` must be in `completed_steps`
+- Every step 1 through 13 (and 13.5 when in `--from-prd` mode against a `prd-bugfix-*` PRD) that is NOT in `skipped_steps` must be in `completed_steps`
 - Each completed step must have its artifacts listed in `step_artifacts`
 
 If any artifact or step is missing: STOP immediately. Report to the user: `Step N did not produce artifact X — re-running /dw-[command]`. Re-execute the command. Verify again. Only then proceed to `/dw-commit`.
@@ -263,9 +319,11 @@ Save the file `.dw/spec/prd-[name]/autopilot-state.json` with the following form
   "mode": "autopilot",
   "wish": "original user description",
   "prd_path": ".dw/spec/prd-[name]",
+  "from_prd_slug": null,
   "current_step": 8,
   "completed_steps": [1, 2, 3, 4, 5, 6, 7],
   "skipped_steps": [2],
+  "skip_reasons": {"2": "domain already mapped in .dw/rules/auth.md"},
   "gates_passed": ["prd", "tasks"],
   "step_artifacts": {
     "9": ["review-matrix-shown-in-session"],
@@ -288,6 +346,7 @@ Save the file `.dw/spec/prd-[name]/autopilot-state.json` with the following form
 - A step ONLY moves to `completed_steps` after verifying its artifacts exist on disk
 - If the session drops, re-invoke `/dw-autopilot` on the same PRD; the command reads `autopilot-state.json` and continues from the correct step, revalidating artifacts before trusting `completed_steps`
 - When the pipeline finishes (after commit or PR), remove the file or mark `"status": "completed"`
+- In `--from-prd` mode, set `from_prd_slug: "<slug>"`, `mode: "from-prd"`, and include steps 1–4 in `skipped_steps` with `skip_reason: "from-prd-mode"` — this is what the pre-commit audit checks against (Step 14 verifies that every step NOT in `skipped_steps` is in `completed_steps`)
 
 <critical>After EACH completed step, display the updated progress block to the user. This is MANDATORY — the user MUST see what was done and what comes next. If a step was skipped, the reason MUST appear in the progress block.</critical>
 

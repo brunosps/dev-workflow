@@ -706,6 +706,67 @@ Três opções:
 - Nunca escrever `.dw/constitution.md` sem aprovação explícita (opção A) ou escolha explícita (opções B/C).
 - Constitution é commitada ao repositório como qualquer outro artefato do projeto — nunca gitignored.
 
+### Step 9: Geração do Mapa de Concerns (Risk Map)
+
+Depois do passo de constitution, gerar `.dw/rules/concerns.md` — o **mapa de riscos** do projeto. Enquanto `.dw/rules/` descreve como o código É e `.dw/constitution.md` descreve o que ele DEVE SER, o mapa de concerns responde uma terceira pergunta: **onde é perigoso mexer?**
+
+**Diferença dos outros dois:**
+- `.dw/rules/*.md` — analítico (padrões observados).
+- `.dw/constitution.md` — declarativo (princípios comprometidos).
+- `.dw/rules/concerns.md` — risco operacional (fragilidade load-bearing, hot spots, código hostil).
+
+**Comportamento:**
+
+Se `.dw/rules/concerns.md` já existir com entradas escritas a mão entre `<!-- preserved:start -->` e `<!-- preserved:end -->`, preserve essas entradas. Atualize as seções auto-geradas (dados de churn de Hot Spots, Histórico de Bugs Conhecidos a partir de `.dw/bugfixes/`).
+
+Caso contrário (primeira execução), construa o arquivo do zero usando `.dw/templates/concerns-template.md` como base.
+
+**Dados a coletar:**
+
+1. **Hot Spots — análise de churn.** Para cada módulo descoberto no Passo 5, compute a contagem de commits tocando arquivos do módulo nos últimos 90 dias (`git log --since="90 days ago" --name-only -- <module-path> | wc -l`). Módulos no top 20% por churn são candidatos. Cruze com `.dw/bugfixes/` (próximo item) — módulos que também aparecem lá são Hot Spots confirmados; o resto fica como "churn alto — verificar com o time."
+
+2. **Histórico de Bugs Conhecidos — agregação de bugfixes.** Se `.dw/bugfixes/` existir, escaneie todo `SUMMARY.md` dentro. Para cada um, parseie a tabela `Arquivos Tocados`; agregue paths de arquivos pelo módulo top-level (ex: `src/auth/session.ts` -> `src/auth/`). Qualquer módulo com `>= 2` fixes históricos entra na seção Histórico de Bugs Conhecidos com contagem e slugs recentes.
+
+3. **Integrações Frágeis.** Procure padrões delatores no código e config:
+   - Clientes SDK externos com scaffolding de retry/backoff (sugere falhas anteriores).
+   - Comentários como `// FIXME: vendor retorna 200 com body vazio às vezes`, `// HACK: workaround para API legada`, `// TODO: tratar edge case do vendor X`.
+   - Loops de retry artesanais ao redor de fetch/axios/HTTP clients.
+   - Diretório `.dw/incidents/` — todo postmortem de incidente que nomeie um sistema externo entra aqui.
+   Liste esses candidatos. Não fabrique — apenas o que você observar.
+
+4. **Código Hostil.** Heurísticas para código que precisa de entendimento completo antes de modificar:
+   - Regex literais com mais de 80 caracteres sem comentário explicativo.
+   - Funções acima de 100 linhas com complexidade ciclomática que resiste à leitura rápida (heurística aproximada: muitos `if`/`switch`/loops aninhados).
+   - Código manual de transação/locking fora da camada idiomática de um ORM.
+   - Serializadores/parsers custom (ex: JSON, CSV, formatos binários escritos a mão) sem arquivo de teste correspondente.
+   Sinalize candidatos e deixe o usuário confirmar.
+
+5. **Tech Debt — Reconhecida.** Escaneie README, CONTRIBUTING, docs/, e comentários no código por marcadores `TODO`, `FIXME`, `XXX`, `HACK`, `DEPRECATED` com mais de 90 dias (use `git blame` para datar). Agrupe por área. Apresente como candidatos; o usuário decide quais merecem reconhecimento (alguns são comentários velhos, alguns são debt real).
+
+**Procedimento:**
+
+1. **Mostre os candidatos no chat primeiro** (NÃO escreva o arquivo ainda). Formate como tabela markdown por seção com contagem e a evidência mais forte para cada entrada. Limite cada seção a 10 entradas — se mais, liste "+N mais (peça expansão)" e deixe o usuário pedir.
+
+2. Pergunte: "Aprovar como está, descartar entradas específicas (passe os labels das linhas), ou pular esse passo inteiro?" Aguarde resposta explícita.
+
+3. Em caso de aprovação, escreva `.dw/rules/concerns.md` usando `.dw/templates/concerns-template.md`. Preencha:
+   - Frontmatter `last_refreshed: <data ISO de hoje>`.
+   - Tabela de Hot Spots.
+   - Tabela de Integrações Frágeis.
+   - Tabela de Código Hostil.
+   - Tabela de Histórico de Bugs Conhecidos.
+   - Tabela de Tech Debt — Reconhecida.
+
+4. Se existia um bloco `<!-- preserved:start --> ... <!-- preserved:end -->` numa versão anterior, anexe-o de volta ao final do arquivo (as entradas curadas a mão pelo time).
+
+5. Imprima: "Escrito `.dw/rules/concerns.md`. Carregado on-demand por `/dw-plan`, `/dw-run` e `/dw-bugfix` quando o alvo deles tocar uma área listada. Nunca bloqueia — informa, sinaliza e sugere ADR para desvios."
+
+**Caso especial — nenhum sinal encontrado:**
+
+Se após as heurísticas nada cruzar a barra (codebase pequeno, churn baixo, sem incidents, sem histórico de bugfix), escreva um `concerns.md` mínimo com todas as seções vazias (apenas headers) e uma nota: "Nenhum sinal de risco no momento. Re-execute depois que o projeto acumular mais histórico."
+
+**Cadência de refresh:** usuários re-rodam `/dw-analyze-project` quando rules ficam desatualizadas. O Passo 9 atualiza seções auto mantendo entradas preservadas. Não existe comando separado só de refresh.
+
 ## Checklist de Qualidade
 
 - [ ] Estrutura do repositório escaneada
@@ -734,6 +795,9 @@ Três opções:
 - [ ] Exemplos de código reais incluídos
 - [ ] Nenhum secret exposto
 - [ ] Convenções de teste documentadas (framework, padrões, cobertura)
+- [ ] Step 8 (constitution) oferecido e resolvido (A/B/C)
+- [ ] Step 9 (mapa de concerns) apresentou candidatos, aguardou aprovação, escreveu `.dw/rules/concerns.md` (ou anotou que não há sinais)
+- [ ] Blocos com marker preserved em concerns.md mantidos verbatim no refresh
 
 ## Exemplo de Uso
 

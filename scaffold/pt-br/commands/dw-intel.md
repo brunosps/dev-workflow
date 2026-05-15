@@ -38,9 +38,10 @@ Voce e o assistente de inteligencia do codebase. Dois modos: consultar o indice 
 
 ## Localizacao dos Arquivos
 
-- Intel machine-readable (consulta primeira): `.dw/intel/{stack,files,apis,deps}.json` + `.dw/intel/arch.md`
+- Intel machine-readable (consulta primeira): `.dw/intel/{stack,files,apis,deps,bugfixes}.json` + `.dw/intel/arch.md`
 - Metadados de refresh: `.dw/intel/.last-refresh.json`
-- Rules human-readable (consulta segunda): `.dw/rules/{index,<modulo>,integrations}.md`
+- Rules human-readable (consulta segunda): `.dw/rules/{index,<modulo>,integrations,concerns}.md`
+- Fonte do historico de bugfixes: `.dw/bugfixes/*/SUMMARY.md`
 - Grep direto fallback (consulta por ultimo): os arquivos source do projeto
 
 ## Comportamento Obrigatorio
@@ -67,6 +68,8 @@ Classifique o `{{QUERY}}` em uma das formas documentadas em `.agents/skills/dw-c
 - **api-list** — primario: `apis.json`
 - **find-export** — primario: `files.json` (busca em arrays `exports`)
 - **convention** — primario: `arch.md`, secundario: `.dw/rules/`
+- **bugfix-history** — primario: `bugfixes.json`, secundario: `.dw/rules/concerns.md` (gatilhos: "bugs em <modulo>", "fixes recentes", "o que quebrou em X", "historico de fix de Y")
+- **risk-area** — primario: `.dw/rules/concerns.md`, secundario: `bugfixes.json` (gatilhos: "X eh arriscado", "o que eh fragil", "hot spots", "tech debt")
 
 ### 3. Execucao da busca
 
@@ -143,7 +146,31 @@ Quando invocado com `--build`, o comando produz ou atualiza o indice queryable d
 5. **Extracao de API.** Routes, RPC handlers, GraphQL resolvers, superficie de CLI publica. Output em `.dw/intel/apis.json`. Budget ≤1.5K tokens.
 6. **Mapa de dependencias.** Imports internos cross-module + pacotes externos com arrays `used_by`. Output em `.dw/intel/deps.json`. Budget ≤1K tokens.
 7. **Sumario de arquitetura.** Documento em prosa descrevendo a forma do projeto, padroes-chave, request flows, topologia de deployment. Output em `.dw/intel/arch.md`. Budget ≤1.5K tokens.
-8. **Metadata de refresh.** Escrever `.dw/intel/.last-refresh.json` com `updated_at`, `version`, `mode` (full ou incremental), contagem de arquivos scanned.
+8. **Historico de bugfixes.** Se `.dw/bugfixes/` existir e nao estiver vazio, escanear todo `SUMMARY.md` e construir `.dw/intel/bugfixes.json` (budget ≤1K tokens). Schema:
+   ```json
+   {
+     "schema_version": "1.0",
+     "fixes": [
+       {
+         "slug": "001-login-nao-funciona",
+         "date": "YYYY-MM-DD",
+         "status": "Fixed",
+         "severity": "Medium",
+         "symptom_one_line": "...",
+         "root_cause_one_line": "...",
+         "modules_touched": ["src/auth/", "src/api/login/"],
+         "files_touched": ["src/auth/session.ts", "src/auth/session.test.ts"],
+         "related_concerns": ["src/auth/session.ts"],
+         "path": ".dw/bugfixes/001-login-nao-funciona/"
+       }
+     ],
+     "by_module": {
+       "src/auth/": ["001-login-nao-funciona", "007-refresh-token-leak"]
+     }
+   }
+   ```
+   Pular se `.dw/bugfixes/` nao existir. Rejeitar SUMMARY.md que falhem validacao de frontmatter; logar no relatorio do build. **Bugfixes escalados** (aqueles com `escalated.md` mas sem `SUMMARY.md` porque o fix vive em `.dw/spec/prd-bugfix-<slug>/`) sao pulados do `bugfixes.json` ate o spec entregar um fix — eles re-entram no indice quando o SUMMARY.md for finalmente escrito. O `TASK.md` escalado continua acessivel via grep direto; o indice so registra fixes concluidos.
+9. **Metadata de refresh.** Escrever `.dw/intel/.last-refresh.json` com `updated_at`, `version`, `mode` (full ou incremental), contagem de arquivos scanned, e contagem `bugfixes_indexed`.
 
 ### Skill complementar para build mode
 
