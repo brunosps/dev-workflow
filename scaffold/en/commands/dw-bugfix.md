@@ -44,6 +44,15 @@
     - `dw-testing-discipline`: use when the fix requires a reproducible E2E/retest flow in a web app — `references/playwright-recipes.md` for recipes, core rules + 6 agent guardrails for any test the fix adds, flaky-discipline if the bug surfaces intermittently.
     - `dw-incident-response`: use when the bug has severity `critical` AND affects production AND was detected by alert/user-report (i.e., the bug IS an incident, not a backlog item). Triggers the 5-phase workflow (triage → investigation → resolution → communication → postmortem) with structured output in `.dw/incidents/`. Fixes ride on `/dw-bugfix` per the incident's resolution phase.
     - `security-review`: use when the root cause touches auth, authorization, external input, upload, secrets, SQL, XSS, SSRF, or other sensitive surfaces
+    - `dw-silent-failure`: use when the symptom may be hidden by swallowed errors, dangerous fallbacks, retries, queue workers, or async detachment
+
+    ## Agent Dispatch
+
+    When project agents are installed:
+    - Start with `dw-code-explorer` to trace reproduction flow and likely owners.
+    - Use `dw-build-fixer` or the language build-fixer only after a build/typecheck/test command fails.
+    - Use `dw-test-author` for the regression test.
+    - Use `dw-silent-failure-hunter` when the bug involves missing errors, incorrect success states, or fallback data.
 
     ## Input Variables
 

@@ -46,6 +46,7 @@ The intel directory is the contract. Every file is machine-parseable and referen
 | `deps.json` | Dependencies: version, type, used_by, invocation | JSON |
 | `bugfixes.json` | Historical bugfix index aggregated from `.dw/bugfixes/*/SUMMARY.md` (slug, date, modules touched, related concerns, by_module map). Optional — present only if `.dw/bugfixes/` is non-empty. | JSON |
 | `arch.md` | Human-readable architecture overview + key components + data flow | Markdown |
+| `codemaps/*.md` | Token-lean architecture maps for architecture/backend/frontend/data/dependencies. Optional but recommended for large repos. | Markdown |
 | `.last-refresh.json` | Timestamps + content hashes for incremental detection (now includes `bugfixes_indexed` count) | JSON |
 
 Schemas are documented in `references/intel-format.md`.
@@ -62,10 +63,11 @@ This skill ships ONE agent — `intel-updater` — which produces machine-readab
 
 1. **`/dw-intel --build`** is invoked.
 2. The command spawns `intel-updater` with `focus: full` (first run) or `focus: partial --files <paths>` (incremental).
-3. The agent reads source files (using Glob/Read/Grep; no Bash file listing for cross-platform safety) and writes the intel files (`stack.json`, `files.json`, `apis.json`, `deps.json`, `arch.md`).
-4. If `.dw/bugfixes/` exists and contains at least one `SUMMARY.md`, the agent additionally scans every SUMMARY frontmatter + Files Touched section and writes `bugfixes.json`. SUMMARY files with invalid frontmatter are logged and skipped.
-5. The agent writes `.last-refresh.json` with timestamps + hashes for incremental change detection on the next run, including a `bugfixes_indexed` count.
-6. `/dw-intel --build` reports completion and invites the user to query via `/dw-intel "<question>"`.
+3. The agent reads source files using iterative retrieval: broad search, relevance evaluation, refined search, then final read set. Use Glob/Read/Grep; no Bash file listing for cross-platform safety.
+4. The agent writes the intel files (`stack.json`, `files.json`, `apis.json`, `deps.json`, `arch.md`) plus token-lean codemaps in `.dw/intel/codemaps/` when enough structure exists.
+5. If `.dw/bugfixes/` exists and contains at least one `SUMMARY.md`, the agent additionally scans every SUMMARY frontmatter + Files Touched section and writes `bugfixes.json`. SUMMARY files with invalid frontmatter are logged and skipped.
+6. The agent writes `.last-refresh.json` with timestamps + hashes for incremental change detection on the next run, including a `bugfixes_indexed` count.
+7. `/dw-intel --build` reports completion and invites the user to query via `/dw-intel "<question>"`.
 
 For human-readable analysis (architecture overview, module conventions, anti-patterns), run `/dw-analyze-project` after `/dw-intel --build` — it reads `.dw/intel/` as input and produces `.dw/rules/`.
 
@@ -90,7 +92,7 @@ If no `.dw/intel/` exists at all, `/dw-intel` falls back to `.dw/rules/` (seeded
 - **Cross-platform**: use Glob/Read/Grep; never Bash `ls`/`find`/`cat` (those break on Windows).
 - **Forbidden files**: never read `.env*` (except `.env.example`/`.env.template`), `*.key`, `*.pem`, `*.pfx`, `*.p12`, `*.keystore`, `*.jks`, `id_rsa`, `id_ed25519`, or files matching `*credential*`/`*secret*` in name. Skip silently if encountered.
 - **Excluded directories**: `node_modules/`, `.git/`, `dist/`, `build/`, `.dw/` (planning docs, not project code).
-- **Output budget**: `files.json` ≤2K tokens, `apis.json` ≤1.5K, `deps.json` ≤1K, `stack.json` ≤500, `arch.md` ≤1.5K, `bugfixes.json` ≤1K. For large repos, prioritize coverage of key files over exhaustive listing. For `bugfixes.json`, keep one-line symptom/root-cause summaries; do not embed full SUMMARY.md content.
+- **Output budget**: `files.json` ≤2K tokens, `apis.json` ≤1.5K, `deps.json` ≤1K, `stack.json` ≤500, `arch.md` ≤1.5K, each `codemaps/*.md` ≤1K, `bugfixes.json` ≤1K. For large repos, prioritize coverage of key files over exhaustive listing. For `bugfixes.json`, keep one-line symptom/root-cause summaries; do not embed full SUMMARY.md content.
 
 ## References
 
@@ -98,6 +100,11 @@ If no `.dw/intel/` exists at all, `/dw-intel` falls back to `.dw/rules/` (seeded
 - `references/incremental-update.md` — how partial updates work (which files to re-read, how to merge with existing entries).
 - `references/query-patterns.md` — how `/dw-intel` answers different question shapes (where-is, what-uses, architecture-of, dependency-of).
 - `references/api-design-discipline.md` — Hyrum's Law, contract-first design, error semantics, boundary validation, versioning. Use when intel feeds techspec authoring (`/dw-plan techspec`) for endpoints — design must respect existing project conventions surfaced in `apis.json`. Adapted from [`addyosmani/agent-skills/api-design`](https://github.com/addyosmani/agent-skills/tree/main/api-design) (MIT).
+
+## ECC-Inspired Additions
+
+- **Iterative retrieval**: subagents should not load broad file sets blindly. They perform at most three search/evaluate/refine cycles, then read only high-relevance files.
+- **Codemaps**: `.dw/intel/codemaps/*.md` stores short maps optimized for agent context instead of forcing repeated source reads.
 
 ## Inspired by
 

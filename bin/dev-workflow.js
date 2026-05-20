@@ -22,8 +22,16 @@ const HELP_TEXT = `
 
   Usage:
     npx dev-workflow init [--force] [--lang=en|pt-br]
-    npx dev-workflow update [--lang=en|pt-br]
+    npx dev-workflow init [--force] [--lang=en|pt-br] [--profile=core|standard|full] [--modules=<csv>]
+    npx dev-workflow update [--lang=en|pt-br] [--profile=core|standard|full] [--modules=<csv>]
     npx dev-workflow install-deps
+    npx dev-workflow list-installed
+    npx dev-workflow doctor
+    npx dev-workflow repair
+    npx dev-workflow subtask create --agent=<name> --goal="<goal>"
+    npx dev-workflow subtask complete --slug=<slug> --file=<handoff.md>
+    npx dev-workflow subtask consume
+    npx dev-workflow subtask list
     npx dev-workflow install-azure-skills [--products=<csv>]
     npx dev-workflow install-aws-skills [--region=<aws-region>]
     npx dev-workflow help
@@ -32,6 +40,10 @@ const HELP_TEXT = `
     init                   Scaffold .dw/ (commands, templates, references, scripts, skills, rules, MCPs)
     update                 Update managed files (commands, templates, references, scripts, skills, wrappers, MCPs)
                            Preserves: .dw/rules/, .dw/spec/, .dw/bugfixes/, .dw/STATE.md, .agents/skills/azure/, user data
+    list-installed         Show dev-workflow install state for this project
+    doctor                 Check managed files, wrappers, agents, and MCP configuration
+    repair                 Reconcile managed files using the recorded install state
+    subtask                Create, complete, consume, and list local subagent handoffs
     install-deps           Install system dependencies (Playwright browsers, MCP servers)
     install-azure-skills   Opt-in: clone curated Azure skills from MicrosoftDocs/Agent-Skills
                            into .agents/skills/azure/ and register the Microsoft Learn MCP
@@ -47,6 +59,8 @@ const HELP_TEXT = `
   Options:
     --force        Overwrite existing files (init only; update always overwrites managed files)
     --lang=LANG    Set language without prompt (en or pt-br)
+    --profile=NAME Install profile for agents (core, standard, full)
+    --modules=CSV  Extra agent modules to install (typescript, python, csharp, rust, security, frontend)
 
   Examples:
     npx dev-workflow init                  # Interactive language selection
@@ -61,10 +75,22 @@ const HELP_TEXT = `
 async function main() {
   switch (command) {
     case 'init':
-      await run({ force: !!flags.force, lang: flags.lang, mode: 'init' });
+      await run({ force: !!flags.force, lang: flags.lang, mode: 'init', profile: flags.profile, modules: flags.modules });
       break;
     case 'update':
-      await run({ force: !!flags.force, lang: flags.lang, mode: 'update' });
+      await run({ force: !!flags.force, lang: flags.lang, mode: 'update', profile: flags.profile, modules: flags.modules });
+      break;
+    case 'list-installed':
+      require('../lib/list-installed').run();
+      break;
+    case 'doctor':
+      require('../lib/doctor').run({ repair: false });
+      break;
+    case 'repair':
+      await run({ force: true, lang: flags.lang, mode: 'repair', profile: flags.profile, modules: flags.modules });
+      break;
+    case 'subtask':
+      require('../lib/subtasks').run(args.slice(1));
       break;
     case 'install-deps':
       installDeps.run();

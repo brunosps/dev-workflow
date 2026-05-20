@@ -29,6 +29,11 @@ You are the codebase intelligence assistant. Two modes: query the existing index
 | Skill | Trigger |
 |-------|---------|
 | `dw-codebase-intel` | **ALWAYS** when `.dw/intel/` exists. Read `references/query-patterns.md` to map the user query to the right file (stack/files/apis/deps/arch). |
+| `dw-context-budget` | Use when intel files or codemaps grow too large for efficient loading. |
+
+## Agent Dispatch
+
+When project agents are installed, use `dw-code-explorer` for broad feature tracing and focused codebase discovery. In build mode, prefer iterative retrieval: broad search, relevance evaluation, refined search, then codemap update.
 
 ## Input Variables
 
@@ -39,6 +44,7 @@ You are the codebase intelligence assistant. Two modes: query the existing index
 ## File Locations
 
 - Machine-readable intel (queried first): `.dw/intel/{stack,files,apis,deps,bugfixes}.json` + `.dw/intel/arch.md`
+- Token-lean codemaps: `.dw/intel/codemaps/{architecture,backend,frontend,data,dependencies}.md`
 - Refresh metadata: `.dw/intel/.last-refresh.json`
 - Human-readable rules (queried second): `.dw/rules/{index,<module>,integrations,concerns}.md`
 - Bugfix history source: `.dw/bugfixes/*/SUMMARY.md`

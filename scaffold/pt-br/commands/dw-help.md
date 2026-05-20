@@ -1,5 +1,5 @@
 <system_instructions>
-Você é o guia do dev-workflow. Exibe a surface primária de comandos, o fluxo típico e atalhos contextuais. Modo padrão mostra 15 comandos visíveis; `--advanced` revela 5 internos/escondidos.
+Você é o guia do dev-workflow. Exibe a surface primária de comandos, o fluxo típico e atalhos contextuais. Modo padrão mostra a surface visível de comandos; `--advanced` revela comandos internos/escondidos.
 
 ## Quando Usar
 - Usuário digita `/dw-help` para descobrir comandos.
@@ -33,13 +33,16 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 | `/dw-commit` | Commits atômicos Conventional pra trabalho pendente. |
 | `/dw-generate-pr [target]` | Push branch, draft do PR body, abre browser. |
 
-## Tier 3 — Especialidade (5)
+## Tier 3 — Especialidade (8)
 
 | Comando | O que |
 |---------|-------|
 | `/dw-analyze-project` | Scan do repo, escreve `.dw/rules/` + oferece gerar `.dw/constitution.md`. |
 | `/dw-redesign-ui "target"` | Audit, propõe 2-3 direções, entrega. Enforça UI grounding + WCAG. |
 | `/dw-functional-doc` | Mapeia screens + flows em doc funcional validado com Playwright. |
+| `/dw-context-budget` | Audita contexto de commands, skills, agentes, instrucoes e MCPs. |
+| `/dw-harness-audit` | Pontua saude da instalacao: wrappers, agentes, MCPs e gates. |
+| `/dw-skill-health` | Audita skills e agentes por bloat, duplicacao e referencias quebradas. |
 | `/dw-new-project` | Bootstrap por entrevista (stack + infra + docker-compose + CI). |
 | `/dw-dockerize` | Detecta stack, propõe Dockerfile + docker-compose pra dev/prod. |
 
@@ -53,7 +56,7 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 
 ## Comandos avançados / internos
 
-Passe `--advanced` pra ver internos (`dw-adr`, `dw-intel`, `dw-secure-audit`, `dw-find-skills`, `dw-update`) — usualmente invocados por outros comandos.
+Passe `--advanced` pra ver internos (`dw-adr`, `dw-intel`, `dw-secure-audit`, `dw-find-skills`, `dw-update`, `dw-subtask-start`, `dw-subtask-complete`, `dw-subtask-resume`) — usualmente invocados por outros comandos.
 ```
 
 ## Modo advanced — flag `--advanced`
@@ -65,7 +68,7 @@ ALSO show:
 
 Auto-invocados por comandos primários mas disponíveis standalone.
 
-## Tier 4 — Hidden (5)
+## Tier 4 — Hidden (8)
 
 | Comando | O que | Invocado por |
 |---------|-------|--------------|
@@ -74,6 +77,9 @@ Auto-invocados por comandos primários mas disponíveis standalone.
 | `/dw-secure-audit` | OWASP + Trivy + lockfile + supply-chain scan. Hard gate. Flags: `--scan-only`, `--plan`, `--execute`. | `/dw-review`, `/dw-generate-pr` |
 | `/dw-find-skills "query"` | Busca npx skills ecosystem, valida, instala. | manual ao estender bundle |
 | `/dw-update` | Atualiza dev-workflow pro último release npm com snapshot rollback. | manutenção manual |
+| `/dw-subtask-start "goal"` | Cria um input packet minimo para subagente. | parent antes de delegar |
+| `/dw-subtask-complete <slug>` | Registra handoff estruturado da sessao child. | subagente / sessao child |
+| `/dw-subtask-resume` | Consome e arquiva handoffs pendentes para sintese do parent. | parent apos delegacao |
 ```
 
 ## Modo keyword — `/dw-help <palavra-chave>`
@@ -92,6 +98,10 @@ Auto-invocados por comandos primários mas disponíveis standalone.
 | `refactor`, `smell`, `code health` | `/dw-brainstorm --refactor` |
 | `ui`, `design`, `redesign` | `/dw-redesign-ui` |
 | `intel`, `onde está`, `o que usa` | `/dw-intel` (ou `--build`) |
+| `contexto`, `tokens`, `agente lento` | `/dw-context-budget` |
+| `harness`, `install`, `wrappers`, `agentes` | `/dw-harness-audit` |
+| `subagent`, `subtask`, `handoff`, `delegate`, `delegar` | `/dw-subtask-start` ou `/dw-subtask-resume` |
+| `skills`, `skill health`, `bloat` | `/dw-skill-health` |
 | `analyze`, `rules`, `convenções` | `/dw-analyze-project` |
 | `constitution`, `princípios` | `/dw-analyze-project` (Step 8) |
 | `security`, `vulnerabilidades`, `cve`, `deps` | `/dw-secure-audit` |
@@ -122,6 +132,6 @@ Sem match: surface padrão + nota.
 - Skill `dw-llm-eval` auto-invocada de `/dw-plan tasks`, `/dw-review`, `/dw-qa --ai`.
 
 **P: O que aconteceu com outros comandos?**
-- v1.0.0 consolidou 30 → 20. Mergers: create-prd/techspec/tasks → `/dw-plan`; run-task/run-plan → `/dw-run`; code-review/review-implementation → `/dw-review`; run-qa/fix-qa → `/dw-qa`; security-check/deps-audit → `/dw-secure-audit`; map-codebase → `/dw-intel --build`; deep-research e refactoring-analysis → `/dw-brainstorm --research/--refactor`. Removidos: revert-task (use `git revert` direto).
+- v1.0.0 consolidou a surface antiga de comandos. Mergers: create-prd/techspec/tasks → `/dw-plan`; run-task/run-plan → `/dw-run`; code-review/review-implementation → `/dw-review`; run-qa/fix-qa → `/dw-qa`; security-check/deps-audit → `/dw-secure-audit`; map-codebase → `/dw-intel --build`; deep-research e refactoring-analysis → `/dw-brainstorm --research/--refactor`. Removidos: revert-task (use `git revert` direto).
 
 </system_instructions>

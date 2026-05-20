@@ -10,11 +10,11 @@ npx @brunosps00/dev-workflow init
 
 This will:
 1. Ask you to select a language (English or Portuguese)
-2. Create `.dw/commands/` with 20 workflow commands
+2. Create `.dw/commands/` with workflow commands
 3. Create `.dw/templates/` with document templates (PRD, TechSpec, Tasks, ADR, etc.)
 4. Create `.dw/rules/` (populated by `/dw-analyze-project`)
 5. Install bundled skills (`dw-verify`, `dw-memory`, `dw-review-rigor`, `dw-ui-discipline`, `dw-testing-discipline`, `security-review`, etc.) to `.agents/skills/`
-6. Generate skill wrappers for Claude Code, Codex, Copilot, and OpenCode
+6. Generate skill wrappers and project agents for Claude Code, Codex, Copilot, and OpenCode
 7. Configure MCP servers (Context7 + Playwright)
 
 > **Compozy-inspired disciplines.** Since 0.5.0, dev-workflow bundles three primitives — `dw-verify`, `dw-memory`, `dw-review-rigor` — adapted from the [Compozy](https://github.com/compozy/compozy) project and invoked internally by existing commands. See [docs/compozy-integration.md](docs/compozy-integration.md) for what was ported and what was not.
@@ -26,7 +26,7 @@ npx @brunosps00/dev-workflow install-deps
 
 ## Commands
 
-dev-workflow v1.0.4 ships **24 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v1.0.5 ships **30 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
 ### Tier 1 — Gateway (3)
 
@@ -52,19 +52,22 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 | **`/dw-commit`** | Atomic Conventional Commits for pending changes. Applies `dw-git-discipline` (one intent per commit, lint+tests+build green before). |
 | **`/dw-generate-pr [target]`** | Push the branch, draft a PR body with summary + test plan, open the browser. Hard gates: dw-verify PASS + secure-audit. |
 
-### Tier 3 — Specialty (5)
+### Tier 3 — Specialty (8)
 
 | Command | What |
 |---------|------|
 | **`/dw-analyze-project`** | Scans the repo, writes `.dw/rules/` (per-module conventions, anti-patterns, naming). Step 8 offers to generate `.dw/constitution.md` (declarative principles the team commits to). Step 9 generates `.dw/rules/concerns.md` (risk map: hot spots, fragile integrations, hostile code, bug history). Run once per project; refresh after major refactors. |
 | **`/dw-redesign-ui "target"`** | Audits a frontend page, runs the `dw-ui-discipline` 4-question grounding, proposes 2-3 design directions, ships the redesign. WCAG 2.2 AA accessibility floor is non-negotiable. |
 | **`/dw-functional-doc`** | Maps screens + user flows into a functional doc, validated end-to-end with Playwright. |
+| **`/dw-context-budget`** | Audits context overhead from commands, skills, agents, instruction files, and MCPs. |
+| **`/dw-harness-audit`** | Deterministic health scorecard for the dev-workflow install, agents, wrappers, MCPs, and gates. |
+| **`/dw-skill-health`** | Audits installed skills and agents for bloat, duplication, and missing references. |
 | **`/dw-new-project`** | Bootstrap a new project from empty directory. Stack interview, wraps official `create-*` tools, composes docker-compose for dev, seeds `.env`, scripts, CI, `.dw/rules/`. |
 | **`/dw-dockerize`** | Reads existing project, detects stack + runtime deps, proposes Dockerfile + docker-compose for dev/prod with explicit trade-offs (Conservative/Balanced/Bold). |
 | **`/dw-install-azure-skills`** | **Opt-in.** Clones curated Azure skills from [`MicrosoftDocs/Agent-Skills`](https://github.com/MicrosoftDocs/Agent-Skills) (CC-BY-4.0) into `.agents/skills/azure/` and registers the [Microsoft Learn MCP Server](https://learn.microsoft.com/en-us/training/support/mcp-get-started) (HTTP, no-auth). Interactive category selection (Compute / Data & Storage / AI & ML / Networking / Identity & Security / DevOps / Observability / Integration / Architecture / All). Re-run to refresh from upstream. Also available as CLI: `npx @brunosps00/dev-workflow install-azure-skills`. |
 | **`/dw-install-aws-skills`** | **Opt-in.** Clones curated AWS skills from [`aws/agent-toolkit-for-aws`](https://github.com/aws/agent-toolkit-for-aws) (Apache 2.0) into `.agents/skills/aws/` and registers the unified [AWS MCP Server](https://docs.aws.amazon.com/aws-mcp/) (stdio via `uvx mcp-proxy-for-aws@latest`). **Requires `uv`, `aws cli ≥ 2.32.0`, and AWS credentials.** Interactive category selection (Core / Analytics / Database / EC2 / Migration / Networking / Operations / Security / Serverless / Storage / All). The agent gains `aws___call_aws` (executes 15,000+ AWS APIs) and `aws___run_script` (Python sandboxed) — review `.dw/references/aws-mcp-instructions.md` for the destructive-operations protocol. Also available as CLI: `npx @brunosps00/dev-workflow install-aws-skills [--region=<aws-region>]`. |
 
-### Tier 4 — Hidden/Internal (5)
+### Tier 4 — Hidden/Internal (8)
 
 These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help --advanced`.
 
@@ -75,6 +78,9 @@ These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help 
 | **`/dw-secure-audit`** | Unified security: OWASP + Trivy SCA/secret/IaC + lockfile + supply-chain check. Hard gate. Flags: `--scan-only`, `--plan`, `--execute`. | `/dw-review`, `/dw-generate-pr` (for TS/Python/C#/Rust) |
 | **`/dw-find-skills "query"`** | Searches `npx skills` ecosystem, vets, installs. | manual when extending the bundle |
 | **`/dw-update`** | Updates dev-workflow to latest npm release with rollback snapshot. | manual maintenance |
+| **`/dw-subtask-start`** | Creates a minimal input packet for a subagent without injecting the parent transcript. | parent agent before delegation |
+| **`/dw-subtask-complete`** | Records a structured child-session handoff. | subagent / child session |
+| **`/dw-subtask-resume`** | Consumes and archives pending handoffs for parent synthesis. | parent agent after delegation |
 
 ## Workflow
 
@@ -157,7 +163,7 @@ npx @brunosps00/dev-workflow update
 |----------|-----------------|--------|
 | Claude Code | `.claude/skills/` | Full support |
 | Codex CLI | `.agents/skills/` | Full support |
-| Copilot | `.agents/skills/` | Full support |
+| Copilot | `.agents/skills/` + `.github/agents/` | Full support |
 | OpenCode | `.opencode/commands/` | Full support |
 
 All wrappers point to `.dw/commands/` as the single source of truth.
@@ -167,29 +173,67 @@ All wrappers point to `.dw/commands/` as the single source of truth.
 ```
 your-project/
 ├── .dw/
-│   ├── commands/          # 22 workflow command files (v1.0.2)
+│   ├── commands/          # workflow command files
 │   ├── templates/         # Document templates (PRD, TechSpec, state, concerns, bugfix-summary, etc.)
 │   │   └── overrides/     # Project-local template customizations (override > core)
 │   ├── rules/             # Project-specific rules (run /dw-analyze-project)
 │   │   └── concerns.md    # Risk map: hot spots, fragile integrations, bug history (Step 9 of /dw-analyze-project)
 │   ├── constitution.md    # Declarative principles (auto-installed when missing)
+│   ├── skill-registry.json # Local skill taxonomy, triggers, owners, load policy, and context limits
 │   ├── references/        # Reference documentation
 │   ├── scripts/           # Utility scripts
 │   ├── spec/              # PRD directories — each contains tasks-validation.md
 │   ├── bugfixes/          # Persistent bugfix records: NNN-<slug>/{TASK.md, SUMMARY.md, fix-report.md} + review/, QA/
+│   ├── subtasks/          # Local ephemeral subagent input packets and handoffs (pending/archive ignored by Git)
 │   └── STATE.md           # Session state: Decisions, Blockers, Todos, Open Loops, Deferred Ideas, Lessons, Preferences (managed by /dw-pause + /dw-resume)
 ├── CLAUDE.md              # Auto-trigger decision tree for Claude Code (merge-aware, includes Auto-Sizing Matrix)
 ├── AGENTS.md              # Same content for Codex / Copilot / OpenCode
 ├── .claude/
 │   ├── skills/            # Claude Code wrappers
+│   ├── agents/            # Claude Code project agents
 │   └── settings.json      # MCP servers (Context7, Playwright)
 ├── .agents/skills/        # Codex/Copilot wrappers + bundled skills
-└── .opencode/commands/    # OpenCode wrappers
+├── .agents/agents/        # Codex/Copilot fallback agent definitions
+├── .github/agents/        # GitHub Copilot custom agents
+├── .opencode/commands/    # OpenCode wrappers
+└── .opencode/agent/       # OpenCode project agents
+```
+
+## Agents
+
+`dev-workflow` installs a compact agent layer in addition to skills. Skills remain protocols and reference material; agents are dispatchable roles such as `dw-code-explorer`, `dw-build-fixer`, `dw-code-reviewer`, and language-specific reviewers.
+
+Profiles control agent breadth:
+
+```bash
+npx @brunosps00/dev-workflow init --profile=core
+npx @brunosps00/dev-workflow init --profile=standard
+npx @brunosps00/dev-workflow init --profile=full
+npx @brunosps00/dev-workflow init --modules=typescript,python
+```
+
+Claude Code and OpenCode receive native project-agent files. Copilot receives `.github/agents/*.agent.md`. Codex receives fallback agent definitions and dispatch instructions through `AGENTS.md`.
+
+Subagent handoffs use local packets under `.dw/subtasks/`:
+
+```bash
+npx @brunosps00/dev-workflow subtask create --agent=dw-code-explorer --goal="Map the auth flow"
+npx @brunosps00/dev-workflow subtask complete --slug=<slug> --file=<handoff.md>
+npx @brunosps00/dev-workflow subtask consume
 ```
 
 ## Bundled Skills
 
-Skills installed to `.agents/skills/` for use by all commands.
+Skills installed to `.agents/skills/` for use by all commands. The bundle is governed by `scaffold/skill-registry.json`, which records each skill's kind, tier, owner, trigger, expected output, load policy, and context limit.
+
+Skill kinds:
+
+- `protocol`: execution discipline or gate used by commands.
+- `domain-pack`: deeper expertise for a domain such as security, UI, testing, React, Remotion, incident response, or LLM evals.
+- `recipe-pack`: tactical recipes for a narrow implementation surface.
+- `asset-pack`: reusable non-code material, prompts, templates, or editorial references.
+
+The rule is deliberate: `SKILL.md` should be a compact entrypoint. Large examples, rules, assets, and checklists live under `references/`, `assets/`, `scripts/`, or `rules/` and are loaded only when the trigger actually needs them. `dev-workflow doctor` validates the registry, installed bundled skills, and context-size limits; `/dw-skill-health` is the agent-facing audit for overlap, bloat, and weak triggers.
 
 ### Workflow discipline (invoked internally by dw-* commands)
 
@@ -273,7 +317,7 @@ Incident response (`dw-incident-response`) adapted from [`wilsto/claude-code-sta
 
 LLM evaluation (`dw-llm-eval`) trajectory-match modes (strict / unordered / subset / superset) and tool-argument matching strategies adapted from [`langchain-ai/agentevals`](https://github.com/langchain-ai/agentevals) (MIT). The broader oracle-ladder framing, judge-calibration discipline, and reference-dataset principle are distilled from the open evaluations literature (OpenAI evals cookbook, Anthropic evals guidance, the academic eval-of-LLM body of work) and rewritten in our voice.
 
-Optional AWS integration (v1.0.4). The `/dw-install-aws-skills` command and `npx @brunosps00/dev-workflow install-aws-skills` CLI pull curated agent skills from [`aws/agent-toolkit-for-aws`](https://github.com/aws/agent-toolkit-for-aws) (Apache 2.0, by AWS) into `.agents/skills/aws/` and register the unified [AWS MCP Server](https://docs.aws.amazon.com/aws-mcp/) via [`mcp-proxy-for-aws`](https://github.com/aws/mcp-proxy-for-aws) (stdio transport with SigV4 authentication). Unlike the Azure equivalent, the AWS MCP Server requires `uv`, `aws cli ≥ 2.32.0`, and valid AWS credentials configured via `aws login` or an IAM profile — the command detects each prerequisite and prints OS-specific install instructions if missing (without auto-installing anything). Capability includes `aws___search_documentation`, `aws___read_documentation`, `aws___retrieve_skill`, plus `aws___call_aws` (executes any of 15,000+ AWS APIs with the user's IAM permissions) and `aws___run_script` (Python sandboxed). `.dw/references/aws-mcp-instructions.md` encodes the destructive-operations protocol — agents must confirm before any `create*`/`update*`/`delete*`/`modify*` call, IAM change, or billing-affecting operation. The AWS Knowledge MCP (HTTP, no-auth) was considered for symmetry with Microsoft Learn MCP but is officially deprecated by AWS in favor of the unified server, which AWS explicitly recommends against running alongside the legacy endpoint ("tool conflicts that confuse AI agents"). Default endpoint is `us-east-1` with `eu-central-1` available; region overridable via `--region=<aws-region>` or by editing `.claude/settings.json` directly. Not installed by default; user explicitly invokes the command. Re-run refreshes from upstream; `dev-workflow update` deliberately does not touch `.agents/skills/aws/`.
+Optional AWS integration (v1.0.5). The `/dw-install-aws-skills` command and `npx @brunosps00/dev-workflow install-aws-skills` CLI pull curated agent skills from [`aws/agent-toolkit-for-aws`](https://github.com/aws/agent-toolkit-for-aws) (Apache 2.0, by AWS) into `.agents/skills/aws/` and register the unified [AWS MCP Server](https://docs.aws.amazon.com/aws-mcp/) via [`mcp-proxy-for-aws`](https://github.com/aws/mcp-proxy-for-aws) (stdio transport with SigV4 authentication). Unlike the Azure equivalent, the AWS MCP Server requires `uv`, `aws cli ≥ 2.32.0`, and valid AWS credentials configured via `aws login` or an IAM profile — the command detects each prerequisite and prints OS-specific install instructions if missing (without auto-installing anything). Capability includes `aws___search_documentation`, `aws___read_documentation`, `aws___retrieve_skill`, plus `aws___call_aws` (executes any of 15,000+ AWS APIs with the user's IAM permissions) and `aws___run_script` (Python sandboxed). `.dw/references/aws-mcp-instructions.md` encodes the destructive-operations protocol — agents must confirm before any `create*`/`update*`/`delete*`/`modify*` call, IAM change, or billing-affecting operation. The AWS Knowledge MCP (HTTP, no-auth) was considered for symmetry with Microsoft Learn MCP but is officially deprecated by AWS in favor of the unified server, which AWS explicitly recommends against running alongside the legacy endpoint ("tool conflicts that confuse AI agents"). Default endpoint is `us-east-1` with `eu-central-1` available; region overridable via `--region=<aws-region>` or by editing `.claude/settings.json` directly. Not installed by default; user explicitly invokes the command. Re-run refreshes from upstream; `dev-workflow update` deliberately does not touch `.agents/skills/aws/`.
 
 Optional Azure integration (v1.0.3). The `/dw-install-azure-skills` command and `npx @brunosps00/dev-workflow install-azure-skills` CLI pull curated agent skills from [`MicrosoftDocs/Agent-Skills`](https://github.com/MicrosoftDocs/Agent-Skills) (CC-BY-4.0, by Microsoft) into `.agents/skills/azure/` and register the [Microsoft Learn MCP Server](https://learn.microsoft.com/en-us/training/support/mcp-get-started) (HTTP endpoint, no authentication required) into `.claude/settings.json`. The MCP server exposes three tools — `microsoft_docs_search`, `microsoft_docs_fetch`, `microsoft_code_sample_search` — that give the agent live access to Microsoft Learn documentation. **Not installed by default**: `init` and `update` do not touch `.agents/skills/azure/` or register the MCP. Users explicitly invoke the command when they begin Azure-focused work. The 10 categories (Compute, Data & Storage, AI & ML, Networking, Identity & Security, DevOps, Observability, Integration, Architecture, All) are dev-workflow's curated grouping over the 200+ skills in the upstream repo; the `--products=<csv>` flag lets advanced users pick individual services. Re-running the command refreshes from upstream; `dev-workflow update` deliberately does not touch these external skills so the Microsoft upstream release cadence is decoupled from the dev-workflow npm release cadence. Skills are copied verbatim from the upstream repo (CC-BY-4.0 permits this with attribution); the agent-facing `.dw/references/azure-mcp-instructions.md` is a clean-room adaptation of Microsoft's "Set instructions" guidance.
 
@@ -283,7 +327,7 @@ Four patterns from [`mattpocock/skills`](https://github.com/mattpocock/skills) b
 
 ## Migration from v0.x (1.0.0 is a consolidation release)
 
-v1.0.0 consolidates 30 commands → 20. **The `dev-workflow update` command auto-removes obsolete wrappers** via the migrator that landed in v0.13.0; no manual action required.
+v1.0.0 consolidated the legacy command surface into the current `dw-*` pipeline. **The `dev-workflow init`, `update`, and `repair` flows auto-remove obsolete wrappers and known removed command sources**; no manual action required.
 
 ### Command renames (15 → 7 merged)
 
@@ -319,8 +363,8 @@ On the next `npx @brunosps00/dev-workflow update`, the following happens automat
 
 1. The 15 renamed commands' wrappers are detected as orphans (their names no longer exist in `lib/constants.js`) and removed from `.claude/skills/`, `.agents/skills/`, and `.opencode/commands/`.
 2. The migrator prints each removal with the friendly "old → new" mapping (e.g., `[orphan] Removing wrapper .agents/skills/dw-create-prd (replaced in v1.0.0 by 'dw-plan prd')`).
-3. The 20 new wrappers are installed for the consolidated commands.
-4. The 17 bundled skills are refreshed.
+3. The current command wrappers are installed for the consolidated commands.
+4. The bundled skills are refreshed.
 
 ### Backwards compatibility
 
@@ -332,7 +376,7 @@ The Trigger Map block (between `<!-- dev-workflow:start -->` and `<!-- dev-workf
 
 ### Skill conventions
 
-Skill description format ("pushy" trigger phrases ≤200 chars, "Use when X. Triggers on Y." pattern) and structural conventions (`SKILL.md` + `references/` / `scripts/` / `assets/` / `agents/` subdirectories, explicit `allowed-tools` in frontmatter) follow the official guidance from [`anthropics/skills/skill-creator`](https://github.com/anthropics/skills/tree/main/skills/skill-creator) (Apache 2.0). dev-workflow's 20 bundled skills are not derived from skill-creator's content — only its conventions are followed for auto-trigger reliability across Claude Code, Codex CLI, Copilot, and OpenCode.
+Skill description format ("pushy" trigger phrases ≤200 chars, "Use when X. Triggers on Y." pattern) and structural conventions (`SKILL.md` + `references/` / `scripts/` / `assets/` / `agents/` subdirectories, explicit `allowed-tools` in frontmatter) follow the official guidance from [`anthropics/skills/skill-creator`](https://github.com/anthropics/skills/tree/main/skills/skill-creator) (Apache 2.0). dev-workflow's bundled skills are not derived from skill-creator's content — only its conventions are followed for auto-trigger reliability across Claude Code, Codex CLI, Copilot, and OpenCode.
 
 ## License
 

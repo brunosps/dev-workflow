@@ -29,6 +29,11 @@ Voce e o assistente de inteligencia do codebase. Dois modos: consultar o indice 
 | Skill | Gatilho |
 |-------|---------|
 | `dw-codebase-intel` | **SEMPRE** quando `.dw/intel/` existir. Leia `references/query-patterns.md` para mapear a query do usuario para o arquivo certo (stack/files/apis/deps/arch). |
+| `dw-context-budget` | Use quando arquivos de intel ou codemaps ficarem grandes demais para carregamento eficiente. |
+
+## Agent Dispatch
+
+Quando agentes do projeto estiverem instalados, use `dw-code-explorer` para rastreamento amplo de feature e descoberta focada do codebase. Em build mode, prefira iterative retrieval: busca ampla, avaliacao de relevancia, busca refinada e depois update de codemap.
 
 ## Variaveis de Entrada
 
@@ -39,6 +44,7 @@ Voce e o assistente de inteligencia do codebase. Dois modos: consultar o indice 
 ## Localizacao dos Arquivos
 
 - Intel machine-readable (consulta primeira): `.dw/intel/{stack,files,apis,deps,bugfixes}.json` + `.dw/intel/arch.md`
+- Codemaps token-lean: `.dw/intel/codemaps/{architecture,backend,frontend,data,dependencies}.md`
 - Metadados de refresh: `.dw/intel/.last-refresh.json`
 - Rules human-readable (consulta segunda): `.dw/rules/{index,<modulo>,integrations,concerns}.md`
 - Fonte do historico de bugfixes: `.dw/bugfixes/*/SUMMARY.md`

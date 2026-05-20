@@ -38,6 +38,17 @@ Quando disponíveis em `./.agents/skills/`, use como suporte:
 - `dw-testing-discipline`: aplicado no estágio de tasks — toda task que adiciona teste nomeia seu invariant per placement doctrine.
 - `dw-council` (opt-in via `--council`): stress-test multi-conselheiro sobre a decisão arquitetural principal no estágio TechSpec.
 - `dw-codebase-intel`: consultado para convenções de API, padrões arquiteturais, naming ao desenhar TechSpec.
+- `dw-search-first`: **OBRIGATÓRIO** antes de adicionar nova dependency, integration, MCP server, helper reutilizavel ou abstracao de framework.
+- `dw-context-budget`: use quando o plano passar de 12 tasks, tocar 30+ arquivos, ou exigir carregar muitos docs/skills.
+
+## Agent Dispatch
+
+Quando agentes do projeto estiverem instalados, use:
+
+- `dw-code-explorer` antes de TechSpec e Tasks para rastrear fluxos existentes e padroes reutilizaveis.
+- `dw-planner` antes de finalizar Tasks para checar slices, dependencias, riscos e criterios de verificacao.
+
+Claude Code e OpenCode podem usar agentes nativos. Codex e Copilot usam `.agents/agents/` mais estas instrucoes como fallback.
 
 ## Constitution Gate
 

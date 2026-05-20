@@ -51,6 +51,18 @@ When available under `./.agents/skills/`, these are invoked as analytical suppor
 - `dw-llm-eval`: **REQUIRED when the diff touches AI/LLM feature code paths**. Reference dataset + ≥2 oracle rungs + judge calibration (if rung 4 used) + eval run results MUST be in the PR. Missing → REJECTED.
 - `security-review`: use when the diff touches auth, authorization, external input, upload, SQL, secrets, SSRF, XSS, or sensitive surfaces.
 - `vercel-react-best-practices`: use when the diff touches React/Next.js.
+- `dw-silent-failure`: use when the diff touches error handling, fallbacks, retries, async jobs, queues, database writes, or external API calls.
+
+## Agent Dispatch
+
+When project agents are installed, dispatch:
+
+- `dw-code-reviewer` for the general Level 3 review.
+- `dw-security-reviewer` when auth, authorization, secrets, SQL, uploads, external input, SSRF, or XSS are in scope.
+- `dw-silent-failure-hunter` when error handling, fallback behavior, queues, or background jobs are touched.
+- Language reviewers such as `dw-typescript-reviewer`, `dw-python-reviewer`, `dw-csharp-reviewer`, or `dw-rust-reviewer` when their module is installed and the diff matches that language.
+
+Consolidate all findings through `dw-review-rigor`; never paste multiple agent reports without de-duplication.
 
 ## Constitution Gate
 

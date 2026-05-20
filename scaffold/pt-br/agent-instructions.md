@@ -50,6 +50,9 @@ Antes de escolher um comando da Trigger Map, dimensione o escopo real da mudanç
 | "Brainstorm X" / "Explora ideias" / "Research X" / "Auditoria de saúde do código" / "Tech debt" | `/dw-brainstorm "X"` (auto-dispatch dos modos grill / prototype / council / research / refactor-audit / onepager conforme os sinais) |
 | "Onde está X?" / "O que usa Y?" / "Como Z é estruturado?" | `/dw-intel "<pergunta>"` |
 | "Reconstrói o índice" / "Refresh do intel" | `/dw-intel --build` |
+| "Contexto pesado" / "Audita uso de tokens" / "Por que o agente está lento?" | `/dw-context-budget` |
+| "Checa instalação dev-workflow" / "Agentes/wrappers estão saudáveis?" | `/dw-harness-audit` |
+| "Audita skills" / "Skills parecem duplicadas ou pesadas" | `/dw-skill-health` |
 | "Redesign dessa UI" / "Audita e entrega novo design" | `/dw-redesign-ui "<target>"` |
 | "Audita dependências" / "Estamos atrasados em pacotes?" | `/dw-secure-audit --plan` |
 | "Scan de vulnerabilidades" / "Check de segurança" | `/dw-secure-audit` |
@@ -81,9 +84,49 @@ Quando qualquer destes se aplica, responda direto e **não** invoque comando `dw
 
 ## Padrão zoom-out (para áreas desconhecidas do código)
 
-Quando você cai numa área do codebase que não conhece e a orientação custa mais que a tarefa em si, **não mergulhe nos arquivos primeiro** — peça a um agente de exploração que produza um mapa. Passe o glossário de domínio do projeto (`.dw/rules/index.md`) e diga: "zoom out de um nível — me mostra os módulos relevantes, suas superfícies públicas, quem chama, e o fluxo de dados entre eles, usando o vocabulário do glossário de domínio." Pegue a visão geral, e só então mergulhe. Isso evita a armadilha de ler o arquivo mais profundo primeiro e reconstruir a arquitetura das folhas pra cima.
+Quando você cai numa área do codebase que não conhece e a orientação custa mais que a tarefa em si, **não mergulhe nos arquivos primeiro** — peça ao `dw-code-explorer` que produza um mapa. Passe o glossário de domínio do projeto (`.dw/rules/index.md`) e diga: "zoom out de um nível — me mostra os módulos relevantes, suas superfícies públicas, quem chama, e o fluxo de dados entre eles, usando o vocabulário do glossário de domínio." Pegue a visão geral, e só então mergulhe. Isso evita a armadilha de ler o arquivo mais profundo primeiro e reconstruir a arquitetura das folhas pra cima.
 
 Adaptado de [`mattpocock/skills/zoom-out`](https://github.com/mattpocock/skills/tree/main/zoom-out) (MIT).
+
+## Disciplina de Dispatch de Subagentes
+
+Agentes de projeto sao instalados em `.claude/agents/`, `.opencode/agent/`, `.agents/agents/` e `.github/agents/` quando suportado. Claude Code e OpenCode podem usar subagentes nativos. Copilot recebe custom agents. Codex deve tratar `.agents/agents/` como perfis delegaveis quando houver suporte a subagentes, ou como prompt pack manual caso contrario.
+
+Use subagente quando:
+
+- A tarefa gerar output volumoso: logs, testes, grep amplo, evidencia de QA, traces de browser ou notas de pesquisa.
+- A tarefa for read-only, paralelizavel e tiver fronteira clara.
+- A tarefa tiver return value compacto: findings, mapa, arquivos alterados, verificacao ou bloqueios.
+- Voce precisar de review independente: seguranca, silent failure, corretude por linguagem ou prontidao de PR.
+
+Nao use subagente quando:
+
+- A tarefa exigir dialogo frequente com o usuario.
+- Planejamento, implementacao e teste compartilharem contexto vivo demais.
+- A mudanca for pequena o bastante para fazer inline.
+- O subagente precisar do transcript completo do parent para nao chutar.
+- A tarefa delegada precisaria spawnar outros subagentes.
+
+Limites:
+
+- Rode no maximo 3 subagentes concorrentes por workstream.
+- Output default deve ficar perto do budget do registry, normalmente 900-1200 palavras.
+- Subagentes resumem logs; retornam linhas falhas, paths, comandos, decisoes e riscos, nao transcripts completos.
+- O parent e o unico sintetizador final.
+- O parent passa um input packet, nao historico bruto da conversa. Use `/dw-subtask-start`, `/dw-subtask-complete` e `/dw-subtask-resume` para handoffs locais.
+
+Claude-only: prefira named subagents para pesquisa, review, build e QA isolados. Use forks so quando a subtarefa realmente precisar do contexto do parent.
+
+Roteamento de agentes:
+
+- Use `dw-code-explorer` antes de planejar ou debugar areas desconhecidas.
+- Use `dw-build-fixer` so depois de uma falha real de build/typecheck/lint.
+- Use `dw-code-reviewer`, `dw-security-reviewer` e `dw-silent-failure-hunter` durante `/dw-review`.
+- Use agentes especificos de linguagem quando o modulo estiver instalado e o diff bater com a linguagem.
+
+## Disciplina de Carregamento de Skills
+
+Skills são protocolos compactos primeiro. Leia o `SKILL.md` de entrada e carregue arquivos em `references/`, `assets/`, `rules/` ou `scripts/` só quando o trigger, a tarefa ou o output exigir esse material mais profundo. Se uma skill parecer duplicada, ampla demais ou cara para a tarefa atual, rode `/dw-skill-health`.
 
 ## Referência de Workflow
 

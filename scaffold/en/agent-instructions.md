@@ -50,6 +50,9 @@ Before picking a command from the Trigger Map, gauge the change's actual scope. 
 | "Brainstorm X" / "Explore ideas" / "Research X" / "Code-health audit" / "Find tech debt" | `/dw-brainstorm "X"` (auto-dispatches grill / prototype / council / research / refactor-audit / onepager based on signals) |
 | "Where is X?" / "What uses Y?" / "How is Z structured?" | `/dw-intel "<question>"` |
 | "Rebuild the codebase index" / "Refresh intel" | `/dw-intel --build` |
+| "Context is heavy" / "Audit token usage" / "Why is the agent slow?" | `/dw-context-budget` |
+| "Check dev-workflow install" / "Are agents/wrappers healthy?" | `/dw-harness-audit` |
+| "Audit skills" / "Skills feel duplicated or bloated" | `/dw-skill-health` |
 | "Redesign this UI" / "Audit and ship a new design" | `/dw-redesign-ui "<target>"` |
 | "Audit dependencies" / "Are we behind on packages?" | `/dw-secure-audit --plan` |
 | "Scan for vulnerabilities" / "Security check" | `/dw-secure-audit` |
@@ -81,9 +84,49 @@ When any of these apply, answer directly and do **not** invoke a `dw-*` command:
 
 ## Zoom-out pattern (for unfamiliar code areas)
 
-When you land in an area of the codebase you don't know and orientation costs more than the task itself, **don't dive into files first** — ask an exploring agent to produce a map. Give it the project's domain glossary (`.dw/rules/index.md`) and tell it: "zoom out one level — show me the relevant modules, their public surfaces, who calls them, and the data flow between them, using domain glossary vocabulary." Get the lay of the land, then dive. This avoids the trap of reading the deepest file first and reconstructing the architecture from leaves upward.
+When you land in an area of the codebase you don't know and orientation costs more than the task itself, **don't dive into files first** — ask `dw-code-explorer` to produce a map. Give it the project's domain glossary (`.dw/rules/index.md`) and tell it: "zoom out one level — show me the relevant modules, their public surfaces, who calls them, and the data flow between them, using domain glossary vocabulary." Get the lay of the land, then dive. This avoids the trap of reading the deepest file first and reconstructing the architecture from leaves upward.
 
 Adapted from [`mattpocock/skills/zoom-out`](https://github.com/mattpocock/skills/tree/main/zoom-out) (MIT).
+
+## Subagent Dispatch Discipline
+
+Project agents are installed in `.claude/agents/`, `.opencode/agent/`, `.agents/agents/`, and `.github/agents/` when supported. Claude Code and OpenCode can use native subagents. Copilot receives custom agents. Codex should treat `.agents/agents/` as delegable profiles when subagents are available, or as a manual prompt pack otherwise.
+
+Use a subagent when:
+
+- The task will generate verbose output: logs, tests, broad grep, QA evidence, browser traces, or research notes.
+- The task is read-only, parallelizable, and has a clear boundary.
+- The task has a compact return value: findings, map, changed files, verification result, or blockers.
+- You need an independent review: security, silent failure, language-specific correctness, or PR readiness.
+
+Do not use a subagent when:
+
+- The task needs frequent user dialogue.
+- Planning, implementation, and testing share too much live context.
+- The change is small enough to do inline.
+- The subagent would need the full parent transcript to avoid guessing.
+- The delegated task would itself need to spawn other subagents.
+
+Limits:
+
+- Run at most 3 subagents concurrently per workstream.
+- Default output should stay near the registry budget, usually 900-1200 words.
+- Subagents summarize logs; they return failing lines, paths, commands, decisions, and risks, not full transcripts.
+- The parent is the only final synthesizer.
+- The parent passes an input packet, not raw conversation history. Use `/dw-subtask-start`, `/dw-subtask-complete`, and `/dw-subtask-resume` for local handoffs.
+
+Claude-only: prefer named subagents for isolated research, review, build, and QA work. Use forks only when the subtask genuinely needs the parent context.
+
+Agent routing:
+
+- Use `dw-code-explorer` before planning or debugging unfamiliar areas.
+- Use `dw-build-fixer` only after an actual build/typecheck/lint failure.
+- Use `dw-code-reviewer`, `dw-security-reviewer`, and `dw-silent-failure-hunter` during `/dw-review`.
+- Use language-specific agents when their module is installed and the diff matches the language.
+
+## Skill Loading Discipline
+
+Skills are compact protocols first. Read the `SKILL.md` entrypoint, then load files under `references/`, `assets/`, `rules/`, or `scripts/` only when the trigger, task, or output requires that deeper material. If a skill feels duplicated, too broad, or expensive for the current task, run `/dw-skill-health`.
 
 ## Workflow Reference
 
