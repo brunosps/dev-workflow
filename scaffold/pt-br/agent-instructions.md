@@ -13,7 +13,7 @@ Antes de escolher um comando da Trigger Map, dimensione o escopo real da mudanç
 |---------|----------------|-------------|
 | **Pequeno** | ≤3 arquivos, sem migration, sem novo endpoint, descritível em uma frase. Exemplos: typo, log message, config de uma linha, bump de dependência, version pin. | Faça inline. Nenhum comando `dw-*`. |
 | **Médio** | Feature ou bug claro, <10 tasks numeradas esperadas, único componente ou serviço, sem decisões arquiteturais. Exemplos: adicionar campo de form com validação, corrigir regressão em módulo conhecido, ligar novo endpoint num handler existente. | `/dw-bugfix` (bugs) ou `/dw-plan` (features) — direto, não via `/dw-autopilot`. |
-| **Grande** | Feature multi-componente, ≥10 tasks esperadas, toca múltiplos módulos, tem superfície UX user-visible E backend. Exemplos: adicionar nova entidade end-to-end (model + migration + API + UI), introduzir integração de terceiro, redesenhar fluxo. | `/dw-autopilot "<wish>"` — pipeline completo PRD → TechSpec → Tasks → Run → QA → Review → Commit → PR com três gates. |
+| **Grande** | Feature multi-componente, ≥10 tasks esperadas, toca múltiplos módulos, tem superfície UX user-visible E backend. Exemplos: adicionar nova entidade end-to-end (model + migration + API + UI), introduzir integração de terceiro, redesenhar fluxo. | `/dw-autopilot "<wish>"` — primeira invocação planeja e para; segunda invocação retoma via `/dw-goal` para Run → Review → QA/Fix → Review, depois Commit → PR. |
 | **Complexo** | Domínio novo, requisitos ambíguos, decisão arquitetural exigida, superfície regulatória ou de compliance, ou escopo que cruza múltiplos PRDs. Exemplos: introduzir event sourcing, reconstruir auth, multi-tenancy, nova linha de produto. | `/dw-brainstorm "<ideia>"` primeiro (auto-dispatch de modos research/council), depois `/dw-plan --council` para a etapa de techspec rodar o debate multi-advisor. |
 
 **Safety valve:** se você começou em Pequeno ou Médio mas o trabalho revela que é Grande de fato (a listagem inline passa de 5 passos, ou `/dw-bugfix` dispara seu `Step 5.0`), PARE e escale. Não existe flag para bypass. Escalar é o desfecho correto.
@@ -26,6 +26,7 @@ Antes de escolher um comando da Trigger Map, dimensione o escopo real da mudanç
 |------------------------------------------------|--------------|
 | "Implementa X" / "Cria Y" / "Adiciona feature Z" / "Preciso de..." | `/dw-autopilot "X"` |
 | "Autopilota esse PRD" / "Leva esse PRD pra PR" / continua escalação de bugfix autonomamente | `/dw-autopilot --from-prd <slug>` (PRD existente em `.dw/spec/<slug>/`) |
+| "Retoma autopilot" / "continua depois do plan" / `autopilot-state.json` tem `status: plan_complete` | `/dw-autopilot` (ou `/dw-goal --from-autopilot <slug>` se o usuário pedir especificamente a etapa de goal) |
 | Erro colado / "X está quebrado" / "Bug em Y" / screenshot de teste falhando | `/dw-bugfix "X"` |
 | "Planeja essa feature" / "Escreve PRD + techspec + tasks" | `/dw-plan "X"` |
 | "Escreve PRD pra X" / "Especifica Y" | `/dw-plan prd "X"` |
@@ -33,6 +34,7 @@ Antes de escolher um comando da Trigger Map, dimensione o escopo real da mudanç
 | "Quebra em tasks" | `/dw-plan tasks` |
 | "Roda essa task" (com ID da task) | `/dw-run <ID>` |
 | "Roda todas as tasks pendentes" / "Executa o plano" | `/dw-run` |
+| "Roda isso como goal" / "objetivo durável" / "long-running objective" | `/dw-goal "<objetivo>"` |
 | "Continue de onde parei" | `/dw-run --resume` |
 | "Pausa o trabalho" / "Encerra a sessão" / "Salva onde paramos" | `/dw-pause` |
 | "Retoma" / "Onde paramos?" / "Volta de onde parei" | `/dw-resume` |
@@ -63,7 +65,7 @@ Antes de escolher um comando da Trigger Map, dimensione o escopo real da mudanç
 | "Instala skills Azure" / "Configura MCP do Microsoft docs" / "Adiciona expertise Azure" / "Vou trabalhar com Azure" | `/dw-install-azure-skills` |
 | "Instala skills AWS" / "Configura MCP da AWS" / "Adiciona expertise AWS" / "Vou trabalhar com AWS" | `/dw-install-aws-skills` |
 
-**Prioridade:** na dúvida entre dois comandos, `/dw-autopilot` é o default mais seguro pra qualquer pedido de feature não-trivial — ele compõe os demais.
+**Prioridade:** na dúvida entre dois comandos, `/dw-autopilot` é o default mais seguro pra qualquer pedido de feature não-trivial. Se um autopilot planejado já parou com `status: plan_complete`, retome em vez de iniciar novo plano; a fase de execução pertence ao `/dw-goal`.
 
 ## Hard Gates (os comandos enforçam — não burle)
 
@@ -131,12 +133,12 @@ Skills são protocolos compactos primeiro. Leia o `SKILL.md` de entrada e carreg
 ## Referência de Workflow
 
 ```
-/dw-autopilot "wish"  ────►  Roda pipeline completo automaticamente
-                              (3 gates: PRD approval, Tasks approval, PR confirmação)
+/dw-autopilot "wish"  ────►  Primeira invocação planeja: PRD → TechSpec → Tasks → STOP
+/dw-autopilot         ────►  Segunda invocação retoma: /dw-goal → Commit → PR
 
   --- OU passo a passo ---
 
-/dw-brainstorm ─► /dw-plan ─► /dw-run ─► /dw-qa ─► /dw-review ─► /dw-commit ─► /dw-generate-pr
+/dw-brainstorm ─► /dw-plan ─► /dw-goal ─► /dw-commit ─► /dw-generate-pr
 ```
 
 Lista completa e ajuda contextual: `/dw-help`.

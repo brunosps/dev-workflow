@@ -19,7 +19,7 @@ Use `/dw-autopilot "wish"` as the gateway for most feature work. The granular co
 
 | Command | When |
 |---------|------|
-| `/dw-autopilot "wish"` | Default entry point. PRD → TechSpec → Tasks → Run → QA → Review → Commit → PR. Three approval gates. |
+| `/dw-autopilot "wish"` | Default entry point in two invocations. First run plans and stops; second run resumes through `/dw-goal`, commit, and PR. |
 | `/dw-bugfix "description"` | A bug or error report. Surgical fix or PRD route. |
 | `/dw-help [keyword]` | This screen. Pass a keyword for shortcuts. `--advanced` reveals internal commands. |
 
@@ -50,15 +50,15 @@ Use `/dw-autopilot "wish"` as the gateway for most feature work. The granular co
 
 ## Workflow at a glance
 
-`/dw-autopilot "wish"` runs the full pipeline (PRD → ... → PR) with 3 gates. Step-by-step:
+`/dw-autopilot "wish"` runs planning first and stops. Reinvoke it to resume through `/dw-goal`, commit, and PR. Step-by-step:
 
 ```
-/dw-brainstorm → /dw-plan → /dw-run → /dw-qa → /dw-review → /dw-commit → /dw-generate-pr
+/dw-brainstorm → /dw-plan → /dw-goal → /dw-commit → /dw-generate-pr
 ```
 
 ## Advanced / internal commands
 
-Pass `--advanced` to `/dw-help` to see internal commands (`dw-adr`, `dw-intel`, `dw-secure-audit`, `dw-find-skills`, `dw-update`, `dw-subtask-start`, `dw-subtask-complete`, `dw-subtask-resume`) that are usually invoked by other commands.
+Pass `--advanced` to `/dw-help` to see internal commands (`dw-adr`, `dw-intel`, `dw-secure-audit`, `dw-goal`, `dw-find-skills`, `dw-update`, `dw-subtask-start`, `dw-subtask-complete`, `dw-subtask-resume`) that are usually invoked by other commands.
 ```
 
 ## Advanced mode — `--advanced` flag
@@ -70,13 +70,14 @@ When invoked with `--advanced`, ALSO show:
 
 These are auto-invoked by primary commands but available standalone.
 
-## Tier 4 — Hidden (8)
+## Tier 4 — Hidden (9)
 
 | Command | What | Invoked by |
 |---------|------|------------|
 | `/dw-adr "decision"` | Record an Architecture Decision Record at `.dw/spec/<prd>/adrs/`. | `/dw-plan techspec --council`, deviations from constitution |
 | `/dw-intel "question"` | Query codebase intelligence; `--build` (re)indexes `.dw/intel/`. | `/dw-plan`, `/dw-review`, `/dw-bugfix` |
 | `/dw-secure-audit` | OWASP + Trivy + lockfile + supply-chain scan. Hard gate. Flags: `--scan-only`, `--plan`, `--execute`. | `/dw-review`, `/dw-generate-pr` |
+| `/dw-goal "<objective>"` | Durable objective contract with `.dw/goals/`; bridges to Codex native `/goal` when available. | `/dw-autopilot` after planning |
 | `/dw-find-skills "query"` | Search npx skills ecosystem, vet, install. | manual when extending the bundle |
 | `/dw-update` | Update dev-workflow to latest npm release with rollback snapshot. | manual maintenance |
 | `/dw-subtask-start "goal"` | Create a minimal input packet for a subagent. | parent agent before delegation |
@@ -93,6 +94,7 @@ Match the keyword and suggest:
 | `prd`, `spec`, `plan`, `architecture`, `techspec`, `tasks` | `/dw-plan` (with appropriate stage flag) |
 | `bug`, `error`, `broken`, `fix` | `/dw-bugfix` |
 | `run`, `execute`, `implement` | `/dw-run` |
+| `goal`, `objective`, `long-running`, `resume autopilot` | `/dw-goal` or `/dw-autopilot` if `autopilot-state.json` exists |
 | `review`, `quality`, `audit code` | `/dw-review` |
 | `qa`, `test plan`, `e2e` | `/dw-qa` |
 | `commit`, `git` | `/dw-commit` |
@@ -121,10 +123,10 @@ If no keyword matches, show the default surface and a note: "Keyword `<word>` no
 ## FAQ
 
 **Q: I'm not sure where to start with a new feature.**
-- Use `/dw-autopilot "what you want"`. It runs PRD → TechSpec → Tasks → Run → Review → PR with three approval gates.
+- Use `/dw-autopilot "what you want"`. First invocation runs PRD → TechSpec → Tasks and stops; second invocation resumes through `/dw-goal`, commit, and PR.
 
 **Q: Do I have to use `/dw-autopilot`?**
-- No. The granular pipeline (`/dw-brainstorm` → `/dw-plan` → `/dw-run` → `/dw-qa` → `/dw-review` → `/dw-commit` → `/dw-generate-pr`) gives you control at each step.
+- No. The granular pipeline (`/dw-brainstorm` → `/dw-plan` → `/dw-goal` or `/dw-run`/`/dw-qa`/`/dw-review` → `/dw-commit` → `/dw-generate-pr`) gives you control at each step.
 
 **Q: I just want to fix a bug.**
 - `/dw-bugfix "<bug description>"`. It triages (bug vs feature vs scope), asks 3 questions, then fixes or routes to a PRD if scope is large.

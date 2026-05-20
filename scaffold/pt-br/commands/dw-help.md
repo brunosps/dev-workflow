@@ -17,7 +17,7 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 
 | Comando | Quando |
 |---------|--------|
-| `/dw-autopilot "desejo"` | Entry point padrão. PRD → TechSpec → Tasks → Run → QA → Review → Commit → PR. Três gates de aprovação. |
+| `/dw-autopilot "desejo"` | Entry point padrão em duas invocações. Primeira roda plan e para; segunda retoma via `/dw-goal`, commit e PR. |
 | `/dw-bugfix "descrição"` | Bug ou error report. Fix cirúrgico ou rota pra PRD. |
 | `/dw-help [palavra-chave]` | Esta tela. Passe palavra-chave pra atalhos. `--advanced` revela comandos internos. |
 
@@ -48,15 +48,15 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 
 ## Workflow em resumo
 
-`/dw-autopilot "desejo"` roda o pipeline completo (PRD → ... → PR) com 3 gates. Passo a passo:
+`/dw-autopilot "desejo"` roda planejamento primeiro e para. Reinvoque para retomar via `/dw-goal`, commit e PR. Passo a passo:
 
 ```
-/dw-brainstorm → /dw-plan → /dw-run → /dw-qa → /dw-review → /dw-commit → /dw-generate-pr
+/dw-brainstorm → /dw-plan → /dw-goal → /dw-commit → /dw-generate-pr
 ```
 
 ## Comandos avançados / internos
 
-Passe `--advanced` pra ver internos (`dw-adr`, `dw-intel`, `dw-secure-audit`, `dw-find-skills`, `dw-update`, `dw-subtask-start`, `dw-subtask-complete`, `dw-subtask-resume`) — usualmente invocados por outros comandos.
+Passe `--advanced` pra ver internos (`dw-adr`, `dw-intel`, `dw-secure-audit`, `dw-goal`, `dw-find-skills`, `dw-update`, `dw-subtask-start`, `dw-subtask-complete`, `dw-subtask-resume`) — usualmente invocados por outros comandos.
 ```
 
 ## Modo advanced — flag `--advanced`
@@ -68,13 +68,14 @@ ALSO show:
 
 Auto-invocados por comandos primários mas disponíveis standalone.
 
-## Tier 4 — Hidden (8)
+## Tier 4 — Hidden (9)
 
 | Comando | O que | Invocado por |
 |---------|-------|--------------|
 | `/dw-adr "decisão"` | Registra um ADR em `.dw/spec/<prd>/adrs/`. | `/dw-plan techspec --council`, desvios de constitution |
 | `/dw-intel "pergunta"` | Query de codebase intel; `--build` (re)indexa `.dw/intel/`. | `/dw-plan`, `/dw-review`, `/dw-bugfix` |
 | `/dw-secure-audit` | OWASP + Trivy + lockfile + supply-chain scan. Hard gate. Flags: `--scan-only`, `--plan`, `--execute`. | `/dw-review`, `/dw-generate-pr` |
+| `/dw-goal "<objetivo>"` | Contrato de objetivo duravel com `.dw/goals/`; faz ponte com `/goal` nativo do Codex quando disponivel. | `/dw-autopilot` apos planejamento |
 | `/dw-find-skills "query"` | Busca npx skills ecosystem, valida, instala. | manual ao estender bundle |
 | `/dw-update` | Atualiza dev-workflow pro último release npm com snapshot rollback. | manutenção manual |
 | `/dw-subtask-start "goal"` | Cria um input packet minimo para subagente. | parent antes de delegar |
@@ -89,6 +90,7 @@ Auto-invocados por comandos primários mas disponíveis standalone.
 | `prd`, `spec`, `plan`, `arquitetura`, `techspec`, `tasks` | `/dw-plan` (stage apropriado) |
 | `bug`, `erro`, `quebrado`, `fix` | `/dw-bugfix` |
 | `run`, `executa`, `implementa` | `/dw-run` |
+| `goal`, `objetivo`, `long-running`, `retomar autopilot` | `/dw-goal` ou `/dw-autopilot` se `autopilot-state.json` existir |
 | `review`, `qualidade`, `audit code` | `/dw-review` |
 | `qa`, `test plan`, `e2e` | `/dw-qa` |
 | `commit`, `git` | `/dw-commit` |
@@ -117,10 +119,10 @@ Sem match: surface padrão + nota.
 ## FAQ
 
 **P: Onde começo com uma nova feature?**
-- `/dw-autopilot "o que voce quer"`. Roda PRD → ... → PR com três gates.
+- `/dw-autopilot "o que voce quer"`. Primeira invocacao roda PRD → TechSpec → Tasks e para; segunda invocacao retoma via `/dw-goal`, commit e PR.
 
 **P: Tenho que usar `/dw-autopilot`?**
-- Não. Pipeline granular dá controle a cada step.
+- Não. Pipeline granular dá controle a cada step, com `/dw-goal` quando quiser executar run/review/QA/review como objetivo duravel.
 
 **P: Só quero corrigir um bug.**
 - `/dw-bugfix "<descrição>"`. Tria, 3 perguntas, fixa ou roteia.

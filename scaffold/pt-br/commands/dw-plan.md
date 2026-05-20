@@ -50,6 +50,12 @@ Quando agentes do projeto estiverem instalados, use:
 
 Claude Code e OpenCode podem usar agentes nativos. Codex e Copilot usam `.agents/agents/` mais estas instrucoes como fallback.
 
+## Ferramenta de Entrevista Estruturada
+
+<critical>Quando uma ferramenta estruturada de entrevista/input do usuario estiver disponivel, `/dw-plan` DEVE usa-la para as perguntas de clarificacao de PRD e TechSpec. Nao rebaixe para chat comum por conveniencia. Se nenhuma ferramenta desse tipo existir no runtime, faca as mesmas perguntas no chat e registre explicitamente: `Ferramenta de entrevista estruturada indisponivel; usando fallback em chat.`</critical>
+
+A ferramenta e obrigatoria no planejamento porque preserva escolhas explicitas do usuario e impede o agent de responder as proprias perguntas. Cada estagio mantem sua propria cota: PRD exige 7+ perguntas de produto; TechSpec exige 7+ perguntas tecnicas.
+
 ## Constitution Gate
 
 <critical>ANTES de qualquer estágio, cheque `.dw/constitution.md`. Se AUSENTE, copie `templates/constitution-template.md` para `.dw/constitution.md` (defaults severity=info), avise usuário no chat, e SIGA. Se PRESENTE, todo FR (PRD), toda decisão arquitetural (TechSpec) e toda task (Tasks) carrega metadata Constitution Alignment mapeando para princípios relevantes ou declarando desvio.</critical>
@@ -73,7 +79,7 @@ Roda em modo padrão OU `plan prd`.
 
 ### Comportamento obrigatório
 
-1. **Perguntas de clarificação (MÍNIMO 7).** Antes de escrever qualquer coisa, faça 7+ perguntas cobrindo: objetivos, usuários-alvo, limites de escopo, métricas de sucesso, estratégia de rollout, pontos de integração, edge cases.
+1. **Perguntas de clarificação (MÍNIMO 7).** Antes de escrever qualquer coisa, use a ferramenta de entrevista estruturada quando disponivel para fazer 7+ perguntas cobrindo: objetivos, usuários-alvo, limites de escopo, métricas de sucesso, estratégia de rollout, pontos de integração, edge cases. Se a ferramenta estiver indisponivel, use fallback em chat e registre o fallback.
 2. **Web search MÍNIMO 3 queries** para padrões de mercado, contexto regulatório, abordagens de competidores quando relevante.
 3. **Constitution alignment.** Cada requisito funcional (FR-N.M) inclui linha `Constitution Alignment: respects P-NNN, P-MMM` OU `no applicable principle: <motivo>`.
 4. **Awareness multi-projeto.** Se feature cruza projetos do workspace, consulte `.dw/rules/integrations.md` e documente escopo na seção "Projetos Impactados".
@@ -97,7 +103,7 @@ Roda em modo padrão (após aprovação do PRD) OU `plan techspec` OU `plan --fr
 ### Comportamento obrigatório
 
 1. **Hard gate: open questions do PRD.** Se `.dw/spec/prd-<feature>/prd.md` tem seção "Open Questions" com itens não resolvidos, PARE e peça pra usuário resolver primeiro.
-2. **Perguntas de clarificação (MÍNIMO 7).** Perguntas técnicas cobrindo: domain placement, data flow, dependências, core interfaces, estratégia de testes, reuse-vs-build, integração multi-projeto se aplicável.
+2. **Perguntas de clarificação (MÍNIMO 7).** Use a ferramenta de entrevista estruturada quando disponivel para fazer perguntas tecnicas cobrindo: domain placement, data flow, dependências, core interfaces, estratégia de testes, reuse-vs-build, integração multi-projeto se aplicável. Se a ferramenta estiver indisponivel, use fallback em chat e registre o fallback.
 3. **Web search MÍNIMO 3 queries** + Context7 MCP para framework/library specifics.
 4. **Source grounding (`dw-source-grounding`).** Toda decisão de framework/library carrega `[source: <url>, version: X.Y, retrieved: YYYY-MM-DD]`.
 5. **Constitution gate.** Cada decisão arquitetural lista `Respects: P-NNN` ou `Deviates: P-NNN — justification: <slug ADR ou racional>`. Desvios de princípios `severity: high/critical` sem ADR → PARE.
@@ -178,7 +184,7 @@ Após plan completo, o diretório do PRD contém:
 
 ## Diretrizes finais
 
-- Cada estágio tem sua própria cota de perguntas de clarificação — não recicle. Estágios diferentes precisam de framing diferente.
+- Cada estágio tem sua própria cota de perguntas de clarificação — não recicle. Estágios diferentes precisam de framing diferente. Use a ferramenta de entrevista estruturada sempre que disponivel.
 - Web search é obrigatório; Context7 MCP para libraries. Sem pular pra "acho que sei a versão mais recente."
 - Constitution gate roda na entrada de cada estágio; defaults são auto-instalados quando ausente (nunca bloqueia).
 - Os três estágios produzem Markdown commitado — esses são os artefatos canônicos de planejamento. Eles evoluem com a feature.

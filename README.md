@@ -26,13 +26,13 @@ npx @brunosps00/dev-workflow install-deps
 
 ## Commands
 
-dev-workflow v1.0.5 ships **30 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v1.0.6 ships **31 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
 ### Tier 1 — Gateway (3)
 
 | Command | When |
 |---------|------|
-| **`/dw-autopilot "wish"`** | Default entry point. Full pipeline (PRD → TechSpec → Tasks → Run → QA → Review → Commit → PR) with 3 approval gates. Use `--from-prd <slug>` to resume from an existing PRD (e.g., after a `/dw-bugfix` safety-valve escalation): skips Steps 1–4 and starts at GATE 1. |
+| **`/dw-autopilot "wish"`** | Default entry point in two invocations. First run completes PRD → TechSpec → Tasks and stops. Second run resumes from state, executes `/dw-goal --from-autopilot <slug>` for Run → Review → QA/Fix → Review, then Commit → PR. |
 | **`/dw-bugfix "description"`** | A bug report or pasted error. Triages bug-vs-feature-vs-scope, surgical fix or routes to a PRD. |
 | **`/dw-help [keyword]`** | Discover commands. Pass a keyword for shortcuts; `--advanced` reveals internal commands. |
 
@@ -67,7 +67,7 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 | **`/dw-install-azure-skills`** | **Opt-in.** Clones curated Azure skills from [`MicrosoftDocs/Agent-Skills`](https://github.com/MicrosoftDocs/Agent-Skills) (CC-BY-4.0) into `.agents/skills/azure/` and registers the [Microsoft Learn MCP Server](https://learn.microsoft.com/en-us/training/support/mcp-get-started) (HTTP, no-auth). Interactive category selection (Compute / Data & Storage / AI & ML / Networking / Identity & Security / DevOps / Observability / Integration / Architecture / All). Re-run to refresh from upstream. Also available as CLI: `npx @brunosps00/dev-workflow install-azure-skills`. |
 | **`/dw-install-aws-skills`** | **Opt-in.** Clones curated AWS skills from [`aws/agent-toolkit-for-aws`](https://github.com/aws/agent-toolkit-for-aws) (Apache 2.0) into `.agents/skills/aws/` and registers the unified [AWS MCP Server](https://docs.aws.amazon.com/aws-mcp/) (stdio via `uvx mcp-proxy-for-aws@latest`). **Requires `uv`, `aws cli ≥ 2.32.0`, and AWS credentials.** Interactive category selection (Core / Analytics / Database / EC2 / Migration / Networking / Operations / Security / Serverless / Storage / All). The agent gains `aws___call_aws` (executes 15,000+ AWS APIs) and `aws___run_script` (Python sandboxed) — review `.dw/references/aws-mcp-instructions.md` for the destructive-operations protocol. Also available as CLI: `npx @brunosps00/dev-workflow install-aws-skills [--region=<aws-region>]`. |
 
-### Tier 4 — Hidden/Internal (8)
+### Tier 4 — Hidden/Internal (9)
 
 These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help --advanced`.
 
@@ -76,6 +76,7 @@ These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help 
 | **`/dw-adr "decision"`** | Records an Architecture Decision Record at `.dw/spec/<prd>/adrs/`. | `/dw-plan techspec --council`; deviations from constitution |
 | **`/dw-intel "question"`** | Query codebase intelligence (`.dw/intel/`). `--build` (re)creates the index. | `/dw-plan`, `/dw-review`, `/dw-bugfix` |
 | **`/dw-secure-audit`** | Unified security: OWASP + Trivy SCA/secret/IaC + lockfile + supply-chain check. Hard gate. Flags: `--scan-only`, `--plan`, `--execute`. | `/dw-review`, `/dw-generate-pr` (for TS/Python/C#/Rust) |
+| **`/dw-goal "<objective>"`** | Durable objective contract. Uses Codex native `/goal` when available and `.dw/goals/` everywhere for Codex, Copilot, Claude Code, and OpenCode. | `/dw-autopilot` after planning |
 | **`/dw-find-skills "query"`** | Searches `npx skills` ecosystem, vets, installs. | manual when extending the bundle |
 | **`/dw-update`** | Updates dev-workflow to latest npm release with rollback snapshot. | manual maintenance |
 | **`/dw-subtask-start`** | Creates a minimal input packet for a subagent without injecting the parent transcript. | parent agent before delegation |
@@ -85,19 +86,18 @@ These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help 
 ## Workflow
 
 ```
-/dw-autopilot "wish"  ------>  Runs entire pipeline automatically
-                                (3 gates: PRD approval, Tasks approval, PR confirmation)
+/dw-autopilot "wish"  ------>  First invocation: PRD → TechSpec → Tasks → STOP
+/dw-autopilot          ------>  Second invocation: /dw-goal → Commit → PR
     --- OR step-by-step ---
 
 /dw-brainstorm  -->  /dw-plan           -->  .dw/spec/prd-{name}/{prd,techspec,tasks}.md
                           |
-                    /dw-run              -->  atomic commits per task, dependency-aware
-                          |
-                    /dw-qa               -->  .dw/spec/prd-{name}/QA/ (UI / API / --ai)
-                          |
-                    /dw-review           -->  L2 PRD coverage + L3 code quality
+                    /dw-goal             -->  /dw-run → /dw-review → /dw-qa → /dw-review
                           |
                     /dw-commit + /dw-generate-pr
+
+Manual alternative after /dw-plan:
+  /dw-run → /dw-review → /dw-qa → /dw-review → /dw-commit → /dw-generate-pr
 
 Shortcuts:
   /dw-intel "question"         Query codebase intelligence
@@ -135,7 +135,7 @@ Customize templates locally without losing dev-workflow updates. Drop a file at 
 
 **What's inside:**
 
-- **Trigger Map** — 15 mappings from user intent ("Implement X", "Bug in Y", "Review my PR", ...) to the `dw-*` command the agent should run. `/dw-autopilot` is the safest default for non-trivial feature requests.
+- **Trigger Map** — mappings from user intent ("Implement X", "Bug in Y", "Review my PR", "resume autopilot", ...) to the `dw-*` command the agent should run. `/dw-autopilot` is the safest default for non-trivial feature requests; `/dw-goal` is the durable execution contract after planning.
 - **Hard Gates** — reminders that constitution violations (high/critical), missing `dw-verify` PASS, and security failures block downstream commands.
 - **Escape Hatches** — explicit cases where the agent should NOT auto-trigger (typos, exploration, aesthetic edits, user opt-out).
 
@@ -167,6 +167,10 @@ npx @brunosps00/dev-workflow update
 | OpenCode | `.opencode/commands/` | Full support |
 
 All wrappers point to `.dw/commands/` as the single source of truth.
+
+### Durable Goals
+
+`/dw-goal` gives every supported agent a portable version of Codex's durable goal workflow. In Codex, it may bridge to the native experimental `/goal` command when `features.goals` is enabled. In every platform, the canonical state is still stored under `.dw/goals/<slug>/` so Copilot, Claude Code, OpenCode, and Codex all follow the same objective, checkpoints, progress log, and stopping condition.
 
 ## Project Structure (after init)
 

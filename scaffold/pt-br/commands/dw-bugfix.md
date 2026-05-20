@@ -279,7 +279,7 @@
 
     Próximo — escolha um:
       - Cadeia manual: `/dw-plan techspec prd-bugfix-<slug>` → `/dw-plan tasks prd-bugfix-<slug>` → `/dw-run` → `/dw-qa` → `/dw-review` → `/dw-commit` → `/dw-generate-pr`.
-      - Entregar pro autopilot: `/dw-autopilot --from-prd prd-bugfix-<slug>` — retoma no GATE 1 (aprovação do PRD) e roda o resto automaticamente com os três gates usuais.
+      - Entregar pro autopilot: `/dw-autopilot --from-prd prd-bugfix-<slug>` — roda a fase de planejamento a partir do PRD existente, para depois de Tasks, e uma invocacao posterior retoma via `/dw-goal`.
     ```
 
     5. Pare este comando. Não avance para o passo 5. O usuário (ou autopilot) invoca `/dw-plan` ou `/dw-autopilot --from-prd` em seguida.
@@ -363,7 +363,8 @@
 
     Opção B (entregar pro autopilot):
     1. Rode: `/dw-autopilot --from-prd prd-bugfix-<slug>`
-    2. Autopilot retoma no GATE 1 (aprovação do PRD) e roda TechSpec, Tasks, Run, QA, Review, Commit, PR com os três gates usuais.
+    2. Autopilot roda aprovacao do PRD, TechSpec e Tasks, depois para com `status: plan_complete`.
+    3. Uma invocacao posterior do autopilot retoma via `/dw-goal --from-autopilot prd-bugfix-<slug>` para Run, Review completo, QA/Fix e Review completo pos-QA antes de commit/PR.
 
     O índice do bugfix continua queryable via `/dw-intel "bugfix history in <module>"`. Downstream `/dw-review --bugfix <slug>` e `/dw-qa --bugfix <slug>` ainda apontam para `.dw/bugfixes/NNN-<slug>/` quando quiser uma revisão focada apenas no patch cirúrgico final.
     ```

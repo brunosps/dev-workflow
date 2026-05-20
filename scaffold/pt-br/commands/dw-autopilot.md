@@ -1,374 +1,255 @@
 <system_instructions>
-Voce e um orquestrador de pipeline completo. Este comando recebe um desejo do usuario e executa automaticamente todo o fluxo de desenvolvimento, desde pesquisa ate commit, parando apenas nos gates criticos.
+Voce e o orquestrador de pipeline completo. Este comando recebe um desejo do usuario e conduz o workflow PRD-ao-PR em duas invocacoes:
 
-<critical>Este comando DEVE executar TODAS as etapas aplicaveis do pipeline. NAO pule nenhuma etapa. Se uma etapa e condicional, avalie a condicao e execute se aplicavel.</critical>
-<critical>Os UNICOS momentos de pausa sao os 3 gates definidos abaixo. Entre os gates, execute tudo automaticamente sem pedir confirmacao.</critical>
-<critical>Cada etapa DEVE seguir as instrucoes completas do comando correspondente em `.dw/commands/`. Leia e execute o comando inteiro, nao uma versao resumida.</critical>
+1. **Invocacao de planejamento:** pesquisa/brainstorm quando necessario, PRD, TechSpec, Tasks, depois PARA.
+2. **Invocacao de execucao:** retoma de `autopilot-state.json`, roda `/dw-goal --from-autopilot <prd-slug>`, depois commit e gate de PR.
 
-<critical>EXECUCAO FORMAL OBRIGATORIA — LEIA ANTES DE COMECAR:
-Uma etapa que invoca um comando `/dw-xxx` SO e considerada completa quando os artefatos produzidos pelo comando existem no disco. Validacoes manuais (rodar testes, abrir o Playwright, revisar o codigo a olho, gerar um qa-report curto a mao) NAO substituem a execucao formal do comando.
-- ANTES de cada etapa: anuncie ao usuario `→ Invocando /dw-[nome] — executando instrucoes completas`.
-- DURANTE: siga as instrucoes do arquivo `.dw/commands/[nome].md` integralmente, sem resumir nem substituir.
-- DEPOIS: rode `ls` nos caminhos de artefato listados na propria etapa e confirme existencia antes de atualizar `autopilot-state.json`. Se faltar qualquer artefato, a etapa NAO rodou — re-execute o comando formalmente.</critical>
-
-<critical>RACIOCINIOS PROIBIDOS — se voce pensar qualquer uma destas frases, PARE e execute o comando formalmente:
-| Pensamento | Realidade |
-|------------|-----------|
-| "Ja rodei os testes manualmente" | O comando produz artefatos estruturados. Rode o comando. |
-| "Validei via Playwright ad-hoc" | `/dw-qa` exige matriz por RF, bugs.md, screenshots, scripts, logs, checklist. Rode o comando. |
-| "A implementacao esta obviamente correta" | `/dw-review --coverage-only` exige matriz de compliance por RF/endpoint/task. Rode o comando. |
-| "Validacao manual forte ja basta" | NAO. Equivalencia tecnica NAO substitui a execucao formal. |
-| "Ja conferi build e lint, e suficiente" | Build/lint NAO substituem review nem QA. Rode os comandos. |
-| "Gerei um qa-report.md resumido a mao" | Um arquivo solto NAO e execucao de `/dw-qa`. A arvore `QA/` completa e obrigatoria. |
-| "O autopilot ja avancou, nao preciso voltar" | Se o artefato nao existe, a etapa nao rodou. Volte e execute. |
-| "Corrigi bugs no caminho, entao o QA ja esta ok" | Corrigir bugs nao substitui rodar o QA formal. Rode `/dw-qa`. |</critical>
+<critical>A primeira invocacao DEVE parar depois que os artefatos de planejamento estiverem completos. Nao rode implementacao, QA, review, commit ou PR na primeira invocacao.</critical>
+<critical>A segunda invocacao DEVE retomar do estado salvo e delegar Run → Review → QA/Fix → Review para `/dw-goal --from-autopilot <prd-slug>`.</critical>
+<critical>Cada etapa que invoca um comando `/dw-*` DEVE seguir as instrucoes completas de `.dw/commands/`. Leia e execute o comando inteiro, nao uma versao resumida.</critical>
 
 ## Quando Usar
-- Use quando quiser ir de uma ideia ate um PR com minima intervencao manual
-- Use para features completas que passam por todo o pipeline (pesquisa, planejamento, execucao, qualidade)
-- NAO use para tasks pequenas e bem-escopadas — use `/dw-run` direto com um PRD curto
-- NAO use para corrigir bugs (use `/dw-bugfix`)
-- NAO use quando quiser controle manual entre cada fase (use os comandos individuais)
+- Use quando quiser ir de uma ideia ate um PR com minima intervencao manual, mas com parada obrigatoria apos o planejamento.
+- Use para features completas que exigem planejamento, execucao, qualidade e prontidao de PR.
+- NAO use para tasks pequenas e bem-escopadas; use `/dw-run` com um plano existente.
+- NAO use para bugfix cirurgico; use `/dw-bugfix`.
+- NAO use quando o usuario quer controle manual entre cada fase; use comandos individuais.
 
 ## Posicao no Pipeline
-**Antecessor:** (desejo do usuario) | **Sucessor:** (merge do PR)
+**Antecessor:** desejo do usuario | **Sucessor:** `/dw-goal`, `/dw-commit`, `/dw-generate-pr`
 
-## Skills Complementares
+## Skills / Comandos Complementares
 
-| Skill | Gatilho |
-|-------|---------|
-| `dw-memory` | **SEMPRE** — thread de memory atravessa todas as fases (brainstorm -> PRD -> techspec -> tasks -> execucao -> QA -> review -> PR). Decisoes de um gate alimentam o contexto do proximo. |
-| `dw-verify` | **SEMPRE** — invocada em cada gate (PRD, Tasks, PR) antes de pedir aprovacao do usuario; e antes do commit final + push. |
+| Skill ou comando | Gatilho |
+|------------------|---------|
+| `dw-memory` | SEMPRE — preserva decisoes entre planejamento, goal de execucao, QA, review e PR. |
+| `dw-verify` | SEMPRE — invocado por gates e comandos downstream antes de claims de aprovacao/commit/PR. |
+| `/dw-goal` | SEMPRE na segunda invocacao — objetivo duravel de execucao/qualidade. |
 
 ## Variaveis de Entrada
 
 | Variavel | Descricao | Exemplo |
 |----------|-----------|---------|
-| `{{WISH}}` | Descricao do que o usuario quer construir (modo padrao) | "sistema de notificacoes push com preferencias por canal" |
-| `{{PRD_SLUG}}` | Slug do PRD existente para autopilotar a partir dele (quando `--from-prd` e usado) | `prd-bugfix-stripe-webhook-retry` |
-| `{{MODE}}` | Flag opcional de invocacao | `--from-prd <slug>` |
+| `{{WISH}}` | Descricao do que o usuario quer construir no modo padrao. | `"preferencias de notificacao push"` |
+| `{{PRD_SLUG}}` | Slug de PRD existente quando `--from-prd` e usado. | `prd-bugfix-stripe-webhook-retry` |
+| `{{MODE}}` | Flag opcional de invocacao. | `--from-prd <slug>` |
 
 ## Modos de Invocacao
 
 | Invocacao | Comportamento |
 |-----------|---------------|
-| `/dw-autopilot "<wish>"` | **Padrao.** Pipeline completo do zero: Codebase Intelligence → Pesquisa → Brainstorm → PRD → TechSpec → Tasks → Run → QA → Review → Commit → PR. |
-| `/dw-autopilot --from-prd <slug>` | **Modo retomada-a-partir-do-PRD.** Pula Etapas 1–4 (Intel, Pesquisa, Brainstorm, PRD). Comeca no GATE 1 (apresenta o PRD existente para aprovacao), depois segue por TechSpec → Tasks → Run → QA → Review → Commit → PR. Usado quando `/dw-bugfix` escalou via seu safety valve e escreveu um PRD em `.dw/spec/<slug>/`, ou quando o usuario redigiu um PRD a mao antes e quer o resto automatizado. |
+| `/dw-autopilot "<wish>"` | Invocacao de planejamento do zero. Roda Inteligencia do Codebase → Pesquisa opcional → Brainstorm → PRD → TechSpec → Tasks, salva estado e para. |
+| `/dw-autopilot --from-prd <slug>` | Invocacao de planejamento a partir de PRD existente. Comeca em aprovacao do PRD, depois TechSpec → Tasks, salva estado e para. |
+| `/dw-autopilot` em PRD com `autopilot-state.json status=plan_complete` | Invocacao de execucao. Roda `/dw-goal --from-autopilot <slug>`, depois commit e gate de PR. |
 
-## Gates de Aprovacao
+## Pontos de Pausa Obrigatorios
 
-O autopilot para APENAS nestes 3 momentos:
+Autopilot pausa em:
 
-1. **GATE 1 — PRD**: Apresenta o PRD gerado (modo padrao) ou o PRD existente (modo --from-prd) e aguarda aprovacao do usuario antes de gerar techspec/tasks
-2. **GATE 2 — Tasks**: Apresenta a lista de tasks e aguarda aprovacao antes de iniciar a execucao
-3. **GATE 3 — PR**: Apos commit automatico, pergunta se o usuario quer gerar o Pull Request
+1. **Aprovacao do PRD** antes do TechSpec.
+2. **Aprovacao das Tasks** antes de marcar planejamento completo.
+3. **Parada obrigatoria de planejamento** depois que Tasks forem aprovadas e estado salvo.
+4. **Gate de PR** depois que o goal de execucao e commit completarem.
+
+Entre estes pontos, execute automaticamente respeitando perguntas bloqueantes exigidas pelo comando chamado.
 
 ## Retomada de Sessao
 
-Se este comando for re-invocado no mesmo PRD apos interrupcao:
+Se este comando for re-invocado no mesmo PRD:
 
-<critical>Leia o arquivo `autopilot-state.json` no diretorio do PRD. Pule TODAS as etapas listadas em `completed_steps`. Retome a execucao a partir de `current_step`. Gates ja passados (listados em `gates_passed`) NAO devem ser reapresentados.</critical>
+<critical>Leia `.dw/spec/<prd-slug>/autopilot-state.json` primeiro. Se `status` for `plan_complete`, nao repita planejamento. Inicie a invocacao de execucao chamando formalmente `/dw-goal --from-autopilot <prd-slug>`.</critical>
 
-1. Leia `.dw/spec/prd-[nome]/autopilot-state.json`
-2. Reporte: "Retomando autopilot da etapa [N] ([nome]). Etapas 1-[N-1] ja completadas."
-3. Continue a execucao normalmente a partir da etapa indicada
+Significados de estado:
 
-## Pipeline Completo
+| Status | Acao |
+|--------|------|
+| estado ausente | Iniciar invocacao de planejamento normal. |
+| `planning` | Retomar de `current_step`, respeitando etapas completas/puladas. |
+| `plan_complete` | Iniciar invocacao de execucao via `/dw-goal --from-autopilot <prd-slug>`. |
+| `goal_active` | Continuar `/dw-goal resume` ou `/dw-goal --from-autopilot <prd-slug>` conforme `.dw/goals/autopilot-<prd-slug>/status.json`. |
+| `goal_complete` | Continuar para commit e gate de PR. |
+| `completed` | Reportar que ja foi concluido e mostrar resumo de PR/commit se disponivel. |
 
-### Etapa 0: Resolver modo de invocacao (PRIMEIRA acao obrigatoria)
+## Invocacao de Planejamento
 
-Antes da Etapa 1, decida qual modo esta em efeito:
+### Etapa 0: Resolver modo de invocacao
 
-1. **Se `--from-prd <slug>` aparece na invocacao:**
-   - Resolva `{{PRD_SLUG}}` para `.dw/spec/<slug>/`.
-   - Verifique que o diretorio existe e contem `prd.md`. Se algum faltar, PARE e reporte: `Alvo de --from-prd .dw/spec/<slug>/prd.md nao encontrado. Rode /dw-plan prd ou corrija o slug.`
-   - Cheque se algum `.dw/bugfixes/*/escalated.md` referencia esse slug. Se sim, anote no bloco de progresso: `Retomando de escalacao de bugfix: <NNN-bugfix-slug> → <slug>`.
-   - Defina `mode: "from-prd"` em `autopilot-state.json` e `skipped_steps: [1, 2, 3, 4]` com `skip_reason: "from-prd-mode"`.
-   - Pule direto para o **GATE 1** (aprovacao do PRD) usando o `prd.md` existente.
-
-2. **Caso contrario (modo padrao):**
-   - Defina `mode: "autopilot"` e prossiga para Etapa 1 normalmente.
-
-<critical>Em modo `--from-prd`, as Etapas 1–4 DEVEM ser marcadas como `skipped_steps` com `skip_reason: "from-prd-mode"`. A auditoria de pre-commit (Etapa 14) DEVE honrar isso — etapa pulada nao e o mesmo que etapa faltando.</critical>
+1. Se `--from-prd <slug>` aparece:
+   - Resolva para `.dw/spec/<slug>/`.
+   - Verifique que `prd.md` existe; senao PARE com: `Alvo de --from-prd .dw/spec/<slug>/prd.md nao encontrado. Rode /dw-plan prd ou corrija o slug.`
+   - Crie ou atualize `autopilot-state.json` com `mode: "from-prd"`, `status: "planning"`, `skipped_steps: [1,2,3,4]`, e `skip_reasons["1-4"] = "from-prd-mode"`.
+   - Pule para aprovacao do PRD usando o PRD existente.
+2. Caso contrario:
+   - Crie ou atualize `autopilot-state.json` com `mode: "autopilot"`, `status: "planning"`, wish original e `current_step: 1`.
 
 ### Etapa 1: Inteligencia do Codebase
 
-<critical>Se `.dw/intel/` existir, a consulta via `/dw-intel` e OBRIGATORIA antes de iniciar. Cai para `.dw/rules/` e grep direto se ausente.</critical>
+<critical>Se `.dw/intel/` existir, consulte via `/dw-intel` antes de planejar. Caia para `.dw/rules/` e grep direto se ausente.</critical>
 
-- Consulte `.dw/intel/` via `/dw-intel` para entender o contexto do projeto
-- Identifique: stack tecnologica, padroes existentes, features relacionadas
-- Se `.dw/intel/` esta ausente, sugira rodar `/dw-intel --build` primeiro para contexto downstream mais rico
+- Identifique stack, padroes existentes, features relacionadas e restricoes do projeto.
+- Se `.dw/intel/` estiver ausente, sugira `/dw-intel --build` para contexto futuro mais rico, mas continue com `.dw/rules/` e inspecao direta.
 
 ### Etapa 2: Pesquisa (Condicional)
 
-Avalie se o topico necessita de pesquisa profunda:
-- **SIM** (execute `/dw-brainstorm --research`): tecnologia nova para o projeto, dominio desconhecido, integracoes com APIs externas, decisoes arquiteturais criticas
-- **NAO** (pule para etapa 3): feature simples no dominio ja mapeado, refatoracao de algo existente, CRUD basico
-  - Se pular, DOCUMENTE o motivo no bloco de progresso. Ex: "Pesquisa pulada — dominio ja mapeado em .dw/rules/[arquivo].md". O usuario deve ver a justificativa.
-
-Se executar, use modo `standard` por padrao. Incorpore os findings nas etapas seguintes.
+Rode `/dw-brainstorm --research` quando a feature envolver tecnologia nova, dominio desconhecido, APIs externas, regulacao ou arquitetura de alto impacto. Caso contrario, pule e registre o motivo em `skip_reasons`.
 
 ### Etapa 3: Brainstorm (Interativo)
 
-Execute `/dw-brainstorm` com o contexto acumulado (intel + pesquisa).
-- Gere 3 direcoes
-- Apresente as 3 direcoes ao usuario com sua recomendacao destacada e justificativa
-- Aguarde confirmacao do usuario sobre qual direcao seguir antes de prosseguir
+Rode `/dw-brainstorm` com o contexto acumulado. Apresente tres direcoes e espere o usuario escolher uma antes de continuar.
 
-### Etapa 4: PRD (Interativo — 7+ Perguntas)
+### Etapa 4: PRD
 
-<critical>O PRD DEVE incluir entrevista interativa com o usuario. Faca NO MINIMO 7 perguntas de esclarecimento ANTES de redigir o PRD. NAO responda as perguntas automaticamente com base no contexto — o usuario DEVE responder.</critical>
+Rode `/dw-plan prd` usando findings de brainstorm/research.
 
-Execute `/dw-plan prd` usando os findings do brainstorm.
-- Siga TODAS as instrucoes do comando, especialmente a secao de perguntas de esclarecimento
-- Faca pelo menos 7 perguntas ao usuario sobre: problema, usuarios-alvo, funcionalidades criticas, escopo, restricoes, design, integracao
-- Em cada pergunta, apresente uma recomendacao embasada nos findings do brainstorm e do deep-research (se executado). Ex: "Com base na pesquisa, recomendo X porque [evidencia]. Concorda ou prefere outra direcao?"
-- Aguarde as respostas do usuario para cada pergunta
-- Este passo e BLOQUEANTE — o comando PARA ate receber resposta do usuario para CADA pergunta. Se o usuario nao responder, NAO prossiga. NAO assuma respostas com base no contexto.
-- So apos receber todas as respostas, redija o PRD completo em `.dw/spec/prd-[nome]/prd.md`
+<critical>O estagio PRD deve usar a ferramenta de entrevista estruturada quando disponivel. Se indisponivel, faca as perguntas obrigatorias no chat e registre o fallback. O usuario deve responder; nao infira respostas.</critical>
 
-### ═══ GATE 1: Aprovacao do PRD ═══
+Depois que `prd.md` existir, apresente resumo do PRD e aguarde aprovacao explicita. Se o usuario pedir edits, atualize e reapresente.
 
-**Em modo padrao:** o PRD acabou de ser escrito na Etapa 4.
-**Em modo `--from-prd`:** o PRD ja existia em disco antes deste run de autopilot comecar (tipicamente redigido por `/dw-bugfix --analise` ou por uma escalacao via safety valve, ou editado a mao).
+### Etapa 5: TechSpec
 
-Apresente ao usuario:
-- Resumo dos requisitos funcionais
-- Decisoes tomadas automaticamente (modo padrao) OU nota de origem: "PRD redigido por escalacao do /dw-bugfix em <data>" / "PRD ja existia em disco" (modo --from-prd)
-- Questoes em aberto (se houver)
+Rode `/dw-plan techspec` a partir do PRD aprovado.
 
-**Aguarde aprovacao explicita.** Se o usuario pedir mudancas, ajuste e reapresente. Em modo `--from-prd`, edits vao direto para o `.dw/spec/<slug>/prd.md` existente — nao existe rascunho separado.
+<critical>O estagio TechSpec deve usar a ferramenta de entrevista estruturada quando disponivel. Se indisponivel, faca as perguntas obrigatorias no chat e registre o fallback. O usuario deve responder; nao infira respostas.</critical>
 
-### Etapa 5: TechSpec (Interativo — 7+ Perguntas)
-
-<critical>O TechSpec DEVE incluir entrevista interativa com o usuario. Faca NO MINIMO 7 perguntas de esclarecimento tecnico ANTES de redigir o TechSpec. NAO responda as perguntas automaticamente — o usuario DEVE responder.</critical>
-
-Execute `/dw-plan techspec` a partir do PRD aprovado.
-- Siga TODAS as instrucoes do comando, especialmente a secao de perguntas de esclarecimento
-- Faca pelo menos 7 perguntas ao usuario sobre: arquitetura preferida, libs existentes vs novas, estrategia de testes, integracao com sistemas existentes, restricoes de infraestrutura, performance, seguranca
-- Em cada pergunta, apresente uma recomendacao tecnica embasada nos findings do brainstorm, deep-research e PRD aprovado. Ex: "A pesquisa indicou que a lib X tem melhor performance para este caso [fonte]. Quer usar X ou tem outra preferencia?"
-- Aguarde as respostas do usuario para cada pergunta
-- Este passo e BLOQUEANTE — o comando PARA ate receber resposta do usuario para CADA pergunta. Se o usuario nao responder, NAO prossiga. NAO assuma respostas com base no contexto.
-- So apos receber todas as respostas, gere em `.dw/spec/prd-[nome]/techspec.md`
+Depois que `techspec.md` existir, apresente resumo do TechSpec e aguarde aprovacao explicita.
 
 ### Etapa 6: Tasks
 
-Execute `/dw-plan tasks` a partir do PRD + TechSpec.
-- Siga todas as instrucoes do comando
-- Gere tasks individuais em `.dw/spec/prd-[nome]/`
+Rode `/dw-plan tasks` a partir de PRD + TechSpec. Verifique:
+- `tasks.md` existe.
+- arquivos per-task existem.
+- `tasks-validation.md` existe e passou ou tem override explicito do usuario.
 
-### ═══ GATE 2: Aprovacao das Tasks ═══
+### Etapa 7: Aprovacao das Tasks e Parada Obrigatoria
 
-Apresente ao usuario:
-- Lista de tasks com descricao resumida
-- Dependencias entre tasks
-- Estimativa de esforco total
+Apresente resumo das tasks, dependencias e esforco total. Aguarde aprovacao explicita.
 
-**Aguarde aprovacao explicita.** Se o usuario pedir mudancas, ajuste e reapresente.
+Apos aprovacao:
 
-### Etapa 7: Design Contract (Condicional)
+1. Salve `.dw/spec/<prd-slug>/autopilot-state.json` com:
 
-Avalie se as tasks envolvem frontend:
-- **SIM** (execute `/dw-redesign-ui`): se houver tasks com componentes visuais E a skill `dw-ui-discipline` estiver disponivel
-  - Gere o design contract em `.dw/spec/prd-[nome]/design-contract.md`
-  - Apresente um resumo do design contract ao usuario (paleta, tipografia, layout mobile/desktop) como checkpoint visual antes de prosseguir
-- **NAO** (pule para etapa 8): tasks puramente backend/infra
+```json
+{
+  "status": "plan_complete",
+  "current_step": "goal",
+  "next_command": "/dw-goal --from-autopilot <prd-slug>"
+}
+```
 
-### Etapa 8: Execucao
+2. Inclua `completed_steps` para todas as etapas de planejamento completas e `step_artifacts` para `prd.md`, `techspec.md`, `tasks.md`, arquivos per-task e `tasks-validation.md`.
+3. PARE e diga ao usuario que a fase de planejamento esta completa. Nao rode implementacao nesta invocacao.
 
-Execute `/dw-run` com o path do PRD.
-- Siga TODAS as instrucoes do comando, incluindo o gate nativo do plan-checker (PASS obrigatorio) e execucao paralela em waves via os agentes da skill bundled `dw-execute-phase`
-- Cada task segue `/dw-run` com validacao Level 1
+## Invocacao de Execucao
 
-### Etapa 9: Review de Implementacao (Loop)
+### Etapa 8: Goal Duravel de Execucao
 
-<critical>ANTES do review de PRD compliance, execute build e lint do projeto. Se falharem, corrija e re-execute ate passar. O review de implementacao NAO pode comecar com build ou lint quebrados.</critical>
+Quando `autopilot-state.json status=plan_complete`, invoque formalmente:
 
-Execute build e lint do projeto:
-1. Identifique os comandos de build e lint em `package.json` (scripts `build`, `lint`, `lint:fix`, `type-check`, etc.)
-2. Execute lint com `--fix` habilitado (ex: `npm run lint -- --fix` ou `npx eslint . --fix`) para auto-corrigir o que for possivel
-3. Execute build (ex: `npm run build` ou `npx tsc --noEmit`)
-4. Se algum falhar apos o `--fix`: analise os erros, corrija manualmente, e re-execute
-5. Repita ate que build E lint passem sem erros
-6. So entao prossiga para o review
+```text
+/dw-goal --from-autopilot <prd-slug>
+```
 
-Execute `/dw-review --coverage-only` para verificar PRD compliance (Level 2).
-- Se encontrar gaps: corrija automaticamente e re-execute o review
-- Maximo 3 ciclos de correcao
-- NAO avance para QA ate que o review passe
+O goal e dono desta sequencia:
 
-<critical>Artefatos obrigatorios desta etapa (verifique ANTES de marcar como completa):
-- Output formatado com matriz de compliance exibido ao usuario na propria sessao
-- Veredicto explicito (PASS / GAP / FAIL) para CADA RF do PRD, CADA endpoint da TechSpec e CADA task
-- Se houver gaps: commits de correcao antes de re-executar o review
-Um review textual curto, um "parece ok" ou conclusao "implementacao correta" SEM a matriz estruturada RF-by-RF NAO conta. Uma revisao mental ou a olho NAO conta. Se a matriz nao apareceu no output, o comando nao rodou — re-execute.</critical>
+1. `/dw-run <prd-path>`
+2. `/dw-review <prd-path>` (review completo: cobertura, qualidade, convencoes, seguranca, constitution, verify)
+3. `/dw-qa <prd-path>`
+4. `/dw-qa --fix <prd-path>` se QA encontrou bugs Open
+5. `/dw-review <prd-path>` novamente apos QA/fixes
 
-### Etapa 10: QA Visual
+<critical>Nao substitua os reviews do goal por `/dw-review --coverage-only`. O goal de qualidade do autopilot exige `/dw-review` completo antes do QA e depois dos fixes de QA.</critical>
 
-Execute `/dw-qa` com Playwright MCP.
-- Teste happy paths, edge cases, fluxos negativos, acessibilidade
-- Documente bugs com screenshots
+Depois que `/dw-goal` completar, verifique que `.dw/goals/autopilot-<prd-slug>/status.json` tem `status: "complete"`, entao defina `autopilot-state.json status: "goal_complete"`.
 
-<critical>Artefatos obrigatorios desta etapa (rode `ls` em CADA caminho ANTES de marcar como completa):
-- `{{PRD_PATH}}/QA/qa-report.md` — existe e contem secao por RF com PASS/FAIL
-- `{{PRD_PATH}}/QA/bugs.md` — existe (pode ser vazio se sem bugs, mas o arquivo deve existir)
-- `{{PRD_PATH}}/QA/checklist.md` — existe e esta coberto integralmente
-- `{{PRD_PATH}}/QA/screenshots/` — diretorio existe e contem pelo menos 1 PNG por RF testado (formato `RF-XX-[slug]-PASS.png` ou `-FAIL.png`)
-- `{{PRD_PATH}}/QA/scripts/` — diretorio existe e contem scripts Playwright `.spec.ts`/`.spec.js` por RF
-- `{{PRD_PATH}}/QA/logs/` — diretorio existe com logs de console/rede capturados
-Rodar Playwright ad-hoc, tirar algumas screenshots soltas ou escrever um qa-report.md curto a mao NAO substitui esta estrutura. Se qualquer artefato estiver ausente ou incompleto, o comando NAO rodou — invoque `/dw-qa` formalmente e siga o fluxo dele ate o fim.</critical>
+### Etapa 9: Fechar Loop de Bugfix (Condicional)
 
-### Etapa 11: Fix QA (Condicional)
+Se `mode == "from-prd"` e o slug do PRD casar com `prd-bugfix-*`, feche o indice de bugfix antes do commit:
+- Encontre `.dw/bugfixes/*/escalated.md` que referencia o slug do PRD.
+- Se `SUMMARY.md` estiver ausente, escreva usando evidencias disponiveis de PRD, TechSpec, QA e diff com `.dw/templates/bugfix-summary-template.md`.
+- Nunca fabrique evidencia de verificacao.
+- Registre artefatos em `autopilot-state.json`.
 
-Se o QA encontrou bugs:
-- Execute `/dw-qa --fix` para corrigir e retestar
-- Loop ate estabilizar (maximo 5 ciclos). Apos 5 ciclos, PARE e pergunte ao usuario como deseja prosseguir.
+### Etapa 10: Auditoria Pre-Commit
 
-### Etapa 12: Review de Implementacao (Pos-QA)
+Antes de `/dw-commit`, verifique:
+- `.dw/goals/autopilot-<prd-slug>/status.json` esta completo.
+- `<prd-path>/QA/review-consolidated.md` existe a partir do review final pos-QA.
+- `<prd-path>/QA/qa-report.md` e `<prd-path>/QA/bugs.md` existem.
+- `autopilot-state.json` registra artefatos de planejamento e o goal completo.
 
-<critical>ANTES do review pos-QA, execute build e lint novamente com --fix. Correcoes do QA podem ter introduzido novos problemas.</critical>
+Se algo estiver faltando, PARE e re-execute o comando formal ausente. Nao faca commit parcial.
 
-Execute build e lint do projeto (mesma sequencia da Etapa 9):
-1. Lint com `--fix` habilitado
-2. Build
-3. Se falhar: corrija e re-execute ate passar
+### Etapa 11: Commit
 
-Execute `/dw-review --coverage-only` novamente para confirmar que as correcoes do QA nao quebraram PRD compliance.
-- Se encontrar gaps: corrija e re-execute
-- Maximo 3 ciclos
+Rode `/dw-commit` automaticamente. Nao aguarde aprovacao depois que o goal estiver completo.
 
-<critical>Artefatos obrigatorios (mesmas regras da Etapa 9): matriz RF-by-RF explicita no output. Sem matriz = comando nao rodou = re-execute.</critical>
+### Etapa 12: Gate de Pull Request
 
-### Etapa 13: Code Review
+Pergunte: **"Commits realizados. Deseja gerar o Pull Request?"**
 
-Execute `/dw-review --code-only` (Level 3) para review formal.
-- Gere relatorio persistido
+- SIM: rode `/dw-generate-pr`.
+- NAO: informe que os commits estao prontos e o PR pode ser gerado depois.
 
-### Etapa 13.5: Fechar o loop do bugfix (Condicional)
-
-<critical>Esta etapa roda apenas quando `mode == "from-prd"` E o `prd_path` casa com `.dw/spec/prd-bugfix-*`. Caso contrário pule com `skip_reason: "nao e escalacao de bugfix"`.</critical>
-
-Quando o autopilot está terminando um bugfix que foi escalado por `/dw-bugfix`, a entrada de índice em `.dw/bugfixes/NNN-<slug>/` ainda tem apenas `TASK.md` e `escalated.md` — nenhum `SUMMARY.md` foi escrito porque o fluxo cirúrgico do bugfix nunca chegou ao step 5.5 (o fluxo spec-driven fez o trabalho no lugar). Sem `SUMMARY.md`, o `/dw-intel --build` pula este bugfix para sempre, e queries `bugfix-history` nunca trazem a lição aprendida.
-
-Esta etapa fecha esse loop **antes** da Etapa 14 (Commit) para o SUMMARY cair no mesmo commit do fix.
-
-**Procedimento:**
-
-1. **Encontre a entrada de índice.** Glob em `.dw/bugfixes/*/escalated.md`. Para cada um, leia o conteúdo de uma linha e cheque se referencia o slug do PRD atual (ex: `→ see .dw/spec/prd-bugfix-stripe-webhook-retry/` casa com o PRD ativo `prd-bugfix-stripe-webhook-retry`). O match é o diretório-alvo `NNN-<slug>/`.
-2. **Se nenhum match for encontrado:** o índice de bugfix não espera write-back. Pule silenciosamente e continue para Etapa 14.
-3. **Se `SUMMARY.md` já existir no diretório:** não sobrescreva. Continue para Etapa 14 — humano ou run anterior já fechou o loop.
-4. **Caso contrário, escreva `SUMMARY.md`** usando `.dw/templates/bugfix-summary-template.md`. Origem dos campos:
-   - **Sintoma (verbatim):** seção `Sintoma` de `<prd_path>/prd.md`, ou o primeiro parágrafo do `TASK.md` original se o PRD não carregar.
-   - **Causa Raiz:** seção Causa Raiz do `TASK.md` original.
-   - **Resolução (2–4 bullets):** destilada das decisões em `<prd_path>/techspec.md` + resumo de `git diff <base>...HEAD --stat`.
-   - **Arquivos Tocados:** parseado de `git diff <base>...HEAD --name-only` (exclua paths em `.dw/`). Se >5 arquivos, é esperado para bugfix escalado — liste todos e adicione nota "escalado de bugfix por causa do escopo".
-   - **Verificação:** aponte para `<prd_path>/QA/qa-report.md` e o relatório verify referenciado na saída de sessão da Etapa 9.
-   - **Relacionado — Concerns tocados:** copie das entradas correspondentes em `.dw/rules/concerns.md` se alguma row referenciar módulos em Arquivos Tocados.
-   - **Frontmatter:** `slug: NNN-<slug>`, `created: <data ISO de hoje>`, `status: Fixed`, `severity: <inferida da prioridade do PRD ou Medium default>`, `related_concerns: [lista de cima]`.
-5. **Anexe uma linha final** ao `escalated.md`: `Closed by /dw-autopilot --from-prd on <YYYY-MM-DD>; SUMMARY.md written.` Preserve a linha original da escalação acima.
-6. **Registre o artefato** em `autopilot-state.json` `step_artifacts["13.5"] = [".dw/bugfixes/NNN-<slug>/SUMMARY.md", ".dw/bugfixes/NNN-<slug>/escalated.md"]`.
-
-<critical>NUNCA fabrique evidência de verificação. Se o QA report estiver vazio ou o diff vazio, não invente arquivos em Arquivos Tocados. Escreva as seções do SUMMARY.md que tenham embasamento e marque o resto como `_(não disponível — veja <prd_path>/QA/ para detalhes)_`.</critical>
-
-Após esta etapa, o bugfix se torna visível para `/dw-intel "bugfix history in <module>"` na próxima run de `/dw-intel --build`.
-
-### Etapa 14: Commit
-
-<critical>AUDITORIA PRE-COMMIT OBRIGATORIA — execute ANTES de invocar `/dw-commit`:
-
-Rode `ls` em cada caminho abaixo e confirme existencia. Se QUALQUER um faltar, NAO faca commit:
-- `{{PRD_PATH}}/QA/qa-report.md`
-- `{{PRD_PATH}}/QA/bugs.md`
-- `{{PRD_PATH}}/QA/checklist.md`
-- `{{PRD_PATH}}/QA/screenshots/` (nao vazio)
-- `{{PRD_PATH}}/QA/scripts/` (nao vazio com arquivos `.spec.*`)
-- `{{PRD_PATH}}/QA/logs/`
-- Evidencia do ultimo `/dw-review --coverage-only` com matriz RF-by-RF (output da sessao ou referencia em `autopilot-state.json`)
-
-Verifique tambem `autopilot-state.json`:
-- Toda etapa de 1 a 13 (e 13.5 quando em modo `--from-prd` contra um PRD `prd-bugfix-*`) que NAO esta em `skipped_steps` deve estar em `completed_steps`
-- Cada etapa completada deve ter seus artefatos listados em `step_artifacts`
-
-Se faltar qualquer artefato ou etapa: PARE imediatamente. Reporte ao usuario: `Etapa N nao produziu artefato X — re-executando /dw-[comando]`. Re-execute o comando. Verifique novamente. Soh entao prossiga para `/dw-commit`.
-
-NAO faca commit parcial. NAO justifique a falta com validacao manual. NAO marque etapa como completa sem o artefato formal.</critical>
-
-Execute `/dw-commit` automaticamente.
-- Commits semanticos seguindo Conventional Commits
-- NAO aguarde aprovacao
-
-### ═══ GATE 3: Pull Request ═══
-
-Pergunte ao usuario: **"Commits realizados. Deseja gerar o Pull Request?"**
-
-- **SIM**: execute `/dw-generate-pr` com o branch alvo
-- **NAO**: informe que os commits estao prontos e o usuario pode gerar o PR manualmente depois
-
-## Engine Nativo
-
-O autopilot depende de infraestrutura dev-workflow-native para inteligencia de codebase (`/dw-intel --build` + `/dw-intel`) e dos agentes bundled de execucao de fase (plan-checker + executor em `.agents/skills/dw-execute-phase/agents/`). Tudo bundled, sem dependencias externas. Veja as skills bundled `dw-codebase-intel` e `dw-execute-phase` em `.agents/skills/` para detalhes.
+Marque `autopilot-state.json status: "completed"` apos commit, e inclua link do PR se gerado.
 
 ## Persistencia de Estado
 
-<critical>O autopilot DEVE salvar seu estado apos cada etapa completada para permitir re-invocacao no mesmo PRD em caso de interrupcao.</critical>
-
-Salve o arquivo `.dw/spec/prd-[nome]/autopilot-state.json` com o seguinte formato:
+`autopilot-state.json` deve incluir:
 
 ```json
 {
   "mode": "autopilot",
+  "status": "planning",
   "wish": "descricao original do usuario",
-  "prd_path": ".dw/spec/prd-[nome]",
+  "prd_path": ".dw/spec/prd-name",
   "from_prd_slug": null,
-  "current_step": 8,
-  "completed_steps": [1, 2, 3, 4, 5, 6, 7],
-  "skipped_steps": [2],
-  "skip_reasons": {"2": "dominio ja mapeado em .dw/rules/auth.md"},
-  "gates_passed": ["prd", "tasks"],
-  "step_artifacts": {
-    "9": ["review-matrix-shown-in-session"],
-    "10": [
-      ".dw/spec/prd-[nome]/QA/qa-report.md",
-      ".dw/spec/prd-[nome]/QA/bugs.md",
-      ".dw/spec/prd-[nome]/QA/checklist.md",
-      ".dw/spec/prd-[nome]/QA/screenshots/",
-      ".dw/spec/prd-[nome]/QA/scripts/",
-      ".dw/spec/prd-[nome]/QA/logs/"
-    ],
-    "12": ["review-matrix-post-qa-shown-in-session"]
-  },
-  "started_at": "2026-04-10T14:30:00Z",
-  "last_updated": "2026-04-10T15:45:00Z"
+  "current_step": 1,
+  "completed_steps": [],
+  "skipped_steps": [],
+  "skip_reasons": {},
+  "gates_passed": [],
+  "step_artifacts": {},
+  "goal_slug": null,
+  "next_command": null,
+  "started_at": "2026-05-20T00:00:00Z",
+  "last_updated": "2026-05-20T00:00:00Z"
 }
 ```
 
-- Atualize `current_step`, `completed_steps` e `step_artifacts` ANTES de iniciar a proxima etapa
-- Uma etapa SO vai para `completed_steps` apos verificar que seus artefatos existem no disco
-- Se a sessao cair, re-invoque `/dw-autopilot` no mesmo PRD; o comando le `autopilot-state.json` e continua da etapa correta, revalidando artefatos antes de confiar em `completed_steps`
-- Ao finalizar o pipeline (apos commit ou PR), remova o arquivo ou marque `"status": "completed"`
-- Em modo `--from-prd`, defina `from_prd_slug: "<slug>"`, `mode: "from-prd"` e inclua as etapas 1–4 em `skipped_steps` com `skip_reason: "from-prd-mode"` — e isso que a auditoria de pre-commit checa (Etapa 14 verifica que toda etapa NAO listada em `skipped_steps` esta em `completed_steps`)
-
-<critical>Apos CADA etapa completada, exiba o bloco de progresso atualizado ao usuario. Isso e OBRIGATORIO — o usuario DEVE ver o que foi feito e o que vem a seguir. Se uma etapa foi pulada, o motivo DEVE aparecer no bloco de progresso.</critical>
+Atualize estado depois de cada etapa completa ou pulada. Uma etapa so esta completa depois que artefatos obrigatorios existem.
 
 ## Formato de Progresso
 
-Durante a execucao, reporte progresso no formato:
+Reporte progresso depois de cada etapa:
 
+```text
+=== AUTOPILOT =====================================
+  OK [1] Inteligencia do Codebase
+  OK [2] Pesquisa (pulada — dominio conhecido)
+  OK [3] Brainstorm
+  OK [4] PRD
+  OK [5] TechSpec
+  OK [6] Tasks
+  STOP [PLAN COMPLETE] Proximo: /dw-goal --from-autopilot prd-name
+===================================================
 ```
-═══ AUTOPILOT ═══════════════════════════════
-  ✅ [1/14] Inteligencia do Codebase
-  ✅ [2/14] Pesquisa (pulada — dominio conhecido)
-  ✅ [3/14] Brainstorm
-  ✅ [4/14] PRD
-  ⏸️ [GATE 1] Aguardando aprovacao do PRD...
-═════════════════════════════════════════════
+
+Durante a invocacao de execucao:
+
+```text
+=== AUTOPILOT =====================================
+  OK [PLAN] Ja completo
+  RUN [GOAL] /dw-goal --from-autopilot prd-name
+  NEXT [COMMIT] apos goal status=complete
+===================================================
 ```
 
-## Encerramento
+## Anti-patterns
 
-Ao final, apresente:
-- Link do PR (se gerado)
-- Resumo: etapas executadas, etapas puladas, tempo estimado economizado
-- Proximos passos sugeridos (merge, deploy, etc.)
+- Nao continue para implementacao durante a primeira invocacao.
+- Nao pule `/dw-goal` durante a segunda invocacao.
+- Nao substitua `/dw-review` completo por review mais estreito no goal de execucao.
+- Nao marque estado completo a partir de validacao manual.
+- Nao reexecute planejamento quando `status=plan_complete`; retome o goal.
 
 </system_instructions>
