@@ -289,21 +289,21 @@ Resolution order: `BROWSER_TEST` env → `.dw/config.json` (`browserTest`) → d
 - **`BROWSER_TEST` = Windows exe** (e.g. `/mnt/c/.../msedge.exe`): launches it with a temp profile in
   remote-debugging mode (`--remote-allow-origins=*`) and connects over CDP. **Works in both WSL2 modes:**
   in mirrored networking it connects to `127.0.0.1` directly; in NAT mode it starts the bundled
-  **`cdp-relay.exe`** (a tiny prebuilt Windows x64 binary, no runtime) on Windows — `0.0.0.0:39222` → `127.0.0.1:<debug>` —
-  and connects via the Windows host gateway. Falls back to headless Chromium if the relay/rule is absent.
+  **`cdp-relay.exe`** (a tiny prebuilt Windows x64 binary, no runtime) on Windows in reverse mode.
+  The relay opens outbound connections to a WSL broker, which exposes a local CDP proxy. Falls back
+  to headless Chromium if the relay is absent.
 - **`BROWSER_TEST` = channel** (`chrome` | `msedge` | `chromium`): launches that channel locally.
 
-NAT mode needs a one-time setup (the WSL **Hyper-V firewall** defaults inbound to Block, and Chromium
-binds its debug port to loopback only):
+NAT mode needs a one-time user-level setup because Chromium binds its debug port to Windows loopback only:
 
 ```bash
 npx @brunosps00/dev-workflow setup-wsl-browser
 ```
 
-This installs the `cdp-relay.exe` bundled with dev-workflow and adds a Hyper-V firewall inbound allow
-rule for TCP 39222 (one UAC prompt). No Rust toolchain is required on the Windows target. After that, the *real* Windows browser is
-driven from WSL — including `page.screencast` video — under NAT. The launched browser and relay use a
-throwaway profile and are killed on exit.
+This installs the `cdp-relay.exe` bundled with dev-workflow into `%LOCALAPPDATA%\dev-workflow`.
+No admin prompt, firewall rule, or Rust toolchain is required on the Windows target. After that,
+the *real* Windows browser is driven from WSL — including `page.screencast` video — under NAT.
+The launched browser and relay use a throwaway profile and are killed on exit.
 
 Two env vars, two jobs — keep them distinct:
 - `BROWSER` — opens URLs for a human (used by `/dw-generate-pr`).

@@ -26,7 +26,7 @@ npx @brunosps00/dev-workflow install-deps
 
 ## Commands
 
-dev-workflow v1.1.2 ships **31 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v1.1.3 ships **31 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
 ### Tier 1 — Gateway (3)
 
@@ -310,7 +310,7 @@ npx @brunosps00/dev-workflow list-installed                # Show managed instal
 npx @brunosps00/dev-workflow doctor                        # Check wrappers, agents, skills, MCPs, gates
 npx @brunosps00/dev-workflow repair                        # Reconcile managed files from recorded install state
 npx @brunosps00/dev-workflow install-deps                  # Install Playwright, react-doctor; check security scanners + Docker
-npx @brunosps00/dev-workflow setup-wsl-browser             # WSL NAT: install prebuilt CDP relay + add Hyper-V firewall rule
+npx @brunosps00/dev-workflow setup-wsl-browser             # WSL NAT: install user-level prebuilt CDP relay (no admin)
 npx @brunosps00/dev-workflow install-azure-skills          # Opt-in: Azure skills + Microsoft Learn MCP
 npx @brunosps00/dev-workflow install-azure-skills --products=azure-aks,azure-openai  # Subset override
 npx @brunosps00/dev-workflow install-aws-skills            # Opt-in: AWS skills + AWS MCP Server (needs uv + aws cli + creds)

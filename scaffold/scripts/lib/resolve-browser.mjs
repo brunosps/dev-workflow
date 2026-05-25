@@ -19,10 +19,9 @@
 //
 // NOTE on WSL networking: the Chromium debug port binds Windows loopback only. In mirrored
 // networking mode WSL shares that loopback, so 127.0.0.1 connects directly. In NAT mode the
-// helper starts the prebuilt cdp-relay.exe on Windows (0.0.0.0:<fixed port> -> 127.0.0.1:debug)
-// and connects via the Windows host gateway. That needs the one-time setup performed by
-// `npx @brunosps00/dev-workflow setup-wsl-browser` (installs the prebuilt relay + adds the Hyper-V firewall
-// rule). Without it, the helper falls back to the local headless Chromium.
+// helper starts the prebuilt cdp-relay.exe on Windows in reverse mode: the Windows process
+// connects outbound to a WSL broker, and Playwright connects to a local WSL proxy. The one-time
+// setup only installs the relay in the Windows user profile; no admin/firewall rule is needed.
 
 import fs from "node:fs";
 import net from "node:net";
@@ -35,6 +34,8 @@ const BUNDLED_LAUNCH = { channel: "chromium" };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const dedupe = (items) => [...new Set(items.filter(Boolean))];
+const REVERSE_RELAY_POOL = 8;
+const CLIENT_WAIT_TIMEOUT_MS = 5000;
 
 export function detectWsl() {
   if (process.env.WSL_DISTRO_NAME) {
@@ -96,6 +97,42 @@ function getFreePort() {
   });
 }
 
+function listen(server, port, host) {
+  return new Promise((resolve, reject) => {
+    const onError = (error) => {
+      server.off("listening", onListening);
+      reject(error);
+    };
+    const onListening = () => {
+      server.off("error", onError);
+      resolve(server.address().port);
+    };
+    server.once("error", onError);
+    server.listen(port, host, onListening);
+  });
+}
+
+function removeItem(items, item) {
+  const index = items.indexOf(item);
+  if (index >= 0) items.splice(index, 1);
+}
+
+function destroyQuietly(item) {
+  try {
+    item.destroy();
+  } catch {
+    // ignore
+  }
+}
+
+function closeServerQuietly(server) {
+  try {
+    server.close();
+  } catch {
+    // ignore
+  }
+}
+
 function windowsHostIp() {
   // In WSL2 NAT mode the Windows host is the default-route gateway (the vEthernet
   // adapter), NOT the /etc/resolv.conf nameserver (which can be a DNS-tunneling proxy
@@ -118,6 +155,27 @@ function windowsHostIp() {
     // ignore
   }
   return null;
+}
+
+function wslBrokerHosts() {
+  const hosts = ["127.0.0.1"];
+  try {
+    const out = spawnSync("ip", ["-4", "-o", "addr", "show", "dev", "eth0", "scope", "global"], { encoding: "utf8" }).stdout ?? "";
+    const match = out.match(/\binet\s+([0-9.]+)\//);
+    if (match) hosts.push(match[1]);
+  } catch {
+    // ignore
+  }
+  if (hosts.length === 1) {
+    try {
+      const out = spawnSync("hostname", ["-I"], { encoding: "utf8" }).stdout ?? "";
+      const fallback = out.split(/\s+/).find((ip) => /^[0-9.]+$/.test(ip) && !ip.startsWith("127."));
+      if (fallback) hosts.push(fallback);
+    } catch {
+      // ignore
+    }
+  }
+  return dedupe(hosts);
 }
 
 function httpGetJson(url, timeoutMs = 1000) {
@@ -190,21 +248,19 @@ function windowsTempDir() {
   return wslPath ? { winPath, wslPath } : null;
 }
 
-// Fixed port the Windows-side relay listens on, so a single Hyper-V firewall rule covers it.
-const DEFAULT_RELAY_PORT = 39222;
-
 function relayPort(projectRoot) {
   const fromEnv = Number(process.env.DW_RELAY_PORT);
-  if (fromEnv) return fromEnv;
+  if (Number.isInteger(fromEnv) && fromEnv > 0 && fromEnv < 65536) return fromEnv;
   if (projectRoot) {
     try {
       const cfg = JSON.parse(fs.readFileSync(path.join(projectRoot, ".dw", "config.json"), "utf8"));
-      if (Number(cfg?.relayPort)) return Number(cfg.relayPort);
+      const fromConfig = Number(cfg?.relayPort);
+      if (Number.isInteger(fromConfig) && fromConfig > 0 && fromConfig < 65536) return fromConfig;
     } catch {
       // ignore
     }
   }
-  return DEFAULT_RELAY_PORT;
+  return 0;
 }
 
 // The prebuilt Windows relay (cdp-relay.exe), installed by `setup-wsl-browser`. Order:
@@ -237,13 +293,183 @@ function findRelayExe(projectRoot) {
   return null;
 }
 
+async function startReverseRelayBroker({ relay, debugPort, projectRoot }) {
+  const idleRelays = [];
+  const pendingClients = [];
+  const relaySockets = [];
+  const localSockets = [];
+  const relayChildren = [];
+  const relayWaiters = [];
+  let closed = false;
+
+  const notifyRelayReady = () => {
+    while (idleRelays.length > 0 && relayWaiters.length > 0) {
+      const waiter = relayWaiters.shift();
+      clearTimeout(waiter.timer);
+      waiter.resolve(true);
+    }
+  };
+
+  const waitForRelayReady = (timeoutMs) => {
+    if (idleRelays.length > 0) return Promise.resolve(true);
+    return new Promise((resolve) => {
+      const waiter = { resolve, timer: null };
+      waiter.timer = setTimeout(() => {
+        removeItem(relayWaiters, waiter);
+        resolve(false);
+      }, timeoutMs);
+      relayWaiters.push(waiter);
+    });
+  };
+
+  const removePendingClient = (pending) => {
+    clearTimeout(pending.timer);
+    removeItem(pendingClients, pending);
+  };
+
+  const pairSockets = (client, relaySocket) => {
+    const closePair = () => {
+      destroyQuietly(client);
+      destroyQuietly(relaySocket);
+    };
+    client.on("error", closePair);
+    relaySocket.on("error", closePair);
+    client.on("close", () => destroyQuietly(relaySocket));
+    relaySocket.on("close", () => destroyQuietly(client));
+    relaySocket.write("GO\n", (error) => {
+      if (error) closePair();
+    });
+    client.pipe(relaySocket);
+    relaySocket.pipe(client);
+  };
+
+  const drainPending = () => {
+    while (pendingClients.length > 0 && idleRelays.length > 0) {
+      const pending = pendingClients.shift();
+      clearTimeout(pending.timer);
+      const relaySocket = idleRelays.shift();
+      if (pending.client.destroyed || relaySocket.destroyed) {
+        destroyQuietly(pending.client);
+        destroyQuietly(relaySocket);
+        continue;
+      }
+      pairSockets(pending.client, relaySocket);
+    }
+  };
+
+  const brokerServer = net.createServer((socket) => {
+    if (closed) {
+      socket.destroy();
+      return;
+    }
+    socket.setNoDelay(true);
+    relaySockets.push(socket);
+    idleRelays.push(socket);
+    socket.on("error", () => destroyQuietly(socket));
+    socket.on("close", () => {
+      removeItem(relaySockets, socket);
+      removeItem(idleRelays, socket);
+    });
+    notifyRelayReady();
+    drainPending();
+  });
+
+  const localServer = net.createServer((client) => {
+    if (closed) {
+      client.destroy();
+      return;
+    }
+    client.setNoDelay(true);
+    localSockets.push(client);
+    client.on("close", () => removeItem(localSockets, client));
+    client.on("error", () => destroyQuietly(client));
+    const pending = {
+      client,
+      timer: setTimeout(() => {
+        removePendingClient(pending);
+        destroyQuietly(client);
+      }, CLIENT_WAIT_TIMEOUT_MS),
+    };
+    client.on("close", () => removePendingClient(pending));
+    pendingClients.push(pending);
+    drainPending();
+  });
+
+  const cleanup = async () => {
+    closed = true;
+    for (const waiter of relayWaiters.splice(0)) {
+      clearTimeout(waiter.timer);
+      waiter.resolve(false);
+    }
+    for (const pending of pendingClients.splice(0)) {
+      clearTimeout(pending.timer);
+      destroyQuietly(pending.client);
+    }
+    for (const socket of [...localSockets, ...relaySockets]) destroyQuietly(socket);
+    for (const child of relayChildren) {
+      try {
+        child.kill();
+      } catch {
+        // ignore
+      }
+    }
+    closeServerQuietly(localServer);
+    closeServerQuietly(brokerServer);
+  };
+
+  let localPort;
+  let brokerPort;
+  try {
+    localPort = await listen(localServer, relayPort(projectRoot), "127.0.0.1");
+    brokerPort = await listen(brokerServer, 0, "0.0.0.0");
+  } catch (error) {
+    await cleanup();
+    throw new Error(`Could not start the WSL reverse relay broker: ${error.message}`);
+  }
+
+  let selectedHost = null;
+  for (const brokerHost of wslBrokerHosts()) {
+    const child = spawn(
+      relay.wslPath,
+      ["--reverse", brokerHost, String(brokerPort), String(debugPort), String(REVERSE_RELAY_POOL)],
+      { detached: true, stdio: "ignore" },
+    );
+    relayChildren.push(child);
+    child.unref();
+
+    if (await waitForRelayReady(brokerHost === "127.0.0.1" ? 1800 : 3000)) {
+      selectedHost = brokerHost;
+      break;
+    }
+
+    try {
+      child.kill();
+    } catch {
+      // ignore
+    }
+  }
+
+  if (!selectedHost) {
+    await cleanup();
+    throw new Error(
+      "WSL is in NAT mode, but the Windows relay could not connect back to the WSL broker. " +
+        "Run `npx @brunosps00/dev-workflow setup-wsl-browser` to reinstall the relay, or enable mirrored networking.",
+    );
+  }
+
+  return {
+    hosts: ["127.0.0.1", "localhost"],
+    port: localPort,
+    relayHost: selectedHost,
+    cleanup,
+  };
+}
+
 // Launches the Windows browser in remote-debugging mode and returns a CDP descriptor.
 // - mirrored networking: WSL shares the Windows loopback (Hyper-V LoopbackEnabled), connect 127.0.0.1.
-// - NAT networking: the prebuilt cdp-relay.exe bridges 0.0.0.0:<relayPort> -> 127.0.0.1:<debug> on the
-//   Windows side, and WSL connects via the Windows host gateway. This needs a one-time Hyper-V firewall
-//   inbound rule for <relayPort> (added by `setup-wsl-browser`), because WSL's Hyper-V firewall defaults
-//   inbound to Block. The browser echoes the request Host into webSocketDebuggerUrl, so the ws stays
-//   reachable through the relay.
+// - NAT networking: the prebuilt cdp-relay.exe runs on Windows in reverse mode. It connects outbound
+//   to a WSL broker, which exposes a local proxy for Playwright. The browser echoes the request Host
+//   into webSocketDebuggerUrl, so the ws stays reachable through the local proxy.
 // --remote-allow-origins=* is required or Chromium drops the DevTools ws (anti-DNS-rebinding).
 async function launchWindowsBrowser(exePath, { headless, projectRoot }) {
   const mirrored = isMirroredNetworking();
@@ -282,39 +508,42 @@ async function launchWindowsBrowser(exePath, { headless, projectRoot }) {
     }
   };
 
-  let hosts;
-  let port;
-  if (mirrored) {
-    hosts = ["127.0.0.1", "localhost"];
-    port = debugPort;
-  } else {
-    const relay = findRelayExe(projectRoot);
-    if (!relay) {
-      await cleanup();
+  try {
+    let hosts;
+    let port;
+    let sourceSuffix = "";
+    if (mirrored) {
+      hosts = ["127.0.0.1", "localhost"];
+      port = debugPort;
+    } else {
+      const relay = findRelayExe(projectRoot);
+      if (!relay) {
+        throw new Error(
+          "WSL is in NAT mode; reaching the Windows browser needs cdp-relay.exe. Run " +
+            "`npx @brunosps00/dev-workflow setup-wsl-browser` to install the prebuilt relay in your Windows user profile. " +
+            "Alternatively enable mirrored networking or set BROWSER_TEST to a CDP URL.",
+        );
+      }
+      const reverseRelay = await startReverseRelayBroker({ relay, debugPort, projectRoot });
+      cleanups.unshift(reverseRelay.cleanup);
+      hosts = reverseRelay.hosts;
+      port = reverseRelay.port;
+      sourceSuffix = "+reverse-relay";
+    }
+
+    const found = await waitForCdp(hosts, port);
+    if (!found) {
       throw new Error(
-        "WSL is in NAT mode; reaching the Windows browser needs cdp-relay.exe. Run " +
-          "`npx @brunosps00/dev-workflow setup-wsl-browser` (installs the prebuilt relay and adds the " +
-          "Hyper-V firewall rule). Alternatively enable mirrored networking or set BROWSER_TEST to a CDP URL.",
+        `Launched ${path.basename(exePath)} but its CDP endpoint was not reachable (${hosts.join("/")}:${port}). ` +
+          "Run `npx @brunosps00/dev-workflow setup-wsl-browser` to reinstall the user-level relay, or enable mirrored networking.",
       );
     }
-    const rport = relayPort(projectRoot);
-    const relayChild = spawn(relay.wslPath, [String(rport), String(debugPort)], { detached: true, stdio: "ignore" });
-    relayChild.unref();
-    cleanups.unshift(() => relayChild.kill());
-    hosts = [windowsHostIp(), "127.0.0.1"].filter(Boolean);
-    port = rport;
-  }
 
-  const found = await waitForCdp(hosts, port);
-  if (!found) {
+    return { mode: "cdp", endpoint: found.base, source: `launched:${path.basename(exePath)}${sourceSuffix}`, cleanup };
+  } catch (error) {
     await cleanup();
-    throw new Error(
-      `Launched ${path.basename(exePath)} but its CDP endpoint was not reachable (${hosts.join("/")}:${port}). ` +
-        "The Hyper-V firewall rule may be missing — run `npx @brunosps00/dev-workflow setup-wsl-browser`.",
-    );
+    throw error;
   }
-
-  return { mode: "cdp", endpoint: found.base, source: `launched:${path.basename(exePath)}${mirrored ? "" : "+relay"}`, cleanup };
 }
 
 const noopCleanup = async () => {};

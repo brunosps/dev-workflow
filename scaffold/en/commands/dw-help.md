@@ -124,7 +124,7 @@ Match the keyword and suggest:
 | `docker`, `compose`, `container` | `/dw-dockerize` |
 | `new project`, `bootstrap`, `scaffold` | `/dw-new-project` |
 | `functional doc`, `screen map`, `e2e doc` | `/dw-functional-doc` |
-| `wsl`, `browser`, `playwright browser`, `cdp` | `npx @brunosps00/dev-workflow setup-wsl-browser` installs the prebuilt relay when WSL NAT must drive the real Windows browser |
+| `wsl`, `browser`, `playwright browser`, `cdp` | `npx @brunosps00/dev-workflow setup-wsl-browser` installs the user-level reverse relay when WSL NAT must drive the real Windows browser |
 | `azure`, `microsoft learn`, `azure skills` | `/dw-install-azure-skills` |
 | `aws`, `aws mcp`, `aws skills` | `/dw-install-aws-skills` |
 | `incident`, `outage`, `postmortem`, `sev-1`, `sev-2` | (Skill `dw-incident-response` auto-invoked from `/dw-bugfix` for prod-critical) |
