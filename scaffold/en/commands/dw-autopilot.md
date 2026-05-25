@@ -152,10 +152,11 @@ When `autopilot-state.json status=plan_complete`, formally invoke:
 The goal owns this sequence:
 
 1. `/dw-run <prd-path>`
-2. `/dw-review <prd-path>` (full review: coverage, quality, conventions, security, constitution, verify)
+2. `/dw-review <prd-path>` (full review: coverage, quality, conventions, constitution, verify)
 3. `/dw-qa <prd-path>`
 4. `/dw-qa --fix <prd-path>` if QA found Open bugs
 5. `/dw-review <prd-path>` again after QA/fixes
+6. **Security Gate** — the post-QA `/dw-review` (step 5) triggers `/dw-secure-audit`, producing a fresh `.dw/secure-audit/audit-summary.md`. This step **ensures** that verdict is APPROVED: if it is missing/stale/REJECTED, run `/dw-secure-audit <prd-path>` standalone, then loop back to `/dw-bugfix` per finding and re-check. SECRET findings always block (no ADR escape). Do not force a second full scan when a fresh APPROVED summary already exists.
 
 <critical>Do not substitute `/dw-review --coverage-only` for the goal reviews. The autopilot quality goal requires full `/dw-review` before QA and after QA fixes.</critical>
 
@@ -175,6 +176,7 @@ Before `/dw-commit`, verify:
 - `.dw/goals/autopilot-<prd-slug>/status.json` is complete.
 - `<prd-path>/QA/review-consolidated.md` exists from the final post-QA review.
 - `<prd-path>/QA/qa-report.md` and `<prd-path>/QA/bugs.md` exist.
+- **Security Gate passed:** `.dw/secure-audit/audit-summary.md` exists, is fresh (post-last-edit), and status is APPROVED. If missing/stale/REJECTED → STOP (do not commit).
 - `autopilot-state.json` records planning artifacts and the completed goal.
 
 If anything is missing, STOP and re-run the missing formal command. Do not commit partial work.

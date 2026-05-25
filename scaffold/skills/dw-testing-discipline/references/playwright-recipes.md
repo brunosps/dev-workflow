@@ -272,6 +272,56 @@ Tests now start authenticated. No login loop in every test.
 - Some authentication flows (Google Sign-In, MFA hardware keys) cannot be automated; use test-mode bypasses with a dedicated test account.
 - Visual regression tests are sensitive to font rendering across OSes; pin to a CI runner OS.
 
+## Browser on WSL (resilient resolution)
+
+WSL makes browser automation fragile: the Playwright MCP may be blocked, headed runs open
+WSLg, and the bundled headless can lose fidelity. dev-workflow ships `.dw/scripts/lib/resolve-browser.mjs`
+to pick a browser deterministically. Both `.dw/scripts/functional-doc/run-playwright-flow.mjs`
+(video, via `page.screencast`) and `.dw/scripts/lib/capture-screenshots.mjs` (responsive shots)
+use it, so the same rules apply everywhere.
+
+Resolution order: `BROWSER_TEST` env → `.dw/config.json` (`browserTest`) → default.
+
+- **Default (no config):** full Chromium in new-headless mode (`channel: "chromium"`) — desktop-faithful
+  rendering, never opens WSLg. This is the recommended default on WSL.
+- **`BROWSER_TEST` = CDP URL** (e.g. `http://localhost:9222`): connects with `chromium.connectOverCDP`.
+  Tries `127.0.0.1` first, then the Windows host (default-route gateway) for NAT.
+- **`BROWSER_TEST` = Windows exe** (e.g. `/mnt/c/.../msedge.exe`): launches it with a temp profile in
+  remote-debugging mode (`--remote-allow-origins=*`) and connects over CDP. **Works in both WSL2 modes:**
+  in mirrored networking it connects to `127.0.0.1` directly; in NAT mode it starts the prebuilt
+  **`cdp-relay.exe`** (a tiny Rust binary, no runtime) on Windows — `0.0.0.0:39222` → `127.0.0.1:<debug>` —
+  and connects via the Windows host gateway. Falls back to headless Chromium if the relay/rule is absent.
+- **`BROWSER_TEST` = channel** (`chrome` | `msedge` | `chromium`): launches that channel locally.
+
+NAT mode needs a one-time setup (the WSL **Hyper-V firewall** defaults inbound to Block, and Chromium
+binds its debug port to loopback only):
+
+```bash
+npx @brunosps00/dev-workflow setup-wsl-browser
+```
+
+This builds `cdp-relay.exe` with the Windows Rust toolchain (`rustup` on Windows) and adds a Hyper-V
+firewall inbound allow rule for TCP 39222 (one UAC prompt). After that, the *real* Windows browser is
+driven from WSL — including `page.screencast` video — under NAT. The launched browser and relay use a
+throwaway profile and are killed on exit.
+
+Two env vars, two jobs — keep them distinct:
+- `BROWSER` — opens URLs for a human (used by `/dw-generate-pr`).
+- `BROWSER_TEST` — the automation target for QA / functional-doc / redesign capture.
+
+To drive the real Windows browser, set `BROWSER_TEST` to its exe path (NAT works as long as `node` is on
+the Windows PATH; mirrored works too). To force the faithful local-headless path instead, leave
+`BROWSER_TEST` unset or set it to `chromium`.
+
+```bash
+# Probe what would be used (cleans up any launched browser):
+node .dw/scripts/lib/resolve-browser.mjs --project-root .
+
+# Responsive screenshots fallback when the Playwright MCP is unavailable:
+node .dw/scripts/lib/capture-screenshots.mjs --url http://localhost:3000/path \
+  --out QA/evidence/ui --widths 375,1440 --slug home
+```
+
 ## Cross-skill integration
 
 When running these recipes, the doctrine in this skill applies:

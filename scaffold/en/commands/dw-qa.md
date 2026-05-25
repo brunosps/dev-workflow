@@ -83,7 +83,7 @@ When available under `./.agents/skills/`, these are invoked operationally:
 
 1. **Pre-flight**: confirm the project dev server can run. Confirm `.dw/spec/<prd>/` has the PRD + TechSpec + tasks.
 2. **Map FRs to test plan**: for each FR, identify the user-facing flow that exercises it.
-3. **Drive Playwright MCP** (or fallback to local Playwright per `dw-testing-discipline/references/playwright-recipes.md`):
+3. **Drive Playwright MCP** (if unavailable or blocked — common on WSL — fall back to the WSL-resilient local capture `node .dw/scripts/lib/capture-screenshots.mjs`, which picks the browser via `.dw/scripts/lib/resolve-browser.mjs`; see the "Browser on WSL" section of `dw-testing-discipline/references/playwright-recipes.md`):
    - Happy paths for each FR.
    - Edge cases (boundary inputs, network failure, validation errors).
    - Negative flows (unauthorized actions, malformed input).

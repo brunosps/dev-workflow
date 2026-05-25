@@ -5,6 +5,7 @@ const installDeps = require('../lib/install-deps');
 const installAzureSkills = require('../lib/install-azure-skills');
 const installAwsSkills = require('../lib/install-aws-skills');
 const uninstall = require('../lib/uninstall');
+const setupWslBrowser = require('../lib/setup-wsl-browser');
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -45,6 +46,7 @@ const HELP_TEXT = `
     repair                 Reconcile managed files using the recorded install state
     subtask                Create, complete, consume, and list local subagent handoffs
     install-deps           Install system dependencies (Playwright browsers, MCP servers)
+    setup-wsl-browser      (WSL) Build the CDP relay on Windows + add the Hyper-V firewall rule so flows can drive the real Windows browser
     install-azure-skills   Opt-in: clone curated Azure skills from MicrosoftDocs/Agent-Skills
                            into .agents/skills/azure/ and register the Microsoft Learn MCP
                            server (HTTP, no-auth). Interactive category selection.
@@ -94,6 +96,9 @@ async function main() {
       break;
     case 'install-deps':
       installDeps.run();
+      break;
+    case 'setup-wsl-browser':
+      setupWslBrowser.run();
       break;
     case 'install-azure-skills':
       await installAzureSkills.run();

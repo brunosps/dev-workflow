@@ -1,7 +1,13 @@
 <system_instructions>
-You are the security audit orchestrator. Runs OWASP static review + supply-chain CVE/secret/IaC scanning + dependency outdated check + supply-chain compromise detection in one pass. Hard-gates downstream commands when CRITICAL or HIGH findings exist.
+You are the security audit orchestrator — the **Security Gate**. Runs OWASP static review + SAST
+(Semgrep, diff-focused on the generated code) + dedicated secret scanning (gitleaks) + supply-chain
+CVE/secret/IaC scanning (Trivy + native lockfile audit) + supply-chain compromise detection + outdated
+check, in one pass. Hard-gates downstream commands when any blocking finding exists.
 
-Auto-invoked by `/dw-review` and `/dw-generate-pr` for TS/Python/C#/Rust projects. Standalone invocation available for manual audit.
+It is **auto-invoked by `/dw-review` and `/dw-generate-pr`** (for TS/Python/C#/Rust), runs as an **explicit,
+named phase in `/dw-autopilot`** (after review + QA, before commit/PR), and is **runnable standalone** any
+time. `/dw-generate-pr` re-enforces the verdict as a final hard gate. All three keep gating on security —
+the standalone command and the named phase are additive, not a replacement.
 
 ## When to Use
 - Auto-invoked: `/dw-review` and `/dw-generate-pr` for supported languages.
@@ -10,7 +16,7 @@ Auto-invoked by `/dw-review` and `/dw-generate-pr` for TS/Python/C#/Rust project
 - Do NOT use as a substitute for human security review on high-stakes auth/payment code (use `security-review` skill PLUS this).
 
 ## Pipeline Position
-**Predecessor:** any time; auto-invoked by `/dw-review`, `/dw-generate-pr` | **Successor:** `/dw-bugfix` to address findings, or `/dw-commit` if APPROVED
+**Predecessor:** `/dw-review` + `/dw-qa` (the Security Gate runs after they pass) | **Successor:** `/dw-commit` / `/dw-generate-pr` if APPROVED, or `/dw-bugfix` to address findings. Can also run standalone any time.
 
 ## Modes
 
@@ -33,10 +39,20 @@ Auto-invoked by `/dw-review` and `/dw-generate-pr` for TS/Python/C#/Rust project
 
 ## Required Dependencies
 
-- **Trivy** — must be installed (via `npx @brunosps00/dev-workflow install-deps`).
+- **Trivy** — SCA / secrets / IaC (via `npx @brunosps00/dev-workflow install-deps`).
+- **Semgrep** — SAST layer (optional but recommended). If absent, the SAST layer is skipped and noted.
+- **gitleaks** — dedicated secret scan (optional but recommended). If absent, falls back to Trivy secrets.
 - **Context7 MCP** — for framework-version-specific security best practices.
 
-## Three Detection Layers
+All scanners are optional individually: a missing tool degrades that layer and is **reported** in the
+summary (the gate never crashes for a missing scanner), but the missing coverage is visible. Install via
+`npx @brunosps00/dev-workflow install-deps`.
+
+## Detection Layers
+
+**Diff focus (the generated code):** layers that support it scope to the diff against the PR base
+(`git merge-base HEAD origin/main`) so the gate concentrates on the code just written, without noise from
+pre-existing code. A `--full` periodic pass scans the whole tree.
 
 ### Layer 1: OWASP Static Review (via `security-review` skill)
 
@@ -72,6 +88,23 @@ Cross-references the dependency tree against:
 
 Output: `.dw/secure-audit/compromise-findings.md` per affected package: COMPROMISED / suspicious / clean.
 
+### Layer 4: SAST — Semgrep (semantic analysis of generated code)
+
+Deterministic, semantic static analysis of the **diff** (`--baseline-commit`), complementing the human-style
+Layer 1. Pinned rulesets: `p/security-audit`, `p/owasp-top-ten`, `p/secrets` (+ language packs as detected).
+Map Semgrep `ERROR`→HIGH (or CRITICAL for RCE/authn-bypass/SQLi CWEs), `WARNING`→MEDIUM, `INFO`→LOW. Apply
+the **fp-check** reachability discipline before a finding blocks (see `security-review/references/sast.md`).
+
+Output: `.dw/secure-audit/sast-findings.md`. If `semgrep` is absent: skipped + noted in the summary.
+
+### Layer 5: Dedicated secret scan — gitleaks
+
+`gitleaks protect --staged` (uncommitted) or `gitleaks detect --log-opts <base>..HEAD` (branch), `--redact`.
+Authoritative for the diff; complements Trivy secrets (dedupe by `file:line`). **Any hit = REJECTED, no ADR
+exception** — secrets are removed and rotated, not justified. See `security-review/references/secrets.md`.
+
+Output: `.dw/secure-audit/secret-findings.md`. If `gitleaks` is absent: falls back to Trivy secrets + noted.
+
 ### Plus: outdated check
 
 `npm outdated` / `pip list --outdated` / `dotnet list outdated` / `cargo outdated` to identify packages behind by minor or major versions.
@@ -84,9 +117,11 @@ All findings are classified into one of these tiers in `.dw/secure-audit/audit-s
 
 | Tier | Criteria | Block | Suggested Action |
 |------|----------|-------|------------------|
+| **SECRET** | Hardcoded credential/key/token (gitleaks or Trivy), survives allowlist | YES — **no ADR exception** | Remove from code + history, rotate, move to a secret store |
 | **COMPROMISED** | Package known to be malicious in this version range | YES | Immediate remove / pin to safe version |
-| **CRITICAL** | CVE CVSS ≥9.0 OR exploits in the wild OR auth bypass | YES | Update or replace within 24h |
-| **HIGH** | CVE CVSS 7.0–8.9 OR exploitable in current context | YES | Update or replace within 1 week |
+| **CRITICAL** | CVE CVSS ≥9.0 OR exploits in the wild OR auth bypass; OR SAST high-impact CWE (SQLi/RCE/authn-bypass/SSRF/deserialization) reachable | YES | Update/replace or fix within 24h |
+| **HIGH** | CVE CVSS 7.0–8.9 OR exploitable in context; OR Semgrep `ERROR` reachable (fp-check passed) | YES | Update/replace or fix within 1 week |
+| **MEDIUM / LOW** | CVE CVSS <7.0; OR Semgrep `WARNING`/`INFO`; OR unreachable finding downgraded by fp-check | NO (advisory) | Track and fix routinely |
 | **OUTDATED-MAJOR** | ≥1 major version behind (e.g., React 17 → 19) | NO | Plan migration in next quarter |
 | **OUTDATED-MINOR** | Minor/patch behind | NO | Update routinely |
 | **CLEAN** | No findings | NO | — |
@@ -94,19 +129,26 @@ All findings are classified into one of these tiers in `.dw/secure-audit/audit-s
 ## Hard Gates
 
 The verdict is one of:
-- **APPROVED** — no CRITICAL or HIGH or COMPROMISED findings. Verdict file `.dw/secure-audit/audit-summary.md` status: APPROVED.
-- **REJECTED** — ≥1 CRITICAL, HIGH, or COMPROMISED finding without explicit ADR or remediation in flight. Verdict file status: REJECTED.
+- **APPROVED** — no SECRET, COMPROMISED, CRITICAL, or HIGH findings. Verdict file `.dw/secure-audit/audit-summary.md` status: APPROVED. (MEDIUM/LOW/outdated may be present as advisory.)
+- **REJECTED** — ≥1 SECRET (always), or ≥1 COMPROMISED/CRITICAL/HIGH without explicit ADR or remediation in flight. Verdict file status: REJECTED.
+
+**Rigoroso threshold:** SECRET and COMPROMISED always block. CRITICAL/HIGH (CVE or reachable SAST) block unless an ADR justifies acceptance. MEDIUM/LOW and outdated are advisory. A SECRET is the one tier with **no ADR escape** — rotate, don't justify.
 
 **`/dw-review` and `/dw-generate-pr` enforce:** if the project's language is supported AND the most recent `.dw/secure-audit/audit-summary.md` is missing OR REJECTED, those commands themselves return REJECTED. No exception. No bypass flag.
 
 ## Mode 1: Default (`/dw-secure-audit`)
 
 1. **Detect stack**: check for package.json / requirements.txt / *.csproj / Cargo.toml.
-2. **Run all three layers in parallel** (where possible):
-   - OWASP static (via `security-review` skill).
+2. **Run all detection layers in parallel** (where possible):
+   - OWASP static (via `security-review` skill) — diff-focused.
+   - SAST — Semgrep on the diff (`--baseline-commit`).
+   - Dedicated secret scan — gitleaks on the diff.
    - Trivy + lockfile audit.
    - Supply-chain compromise check.
 3. **Run outdated check.**
+   **fp-check:** before finalizing, run reachability validation on each blocking SAST/OWASP finding
+   (see `security-review` SKILL.md); downgrade provably-unreachable ones to advisory with a logged reason.
+   Secrets are exempt from downgrade.
 4. **Aggregate findings** per classification tier.
 5. **Write summary** at `.dw/secure-audit/audit-summary.md`:
 
@@ -118,14 +160,26 @@ The verdict is one of:
 ## Tier Summary
 | Tier | Count | Detail |
 |------|-------|--------|
+| SECRET | N | <list> |
 | COMPROMISED | N | <list> |
 | CRITICAL | N | <list> |
 | HIGH | N | <list> |
+| MEDIUM/LOW (advisory) | N | <list> |
 | OUTDATED-MAJOR | N | <list> |
 | OUTDATED-MINOR | N | <list> |
 
+## Scanners
+| Layer | Tool | Status |
+|-------|------|--------|
+| OWASP | security-review | run |
+| SAST | semgrep | run / skipped (not installed) |
+| Secrets | gitleaks | run / fallback to trivy (not installed) |
+| SCA/IaC | trivy | run |
+
 ## Layer reports
 - OWASP findings: `owasp-findings.md`
+- SAST findings: `sast-findings.md`
+- Secret findings: `secret-findings.md`
 - Trivy findings: `trivy-findings.md`
 - Lockfile findings: `lockfile-findings.md`
 - Compromise findings: `compromise-findings.md`
@@ -164,7 +218,7 @@ For each user-approved remediation:
 ## Mode 4: CI mode (`/dw-secure-audit --scan-only`)
 
 Minimal output:
-- Runs all three layers.
+- Runs all detection layers.
 - Writes findings to disk.
 - Exits with code 0 if APPROVED, 1 if REJECTED.
 - No remediation planning.
@@ -182,8 +236,9 @@ For pre-merge CI gates.
 ## Constitution Gate
 
 <critical>
-- A CRITICAL or COMPROMISED finding without an ADR justifying explicit acceptance → verdict cannot be APPROVED.
-- Constitution principle violations (security-related principles like P-009 server-side auth, P-010 secrets-in-repo) escalate findings — a `severity: info` principle violation surfaced here becomes a HIGH classification.
+- A SECRET finding → verdict cannot be APPROVED, EVER (no ADR escape). Rotate and remove.
+- A CRITICAL/HIGH/COMPROMISED finding (CVE or reachable SAST) without an ADR justifying explicit acceptance → verdict cannot be APPROVED.
+- Constitution principle violations (security principles like P-009 server-side auth, P-010 secrets-in-repo, P-011 no high-severity SAST) escalate findings — a `severity: info` principle violation surfaced here becomes a HIGH classification.
 </critical>
 
 ## Anti-patterns
@@ -198,8 +253,10 @@ For pre-merge CI gates.
 
 ```
 .dw/secure-audit/
-├── audit-summary.md           # verdict + tier summary
+├── audit-summary.md           # verdict + tier summary + scanner status
 ├── owasp-findings.md          # Layer 1
+├── sast-findings.md           # Layer 4 (Semgrep)
+├── secret-findings.md         # Layer 5 (gitleaks, redacted)
 ├── trivy-findings.md          # Layer 2 (SCA + secrets + IaC)
 ├── lockfile-findings.md       # Layer 2 (native auditor)
 ├── compromise-findings.md     # Layer 3

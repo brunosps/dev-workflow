@@ -19,7 +19,7 @@ This will:
 
 > **Compozy-inspired disciplines.** Since 0.5.0, dev-workflow bundles three primitives — `dw-verify`, `dw-memory`, `dw-review-rigor` — adapted from the [Compozy](https://github.com/compozy/compozy) project and invoked internally by existing commands. See [docs/compozy-integration.md](docs/compozy-integration.md) for what was ported and what was not.
 
-Optional dependencies (Playwright browsers, react-doctor, Trivy, Docker):
+Optional dependencies (Playwright browsers, react-doctor, Trivy, Semgrep, gitleaks, Docker):
 ```bash
 npx @brunosps00/dev-workflow install-deps
 ```
@@ -75,7 +75,7 @@ These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help 
 |---------|------|------------|
 | **`/dw-adr "decision"`** | Records an Architecture Decision Record at `.dw/spec/<prd>/adrs/`. | `/dw-plan techspec --council`; deviations from constitution |
 | **`/dw-intel "question"`** | Query codebase intelligence (`.dw/intel/`). `--build` (re)creates the index. | `/dw-plan`, `/dw-review`, `/dw-bugfix` |
-| **`/dw-secure-audit`** | Unified security: OWASP + Trivy SCA/secret/IaC + lockfile + supply-chain check. Hard gate. Flags: `--scan-only`, `--plan`, `--execute`. | `/dw-review`, `/dw-generate-pr` (for TS/Python/C#/Rust) |
+| **`/dw-secure-audit`** | **Security Gate** (phase after review/QA, before commit/PR): OWASP + Semgrep SAST (diff/generated code) + gitleaks secrets + Trivy SCA/IaC + lockfile + supply-chain + outdated. Rigoroso: secrets/CRITICAL/HIGH block (secrets have no ADR escape). Flags: `--scan-only`, `--plan`, `--execute`. See [docs/security-gate.md](docs/security-gate.md). | `/dw-autopilot` (explicit step), enforced by `/dw-generate-pr` |
 | **`/dw-goal "<objective>"`** | Durable objective contract. Uses Codex native `/goal` when available and `.dw/goals/` everywhere for Codex, Copilot, Claude Code, and OpenCode. | `/dw-autopilot` after planning |
 | **`/dw-find-skills "query"`** | Searches `npx skills` ecosystem, vets, installs. | manual when extending the bundle |
 | **`/dw-update`** | Updates dev-workflow to latest npm release with rollback snapshot. | manual maintenance |

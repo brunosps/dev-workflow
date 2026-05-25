@@ -80,12 +80,17 @@ mode: defaults | custom
 **P-009 — Server-side authorization on every state-changing endpoint** (severity: info)
 **Rule:** Any endpoint that creates, updates, or deletes data must verify caller authorization on the server. UI-level gating (hidden buttons, disabled forms) is not security.
 **Why:** Browsers are untrusted (see `dw-testing-discipline/references/security-boundary.md`). UI gating is convenience; only server checks protect data.
-**Enforcement:** `dw-code-review` and `dw-security-check` require an explicit auth check (decorator, middleware, or in-handler assertion) on POST/PUT/PATCH/DELETE routes.
+**Enforcement:** `dw-review` and the `dw-secure-audit` Security Gate require an explicit auth check (decorator, middleware, or in-handler assertion) on POST/PUT/PATCH/DELETE routes.
 
-**P-010 — Secrets never enter the repository** (severity: info)
+**P-010 — Secrets never enter the repository** (severity: high)
 **Rule:** No API keys, passwords, signing keys, tokens, or production endpoints checked into source. `.env.example` documents shape only.
 **Why:** Repository history is permanent. A secret committed once is leaked even if reverted next commit.
-**Enforcement:** `dw-security-check` runs Trivy + secret scanners on the diff.
+**Enforcement:** the `dw-secure-audit` Security Gate runs gitleaks + Trivy secret scanners on the diff. Any hit blocks — with **no ADR exception** (rotate, don't justify).
+
+**P-011 — No high-severity SAST finding ships unreviewed** (severity: high)
+**Rule:** Generated/changed code must pass the SAST layer (Semgrep) of the Security Gate. A reachable high-severity finding (SQLi, command/code injection, SSRF, insecure deserialization, authn bypass) blocks unless an ADR justifies acceptance.
+**Why:** AI-generated code reproduces insecure patterns at scale; deterministic SAST on the diff catches what review by reading misses.
+**Enforcement:** `dw-secure-audit` runs Semgrep on the diff (`--baseline-commit`); findings survive an fp-check reachability validation before blocking.
 
 ---
 

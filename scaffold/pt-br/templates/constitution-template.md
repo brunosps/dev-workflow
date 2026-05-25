@@ -80,12 +80,17 @@ mode: defaults | custom
 **P-009 — Authorization server-side em todo endpoint que altera estado** (severity: info)
 **Regra:** Endpoint que cria, atualiza ou deleta dado deve verificar autorização do caller no servidor. Gating em UI (botões escondidos, formulários disabled) não é segurança.
 **Why:** Browsers são untrusted (ver `dw-testing-discipline/references/security-boundary.md`). Gating em UI é conveniência; só checks server-side protegem dado.
-**Enforcement:** `dw-code-review` e `dw-security-check` exigem check de auth explícito (decorator, middleware ou assertion in-handler) em rotas POST/PUT/PATCH/DELETE.
+**Enforcement:** `dw-review` e o Security Gate `dw-secure-audit` exigem check de auth explícito (decorator, middleware ou assertion in-handler) em rotas POST/PUT/PATCH/DELETE.
 
-**P-010 — Secrets nunca entram no repositório** (severity: info)
+**P-010 — Secrets nunca entram no repositório** (severity: high)
 **Regra:** Nenhuma API key, password, signing key, token ou endpoint de produção commitado em source. `.env.example` documenta forma apenas.
 **Why:** Histórico de repositório é permanente. Um secret commitado uma vez está vazado mesmo que revertido no commit seguinte.
-**Enforcement:** `dw-security-check` roda Trivy + secret scanners no diff.
+**Enforcement:** o Security Gate `dw-secure-audit` roda gitleaks + Trivy no diff. Qualquer hit bloqueia — **sem exceção de ADR** (rotacione, não justifique).
+
+**P-011 — Nenhum finding SAST high-severity passa sem revisão** (severity: high)
+**Regra:** Código gerado/alterado deve passar na camada SAST (Semgrep) do Security Gate. Um finding high-severity alcançável (SQLi, command/code injection, SSRF, deserialization insegura, authn bypass) bloqueia salvo ADR justificando aceitação.
+**Why:** Código gerado por IA reproduz padrões inseguros em escala; SAST determinístico no diff pega o que o review por leitura perde.
+**Enforcement:** `dw-secure-audit` roda Semgrep no diff (`--baseline-commit`); findings sobrevivem a uma validação fp-check de reachability antes de bloquear.
 
 ---
 

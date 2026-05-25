@@ -152,10 +152,11 @@ Quando `autopilot-state.json status=plan_complete`, invoque formalmente:
 O goal e dono desta sequencia:
 
 1. `/dw-run <prd-path>`
-2. `/dw-review <prd-path>` (review completo: cobertura, qualidade, convencoes, seguranca, constitution, verify)
+2. `/dw-review <prd-path>` (review completo: cobertura, qualidade, convencoes, constitution, verify)
 3. `/dw-qa <prd-path>`
 4. `/dw-qa --fix <prd-path>` se QA encontrou bugs Open
 5. `/dw-review <prd-path>` novamente apos QA/fixes
+6. **Security Gate** — o `/dw-review` pós-QA (passo 5) aciona o `/dw-secure-audit`, produzindo um `.dw/secure-audit/audit-summary.md` fresco. Este passo **garante** que o verdict é APROVADO: se ausente/desatualizado/REPROVADO, rode `/dw-secure-audit <prd-path>` standalone, depois volte pro `/dw-bugfix` por finding e re-cheque. Findings SECRET sempre bloqueiam (sem escape de ADR). Não force um segundo scan completo quando já existe um summary APROVADO fresco.
 
 <critical>Nao substitua os reviews do goal por `/dw-review --coverage-only`. O goal de qualidade do autopilot exige `/dw-review` completo antes do QA e depois dos fixes de QA.</critical>
 
@@ -175,6 +176,7 @@ Antes de `/dw-commit`, verifique:
 - `.dw/goals/autopilot-<prd-slug>/status.json` esta completo.
 - `<prd-path>/QA/review-consolidated.md` existe a partir do review final pos-QA.
 - `<prd-path>/QA/qa-report.md` e `<prd-path>/QA/bugs.md` existem.
+- **Security Gate passou:** `.dw/secure-audit/audit-summary.md` existe, esta fresco (pos-ultima-edicao) e status APROVADO. Se ausente/desatualizado/REPROVADO → PARE (nao commite).
 - `autopilot-state.json` registra artefatos de planejamento e o goal completo.
 
 Se algo estiver faltando, PARE e re-execute o comando formal ausente. Nao faca commit parcial.

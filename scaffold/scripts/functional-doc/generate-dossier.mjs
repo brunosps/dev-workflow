@@ -628,7 +628,7 @@ function toTitleCase(value) {
 function buildPlaywrightSteps(features, heading, s) {
   const safeHeading = heading.replace(/"/g, '\\"');
   const steps = [
-    `  await test.step("${s.validateInitialLoad}", async () => {`,
+    `  await step("${s.validateInitialLoad}", async () => {`,
     `    await expect(page.getByText(/${escapeRegex(safeHeading)}/i).first()).toBeVisible();`,
     `  });`,
   ];
@@ -636,8 +636,8 @@ function buildPlaywrightSteps(features, heading, s) {
   const firstEdge = features.flatMap((feature) => feature.cases).find((item) => item.type === "edge-case");
   if (firstEdge) {
     steps.push(
-      `  await test.step("${s.recordEdgeCase}", async () => {`,
-      `    await page.screenshot({ path: "evidence-edge-case.png", fullPage: true });`,
+      `  await step("${s.recordEdgeCase}", async () => {`,
+      `    await shot("edge-case");`,
       `  });`,
     );
   }
@@ -645,7 +645,7 @@ function buildPlaywrightSteps(features, heading, s) {
   const firstError = features.flatMap((feature) => feature.cases).find((item) => item.type === "error");
   if (firstError) {
     steps.push(
-      `  await test.step("${s.recordErrorCase}", async () => {`,
+      `  await step("${s.recordErrorCase}", async () => {`,
       `    await expect(page.locator("body")).toBeVisible();`,
       `  });`,
     );
@@ -715,7 +715,7 @@ function buildManifest({ projectRoot, target, targetType, routePath, baseUrl, ha
       features: path.join(outputRoot, "features.md"),
       caseMatrix: path.join(outputRoot, "case-matrix.md"),
       e2eRunbook: path.join(outputRoot, "e2e-runbook.md"),
-      script: path.join(outputRoot, "scripts", `${slugify(routePath || target)}.spec.ts`),
+      script: path.join(outputRoot, "scripts", `${slugify(routePath || target)}.flow.mjs`),
       captions: path.join(outputRoot, "captions", `${slugify(routePath || target)}.srt`),
     },
     blockers: hasPlaywright ? [] : ["Playwright configuration not detected"],
@@ -786,10 +786,8 @@ function main() {
   );
 
   writeFile(
-    path.join(outputRoot, "scripts", `${slugify(routePath || target)}.spec.ts`),
-    renderTemplate(path.join(templatesRoot, "playwright.spec.ts.tpl"), {
-      baseUrl,
-      testTitle: s.flowTest(routePath || target),
+    path.join(outputRoot, "scripts", `${slugify(routePath || target)}.flow.mjs`),
+    renderTemplate(path.join(templatesRoot, "playwright.flow.mjs.tpl"), {
       routePath,
       routeRegex: escapeRegex(routePath || "/"),
       testSteps: buildPlaywrightSteps(features, heading, s),

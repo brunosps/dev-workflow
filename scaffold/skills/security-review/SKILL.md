@@ -37,6 +37,25 @@ Before flagging any issue, you MUST research the codebase to understand:
 | **MEDIUM** | Vulnerable pattern, input source unclear | **Note** as "Needs verification" |
 | **LOW** | Theoretical, best practice, defense-in-depth | **Do not report** |
 
+## Automated scanners + false-positive validation (fp-check)
+
+The Security Gate (`/dw-secure-audit`) pairs this human-style review with deterministic tools:
+- **SAST** — Semgrep, diff-focused on the generated code. See `references/sast.md`.
+- **Secrets** — gitleaks (dedicated) + Trivy. See `references/secrets.md`. Any secret = REJECTED.
+
+Tool findings are **not** auto-trusted to block. Apply the SAME reachability discipline to them before a
+finding blocks the gate (the **fp-check** step):
+
+1. **Reachable?** Trace the flagged sink back — is it on a path attacker-controlled input can reach?
+2. **Controlled?** Is the input actually attacker-controlled, or a constant / server-controlled value
+   (see the table below) / framework-mitigated?
+3. **Verdict:** If both hold → keep as blocking at its tier. If provably unreachable or
+   trusted-input → **downgrade to advisory** and write the one-line justification in the findings file.
+   Never silently drop a tool finding — log every downgrade so the pattern stays auditable.
+
+Exception: **secrets do not get an fp-check downgrade** — a real-looking credential is removed and
+rotated, not argued away (only committed `.gitleaks.toml` allowlist entries for known fixtures apply).
+
 ## Do Not Flag
 
 ### General Rules

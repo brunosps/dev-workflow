@@ -92,6 +92,11 @@ Without this sentence, defaults take over: light mode, default contrasts, animat
 | Designing state coverage | `references/state-matrix.md` |
 | Interactive widget (button, form, modal, anything clickable) | `references/accessibility-floor.md` |
 | No design authority exists in the project | `references/curated-defaults.md` (palettes / fonts / scales) |
+| Choosing or reviewing a palette / dark mode | `references/color-oklch.md` (OKLCH, tinted neutrals, contrast) |
+| Fonts, sizing, hierarchy, line length | `references/type-scale.md` (modular scale, pairing, measure) |
+| Adding animation or transitions | `references/motion.md` (easing, duration, reduced-motion) |
+| Cross-device / breakpoints / touch | `references/responsive.md` (mobile-first, container queries) |
+| Any user-facing copy (labels, errors, empty states) | `references/ux-writing.md` |
 
 ## The 14 visual-slop patterns (full catalog in `references/visual-slop.md`)
 

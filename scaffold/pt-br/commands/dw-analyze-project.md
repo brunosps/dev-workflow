@@ -767,6 +767,27 @@ Se após as heurísticas nada cruzar a barra (codebase pequeno, churn baixo, sem
 
 **Cadência de refresh:** usuários re-rodam `/dw-analyze-project` quando rules ficam desatualizadas. O Passo 9 atualiza seções auto mantendo entradas preservadas. Não existe comando separado só de refresh.
 
+### Passo 10: Autoridade de design (DESIGN.md) — só projetos frontend
+
+Rode quando um frontend for detectado (React/Vue/Angular/Svelte/Tailwind/CSS), para que a grounding
+question 1 do `dw-ui-discipline` ("de onde vêm as decisões de design?") tenha uma autoridade do projeto
+para seguir. Isso fecha o loop que hoje a grounding apenas *lê*.
+
+1. **Cheque uma autoridade existente primeiro.** Se `DESIGN.md`, `BRAND.md` ou `STYLE_GUIDE.md` já existe
+   na raiz do projeto (ou do módulo frontend), NÃO sobrescreva — registre a localização e pare.
+2. **Detecte design tokens** em ordem de prioridade: `theme`/`@theme` do Tailwind (cores, fontFamily,
+   spacing, radius), CSS custom properties em `globals.css`/`theme.css`/`tokens.css`, theme exports de
+   MUI/Chakra, `components.json` do shadcn, theme do Storybook. Leia os valores reais — não invente.
+3. **Se houver tokens:** sintetize `DESIGN.md` na raiz do frontend capturando o que o projeto JÁ usa —
+   paleta (com os valores hex/oklch reais e nomes dos tokens), tipografia (famílias, escala, pesos),
+   escala de spacing/radius e convenções de componente observadas. Inicie com:
+   `> Gerado por /dw-analyze-project a partir de tokens existentes em <data>. Cure antes de tratar como canon.`
+4. **Se não houver tokens:** NÃO fabrique paleta. Recomende bootstrap a partir de
+   `dw-ui-discipline/references/curated-defaults.md` e registre essa recomendação no índice de rules.
+5. Referencie o novo `DESIGN.md` a partir de `.dw/rules/<módulo-frontend>.md` para os comandos downstream acharem.
+
+Este passo é aditivo e reversível; nunca edita código de componente, só documenta o que existe.
+
 ## Checklist de Qualidade
 
 - [ ] Estrutura do repositório escaneada
@@ -797,6 +818,7 @@ Se após as heurísticas nada cruzar a barra (codebase pequeno, churn baixo, sem
 - [ ] Convenções de teste documentadas (framework, padrões, cobertura)
 - [ ] Step 8 (constitution) oferecido e resolvido (A/B/C)
 - [ ] Step 9 (mapa de concerns) apresentou candidatos, aguardou aprovação, escreveu `.dw/rules/concerns.md` (ou anotou que não há sinais)
+- [ ] Passo 10 (autoridade de design) rodou para projetos frontend: autoridade existente respeitada, ou `DESIGN.md` gerado a partir de tokens reais, ou bootstrap via curated-defaults recomendado
 - [ ] Blocos com marker preserved em concerns.md mantidos verbatim no refresh
 
 ## Exemplo de Uso

@@ -44,9 +44,10 @@ When available under `./.agents/skills/`, these are invoked as analytical suppor
 
 - `dw-review-rigor`: **ALWAYS** — applies de-duplication (same pattern in N files = 1 finding), severity ordering (critical → high → medium → low), verify-before-flag, skip-what-linter-catches, and signal-over-volume. The "Issues Found" table follows this discipline.
 - `dw-verify`: **ALWAYS** — invoked before emitting `APPROVED` or `APPROVED WITH CAVEATS`. Without a VERIFICATION REPORT PASS (test + lint + build), verdict cannot be APPROVED.
-- `dw-secure-audit`: **ALWAYS for TS/Python/C#/Rust projects** — security gate. If the project uses a supported language and a recent `secure-audit.md` is missing OR has REJECTED status, the verdict is **REJECTED** — no exception.
+- `dw-secure-audit` (**Security Gate**): **ALWAYS for TS/Python/C#/Rust projects** — triggered here and the verdict is enforced. If the project's language is supported and a fresh `.dw/secure-audit/audit-summary.md` is missing OR has REJECTED status, the review verdict is **REJECTED** — no exception. The same gate is also a standalone command (`/dw-secure-audit`) and an explicit phase in `/dw-autopilot`. It now adds Semgrep SAST (diff) + gitleaks secrets on top of OWASP/Trivy/SCA.
+- `security-review`: the OWASP diff-level skill the gate uses (injection, authz, secrets, SSRF, crypto — HIGH CONFIDENCE only).
 - `dw-simplification`: use when the diff touches dense or twisty code — applies Chesterton's Fence, behavior-preserving refactor protocol, complexity metrics.
-- `dw-ui-discipline`: use when the diff touches UI — runs the 14 visual-slop patterns + accessibility floor checks.
+- `dw-ui-discipline`: use when the diff touches UI — runs the 14 visual-slop patterns + accessibility floor checks. For a deterministic gate, also run `node .dw/scripts/lib/ui-slop-detect.mjs <changed-ui-paths> --fail-on error` (a wrapper over the impeccable detector); treat blocking findings as **REJECTED** and surface warnings in the report.
 - `dw-testing-discipline`: use when the diff touches tests — applies the 25 anti-patterns catalog + 6 agent guardrails (when tests were agent-authored).
 - `dw-llm-eval`: **REQUIRED when the diff touches AI/LLM feature code paths**. Reference dataset + ≥2 oracle rungs + judge calibration (if rung 4 used) + eval run results MUST be in the PR. Missing → REJECTED.
 - `security-review`: use when the diff touches auth, authorization, external input, upload, SQL, secrets, SSRF, XSS, or sensitive surfaces.
@@ -161,9 +162,10 @@ If MISSING > 0, the verdict suggests revisiting `/dw-plan tasks` to scope or `/d
    - Run dw-verify to produce a VERIFICATION REPORT (test + lint + build all GREEN).
    - Without PASS, verdict cannot be APPROVED.
 
-8. **Security Layer (`dw-secure-audit` for TS/Python/C#/Rust):**
-   - Run `/dw-secure-audit` against the PR. Latest scan must be present and not REJECTED.
-   - If language is supported and audit is missing OR REJECTED → verdict **REJECTED**.
+8. **Security Gate (`dw-secure-audit` for TS/Python/C#/Rust):**
+   - Trigger `/dw-secure-audit` against the diff (OWASP + Semgrep SAST + gitleaks + Trivy/SCA + supply-chain). It produces/refreshes `.dw/secure-audit/audit-summary.md`.
+   - Latest scan must be present, fresh (post-last-edit), and not REJECTED. If language is supported and the audit is missing OR REJECTED → review verdict **REJECTED**. SECRET findings always block (no ADR escape).
+   - The same gate is also runnable standalone (`/dw-secure-audit`) and is an explicit phase in `/dw-autopilot`; `/dw-generate-pr` re-enforces the verdict before the PR.
 
 ### Output
 
