@@ -40,6 +40,7 @@ const HELP_TEXT = `
   Commands:
     init                   Scaffold .dw/ (commands, templates, references, scripts, skills, rules, MCPs)
     update                 Update managed files (commands, templates, references, scripts, skills, wrappers, MCPs)
+                           and print post-update agent actions for project-derived docs/health checks
                            Preserves: .dw/rules/, .dw/spec/, .dw/bugfixes/, .dw/STATE.md, .agents/skills/azure/, user data
     list-installed         Show dev-workflow install state for this project
     doctor                 Check managed files, wrappers, agents, and MCP configuration

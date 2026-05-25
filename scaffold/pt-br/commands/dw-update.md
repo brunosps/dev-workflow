@@ -80,6 +80,7 @@ O comando `update` sobrescreve arquivos gerenciados e PRESERVA:
 - `.dw/rules/` (rules do usuário)
 - `.dw/spec/` (PRDs e tasks em andamento)
 - `.dw/intel/` (índice de codebase do `/dw-intel --build`)
+- docs derivados do projeto como `.dw/constitution.md`, `.dw/rules/concerns.md` e `DESIGN.md` em frontend
 
 O comando `update` também roda o passo de migração GSD automaticamente — se o projeto tem `.planning/` legado (de uso prévio do GSD), o conteúdo é migrado para `.dw/intel/`, `.dw/spec/active-session.md`, `.dw/spec/quick/`, etc., e `.planning/` é renomeado para `.planning.gsd-archive-<DATA>/` para inspeção. Os arquivos `.claude/commands/gsd/`, `.claude/agents/gsd-*.md`, `.claude/hooks/gsd-*.js` e `.claude/gsd-file-manifest.json` são removidos durante a migração.
 
@@ -97,9 +98,23 @@ Apresente ao usuário:
 - Idioma detectado (`DETECTED_LANG`)
 - Versão anterior → nova versão
 - Resumo do que o output do `update` mostrou (arquivos copiados, wrappers gerados, MCPs configurados)
+- As `Post-update agent actions` impressas pelo CLI
 - Quaisquer avisos ou erros
 
-### 6. Sugerir Próximo Passo
+### 6. Executar Ações de Agente Pós-Update (Obrigatório)
+
+<critical>O CLI não consegue executar slash commands nem inspecionar sozinho a autoridade de design específica do produto. Quando o output do update imprimir `Post-update agent actions`, trate essa lista como trabalho para este agente executar agora, exceto se o usuário pediu explicitamente "só atualize os arquivos".</critical>
+
+Rode os comandos listados nesta ordem:
+
+1. `/dw-analyze-project` quando listado — refresca docs derivados do projeto. Este é o comando que cria ou atualiza `.dw/rules/`, oferece `.dw/constitution.md`, escreve `.dw/rules/concerns.md` e, em projetos frontend, sintetiza `DESIGN.md` a partir dos tokens existentes quando não há autoridade de design.
+2. `/dw-intel --build` quando listado — reconstrói o índice queryable do codebase depois do refresh de rules/docs.
+3. `/dw-harness-audit` — valida commands, wrappers, agentes, MCPs e gates depois que arquivos gerenciados mudaram.
+4. `/dw-skill-health` — audita bundled skills e agentes atualizados por bloat, sobreposição e referências antigas.
+
+Se `/dw-analyze-project` fizer perguntas de esclarecimento ou aprovação, faça-as e continue. Não fabrique `DESIGN.md`, `concerns.md` ou constitution diretamente dentro de `/dw-update`; delegue para o comando dono desses artefatos.
+
+### 7. Sugerir Próximo Passo
 
 Se comandos/skills foram atualizados, lembre o usuário:
 - Reinicie a sessão do agente (ou recarregue skills) para que as instruções novas tenham efeito — skills costumam ser carregadas no início da sessão

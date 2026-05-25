@@ -23,16 +23,16 @@ O dev-workflow historicamente distribui prompts e templates. O Compozy trata ski
 
 ### Padrões injetados em commands existentes
 
-- **Hard gates**: `dw-create-techspec` (bloqueia se PRD tem Open Questions abertas); `dw-generate-pr` (bloqueia se sessão não tem `dw-verify` PASS); `dw-fix-qa` (bloqueia mudança de status sem reteste + verify).
-- **Circular dependency detection**: `dw-create-tasks` faz grafo de deps e aborta se houver ciclo — antes de escrever `tasks.md`.
-- **Codebase-aware task enrichment**: `dw-create-tasks` dispatcha `Agent Explore` em paralelo para preencher Relevant Files / Dependent Files / Related Rules em cada task (aditivo, não bloqueia).
-- **De-duplication em review**: `dw-code-review`, `dw-review-implementation`, `dw-refactoring-analysis` aplicam as 5 regras de `dw-review-rigor` para evitar N findings idênticos em N arquivos.
-- **Memory thread**: `dw-run-task`, `dw-run-plan`, `dw-autopilot`, `dw-resume`, `dw-revert-task` usam `dw-memory` para persistir contexto cross-task com discipline.
+- **Hard gates**: `/dw-plan techspec` bloqueia se PRD tem Open Questions abertas; `/dw-generate-pr` bloqueia sem `dw-verify` PASS; `/dw-qa --fix` bloqueia mudança de status sem reteste + verify; `/dw-secure-audit` bloqueia commit/PR quando há SECRET/CRITICAL/HIGH.
+- **Circular dependency detection**: `/dw-plan tasks` faz grafo de deps e aborta se houver ciclo antes de escrever `tasks.md`.
+- **Codebase-aware task enrichment**: `/dw-plan tasks` usa exploração de codebase para preencher Relevant Files / Dependent Files / Related Rules em cada task (aditivo, não bloqueia).
+- **De-duplication em review**: `/dw-review` e `/dw-brainstorm --refactor` aplicam as 5 regras de `dw-review-rigor` para evitar N findings idênticos em N arquivos.
+- **Memory thread**: `/dw-run`, `/dw-goal`, `/dw-autopilot`, `/dw-pause` e `/dw-resume` usam `dw-memory` para persistir contexto cross-task com discipline.
 
-### Novos commands
+### Novos commands / comandos consolidados
 
 - **`dw-adr`**: inspirado em `cy-create-adr` do Compozy. Registra Architecture Decision Records em `.dw/spec/<prd>/adrs/`. Templates PRD/TechSpec/Task ganharam seção opcional "Related ADRs".
-- **`dw-revert-task`**: não tem análogo no Compozy. Preencheu gap nativo do dev-workflow: rollback seguro de commits de uma task com verificação de dependências.
+- **`dw-review`**, **`dw-run`** e **`dw-plan`**: consolidam a surface 1.0.0, mas preservam os gates e padrões originalmente incorporados dos fluxos Compozy.
 
 ### Schema versioning
 
@@ -66,7 +66,7 @@ Compozy separa workspace (artifacts editáveis) de daemon (run state em SQLite).
 
 ### Review provider abstraction (CodeRabbit bridge etc.)
 
-Compozy tem adapters para review providers externos. **Não portado**: dev-workflow já suporta review via MCP/Playwright e `dw-code-review` manual; adicionar provider bridging seria escopo fora do PRD→PR loop.
+Compozy tem adapters para review providers externos. **Não portado**: dev-workflow já suporta review via MCP/Playwright e `/dw-review`; adicionar provider bridging seria escopo fora do PRD→PR loop.
 
 ### Executáveis e scripts binários do Compozy
 
@@ -80,7 +80,7 @@ Compozy tem adapters para review providers externos. **Não portado**: dev-workf
 | `scaffold/skills/dw-memory/SKILL.md` | `/tmp/compozy/.agents/skills/cy-workflow-memory/SKILL.md` |
 | `scaffold/skills/dw-review-rigor/SKILL.md` | `/tmp/compozy/.agents/skills/cy-review-round/SKILL.md` |
 | `scaffold/pt-br/commands/dw-adr.md` + EN | `/tmp/compozy/.agents/skills/cy-create-adr/` (referencial) |
-| `scaffold/*/commands/dw-create-tasks.md` (circular-dep + enrichment) | `/tmp/compozy/.agents/skills/cy-create-tasks/SKILL.md` |
+| `scaffold/*/commands/dw-plan.md` (circular-dep + enrichment no estágio `tasks`) | `/tmp/compozy/.agents/skills/cy-create-tasks/SKILL.md` |
 | Templates com `schema_version` | Frontmatter v2 dos artifacts Compozy |
 | `scaffold/skills/dw-council/SKILL.md` | `/tmp/compozy/.agents/skills/cy-idea-factory/references/council.md` |
 | `scaffold/skills/dw-council/agents/*.md` | `/tmp/compozy/extensions/cy-idea-factory/agents/*/AGENT.md` |
@@ -101,7 +101,6 @@ Os ports são adaptações conceituais e textuais. Créditos ao projeto Compozy 
 
 Nem tudo no dev-workflow vem do Compozy. Alguns commands são nativos — preenchem gaps do próprio dev-workflow ou foram inspirados em skills do ecosistema skills.sh.
 
-- **`/dw-revert-task`** — sem análogo no Compozy. Padrão próprio, motivado pela necessidade de revert seguro de task com dependency checks.
-- **`/dw-security-check`** — dev-workflow-native. Conceitualmente inspirado em skills pesquisadas via `/find-skills` no skills.sh (`supercent-io/skills-template@security-best-practices`, `hoodini/ai-agents-skills@owasp-security`, `github/awesome-copilot@agent-owasp-compliance`) — mas implementado do zero com integração nativa a **Trivy** (SCA/IaC scanner não presente em Compozy), às primitivas `dw-verify`/`dw-review-rigor`/`security-review`, e a Context7 MCP para best practices de framework. Suporta **TypeScript, Python, C# e Rust** na release inicial.
+- **`/dw-secure-audit`** — dev-workflow-native. Conceitualmente inspirado em skills pesquisadas via `/find-skills` no skills.sh (`supercent-io/skills-template@security-best-practices`, `hoodini/ai-agents-skills@owasp-security`, `github/awesome-copilot@agent-owasp-compliance`) — mas implementado do zero com integração nativa a **Trivy** (SCA/IaC), **Semgrep** (SAST), **gitleaks** (secrets), às primitivas `dw-verify`/`dw-review-rigor`/`security-review`, e a Context7 MCP para best practices de framework. Suporta **TypeScript, Python, C# e Rust** como stacks com gate rígido, e best-effort para outras linguagens.
 
-- **`/dw-brainstorm` (product-aware upgrade)** — conceitualmente inspirado em [`addyosmani/agent-skills@idea-refine`](https://skills.sh/addyosmani/agent-skills/idea-refine) (Addy Osmani, Google — 1.4K+ installs), surfaced via `/find-skills`. **Adaptação crítica**: enquanto `idea-refine` lê `src/*` com Glob/Grep/Read, o `/dw-brainstorm` lê **PRDs + rules + intel** para mapear o **inventário de features do produto** — mantendo o brainstorm em nível de produto, não de código. Adicionamos classificação dev-workflow-nativa (IMPROVES/CONSOLIDATES/NEW) que força a discussão "feature nova vs consolidação vs melhoria" antes do PRD. O one-pager durável em `.dw/spec/ideas/<slug>.md` encaixa no pipeline existente: `/dw-create-prd` aceita como input e reduz perguntas de 7 para 4.
+- **`/dw-brainstorm` (product-aware upgrade)** — conceitualmente inspirado em [`addyosmani/agent-skills@idea-refine`](https://skills.sh/addyosmani/agent-skills/idea-refine) (Addy Osmani, Google — 1.4K+ installs), surfaced via `/find-skills`. **Adaptação crítica**: enquanto `idea-refine` lê `src/*` com Glob/Grep/Read, o `/dw-brainstorm` lê **PRDs + rules + intel** para mapear o **inventário de features do produto** — mantendo o brainstorm em nível de produto, não de código. Adicionamos classificação dev-workflow-nativa (IMPROVES/CONSOLIDATES/NEW) que força a discussão "feature nova vs consolidação vs melhoria" antes do PRD. O one-pager durável em `.dw/spec/ideas/<slug>.md` encaixa no pipeline existente: `/dw-plan prd` aceita como input e reduz perguntas de 7 para 4.

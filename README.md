@@ -19,24 +19,24 @@ This will:
 
 > **Compozy-inspired disciplines.** Since 0.5.0, dev-workflow bundles three primitives — `dw-verify`, `dw-memory`, `dw-review-rigor` — adapted from the [Compozy](https://github.com/compozy/compozy) project and invoked internally by existing commands. See [docs/compozy-integration.md](docs/compozy-integration.md) for what was ported and what was not.
 
-Optional dependencies (Playwright browsers, react-doctor, Trivy, Semgrep, gitleaks, Docker):
+Optional dependencies (Playwright browsers, react-doctor, Trivy, Semgrep, gitleaks, syft, Docker):
 ```bash
 npx @brunosps00/dev-workflow install-deps
 ```
 
 ## Commands
 
-dev-workflow v1.0.6 ships **31 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v1.1.1 ships **31 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
 ### Tier 1 — Gateway (3)
 
 | Command | When |
 |---------|------|
-| **`/dw-autopilot "wish"`** | Default entry point in two invocations. First run completes PRD → TechSpec → Tasks and stops. Second run resumes from state, executes `/dw-goal --from-autopilot <slug>` for Run → Review → QA/Fix → Review, then Commit → PR. |
+| **`/dw-autopilot "wish"`** | Default entry point in two invocations. First run completes PRD → TechSpec → Tasks and stops. Second run resumes from state, executes `/dw-goal --from-autopilot <slug>` for Run → Review → QA/Fix → Review, then Security Gate → Commit → PR. |
 | **`/dw-bugfix "description"`** | A bug report or pasted error. Triages bug-vs-feature-vs-scope, surgical fix or routes to a PRD. |
 | **`/dw-help [keyword]`** | Discover commands. Pass a keyword for shortcuts; `--advanced` reveals internal commands. |
 
-### Tier 2 — Pipeline granular (7)
+### Tier 2 — Pipeline granular (9)
 
 Use these when you want step-by-step control instead of `/dw-autopilot`.
 
@@ -52,13 +52,13 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 | **`/dw-commit`** | Atomic Conventional Commits for pending changes. Applies `dw-git-discipline` (one intent per commit, lint+tests+build green before). |
 | **`/dw-generate-pr [target]`** | Push the branch, draft a PR body with summary + test plan, open the browser. Hard gates: dw-verify PASS + secure-audit. |
 
-### Tier 3 — Specialty (8)
+### Tier 3 — Specialty (10)
 
 | Command | What |
 |---------|------|
-| **`/dw-analyze-project`** | Scans the repo, writes `.dw/rules/` (per-module conventions, anti-patterns, naming). Step 8 offers to generate `.dw/constitution.md` (declarative principles the team commits to). Step 9 generates `.dw/rules/concerns.md` (risk map: hot spots, fragile integrations, hostile code, bug history). Run once per project; refresh after major refactors. |
-| **`/dw-redesign-ui "target"`** | Audits a frontend page, runs the `dw-ui-discipline` 4-question grounding, proposes 2-3 design directions, ships the redesign. WCAG 2.2 AA accessibility floor is non-negotiable. |
-| **`/dw-functional-doc`** | Maps screens + user flows into a functional doc, validated end-to-end with Playwright. |
+| **`/dw-analyze-project`** | Scans the repo, writes `.dw/rules/` (per-module conventions, anti-patterns, naming). Step 8 offers `.dw/constitution.md`; Step 9 writes `.dw/rules/concerns.md`; Step 10 can synthesize a frontend `DESIGN.md` from existing tokens. Run once per project; refresh after major refactors. |
+| **`/dw-redesign-ui "target"`** | Audits a frontend page, runs the `dw-ui-discipline` 4-question grounding, proposes 2-3 design directions, ships the redesign. WCAG 2.2 AA accessibility floor is non-negotiable; UI diffs can also run the deterministic impeccable slop detector. |
+| **`/dw-functional-doc`** | Maps screens + user flows into a functional doc, validated end-to-end with Playwright. Uses the WSL-resilient browser resolver and can capture guided functional video evidence. |
 | **`/dw-context-budget`** | Audits context overhead from commands, skills, agents, instruction files, and MCPs. |
 | **`/dw-harness-audit`** | Deterministic health scorecard for the dev-workflow install, agents, wrappers, MCPs, and gates. |
 | **`/dw-skill-health`** | Audits installed skills and agents for bloat, duplication, and missing references. |
@@ -75,7 +75,7 @@ These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help 
 |---------|------|------------|
 | **`/dw-adr "decision"`** | Records an Architecture Decision Record at `.dw/spec/<prd>/adrs/`. | `/dw-plan techspec --council`; deviations from constitution |
 | **`/dw-intel "question"`** | Query codebase intelligence (`.dw/intel/`). `--build` (re)creates the index. | `/dw-plan`, `/dw-review`, `/dw-bugfix` |
-| **`/dw-secure-audit`** | **Security Gate** (phase after review/QA, before commit/PR): OWASP + Semgrep SAST (diff/generated code) + gitleaks secrets + Trivy SCA/IaC + lockfile + supply-chain + outdated. Rigoroso: secrets/CRITICAL/HIGH block (secrets have no ADR escape). Flags: `--scan-only`, `--plan`, `--execute`. See [docs/security-gate.md](docs/security-gate.md). | `/dw-autopilot` (explicit step), enforced by `/dw-generate-pr` |
+| **`/dw-secure-audit`** | **Security Gate** (phase after review/QA, before commit/PR): OWASP + Semgrep SAST (diff/generated code) + gitleaks secrets + Trivy SCA/IaC + lockfile + supply-chain + outdated. Rigoroso: secrets/CRITICAL/HIGH block (secrets have no ADR escape). Flags: `--scan-only`, `--plan`, `--execute`. See [docs/security-gate.md](docs/security-gate.md). | `/dw-review`, `/dw-autopilot` (explicit step), enforced by `/dw-generate-pr` |
 | **`/dw-goal "<objective>"`** | Durable objective contract. Uses Codex native `/goal` when available and `.dw/goals/` everywhere for Codex, Copilot, Claude Code, and OpenCode. | `/dw-autopilot` after planning |
 | **`/dw-find-skills "query"`** | Searches `npx skills` ecosystem, vets, installs. | manual when extending the bundle |
 | **`/dw-update`** | Updates dev-workflow to latest npm release with rollback snapshot. | manual maintenance |
@@ -87,17 +87,17 @@ These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help 
 
 ```
 /dw-autopilot "wish"  ------>  First invocation: PRD → TechSpec → Tasks → STOP
-/dw-autopilot          ------>  Second invocation: /dw-goal → Commit → PR
+/dw-autopilot          ------>  Second invocation: /dw-goal → Security Gate → Commit → PR
     --- OR step-by-step ---
 
 /dw-brainstorm  -->  /dw-plan           -->  .dw/spec/prd-{name}/{prd,techspec,tasks}.md
                           |
-                    /dw-goal             -->  /dw-run → /dw-review → /dw-qa → /dw-review
+                    /dw-goal             -->  /dw-run → /dw-review → /dw-qa → /dw-review → /dw-secure-audit
                           |
                     /dw-commit + /dw-generate-pr
 
 Manual alternative after /dw-plan:
-  /dw-run → /dw-review → /dw-qa → /dw-review → /dw-commit → /dw-generate-pr
+  /dw-run → /dw-review → /dw-qa → /dw-review → /dw-secure-audit → /dw-commit → /dw-generate-pr
 
 Shortcuts:
   /dw-intel "question"         Query codebase intelligence
@@ -116,18 +116,29 @@ A **constitution** is a declarative list of principles your team commits to (e.g
 **How it works:**
 
 - `/dw-analyze-project` offers three paths: synthesize from observed patterns (with your approval), install canonical defaults, or skip.
-- If `/dw-create-prd`, `/dw-create-techspec`, or `/dw-code-review` run **without** a constitution, they auto-install the defaults template (10 canonical principles at `severity: info`), notify in chat, and continue. Ausência nunca bloqueia.
+- If `/dw-plan` or `/dw-review` run **without** a constitution, they auto-install the defaults template (10 canonical principles at `severity: info`), notify in chat, and continue. Ausência nunca bloqueia.
 - Once principles exist:
   - `severity: info` → reported, never blocks.
   - `severity: high` → blocks PR/techspec when violated, unless an ADR justifies the deviation.
   - `severity: critical` → blocks plus requires reviewer sign-off in the ADR.
 - Defaults start at `info`; you promote severities as your team trusts enforcement.
 
-**Tasks consistency check.** At the end of `/dw-create-tasks`, a 5-dimension consistency check validates PRD ↔ TechSpec ↔ Tasks alignment (FR coverage, task grounding, test coverage, dependency DAG, constitution alignment) and writes `.dw/spec/prd-<feature>/tasks-validation.md`. Any FAIL blocks user approval until resolved or explicitly overridden.
+**Tasks consistency check.** At the end of `/dw-plan tasks`, a 5-dimension consistency check validates PRD ↔ TechSpec ↔ Tasks alignment (FR coverage, task grounding, test coverage, dependency DAG, constitution alignment) and writes `.dw/spec/prd-<feature>/tasks-validation.md`. Any FAIL blocks user approval until resolved or explicitly overridden.
 
 ## Template Overrides
 
 Customize templates locally without losing dev-workflow updates. Drop a file at `.dw/templates/overrides/<name>.md`; the override is used in place of the bundled core template on every `update`. Subdirectories work too (e.g., `.dw/templates/overrides/functional-doc/e2e-runbook.md`). See `.dw/templates/overrides/README.md` (created on init) for the workflow and `diff` cadence guidance.
+
+## Post-Update Actions
+
+`dev-workflow update` refreshes managed files only: commands, templates, references, scripts, bundled skills, wrappers, agents, and MCP config. It does **not** overwrite project-derived docs such as `.dw/rules/`, `.dw/constitution.md`, `.dw/rules/concerns.md`, `.dw/intel/`, or frontend `DESIGN.md`.
+
+After an update, the CLI prints **Post-update agent actions**. When `/dw-update` runs inside an agent, it should execute the listed commands in order:
+
+1. `/dw-analyze-project` when project-derived docs are missing or need refresh; this owns `.dw/rules/`, constitution, concerns map, and frontend `DESIGN.md`.
+2. `/dw-intel --build` when the codebase index is missing or stale.
+3. `/dw-harness-audit` to validate the install after managed files changed.
+4. `/dw-skill-health` to inspect refreshed skills and agents.
 
 ## Auto-Trigger (CLAUDE.md / AGENTS.md)
 
@@ -188,6 +199,8 @@ your-project/
 │   ├── scripts/           # Utility scripts
 │   ├── spec/              # PRD directories — each contains tasks-validation.md
 │   ├── bugfixes/          # Persistent bugfix records: NNN-<slug>/{TASK.md, SUMMARY.md, fix-report.md} + review/, QA/
+│   ├── goals/             # Durable goal state used by /dw-goal and /dw-autopilot
+│   ├── secure-audit/      # Security Gate summaries and per-layer reports
 │   ├── subtasks/          # Local ephemeral subagent input packets and handoffs (pending/archive ignored by Git)
 │   └── STATE.md           # Session state: Decisions, Blockers, Todos, Open Loops, Deferred Ideas, Lessons, Preferences (managed by /dw-pause + /dw-resume)
 ├── CLAUDE.md              # Auto-trigger decision tree for Claude Code (merge-aware, includes Auto-Sizing Matrix)
@@ -224,6 +237,7 @@ Subagent handoffs use local packets under `.dw/subtasks/`:
 npx @brunosps00/dev-workflow subtask create --agent=dw-code-explorer --goal="Map the auth flow"
 npx @brunosps00/dev-workflow subtask complete --slug=<slug> --file=<handoff.md>
 npx @brunosps00/dev-workflow subtask consume
+npx @brunosps00/dev-workflow subtask list
 ```
 
 ## Bundled Skills
@@ -245,15 +259,15 @@ These are not slash commands — they are primitives other commands call to enfo
 
 | Skill | Description | Invoked by | Inspired by |
 |-------|-------------|------------|-------------|
-| **dw-verify** | Enforces fresh verification evidence before any completion, commit, or PR claim — with Iron Law, gate function, and Verification Report template | `dw-run-task`, `dw-run-plan`, `dw-fix-qa`, `dw-bugfix`, `dw-code-review`, `dw-generate-pr` | [Compozy](https://github.com/compozy/compozy) `cy-final-verify` |
-| **dw-memory** | Two-tier workflow memory (shared `MEMORY.md` + per-task `<N>_memory.md`) with promotion test and compaction rules, so cross-task context persists cleanly | `dw-run-task`, `dw-run-plan`, `dw-autopilot` | [Compozy](https://github.com/compozy/compozy) `cy-workflow-memory` |
-| **dw-review-rigor** | Review discipline: de-duplication, severity ordering, verify-intent-before-flagging, skip-linter-issues, signal-over-volume | `dw-code-review`, `dw-review-implementation`, `dw-refactoring-analysis` | [Compozy](https://github.com/compozy/compozy) `cy-review-round` |
-| **dw-council** | Multi-advisor debate (3-5 archetypes) with steel-manning, concession tracking, and dissent-preserving synthesis. Opt-in only. | `dw-brainstorm --council`, `dw-create-techspec --council` | [Compozy](https://github.com/compozy/compozy) `cy-idea-factory` |
-| **dw-codebase-intel** | Codebase intelligence (`stack.json`, `files.json`, `apis.json`, `deps.json`, `arch.md`) with incremental updates and query patterns. Cross-cutting reference: `api-design-discipline` (Hyrum's Law, contract-first, error semantics) used when techspecs design API endpoints. | `/dw-intel`, `/dw-map-codebase`, `dw-create-techspec` | [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) (MIT) + [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
-| **dw-execute-phase** | Goal-backward 6-dimension plan verification (`plan-checker`) and wave-based parallel task execution (`executor`) with atomic commit, deviation handling, and checkpoint recovery | `dw-run-plan`, `dw-autopilot` | [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) (MIT) |
-| **dw-source-grounding** | Detect → Fetch → Implement → Cite protocol with `[source: <url>, version: X.Y, retrieved: YYYY-MM-DD]` citations. Strict source-priority hierarchy (Tier 1 official docs > Tier 2 maintainer blogs > Tier 3 Stack Overflow as discovery only). | `dw-create-techspec`, `dw-deps-audit`, `dw-deep-research` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
-| **dw-simplification** | Chesterton's Fence (understand WHY before changing), behavior-preserving refactor protocol (test gate before/after), complexity metrics (cyclomatic, cognitive, depth, fan-out), Rule of 500 for large refactors | `dw-code-review`, `dw-refactoring-analysis` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
-| **dw-debug-protocol** | Stop-the-line discipline plus six-step triage (Reproduce → Localize → Reduce → Fix Root Cause → Guard → Verify End-to-End). Error categorization matrix; instrument-first non-reproducible-bug strategy. | `dw-bugfix`, `dw-fix-qa` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
+| **dw-verify** | Enforces fresh verification evidence before any completion, commit, or PR claim — with Iron Law, gate function, and Verification Report template | `/dw-run`, `/dw-goal`, `/dw-qa --fix`, `/dw-bugfix`, `/dw-review`, `/dw-generate-pr` | [Compozy](https://github.com/compozy/compozy) `cy-final-verify` |
+| **dw-memory** | Two-tier workflow memory (shared `MEMORY.md` + per-task `<N>_memory.md`) with promotion test and compaction rules, so cross-task context persists cleanly | `/dw-run`, `/dw-goal`, `/dw-autopilot`, `/dw-pause`, `/dw-resume` | [Compozy](https://github.com/compozy/compozy) `cy-workflow-memory` |
+| **dw-review-rigor** | Review discipline: de-duplication, severity ordering, verify-intent-before-flagging, skip-linter-issues, signal-over-volume | `/dw-review`, `/dw-brainstorm --refactor` | [Compozy](https://github.com/compozy/compozy) `cy-review-round` |
+| **dw-council** | Multi-advisor debate (3-5 archetypes) with steel-manning, concession tracking, and dissent-preserving synthesis. Opt-in only. | `/dw-brainstorm --council`, `/dw-plan techspec --council` | [Compozy](https://github.com/compozy/compozy) `cy-idea-factory` |
+| **dw-codebase-intel** | Codebase intelligence (`stack.json`, `files.json`, `apis.json`, `deps.json`, `arch.md`) with incremental updates and query patterns. Cross-cutting reference: `api-design-discipline` (Hyrum's Law, contract-first, error semantics) used when techspecs design API endpoints. | `/dw-intel`, `/dw-intel --build`, `/dw-plan techspec` | [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) (MIT) + [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
+| **dw-execute-phase** | Goal-backward 6-dimension plan verification (`plan-checker`) and wave-based parallel task execution (`executor`) with atomic commit, deviation handling, and checkpoint recovery | `/dw-run`, `/dw-goal`, `/dw-autopilot` | [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) (MIT) |
+| **dw-source-grounding** | Detect → Fetch → Implement → Cite protocol with `[source: <url>, version: X.Y, retrieved: YYYY-MM-DD]` citations. Strict source-priority hierarchy (Tier 1 official docs > Tier 2 maintainer blogs > Tier 3 Stack Overflow as discovery only). | `/dw-plan techspec`, `/dw-secure-audit --plan`, `/dw-brainstorm --research` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
+| **dw-simplification** | Chesterton's Fence (understand WHY before changing), behavior-preserving refactor protocol (test gate before/after), complexity metrics (cyclomatic, cognitive, depth, fan-out), Rule of 500 for large refactors | `/dw-review`, `/dw-brainstorm --refactor` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
+| **dw-debug-protocol** | Stop-the-line discipline plus six-step triage (Reproduce → Localize → Reduce → Fix Root Cause → Guard → Verify End-to-End). Error categorization matrix; instrument-first non-reproducible-bug strategy. | `/dw-bugfix`, `/dw-qa --fix` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
 | **dw-git-discipline** | Trunk-based pattern (1-3 day branches, daily rebase, feature flags), atomic commit discipline (one intent per commit; refactor separate from feature), Conventional Commits, branch hygiene | `dw-commit`, `dw-generate-pr` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
 
 ### Domain expertise
@@ -278,7 +292,10 @@ Installed via `npx @brunosps00/dev-workflow install-deps`:
 | **Playwright** | Browser automation for QA, E2E tests, and visual validation | [playwright.dev](https://playwright.dev/) |
 | **Context7 MCP** | Contextual documentation lookup for AI assistants | [upstash/context7-mcp](https://github.com/upstash/context7-mcp) |
 | **react-doctor** | Health score and diagnostics for React projects | [react.doctor](https://www.react.doctor/) |
-| **Trivy** | Native binary scanner used by `/dw-security-check` for CVE, secret, and IaC scanning. `install-deps` detects presence and prints OS-specific install instructions (brew / curl script / choco / Docker) — does not install automatically. | [aquasecurity.github.io/trivy](https://aquasecurity.github.io/trivy/) |
+| **Trivy** | Native binary scanner used by `/dw-secure-audit` for CVE, secret, and IaC scanning. `install-deps` detects presence and prints OS-specific install instructions (brew / curl script / choco / Docker) — does not install automatically. | [aquasecurity.github.io/trivy](https://aquasecurity.github.io/trivy/) |
+| **Semgrep** | SAST layer for `/dw-secure-audit`, focused on generated-code diffs with pinned security rulesets. `install-deps` detects presence and prints OS-specific install instructions. | [semgrep.dev](https://semgrep.dev/) |
+| **gitleaks** | Dedicated secret scanner for `/dw-secure-audit`; any confirmed secret blocks without ADR exception. `install-deps` detects presence and prints OS-specific install instructions. | [github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks) |
+| **syft** | Optional SBOM/license inventory layer for `/dw-secure-audit`; advisory and non-blocking. `install-deps` detects presence and prints OS-specific install instructions. | [github.com/anchore/syft](https://github.com/anchore/syft) |
 | **Docker + Docker Compose** | Required by `/dw-new-project` and `/dw-dockerize` for dev dependency seeding and image generation. `install-deps` detects presence and prints OS-specific install instructions — does not install automatically. | [docs.docker.com](https://docs.docker.com/engine/install/) |
 
 ## Options
@@ -288,12 +305,17 @@ npx @brunosps00/dev-workflow init                          # Interactive languag
 npx @brunosps00/dev-workflow init --lang=en                # English, skip prompt
 npx @brunosps00/dev-workflow init --lang=pt-br             # Portuguese, skip prompt
 npx @brunosps00/dev-workflow init --force                  # Overwrite existing files
-npx @brunosps00/dev-workflow update                        # Update commands/templates only
-npx @brunosps00/dev-workflow install-deps                  # Install Playwright, react-doctor; check Trivy, Docker
+npx @brunosps00/dev-workflow update                        # Update managed files + print post-update agent actions
+npx @brunosps00/dev-workflow list-installed                # Show managed install state
+npx @brunosps00/dev-workflow doctor                        # Check wrappers, agents, skills, MCPs, gates
+npx @brunosps00/dev-workflow repair                        # Reconcile managed files from recorded install state
+npx @brunosps00/dev-workflow install-deps                  # Install Playwright, react-doctor; check security scanners + Docker
+npx @brunosps00/dev-workflow setup-wsl-browser             # WSL NAT: build CDP relay + add Hyper-V firewall rule
 npx @brunosps00/dev-workflow install-azure-skills          # Opt-in: Azure skills + Microsoft Learn MCP
 npx @brunosps00/dev-workflow install-azure-skills --products=azure-aks,azure-openai  # Subset override
 npx @brunosps00/dev-workflow install-aws-skills            # Opt-in: AWS skills + AWS MCP Server (needs uv + aws cli + creds)
 npx @brunosps00/dev-workflow install-aws-skills --region=eu-central-1  # Region override
+npx @brunosps00/dev-workflow uninstall                     # Remove managed files while preserving user data
 npx @brunosps00/dev-workflow help                          # Show help
 ```
 
@@ -304,12 +326,12 @@ After running `npx @brunosps00/dev-workflow init`:
 1. **Run `/dw-analyze-project`** in your AI assistant to generate project rules
 2. **Run `/dw-brainstorm`** to start planning a new feature
 3. **Run `/dw-help`** to see all available commands and workflows
-4. **(Optional) Run `npx @brunosps00/dev-workflow install-deps`** to install Playwright + react-doctor and check Trivy + Docker
-5. **Run `/dw-map-codebase`** once your project has source files to build the queryable index in `.dw/intel/`
+4. **(Optional) Run `npx @brunosps00/dev-workflow install-deps`** to install Playwright + react-doctor and check Trivy/Semgrep/gitleaks/syft + Docker
+5. **Run `/dw-intel --build`** once your project has source files to build the queryable index in `.dw/intel/`
 
 ## Acknowledgements
 
-Codebase intelligence (`/dw-intel`, `/dw-map-codebase`, the `dw-codebase-intel` bundled skill) and phase execution patterns (the `dw-execute-phase` bundled skill, with its `plan-checker` and `executor` agents) were adapted from [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) by gsd-build (MIT). Schemas (`stack.json`, `files.json`, `apis.json`, `deps.json`, `arch.md`), the goal-backward verification protocol, and the wave-based parallel execution pattern come from there. dev-workflow specifics: `.dw/` namespace instead of `.planning/`, agent-driven runtime instead of `gsd-sdk` CLI, integration with the rest of the `dw-*` command surface.
+Codebase intelligence (`/dw-intel`, `/dw-intel --build`, the `dw-codebase-intel` bundled skill) and phase execution patterns (the `dw-execute-phase` bundled skill, with its `plan-checker` and `executor` agents) were adapted from [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) by gsd-build (MIT). Schemas (`stack.json`, `files.json`, `apis.json`, `deps.json`, `arch.md`), the goal-backward verification protocol, and the wave-based parallel execution pattern come from there. dev-workflow specifics: `.dw/` namespace instead of `.planning/`, agent-driven runtime instead of `gsd-sdk` CLI, integration with the rest of the `dw-*` command surface.
 
 Source-driven development, code simplification, debugging discipline, and git workflow patterns adapted from [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) by Addy Osmani (MIT) into the bundled `dw-source-grounding`, `dw-simplification`, `dw-debug-protocol`, and `dw-git-discipline` skills. Performance-optimization workflow (`vercel-react-best-practices/references/perf-discipline.md`) and API-design discipline (`dw-codebase-intel/references/api-design-discipline.md`) also incorporated as enhancements to existing bundled skills. Browser security-boundary and three-workflow-patterns (originally from `addyosmani/agent-skills/browser-devtools`) now live inside `dw-testing-discipline/references/`.
 

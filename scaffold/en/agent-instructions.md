@@ -72,7 +72,7 @@ Before picking a command from the Trigger Map, gauge the change's actual scope. 
 - **`.dw/constitution.md`**: principles with `severity: high` or `critical` block PRs / techspecs without an ADR justifying the deviation. Missing constitution? Commands auto-install defaults at `severity: info` (non-blocking) and continue — never blocks on absence.
 - **`.dw/spec/<prd>/tasks-validation.md`**: auto-generated at the end of `/dw-plan tasks`. Any FAIL dimension blocks user approval until resolved or explicitly overridden.
 - **Verification**: `/dw-generate-pr` requires a fresh `dw-verify` PASS (tests + lint + build) after the last edit.
-- **Security**: TS / Python / C# / Rust projects must pass `/dw-secure-audit` (Trivy + OWASP + lockfile audit) before the PR opens.
+- **Security**: TS / Python / C# / Rust projects must pass `/dw-secure-audit` (OWASP + Semgrep + gitleaks + Trivy + lockfile audit) before the PR opens.
 
 ## Escape Hatches — do NOT auto-trigger
 

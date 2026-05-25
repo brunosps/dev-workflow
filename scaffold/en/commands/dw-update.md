@@ -79,6 +79,7 @@ The `update` command overwrites managed files and PRESERVES:
 - `.dw/rules/` (user rules)
 - `.dw/spec/` (in-progress PRDs and tasks)
 - `.dw/intel/` (codebase index from `/dw-intel --build`)
+- project-derived docs such as `.dw/constitution.md`, `.dw/rules/concerns.md`, and frontend `DESIGN.md`
 
 The `update` command also runs the GSD migration step automatically — if a project has legacy `.planning/` (from prior GSD usage), the contents are migrated to `.dw/intel/`, `.dw/spec/active-session.md`, `.dw/spec/quick/`, etc., and `.planning/` is renamed to `.planning.gsd-archive-<DATE>/` for inspection. The `.claude/commands/gsd/`, `.claude/agents/gsd-*.md`, `.claude/hooks/gsd-*.js`, and `.claude/gsd-file-manifest.json` files are removed during the migration.
 
@@ -96,9 +97,23 @@ Present to the user:
 - Detected language (`DETECTED_LANG`)
 - Previous version → new version
 - Summary of what the `update` output showed (files copied, wrappers generated, MCPs configured)
+- The `Post-update agent actions` printed by the CLI
 - Any warnings or errors
 
-### 6. Suggest Next Step
+### 6. Run Post-Update Agent Actions (Required)
+
+<critical>The CLI cannot execute slash commands or inspect product-specific design authority by itself. When the update output prints `Post-update agent actions`, treat that list as work for this agent to run now, unless the user explicitly asked for "update files only".</critical>
+
+Run listed commands in this order:
+
+1. `/dw-analyze-project` when listed — refreshes project-derived docs. This is the command that creates or refreshes `.dw/rules/`, offers `.dw/constitution.md`, writes `.dw/rules/concerns.md`, and for frontend projects synthesizes `DESIGN.md` from existing design tokens when no design authority exists.
+2. `/dw-intel --build` when listed — rebuilds the queryable codebase index after rules/docs refresh.
+3. `/dw-harness-audit` — validates commands, wrappers, agents, MCPs, and gates after managed files changed.
+4. `/dw-skill-health` — audits refreshed bundled skills and agents for bloat, overlap, and stale references.
+
+If `/dw-analyze-project` asks clarification or approval questions, ask them and continue. Do not fabricate `DESIGN.md`, `concerns.md`, or constitution content directly inside `/dw-update`; delegate to the command that owns those artifacts.
+
+### 7. Suggest Next Step
 
 If commands/skills were updated, remind the user:
 - Restart the agent session (or reload skills) so the new instructions take effect — skills are usually loaded at session start
