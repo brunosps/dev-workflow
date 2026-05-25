@@ -294,11 +294,11 @@ Use the workspace utilities when appropriate:
 - `node .dw/scripts/functional-doc/generate-dossier.mjs --target <URL> [--lang en|pt-br] [--project <name>] [--base-url <url>]`
 - `node .dw/scripts/functional-doc/run-playwright-flow.mjs --flow-dir <path> [--video-resolution fullhd|1920x1080] [--list-only]`
 
-The runner drives Playwright via the Node API and records video with `page.screencast` (the only
-mechanism that works over CDP). It generates `scripts/<slug>.flow.mjs` — a plain ESM module exporting
+The runner drives Playwright via the Node API and records video with `page.screencast` (works with
+the primary launched Chromium and the CDP fallback). It generates `scripts/<slug>.flow.mjs` — a plain ESM module exporting
 `async function flow({ page, context, expect, baseURL, step, shot })` — not a `@playwright/test` spec,
 so it needs no project `playwright.config.*`. The browser is chosen by `.dw/scripts/lib/resolve-browser.mjs`
-(WSL-resilient: full headless Chromium by default; set `BROWSER_TEST` to a Windows browser exe to drive it over CDP — in NAT run `npx @brunosps00/dev-workflow setup-wsl-browser` once to install the user-level reverse cdp-relay.exe, mirrored networking works directly);
+(WSL-resilient: full headless Chromium by default; set `BROWSER_TEST` to a Windows browser exe only as CDP fallback — in NAT run `npx @brunosps00/dev-workflow setup-wsl-browser` once to install the optional user-level reverse cdp-relay.exe, mirrored networking works directly);
 see the "Browser on WSL" section of `dw-testing-discipline/references/playwright-recipes.md`. Chromium
 only — `screencast`/CDP do not support Firefox/WebKit.
 

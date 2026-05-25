@@ -3,19 +3,17 @@
 // Resolves which browser to drive for dev-workflow's browser-automation flows
 // (dw-qa, dw-functional-doc, dw-redesign-ui), with WSL resilience.
 //
-// Resolution order: env BROWSER_TEST -> .dw/config.json (browserTest) -> auto-detect.
-// On WSL with no explicit config, auto-detects a Windows browser (Edge first, then
-// Chrome) and launches it in remote-debugging mode so flows connect over CDP instead
-// of opening WSLg / losing layout fidelity in the bundled Linux Chromium.
+// Resolution order: Playwright Chromium primary -> optional CDP fallback from env
+// BROWSER_TEST or .dw/config.json (browserTest).
 //
 // Returns one of:
-//   { mode: "cdp",    endpoint, source, cleanup }   // connect over CDP (browser ready)
-//   { mode: "launch", launchOptions, source }        // let Playwright launch the browser
+//   { mode: "launch", launchOptions, source, fallback?, openFallback? } // let Playwright launch first
+//   { mode: "cdp",    endpoint, source, cleanup }                       // resolved fallback descriptor
 //
-// DEFAULT (no BROWSER_TEST): the full Playwright Chromium in headless via
-// channel:"chromium", which uses the new headless mode (desktop-faithful rendering,
-// not the lighter headless-shell) and never opens WSLg. This is the robust default on
-// WSL. Set BROWSER_TEST to opt into a Windows browser.
+// DEFAULT: full Playwright Chromium in headless via channel:"chromium", which uses the
+// new headless mode (desktop-faithful rendering, not the lighter headless-shell) and
+// never opens WSLg. BROWSER_TEST can provide a CDP/Windows-browser fallback when the
+// primary Playwright launch fails.
 //
 // NOTE on WSL networking: the Chromium debug port binds Windows loopback only. In mirrored
 // networking mode WSL shares that loopback, so 127.0.0.1 connects directly. In NAT mode the
@@ -548,21 +546,45 @@ async function launchWindowsBrowser(exePath, { headless, projectRoot }) {
 
 const noopCleanup = async () => {};
 
-function bundledDescriptor(headless, source = "bundled") {
+function bundledDescriptor(headless, source = "playwright-default") {
   return { mode: "launch", launchOptions: { ...BUNDLED_LAUNCH, headless }, source };
 }
 
-// When an explicit BROWSER_TEST cannot be honored, degrade to the headless default
-// (resilient) unless allowFallback is false (then throw, e.g. for diagnostics).
-function degradeOrThrow(message, { headless, allowFallback }) {
-  if (allowFallback) {
-    process.stderr.write(`resolve-browser: ${message} Falling back to headless Chromium.\n`);
-    return bundledDescriptor(headless, "fallback");
-  }
-  throw new Error(message);
+function cdpFallbackInfo({ kind, source, value }) {
+  return { mode: "cdp", kind, source, value };
 }
 
-export async function resolveBrowser({ projectRoot, headless = true, allowFallback = true } = {}) {
+async function resolveCdpFallback({ kind, value, source, projectRoot, headless }) {
+  if (kind === "cdp") {
+    const url = new URL(value.replace(/^cdp:\/\//i, "http://"));
+    const port = Number(url.port) || 9222;
+    const found = await findReachableCdp(port, [url.hostname]);
+    if (!found) {
+      throw new Error(`CDP fallback '${value}' is not reachable (start the browser with --remote-debugging-port=${port}).`);
+    }
+    return { mode: "cdp", endpoint: found.base, source: `fallback:${source}`, cleanup: noopCleanup };
+  }
+
+  if (kind === "exe") {
+    if (!fs.existsSync(value)) {
+      throw new Error(`CDP fallback points to '${value}', but that file does not exist.`);
+    }
+    const descriptor = await launchWindowsBrowser(value, { headless, projectRoot });
+    return { ...descriptor, source: `fallback:${descriptor.source}` };
+  }
+
+  throw new Error(`Unsupported CDP fallback kind '${kind}'.`);
+}
+
+function withCdpFallback(primary, fallbackArgs) {
+  return {
+    ...primary,
+    fallback: cdpFallbackInfo(fallbackArgs),
+    openFallback: () => resolveCdpFallback(fallbackArgs),
+  };
+}
+
+export async function resolveBrowser({ projectRoot, headless = true } = {}) {
   const { value, source } = readConfigValue(projectRoot);
 
   if (!value) {
@@ -572,30 +594,11 @@ export async function resolveBrowser({ projectRoot, headless = true, allowFallba
   const kind = classifyValue(value);
 
   if (kind === "cdp") {
-    const url = new URL(value.replace(/^cdp:\/\//i, "http://"));
-    const port = Number(url.port) || 9222;
-    const found = await findReachableCdp(port, [url.hostname]);
-    if (!found) {
-      return degradeOrThrow(
-        `BROWSER_TEST endpoint '${value}' is not reachable (start the browser with --remote-debugging-port=${port}).`,
-        { headless, allowFallback },
-      );
-    }
-    return { mode: "cdp", endpoint: found.base, source, cleanup: noopCleanup };
+    return withCdpFallback(bundledDescriptor(headless), { kind, value, source, projectRoot, headless });
   }
 
   if (kind === "exe") {
-    if (!fs.existsSync(value)) {
-      return degradeOrThrow(`BROWSER_TEST points to '${value}', but that file does not exist.`, {
-        headless,
-        allowFallback,
-      });
-    }
-    try {
-      return await launchWindowsBrowser(value, { headless, projectRoot });
-    } catch (error) {
-      return degradeOrThrow(error.message, { headless, allowFallback });
-    }
+    return withCdpFallback(bundledDescriptor(headless), { kind, value, source, projectRoot, headless });
   }
 
   // channel: chrome | msedge | chromium

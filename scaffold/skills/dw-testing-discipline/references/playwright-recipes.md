@@ -280,21 +280,20 @@ to pick a browser deterministically. Both `.dw/scripts/functional-doc/run-playwr
 (video, via `page.screencast`) and `.dw/scripts/lib/capture-screenshots.mjs` (responsive shots)
 use it, so the same rules apply everywhere.
 
-Resolution order: `BROWSER_TEST` env → `.dw/config.json` (`browserTest`) → default.
+Resolution order: Playwright Chromium default first → optional CDP fallback from `BROWSER_TEST` env
+or `.dw/config.json` (`browserTest`) only if the primary launch fails.
 
-- **Default (no config):** full Chromium in new-headless mode (`channel: "chromium"`) — desktop-faithful
+- **Default / primary:** full Chromium in new-headless mode (`channel: "chromium"`) — desktop-faithful
   rendering, never opens WSLg. This is the recommended default on WSL.
-- **`BROWSER_TEST` = CDP URL** (e.g. `http://localhost:9222`): connects with `chromium.connectOverCDP`.
-  Tries `127.0.0.1` first, then the Windows host (default-route gateway) for NAT.
-- **`BROWSER_TEST` = Windows exe** (e.g. `/mnt/c/.../msedge.exe`): launches it with a temp profile in
-  remote-debugging mode (`--remote-allow-origins=*`) and connects over CDP. **Works in both WSL2 modes:**
-  in mirrored networking it connects to `127.0.0.1` directly; in NAT mode it starts the bundled
-  **`cdp-relay.exe`** (a tiny prebuilt Windows x64 binary, no runtime) on Windows in reverse mode.
-  The relay opens outbound connections to a WSL broker, which exposes a local CDP proxy. Falls back
-  to headless Chromium if the relay is absent.
+- **`BROWSER_TEST` = CDP URL** (e.g. `http://localhost:9222`): fallback target using
+  `chromium.connectOverCDP` if the primary Chromium launch fails.
+- **`BROWSER_TEST` = Windows exe** (e.g. `/mnt/c/.../msedge.exe`): fallback target. The runner launches it
+  with a temp profile in remote-debugging mode (`--remote-allow-origins=*`) and connects over CDP. In NAT
+  mode it starts the bundled **`cdp-relay.exe`** on Windows in reverse mode; the relay opens outbound
+  connections to a WSL broker, which exposes a local CDP proxy.
 - **`BROWSER_TEST` = channel** (`chrome` | `msedge` | `chromium`): launches that channel locally.
 
-NAT mode needs a one-time user-level setup because Chromium binds its debug port to Windows loopback only:
+NAT mode needs this one-time user-level setup only if you want the Windows-browser CDP fallback:
 
 ```bash
 npx @brunosps00/dev-workflow setup-wsl-browser
@@ -302,16 +301,16 @@ npx @brunosps00/dev-workflow setup-wsl-browser
 
 This installs the `cdp-relay.exe` bundled with dev-workflow into `%LOCALAPPDATA%\dev-workflow`.
 No admin prompt, firewall rule, or Rust toolchain is required on the Windows target. After that,
-the *real* Windows browser is driven from WSL — including `page.screencast` video — under NAT.
+the *real* Windows browser is available as a fallback from WSL — including `page.screencast` video — under NAT.
 The launched browser and relay use a throwaway profile and are killed on exit.
 
 Two env vars, two jobs — keep them distinct:
 - `BROWSER` — opens URLs for a human (used by `/dw-generate-pr`).
-- `BROWSER_TEST` — the automation target for QA / functional-doc / redesign capture.
+- `BROWSER_TEST` — optional CDP fallback target for QA / functional-doc / redesign capture.
 
-To drive the real Windows browser, set `BROWSER_TEST` to its exe path (NAT works as long as `node` is on
-the Windows PATH; mirrored works too). To force the faithful local-headless path instead, leave
-`BROWSER_TEST` unset or set it to `chromium`.
+To make the real Windows browser available as fallback, set `BROWSER_TEST` to its exe path (NAT works
+as long as `node` is on the Windows PATH; mirrored works too). Leave `BROWSER_TEST` unset for the plain
+Playwright-default path.
 
 ```bash
 # Probe what would be used (cleans up any launched browser):

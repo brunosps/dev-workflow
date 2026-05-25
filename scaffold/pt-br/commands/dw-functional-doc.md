@@ -294,11 +294,11 @@ Use os utilitários do workspace quando fizer sentido:
 - `node .dw/scripts/functional-doc/generate-dossier.mjs --target <URL> [--lang en|pt-br] [--project <nome>] [--base-url <url>]`
 - `node .dw/scripts/functional-doc/run-playwright-flow.mjs --flow-dir <caminho> [--video-resolution fullhd|1920x1080] [--list-only]`
 
-O runner dirige o Playwright pela API Node e grava vídeo com `page.screencast` (único mecanismo que
-funciona via CDP). Ele gera `scripts/<slug>.flow.mjs` — um módulo ESM simples que exporta
+O runner dirige o Playwright pela API Node e grava vídeo com `page.screencast` (funciona no Chromium
+lançado por padrão e no fallback CDP). Ele gera `scripts/<slug>.flow.mjs` — um módulo ESM simples que exporta
 `async function flow({ page, context, expect, baseURL, step, shot })`, não um spec `@playwright/test`,
 então dispensa o `playwright.config.*` do projeto. O browser é escolhido por `.dw/scripts/lib/resolve-browser.mjs`
-(resiliente no WSL: Chromium headless full por padrão; defina `BROWSER_TEST` com o caminho do exe do browser do Windows para dirigi-lo via CDP — em NAT rode `npx @brunosps00/dev-workflow setup-wsl-browser` uma vez para instalar o cdp-relay.exe reverso no contexto do usuário, em mirrored funciona direto);
+(resiliente no WSL: Chromium headless full por padrão; defina `BROWSER_TEST` com o caminho do exe do browser do Windows apenas como fallback CDP — em NAT rode `npx @brunosps00/dev-workflow setup-wsl-browser` uma vez para instalar o cdp-relay.exe reverso opcional no contexto do usuário, em mirrored funciona direto);
 veja a seção "Browser on WSL" de `dw-testing-discipline/references/playwright-recipes.md`. Só Chromium —
 `screencast`/CDP não suportam Firefox/WebKit.
 

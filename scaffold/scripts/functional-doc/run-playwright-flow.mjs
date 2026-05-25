@@ -6,10 +6,9 @@
 // which is the only mechanism that works over connectOverCDP (recordVideo does not).
 // Driving directly also removes the dependency on the project's playwright.config.*.
 //
-// Browser selection is delegated to ../lib/resolve-browser.mjs (WSL-resilient): a Windows
-// browser over CDP when reachable, otherwise the full headless Chromium (desktop-faithful,
-// no WSLg). The flow module is plain .mjs exporting `async function flow({ page, context,
-// expect, baseURL, step, shot })`.
+// Browser selection is delegated to ../lib/resolve-browser.mjs (WSL-resilient): Playwright
+// Chromium is primary, with a configured Windows/CDP target only as fallback. The flow module
+// is plain .mjs exporting `async function flow({ page, context, expect, baseURL, step, shot })`.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -79,22 +78,51 @@ async function importPlaywright() {
   }
 }
 
-async function openBrowser(chromium, descriptor) {
+async function openBrowser(chromium, descriptor, log) {
   if (descriptor.mode === "cdp") {
-    const browser = await chromium.connectOverCDP(descriptor.endpoint);
-    return { browser, cleanup: descriptor.cleanup ?? (async () => {}) };
+    let browser;
+    try {
+      browser = await chromium.connectOverCDP(descriptor.endpoint);
+    } catch (error) {
+      await (descriptor.cleanup ?? (async () => {}))();
+      throw error;
+    }
+    return { browser, descriptor, cleanup: descriptor.cleanup ?? (async () => {}) };
   }
-  const browser = await chromium.launch(descriptor.launchOptions);
-  return {
-    browser,
-    cleanup: async () => {
-      try {
-        await browser.close();
-      } catch {
-        // ignore
-      }
-    },
-  };
+  try {
+    const browser = await chromium.launch(descriptor.launchOptions);
+    return {
+      browser,
+      descriptor,
+      cleanup: async () => {
+        try {
+          await browser.close();
+        } catch {
+          // ignore
+        }
+      },
+    };
+  } catch (primaryError) {
+    if (typeof descriptor.openFallback !== "function") {
+      throw primaryError;
+    }
+    log(`browser launch failed (${primaryError.message}); trying CDP fallback from ${descriptor.fallback?.source ?? "config"}.`);
+    let fallbackDescriptor;
+    try {
+      fallbackDescriptor = await descriptor.openFallback();
+    } catch (fallbackError) {
+      throw new Error(`Playwright Chromium launch failed: ${primaryError.message}; CDP fallback failed: ${fallbackError.message}`);
+    }
+    let browser;
+    try {
+      browser = await chromium.connectOverCDP(fallbackDescriptor.endpoint);
+    } catch (error) {
+      await (fallbackDescriptor.cleanup ?? (async () => {}))();
+      throw new Error(`Playwright Chromium launch failed: ${primaryError.message}; CDP fallback failed: ${error.message}`);
+    }
+    log(`browser fallback: mode=${fallbackDescriptor.mode} source=${fallbackDescriptor.source}`);
+    return { browser, descriptor: fallbackDescriptor, cleanup: fallbackDescriptor.cleanup ?? (async () => {}) };
+  }
 }
 
 async function openContext(browser, descriptor, { resolution, baseURL }) {
@@ -168,15 +196,18 @@ async function main() {
   };
 
   const descriptor = await resolveBrowser({ projectRoot, headless: true });
-  log(`browser: mode=${descriptor.mode} source=${descriptor.source}`);
+  log(
+    `browser: mode=${descriptor.mode} source=${descriptor.source}` +
+      (descriptor.fallback ? ` fallback=${descriptor.fallback.source}` : ""),
+  );
   if (args.browserName && args.browserName !== "chromium") {
     log(`note: --browser-name=${args.browserName} ignored; screencast/CDP require Chromium.`);
   }
 
-  const { browser, cleanup: cleanupBrowser } = await openBrowser(chromium, descriptor);
-  const { context, owns: ownsContext } = await openContext(browser, descriptor, { resolution, baseURL });
+  const { browser, descriptor: activeDescriptor, cleanup: cleanupBrowser } = await openBrowser(chromium, descriptor, log);
+  const { context, owns: ownsContext } = await openContext(browser, activeDescriptor, { resolution, baseURL });
   const page = await context.newPage();
-  if (descriptor.mode === "cdp") {
+  if (activeDescriptor.mode === "cdp") {
     try {
       await page.setViewportSize({ width: resolution.width, height: resolution.height });
     } catch {
@@ -263,8 +294,8 @@ async function main() {
 
   updateManifest(manifestPath, {
     status,
-    browserMode: descriptor.mode,
-    browserSource: descriptor.source,
+    browserMode: activeDescriptor.mode,
+    browserSource: activeDescriptor.source,
     recording,
     videoResolution: resolution.label,
     video: videoExists ? videoPath : null,

@@ -62,6 +62,55 @@ function slugify(value) {
   );
 }
 
+async function openBrowser(chromium, descriptor) {
+  if (descriptor.mode === "cdp") {
+    let browser;
+    try {
+      browser = await chromium.connectOverCDP(descriptor.endpoint);
+    } catch (error) {
+      await (descriptor.cleanup ?? (async () => {}))();
+      throw error;
+    }
+    return { browser, descriptor, cleanup: descriptor.cleanup ?? (async () => {}) };
+  }
+  try {
+    const browser = await chromium.launch(descriptor.launchOptions);
+    return {
+      browser,
+      descriptor,
+      cleanup: async () => {
+        try {
+          await browser.close();
+        } catch {
+          // ignore
+        }
+      },
+    };
+  } catch (primaryError) {
+    if (typeof descriptor.openFallback !== "function") {
+      throw primaryError;
+    }
+    process.stderr.write(
+      `browser launch failed (${primaryError.message}); trying CDP fallback from ${descriptor.fallback?.source ?? "config"}.\n`,
+    );
+    let fallbackDescriptor;
+    try {
+      fallbackDescriptor = await descriptor.openFallback();
+    } catch (fallbackError) {
+      throw new Error(`Playwright Chromium launch failed: ${primaryError.message}; CDP fallback failed: ${fallbackError.message}`);
+    }
+    let browser;
+    try {
+      browser = await chromium.connectOverCDP(fallbackDescriptor.endpoint);
+    } catch (error) {
+      await (fallbackDescriptor.cleanup ?? (async () => {}))();
+      throw new Error(`Playwright Chromium launch failed: ${primaryError.message}; CDP fallback failed: ${error.message}`);
+    }
+    process.stderr.write(`browser fallback: mode=${fallbackDescriptor.mode} source=${fallbackDescriptor.source}\n`);
+    return { browser, descriptor: fallbackDescriptor, cleanup: fallbackDescriptor.cleanup ?? (async () => {}) };
+  }
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (!args.url) {
@@ -85,27 +134,17 @@ async function main() {
 
   fs.mkdirSync(outDir, { recursive: true });
   const descriptor = await resolveBrowser({ projectRoot: process.cwd(), headless: true });
-  process.stderr.write(`browser: mode=${descriptor.mode} source=${descriptor.source}\n`);
+  process.stderr.write(
+    `browser: mode=${descriptor.mode} source=${descriptor.source}` +
+      (descriptor.fallback ? ` fallback=${descriptor.fallback.source}` : "") +
+      "\n",
+  );
 
-  let browser;
-  let cleanup = async () => {};
-  if (descriptor.mode === "cdp") {
-    browser = await chromium.connectOverCDP(descriptor.endpoint);
-    cleanup = descriptor.cleanup ?? (async () => {});
-  } else {
-    browser = await chromium.launch(descriptor.launchOptions);
-    cleanup = async () => {
-      try {
-        await browser.close();
-      } catch {
-        // ignore
-      }
-    };
-  }
+  const { browser, descriptor: activeDescriptor, cleanup } = await openBrowser(chromium, descriptor);
 
   const shots = [];
   try {
-    const existing = descriptor.mode === "cdp" ? browser.contexts()[0] : null;
+    const existing = activeDescriptor.mode === "cdp" ? browser.contexts()[0] : null;
     const context = existing ?? (await browser.newContext());
     const ownsContext = !existing;
     const page = await context.newPage();
