@@ -21,7 +21,7 @@
 // networking mode WSL shares that loopback, so 127.0.0.1 connects directly. In NAT mode the
 // helper starts the prebuilt cdp-relay.exe on Windows (0.0.0.0:<fixed port> -> 127.0.0.1:debug)
 // and connects via the Windows host gateway. That needs the one-time setup performed by
-// `npx @brunosps00/dev-workflow setup-wsl-browser` (builds the relay + adds the Hyper-V firewall
+// `npx @brunosps00/dev-workflow setup-wsl-browser` (installs the prebuilt relay + adds the Hyper-V firewall
 // rule). Without it, the helper falls back to the local headless Chromium.
 
 import fs from "node:fs";
@@ -207,7 +207,7 @@ function relayPort(projectRoot) {
   return DEFAULT_RELAY_PORT;
 }
 
-// The prebuilt Rust relay (cdp-relay.exe), built on Windows by `setup-wsl-browser`. Order:
+// The prebuilt Windows relay (cdp-relay.exe), installed by `setup-wsl-browser`. Order:
 // .dw/config.json relayExe -> %LOCALAPPDATA%\dev-workflow\cdp-relay.exe. Returns { winPath, wslPath } or null.
 function findRelayExe(projectRoot) {
   const candidates = [];
@@ -293,7 +293,7 @@ async function launchWindowsBrowser(exePath, { headless, projectRoot }) {
       await cleanup();
       throw new Error(
         "WSL is in NAT mode; reaching the Windows browser needs cdp-relay.exe. Run " +
-          "`npx @brunosps00/dev-workflow setup-wsl-browser` (builds the relay on Windows and adds the " +
+          "`npx @brunosps00/dev-workflow setup-wsl-browser` (installs the prebuilt relay and adds the " +
           "Hyper-V firewall rule). Alternatively enable mirrored networking or set BROWSER_TEST to a CDP URL.",
       );
     }

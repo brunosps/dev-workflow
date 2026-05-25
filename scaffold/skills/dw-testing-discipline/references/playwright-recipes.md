@@ -288,8 +288,8 @@ Resolution order: `BROWSER_TEST` env → `.dw/config.json` (`browserTest`) → d
   Tries `127.0.0.1` first, then the Windows host (default-route gateway) for NAT.
 - **`BROWSER_TEST` = Windows exe** (e.g. `/mnt/c/.../msedge.exe`): launches it with a temp profile in
   remote-debugging mode (`--remote-allow-origins=*`) and connects over CDP. **Works in both WSL2 modes:**
-  in mirrored networking it connects to `127.0.0.1` directly; in NAT mode it starts the prebuilt
-  **`cdp-relay.exe`** (a tiny Rust binary, no runtime) on Windows — `0.0.0.0:39222` → `127.0.0.1:<debug>` —
+  in mirrored networking it connects to `127.0.0.1` directly; in NAT mode it starts the bundled
+  **`cdp-relay.exe`** (a tiny prebuilt Windows x64 binary, no runtime) on Windows — `0.0.0.0:39222` → `127.0.0.1:<debug>` —
   and connects via the Windows host gateway. Falls back to headless Chromium if the relay/rule is absent.
 - **`BROWSER_TEST` = channel** (`chrome` | `msedge` | `chromium`): launches that channel locally.
 
@@ -300,8 +300,8 @@ binds its debug port to loopback only):
 npx @brunosps00/dev-workflow setup-wsl-browser
 ```
 
-This builds `cdp-relay.exe` with the Windows Rust toolchain (`rustup` on Windows) and adds a Hyper-V
-firewall inbound allow rule for TCP 39222 (one UAC prompt). After that, the *real* Windows browser is
+This installs the `cdp-relay.exe` bundled with dev-workflow and adds a Hyper-V firewall inbound allow
+rule for TCP 39222 (one UAC prompt). No Rust toolchain is required on the Windows target. After that, the *real* Windows browser is
 driven from WSL — including `page.screencast` video — under NAT. The launched browser and relay use a
 throwaway profile and are killed on exit.
 

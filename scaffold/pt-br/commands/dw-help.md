@@ -120,7 +120,7 @@ Auto-invocados por comandos primários mas disponíveis standalone.
 | `docker`, `compose`, `container` | `/dw-dockerize` |
 | `new project`, `bootstrap`, `scaffold` | `/dw-new-project` |
 | `functional doc`, `screen map` | `/dw-functional-doc` |
-| `wsl`, `browser`, `playwright browser`, `cdp` | `npx @brunosps00/dev-workflow setup-wsl-browser` quando WSL NAT precisa dirigir o browser real do Windows |
+| `wsl`, `browser`, `playwright browser`, `cdp` | `npx @brunosps00/dev-workflow setup-wsl-browser` instala o relay precompilado quando WSL NAT precisa dirigir o browser real do Windows |
 | `azure`, `microsoft learn`, `azure skills` | `/dw-install-azure-skills` |
 | `aws`, `aws mcp`, `aws skills` | `/dw-install-aws-skills` |
 | `incident`, `outage`, `postmortem`, `sev-1` | (Skill `dw-incident-response` auto-invocada de `/dw-bugfix`) |

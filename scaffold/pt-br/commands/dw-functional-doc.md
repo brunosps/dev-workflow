@@ -298,7 +298,7 @@ O runner dirige o Playwright pela API Node e grava vídeo com `page.screencast` 
 funciona via CDP). Ele gera `scripts/<slug>.flow.mjs` — um módulo ESM simples que exporta
 `async function flow({ page, context, expect, baseURL, step, shot })`, não um spec `@playwright/test`,
 então dispensa o `playwright.config.*` do projeto. O browser é escolhido por `.dw/scripts/lib/resolve-browser.mjs`
-(resiliente no WSL: Chromium headless full por padrão; defina `BROWSER_TEST` com o caminho do exe do browser do Windows para dirigi-lo via CDP — em NAT rode `npx @brunosps00/dev-workflow setup-wsl-browser` uma vez para o cdp-relay.exe + regra Hyper-V, em mirrored funciona direto);
+(resiliente no WSL: Chromium headless full por padrão; defina `BROWSER_TEST` com o caminho do exe do browser do Windows para dirigi-lo via CDP — em NAT rode `npx @brunosps00/dev-workflow setup-wsl-browser` uma vez para instalar o cdp-relay.exe precompilado + regra Hyper-V, em mirrored funciona direto);
 veja a seção "Browser on WSL" de `dw-testing-discipline/references/playwright-recipes.md`. Só Chromium —
 `screencast`/CDP não suportam Firefox/WebKit.
 

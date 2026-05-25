@@ -2,7 +2,7 @@
 name = "cdp-relay"
 version = "0.1.0"
 edition = "2021"
-description = "Tiny TCP forwarder so WSL can reach a Windows browser's CDP debug port in NAT mode. Built on Windows by dev-workflow; no runtime dependency."
+description = "Tiny TCP forwarder so WSL can reach a Windows browser's CDP debug port in NAT mode. Source for the prebuilt dev-workflow relay; no runtime dependency."
 
 [[bin]]
 name = "cdp-relay"

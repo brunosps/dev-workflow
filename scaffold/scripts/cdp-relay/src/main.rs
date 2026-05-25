@@ -3,7 +3,8 @@
 //! Listens on 0.0.0.0:<listen> and forwards every connection to 127.0.0.1:<target>.
 //! dev-workflow runs this on the Windows side so WSL (NAT networking) can reach a Windows
 //! browser's CDP remote-debugging port, which Chromium binds to loopback only. std-only:
-//! no crates, no runtime — a single static .exe built with the user's Windows `cargo`.
+//! no crates, no runtime. dev-workflow ships a prebuilt Windows x64 .exe; this source is
+//! kept for maintainers who need to rebuild it.
 
 use std::env;
 use std::io;
