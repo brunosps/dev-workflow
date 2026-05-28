@@ -35,17 +35,6 @@
       "bundled": true
     },
     {
-      "name": "dw-context-budget",
-      "kind": "protocol",
-      "tier": "core",
-      "owner": "dw-context-budget",
-      "trigger": "Context overhead, slow sessions, many agents/skills/MCPs",
-      "expected_output": "A context budget report with concrete savings.",
-      "load_policy": "always-small",
-      "context_limit": 6000,
-      "bundled": true
-    },
-    {
       "name": "dw-council",
       "kind": "protocol",
       "tier": "specialty",
