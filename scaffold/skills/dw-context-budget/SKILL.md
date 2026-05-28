@@ -43,3 +43,15 @@ Return:
 5. What must remain loaded because commands depend on it.
 
 Inspired by ECC's `context-budget` and `strategic-compact` patterns; adapted for dev-workflow's `.dw/` scaffold and cross-platform wrappers.
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when the budget is acceptable, `FINDINGS` when concrete savings exist, `BLOCKED` when files cannot be measured, `NOT_APPLICABLE` when context budget is not relevant.
+- **Scope:** commands, skills, agents, MCPs, and instruction files measured.
+- **Evidence:** largest files, duplicate content, loaded references, and approximate byte/token cost.
+- **Artifacts:** report path or inline budget table.
+- **Decisions:** what stays loaded, what moves behind lazy references, and what can merge/remove.
+- **Risks:** losing trigger clarity, hiding required instructions, or creating stale references.
+- **Next Step:** top compaction action with expected savings.

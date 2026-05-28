@@ -150,3 +150,15 @@ For the complete guide with all rules expanded: `AGENTS.md`
 ## References
 
 - `references/perf-discipline.md` — workflow discipline (measure → identify → fix → verify → guard) that wraps the per-rule recipes above. Use when tackling performance work; cite the metric and tool before applying any rule. Adapted from [`addyosmani/agent-skills/performance-optimization`](https://github.com/addyosmani/agent-skills/tree/main/performance-optimization) (MIT).
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when selected rules are evidence-backed and verified, `FINDINGS` when React/Next.js performance issues remain, `BLOCKED` when baseline metrics or app context are missing, `NOT_APPLICABLE` when no React/Next.js performance surface is in scope.
+- **Scope:** route/component, framework mode, metric, and selected rule category.
+- **Evidence:** baseline measurement, trace/profile/build output, rule references, and affected code paths.
+- **Artifacts:** recommendation, code path, perf log, bundle report, or guard test.
+- **Decisions:** rule selected, metric target, and rejected optimizations.
+- **Risks:** premature optimization, hydration mismatch, cache staleness, bundle bloat, or rerender regressions.
+- **Next Step:** measure, apply rule, verify, or add regression guard.

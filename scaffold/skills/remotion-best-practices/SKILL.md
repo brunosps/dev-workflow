@@ -61,3 +61,15 @@ Read individual rule files for detailed explanations and code examples:
 - [rules/parameters.md](rules/parameters.md) - Make a video parametrizable by adding a Zod schema
 - [rules/maps.md](rules/maps.md) - Add a map using Mapbox and animate it
 - [rules/voiceover.md](rules/voiceover.md) - Adding AI-generated voiceover to Remotion compositions using ElevenLabs TTS
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when relevant Remotion rules are selected and actionable, `FINDINGS` when implementation gaps remain, `BLOCKED` when composition/media requirements are missing, `NOT_APPLICABLE` when no Remotion/video work is in scope.
+- **Scope:** composition, media type, render target, and selected rules.
+- **Evidence:** project files, rule references, asset constraints, and render/test output when available.
+- **Artifacts:** implementation guidance, component/file path, render command, or asset list.
+- **Decisions:** selected rule set, animation/media approach, and rejected alternatives.
+- **Risks:** timing drift, asset decode failure, text overflow, render cost, or accessibility/caption gaps.
+- **Next Step:** exact rule file to read, code edit, or render validation command.

@@ -31,3 +31,15 @@ Only flag a finding when you can name:
 - the minimal fix.
 
 Inspired by ECC's `silent-failure-hunter`; adapted as both a skill and a dispatchable `dw-silent-failure-hunter` agent.
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when no concrete silent-failure risk is found, `FINDINGS` when at least one named risk exists, `BLOCKED` when failure paths cannot be inspected, `NOT_APPLICABLE` when no fallible control flow is in scope.
+- **Scope:** files/functions, failure paths, async boundaries, and IO surfaces inspected.
+- **Evidence:** exact location, trigger, hidden bad outcome, and current handling behavior.
+- **Artifacts:** review finding, bugfix task, regression guard, or log/trace path.
+- **Decisions:** why the issue is concrete enough to flag or why it is an explicit pass.
+- **Risks:** swallowed errors, false success, lost stack/context, untracked async work, or unsafe fallback.
+- **Next Step:** minimal fix or verification proving the pass.

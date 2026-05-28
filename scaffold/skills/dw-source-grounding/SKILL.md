@@ -126,3 +126,15 @@ Already does multi-source research; gains the citation discipline. Each finding 
 ## Inspired by
 
 Adapted from [`addyosmani/agent-skills/source-driven-development`](https://github.com/addyosmani/agent-skills) by Addy Osmani (MIT license). Core protocol (Detect → Fetch → Implement → Cite) and source authority hierarchy preserved. dev-workflow integration: invoked by `dw-create-techspec`, `dw-deps-audit`, `dw-deep-research` via Complementary Skills, and citation format aligned with our existing report frontmatter conventions (`type: ...`, `schema_version: ...`).
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when the decision is source-grounded and cited, `FINDINGS` when citations are stale/weak, `BLOCKED` when required sources cannot be fetched, `NOT_APPLICABLE` when no external/source-sensitive decision exists.
+- **Scope:** decision, library/API/version, and source priority tier.
+- **Evidence:** URL, version, retrieval date, source tier, and quoted/paraphrased facts.
+- **Artifacts:** citation block, TechSpec/ADR entry, dependency note, or research report.
+- **Decisions:** accepted source, rejected source, and freshness judgment.
+- **Risks:** stale docs, unofficial authority, version mismatch, or uncited assumptions.
+- **Next Step:** fetch stronger source, cite, defer, or mark unverified.

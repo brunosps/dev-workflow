@@ -137,3 +137,15 @@ Ported from Compozy's `cy-review-round` skill (`/tmp/compozy/.agents/skills/cy-r
 - No issue-file frontmatter (Compozy uses it to interoperate with its remediation engine; dev-workflow's remediation is manual or via `/dw-qa --fix`).
 
 Credit: Compozy project (https://github.com/compozy/compozy).
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when no defensible findings remain, `FINDINGS` when review findings exist, `BLOCKED` when diff/context is insufficient, `NOT_APPLICABLE` when no review is in scope.
+- **Scope:** diff range, files reviewed, prior rounds, and review mode.
+- **Evidence:** file/line references, behavior impact, and prior-round disposition.
+- **Artifacts:** review report, inline findings, or consolidation notes.
+- **Decisions:** finding severity/order, duplicate suppression, and false-positive rejection.
+- **Risks:** missing tests, unreviewed generated files, stale base branch, or non-defensible claims.
+- **Next Step:** exact fix, verification, or approval/block marker.

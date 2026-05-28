@@ -131,3 +131,15 @@ If the executor exhausts its context budget mid-phase OR the user signals stop:
 ## Inspired by
 
 Adapted from [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) (`gsd-executor`, `gsd-plan-checker`) by gsd-build (MIT license). Core protocols (goal-backward verification, atomic commits, deviation handling, checkpoint resume) preserved. Path conventions changed from `.planning/<phase>/` to `.dw/spec/prd-<slug>/`. SDK CLI calls (`gsd-sdk query init.execute-phase`) replaced by inline operations. The companion `gsd-debugger` agent (1452 lines) was NOT ported — its scope overlaps with the existing `/dw-bugfix` and `/dw-qa --fix` commands.
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when plan-check and execution wave complete, `FINDINGS` when deviations or failed tasks remain, `BLOCKED` when plan-check returns `REVISE`/`BLOCK`, `NOT_APPLICABLE` when no task execution is in scope.
+- **Scope:** PRD/spec slug, wave, tasks, dependencies, and agent roles.
+- **Evidence:** plan-check verdict, task files read, command outputs, and deviation notes.
+- **Artifacts:** changed files, task memory, checkpoint, deviations report, or commits.
+- **Decisions:** wave ordering, task split, and accepted deviations.
+- **Risks:** dependency drift, uncommitted work, skipped verification, or partial checkpoint.
+- **Next Step:** next task, commit, checkpoint, or revision needed.

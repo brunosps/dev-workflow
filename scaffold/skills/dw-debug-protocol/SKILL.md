@@ -106,3 +106,15 @@ After 60 minutes stuck at step 2 (localize) or step 4 (root cause), surface the 
 - Don't silently spin. Fresh eyes find what stuck eyes miss.
 
 This is not failure — it's protocol. Stuck > 1 hour is a signal, not a flaw.
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when the bug is reproduced, root-caused, guarded, and verified, `FINDINGS` when a confirmed defect remains, `BLOCKED` when reproduction/localization is impossible, `NOT_APPLICABLE` when the task is not bug-shaped.
+- **Scope:** symptom, affected surface, environment, and triage step reached.
+- **Evidence:** reproduction command, failing output, localized files, and root-cause proof.
+- **Artifacts:** bugfix task/report, regression test, logs, or verification output.
+- **Decisions:** chosen fix path and rejected hypotheses.
+- **Risks:** non-reproducibility, partial guard coverage, rollback gaps, or hidden adjacent defects.
+- **Next Step:** next triage step or verification command.

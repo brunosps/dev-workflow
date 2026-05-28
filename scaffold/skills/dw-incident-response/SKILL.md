@@ -166,3 +166,15 @@ Files are committed to the repo alongside code — incidents are part of the pro
 ## Why this skill exists
 
 dev-workflow's existing surface is "build feature → ship." Nothing covered "production broke, what now?" Teams improvised postmortems, action items got lost, and the same bug recurred. This skill closes that loop: structured response in the moment, blameless reflection after, and cross-incident learning that feeds back into the project's constitution.
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when incident triage, resolution, comms, and follow-up are complete, `FINDINGS` when incident work remains, `BLOCKED` when severity/ownership/evidence is missing, `NOT_APPLICABLE` when no incident workflow is in scope.
+- **Scope:** incident id, severity, service, timeline window, and owner.
+- **Evidence:** symptoms, customer impact, logs/metrics, mitigation, and verification.
+- **Artifacts:** incident files, communication draft, action items, or postmortem path.
+- **Decisions:** severity, mitigation path, rollback/fix choice, and communication cadence.
+- **Risks:** recurring cause, incomplete customer notice, weak action items, or missing monitoring.
+- **Next Step:** next incident phase or postmortem/action-item owner.

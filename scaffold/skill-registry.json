@@ -240,7 +240,7 @@
       "trigger": "Security review, sensitive code, OWASP checks, auth/payment/input surfaces",
       "expected_output": "High-confidence security findings or explicit pass.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 14000,
       "bundled": true
     },
     {

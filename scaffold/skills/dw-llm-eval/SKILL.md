@@ -148,3 +148,15 @@ The oracle ladder fixes both: forces measurement, forces ANCHORED measurement (l
 ## Bottom line
 
 > An AI feature without an eval suite is a feature you can't ship safely. An eval suite without calibration is a number you can't trust. Build the dataset from real failures, climb the ladder from cheap to expensive, calibrate the judge against humans, and re-run before every model swap. The discipline is small; the absence of it is one of the largest sources of "we shipped and don't know if it's worse" experiences in the industry.
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when eval strategy/results meet the feature gate, `FINDINGS` when eval gaps or regressions remain, `BLOCKED` when dataset/rubric/calibration is missing, `NOT_APPLICABLE` when no LLM/AI behavior is in scope.
+- **Scope:** feature, model path, dataset, oracle rungs, and command mode.
+- **Evidence:** dataset provenance, metrics, judge calibration, run logs, and failure cases.
+- **Artifacts:** eval plan, cases.jsonl, run JSONL, rubric, or QA log path.
+- **Decisions:** oracle rung selection, metric thresholds, and accepted deviations.
+- **Risks:** judge drift, synthetic-only cases, same-model judging, hallucination, or uncovered trajectories.
+- **Next Step:** add dataset case, run eval, calibrate judge, or block release.

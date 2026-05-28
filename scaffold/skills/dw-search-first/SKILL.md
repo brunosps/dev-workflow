@@ -29,3 +29,15 @@ Use before writing custom infrastructure, adding an integration, choosing a depe
 - Build custom only after search channels were checked or explicitly unavailable.
 
 Inspired by ECC's `search-first`; adapted to compose with `dw-source-grounding`, `/dw-plan`, and `/dw-find-skills`.
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when an `ADOPT`/`WRAP`/`COMPOSE`/`BUILD` decision is justified, `FINDINGS` when search gaps remain, `BLOCKED` when required search channels are unavailable, `NOT_APPLICABLE` when no new capability/dependency is being chosen.
+- **Scope:** capability, constraints, project area, and checked channels.
+- **Evidence:** repo hits, installed skills, `.dw/intel/`, package/docs links, or explicit unavailable-channel note.
+- **Artifacts:** TechSpec/ADR decision entry or dependency/reuse note.
+- **Decisions:** `ADOPT`, `WRAP`, `COMPOSE`, or `BUILD`, with rejected alternatives.
+- **Risks:** license, maintenance, dependency weight, version drift, or local reinvention.
+- **Next Step:** install/adapt/write decision record or ask for missing constraint.

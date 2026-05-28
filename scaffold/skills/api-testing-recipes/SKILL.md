@@ -102,3 +102,15 @@ Per-recipe details in `references/auth-patterns.md`.
 ## Inspired by
 
 Hand-curated by dev-workflow. `.http` syntax follows the JetBrains HTTP Client / VSCode REST Client conventions. Per-stack recipes adapt patterns from each ecosystem's official testing docs (FastAPI testing tutorial, NestJS testing recipes, Microsoft.AspNetCore.Mvc.Testing docs, Axum testing examples).
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when a recipe and evidence path are selected, `FINDINGS` when API test gaps remain, `BLOCKED` when the stack or auth flow is unknown, `NOT_APPLICABLE` when no HTTP/API surface is in scope.
+- **Scope:** API surface, requirement/RF, auth mode, and selected recipe.
+- **Evidence:** route/schema/source files read and request/response logs or planned log path.
+- **Artifacts:** `.http` file, test file, matrix, or log path to create/update.
+- **Decisions:** why this recipe fits the stack and why alternatives were rejected.
+- **Risks:** credentials, environment dependencies, flaky external calls, or uncovered negative cases.
+- **Next Step:** exact command or file edit needed to execute the recipe.

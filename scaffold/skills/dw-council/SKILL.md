@@ -180,3 +180,15 @@ Adaptations for dev-workflow:
 - Integration points map to dev-workflow commands (`dw-brainstorm`, `dw-create-techspec`) instead of Compozy's idea-factory pipeline
 
 Credit: Compozy project (https://github.com/compozy/compozy).
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when advisor positions and a recommendation are complete, `FINDINGS` when unresolved tensions remain, `BLOCKED` when inputs or constraints are missing, `NOT_APPLICABLE` when no high-impact tradeoff exists.
+- **Scope:** decision, constraints, advisors consulted, and artifact path.
+- **Evidence:** each advisor's cited position and the facts they used.
+- **Artifacts:** council report, debate notes, or decision summary path.
+- **Decisions:** recommended path, rejected alternatives, and what would change the call.
+- **Risks:** unresolved disagreement, missing stakeholder data, or unvalidated assumptions.
+- **Next Step:** concrete follow-up: accept, run experiment, gather data, or escalate.

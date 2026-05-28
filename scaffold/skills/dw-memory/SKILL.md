@@ -193,3 +193,15 @@ Ported from Compozy's `cy-workflow-memory` skill (`/tmp/compozy/.agents/skills/c
 Credit: Compozy project (https://github.com/compozy/compozy).
 
 The Context Budget section adapts the context-loading discipline from [`tech-leads-club/agent-skills/tlc-spec-driven`](https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/skills/(development)/tlc-spec-driven) (CC-BY-4.0, Felipe Rodrigues). The target, the anti-co-load rules, and the "monitoring signal" framing come from there; the integration with two-tier memory and the specific file ceilings are dev-workflow-specific.
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when memory is current and scoped correctly, `FINDINGS` when memory is stale/overloaded, `BLOCKED` when required task/project context is missing, `NOT_APPLICABLE` when no session memory is needed.
+- **Scope:** project memory, task memory, checkpoint, and files considered.
+- **Evidence:** memory entries read/written, stale facts removed, and promotion decision.
+- **Artifacts:** `.dw/STATE.md`, task `MEMORY.md`, checkpoint, or compaction note.
+- **Decisions:** promote, keep local, discard, or compact.
+- **Risks:** stale instructions, duplicated facts, leaked task-local context, or oversized memory.
+- **Next Step:** exact memory write, compaction, or checkpoint action.

@@ -155,3 +155,15 @@ In all bend cases, document the bend in the PR (one line). "I skipped the state 
 The shorter route — "agent loads a 161-palette catalog and picks one" — produces dashboards that look like every other dashboard because the agent has no constraint that pulls it away from training-data centers of mass.
 
 The grounding pulls the design toward the specific surface, the specific user, the specific moment. Even with the same palette catalog, a "3am on-call dark room troubleshooting" design lands different choices than a "morning manager approving expenses" design. That difference is where surface quality lives.
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when grounding, state coverage, accessibility, and visual review pass, `FINDINGS` when UI risks remain, `BLOCKED` when design authority or surface job is unclear, `NOT_APPLICABLE` when no UI surface is in scope.
+- **Scope:** screen/component, design authority, user job, state matrix, and device/context.
+- **Evidence:** design source read, four grounding answers, states checked, screenshots, and accessibility checks.
+- **Artifacts:** UI proposal, design notes, state matrix, screenshot path, or QA finding.
+- **Decisions:** palette/type/component choices, state handling, and accepted deviations.
+- **Risks:** training-data defaults, missing states, contrast/focus failures, unreadable hierarchy, or mobile overflow.
+- **Next Step:** exact design/code/QA action or missing input to gather.

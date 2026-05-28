@@ -329,3 +329,15 @@ If no vulnerabilities found, state: "No high-confidence vulnerabilities identifi
 - `terraform.md` - IaC security
 - `ci-cd.md` - Pipeline security
 - `cloud.md` - AWS/GCP/Azure security
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when no high-confidence security findings remain, `FINDINGS` when exploitable issues exist, `BLOCKED` when threat context or sensitive paths cannot be inspected, `NOT_APPLICABLE` when no security-relevant surface is in scope.
+- **Scope:** assets, trust boundaries, languages/frameworks, data classes, and threat model slice.
+- **Evidence:** file/line references, exploit path, affected data/actor, and reference category.
+- **Artifacts:** security findings, verification notes, remediation plan, or audit report.
+- **Decisions:** severity, confidence, exploitability, and false-positive rejection.
+- **Risks:** authz bypass, injection, secret exposure, SSRF, supply chain, logging, or misconfiguration.
+- **Next Step:** minimal remediation, verification, or explicit accepted risk owner.

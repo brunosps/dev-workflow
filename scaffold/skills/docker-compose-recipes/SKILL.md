@@ -82,3 +82,15 @@ Each row points to `services/<name>.yml`.
 ## Inspired by
 
 Hand-curated by dev-workflow. Service defaults follow upstream documentation (Docker Hub `postgres`, `redis`, `mailhog/mailhog`, `minio/minio`, `getmeili/meilisearch`, `jaegertracing/all-in-one`, `traefik`). Healthcheck patterns adapted from `docker-library/healthcheck` and the official compose docs.
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when service recipes and compose guidance are selected, `FINDINGS` when compose gaps remain, `BLOCKED` when required ports/secrets/envs are unknown, `NOT_APPLICABLE` when no local infrastructure service is in scope.
+- **Scope:** services, project mode (`dev`/`prod`), ports, volumes, and env files touched.
+- **Evidence:** existing compose files, service references, healthcheck needs, and conflicting ports.
+- **Artifacts:** compose snippets/files, `.env` keys, healthchecks, and follow-up reference files.
+- **Decisions:** selected service recipe, image tag policy, and any prod/dev transform.
+- **Risks:** secret leakage, readiness ambiguity, data persistence, mail routing, or destructive defaults.
+- **Next Step:** exact compose edit and validation command.

@@ -161,3 +161,13 @@ Verification failure is information, not a dead end. Protocol:
 Discover the project gate before claiming success. Prefer documented gates in `.dw/rules/`, then package scripts such as `verify`, `check`, `ci`, or `test`, then Makefile/just/pyproject equivalents. If no verification command exists, state that explicitly in the Verification Report and avoid completion language.
 
 Load `references/verification-discovery-and-attribution.md` when you need the full discovery checklist, command integration table, or attribution notes.
+
+## Structured Return
+
+- **Status:** `PASS` fresh gates prove the claim, `FINDINGS` fail/incomplete, `BLOCKED` no valid gate, `NOT_APPLICABLE` no claim.
+- **Scope:** claim, files, gates, environment.
+- **Evidence:** commands, exit codes, output, timestamps.
+- **Artifacts:** report, logs, screenshots, CI link.
+- **Decisions:** selected gate and skipped-gate reason.
+- **Risks:** stale output, partial runs, unverified generated files.
+- **Next Step:** rerun, fix, add gate, or name blocker.

@@ -75,3 +75,15 @@ Provide:
 2. Brief audit of what still sounds AI-generated
 3. Final rewrite
 4. Short change summary when useful
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when the final rewrite preserves meaning and voice, `FINDINGS` when prose issues remain, `BLOCKED` when audience/voice/source constraints are missing, `NOT_APPLICABLE` when no prose rewrite is in scope.
+- **Scope:** document, audience, intended voice, and sections edited.
+- **Evidence:** AI-writing tells found, source meaning preserved, and style constraints applied.
+- **Artifacts:** draft rewrite, audit, final rewrite, and change summary.
+- **Decisions:** tone choices, cuts, preserved terminology, and unresolved wording tradeoffs.
+- **Risks:** meaning drift, over-polishing, unsupported claims, or voice mismatch.
+- **Next Step:** accept final rewrite, provide missing voice sample, or revise named section.

@@ -145,3 +145,15 @@ In the formal Level 3 review (post-Level 2 chain from `dw-review-implementation`
 Adapted from [`addyosmani/agent-skills/code-simplification`](https://github.com/addyosmani/agent-skills) by Addy Osmani (MIT license). Core principles (Chesterton's Fence, behavior preservation, scope discipline, Rule of 500) preserved. dev-workflow integration: invoked by `/dw-review`, `/dw-refactor`, and `/dw-brainstorm` refactor-audit mode via Complementary Skills.
 
 The deep-modules reference is adapted from [`mattpocock/skills/improve-codebase-architecture`](https://github.com/mattpocock/skills/tree/main/improve-codebase-architecture) by Matt Pocock (MIT license). Core framing (deep modules = high leverage at small interface, deletion test, shallow-wrapper anti-pattern) preserved; paths and integration points rebased on dev-workflow conventions.
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when simplification is safe and justified, `FINDINGS` when concrete refactor opportunities exist, `BLOCKED` when behavior or ownership is unclear, `NOT_APPLICABLE` when no simplification/refactor scope exists.
+- **Scope:** module, smell, complexity signal, and behavior boundary.
+- **Evidence:** code paths read, metrics, duplication, tests, and Chesterton's Fence rationale.
+- **Artifacts:** refactor recommendation, characterization test plan, codemod plan, or task list.
+- **Decisions:** simplify now, defer, split, preserve, or reject.
+- **Risks:** behavior drift, shallow wrapper churn, missing tests, or broad blast radius.
+- **Next Step:** smallest behavior-preserving refactor or prerequisite guard.

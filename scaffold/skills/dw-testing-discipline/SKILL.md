@@ -171,3 +171,15 @@ Any of these in a PR is enough to REJECT a verdict:
 ## Bottom line
 
 > A test that cannot fail is decorative. A test that fails for the wrong reason is misleading. Build tests that fail for exactly one reason — the reason the invariant was violated — and trust them when they do. Mocks isolate. Real systems validate. Coverage shines a light. Mutation score grades the suite. Agents will reach for the mock and the snapshot; the guardrails make them put both down. Tests reveal bugs, not just pass.
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when tests target real behavior at the right layer, `FINDINGS` when test design gaps or anti-patterns remain, `BLOCKED` when the invariant or owning layer is unclear, `NOT_APPLICABLE` when no test work is in scope.
+- **Scope:** invariant, owning layer, suite/file, and workflow (`author`, `review`, `debug`, `flaky`).
+- **Evidence:** production behavior read, existing suite, execution output, anti-patterns, and guardrails checked.
+- **Artifacts:** test file, matrix, flaky quarantine note, mutation/coverage result, or QA log.
+- **Decisions:** placement, mock/real-system boundary, snapshot classification, and negative companion.
+- **Risks:** false confidence, flakiness, mock drift, implementation-detail coupling, or weak assertions.
+- **Next Step:** exact test edit, verification command, or clarification needed.

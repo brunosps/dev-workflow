@@ -121,3 +121,15 @@ Real-world software can't always be perfect:
 - [ ] No `--no-verify`
 - [ ] No amend of pushed commit
 - [ ] Branch name follows convention
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when the commit/PR plan is atomic and verified, `FINDINGS` when git hygiene gaps remain, `BLOCKED` when repository state is ambiguous, `NOT_APPLICABLE` when no git action is in scope.
+- **Scope:** branch, staged/unstaged files, intended commit/PR, and remote state.
+- **Evidence:** `git status`, diff summary, verification commands, and branch checks.
+- **Artifacts:** commit plan, commit hash, PR body, or branch hygiene report.
+- **Decisions:** commit split, message type/scope, and files intentionally excluded.
+- **Risks:** unrelated dirty files, skipped checks, pushed-history rewrite, or mixed intent.
+- **Next Step:** exact stage/commit/push/PR command or cleanup action.

@@ -111,3 +111,15 @@ If no `.dw/intel/` exists at all, `/dw-intel` falls back to `.dw/rules/` (seeded
 Adapted from [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) (`gsd-intel-updater`) by gsd-build (MIT license). Core schemas (`files.json`, `apis.json`, `deps.json`, `stack.json`, `arch.md`) and incremental update protocol preserved. Path conventions changed from `.planning/intel/` to `.dw/intel/`. CLI tooling (`gsd-sdk query intel.*`) replaced by agent-driven inline operations (no separate runtime). The companion `gsd-codebase-mapper` agent (human-readable analysis docs) was NOT ported — its scope overlaps with the existing `/dw-analyze-project` command which writes to `.dw/rules/`.
 
 The `bugfixes.json` index and the `bugfix-history` / `risk-area` query shapes (see `references/query-patterns.md`) were added in v1.0.2 to enable cross-skill awareness of `.dw/bugfixes/` — adapted from the operational-memory pattern in [`tech-leads-club/agent-skills/tlc-spec-driven`](https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/skills/(development)/tlc-spec-driven) (CC-BY-4.0, Felipe Rodrigues). The original skill maintains a single `STATE.md`; dev-workflow splits this into project-level `.dw/STATE.md` (session continuity) and a queryable `bugfixes.json` (historical fixes), which compose with the existing per-PRD `MEMORY.md`.
+
+## Structured Return
+
+When invoked directly or by a harness, return or merge this block:
+
+- **Status:** `PASS` when indexes are updated or the query answer is cited, `FINDINGS` when intel is stale/incomplete, `BLOCKED` when required project files cannot be read, `NOT_APPLICABLE` when the task does not need codebase intel.
+- **Scope:** index files, query type, module, and paths inspected.
+- **Evidence:** cited `.dw/intel/*` entries, source files, timestamps, or stale-index indicators.
+- **Artifacts:** updated index files, query answer, codemap, or bugfix index path.
+- **Decisions:** whether to rebuild, incrementally update, or answer from existing intel.
+- **Risks:** stale docs, missing generated files, broad reads, or uncited conclusions.
+- **Next Step:** exact index update, query refinement, or source read required.
