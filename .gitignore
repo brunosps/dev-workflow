@@ -3,8 +3,10 @@
 # Each user's local setup; not part of the dev-workflow source.
 .claude/
 .codex/
+.agents/
 .github/
 .opencode/
+skills-lock.json
 
 # Node
 node_modules/
