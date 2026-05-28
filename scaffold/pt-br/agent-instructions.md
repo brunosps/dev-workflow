@@ -14,7 +14,7 @@ Antes de escolher um comando da Trigger Map, dimensione o escopo real da mudanç
 | **Pequeno** | ≤3 arquivos, sem migration, sem novo endpoint, descritível em uma frase. Exemplos: typo, log message, config de uma linha, bump de dependência, version pin. | Faça inline. Nenhum comando `dw-*`. |
 | **Médio** | Feature ou bug claro, <10 tasks numeradas esperadas, único componente ou serviço, sem decisões arquiteturais. Exemplos: adicionar campo de form com validação, corrigir regressão em módulo conhecido, ligar novo endpoint num handler existente. | `/dw-bugfix` (bugs) ou `/dw-plan` (features) — direto, não via `/dw-autopilot`. |
 | **Grande** | Feature multi-componente, ≥10 tasks esperadas, toca múltiplos módulos, tem superfície UX user-visible E backend. Exemplos: adicionar nova entidade end-to-end (model + migration + API + UI), introduzir integração de terceiro, redesenhar fluxo. | `/dw-autopilot "<wish>"` — primeira invocação planeja e para; segunda invocação retoma via `/dw-goal` para Run → Review → QA/Fix → Review, depois Commit → PR. |
-| **Complexo** | Domínio novo, requisitos ambíguos, decisão arquitetural exigida, superfície regulatória ou de compliance, ou escopo que cruza múltiplos PRDs. Exemplos: introduzir event sourcing, reconstruir auth, multi-tenancy, nova linha de produto. | `/dw-brainstorm "<ideia>"` primeiro (auto-dispatch de modos research/council), depois `/dw-plan --council` para a etapa de techspec rodar o debate multi-advisor. |
+| **Complexo** | Domínio novo, requisitos ambíguos, decisão arquitetural exigida, superfície regulatória ou de compliance, ou escopo que cruza múltiplos PRDs. Exemplos: introduzir event sourcing, reconstruir auth, multi-tenancy, nova linha de produto. | `/dw-opportunities` primeiro se a ideia ainda nao existir; caso contrario `/dw-brainstorm "<ideia>"` (auto-dispatch de modos research/council), depois `/dw-plan --council` para a etapa de techspec rodar o debate multi-advisor. |
 
 **Safety valve:** se você começou em Pequeno ou Médio mas o trabalho revela que é Grande de fato (a listagem inline passa de 5 passos, ou `/dw-bugfix` dispara seu `Step 5.0`), PARE e escale. Não existe flag para bypass. Escalar é o desfecho correto.
 
@@ -49,7 +49,10 @@ Antes de escolher um comando da Trigger Map, dimensione o escopo real da mudanç
 | "Só code review qualidade" | `/dw-review --code-only` |
 | "Hora de commitar" / mudanças validadas e prontas | `/dw-commit` |
 | "Abre um PR" / "Sobe isso" | `/dw-generate-pr` |
-| "Brainstorm X" / "Explora ideias" / "Research X" / "Auditoria de saúde do código" / "Tech debt" | `/dw-brainstorm "X"` (auto-dispatch dos modos grill / prototype / council / research / refactor-audit / onepager conforme os sinais) |
+| "Sugere ideias novas" / "O que devemos construir agora?" / "Encontra oportunidades" / "Ideias de roadmap" | `/dw-opportunities` |
+| "Que melhorias de seguranca devemos considerar?" / "Encontra oportunidades de seguranca" | `/dw-opportunities "security"` |
+| "Brainstorm X" / "Explora essa ideia" / "Research X" | `/dw-brainstorm "X"` (auto-dispatch dos modos grill / prototype / council / research / onepager conforme os sinais) |
+| "Auditoria de saude do codigo" / "Tech debt" / "Oportunidades de refactor" / "Smells em X" | `/dw-refactor "X"` |
 | "Onde está X?" / "O que usa Y?" / "Como Z é estruturado?" | `/dw-intel "<pergunta>"` |
 | "Reconstrói o índice" / "Refresh do intel" | `/dw-intel --build` |
 | "Contexto pesado" / "Audita uso de tokens" / "Por que o agente está lento?" | `/dw-context-budget` |

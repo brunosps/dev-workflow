@@ -21,11 +21,12 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 | `/dw-bugfix "descrição"` | Bug ou error report. Fix cirúrgico ou rota pra PRD. |
 | `/dw-help [palavra-chave]` | Esta tela. Passe palavra-chave pra atalhos. `--advanced` revela comandos internos. |
 
-## Tier 2 — Pipeline granular (9)
+## Tier 2 — Pipeline granular (10)
 
 | Comando | O que |
 |---------|-------|
-| `/dw-brainstorm "ideia"` | Refina ideia antes do PRD. Flags: `--onepager`, `--council`, `--research`, `--refactor`. |
+| `/dw-opportunities [foco]` | Sugere oportunidades especificas do projeto em produto, UX, automacao, refactor e seguranca antes de existir uma ideia concreta. Flag: `--research`. |
+| `/dw-brainstorm "ideia"` | Refina uma ideia concreta antes do PRD. Flags: `--onepager`, `--council`, `--research`. |
 | `/dw-plan "feature"` | PRD → TechSpec → Tasks sequencial com checkpoints. Stages: `prd`, `techspec`, `tasks`. |
 | `/dw-run [task-id]` | Executa todas tasks pendentes ou uma específica. Flag `--resume`. |
 | `/dw-review` | Level 2 (cobertura PRD) + Level 3 (qualidade/segurança). Flags: `--coverage-only`, `--code-only`, `--bugfix <slug>`. |
@@ -35,12 +36,13 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 | `/dw-commit` | Commits atômicos Conventional pra trabalho pendente. |
 | `/dw-generate-pr [target]` | Push branch, draft do PR body, abre browser. |
 
-## Tier 3 — Especialidade (10)
+## Tier 3 — Especialidade (11)
 
 | Comando | O que |
 |---------|-------|
 | `/dw-analyze-project` | Scan do repo, escreve `.dw/rules/`, oferece `.dw/constitution.md`, gera `.dw/rules/concerns.md` e sintetiza `DESIGN.md` em frontend quando há tokens. |
 | `/dw-redesign-ui "target"` | Audit, propõe 2-3 direções, entrega. Enforça UI grounding + WCAG; pode rodar o detector determinístico do impeccable. |
+| `/dw-refactor "target"` | Audita code health e tech debt com smells Fowler, deep-modules e gates de teste preservando comportamento. |
 | `/dw-functional-doc` | Mapeia screens + flows em doc funcional validado com Playwright; usa resolução de browser resiliente no WSL. |
 | `/dw-context-budget` | Audita contexto de commands, skills, agentes, instrucoes e MCPs. |
 | `/dw-harness-audit` | Pontua saude da instalacao: wrappers, agentes, MCPs e gates. |
@@ -55,7 +57,7 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 `/dw-autopilot "desejo"` roda planejamento primeiro e para. Reinvoque para retomar via `/dw-goal`, Security Gate, commit e PR. Passo a passo:
 
 ```
-/dw-brainstorm → /dw-plan → /dw-goal → /dw-secure-audit → /dw-commit → /dw-generate-pr
+/dw-opportunities → /dw-brainstorm → /dw-plan → /dw-goal → /dw-secure-audit → /dw-commit → /dw-generate-pr
 ```
 
 ## Comandos avançados / internos
@@ -102,8 +104,9 @@ Auto-invocados por comandos primários mas disponíveis standalone.
 | `commit`, `git` | `/dw-commit` |
 | `pr`, `pull request`, `merge` | `/dw-generate-pr` |
 | `ideia`, `brainstorm`, `explora` | `/dw-brainstorm` |
+| `oportunidades`, `o que vem agora`, `roadmap`, `ideias novas`, `features` | `/dw-opportunities` |
 | `research`, `compara`, `estado da arte` | `/dw-brainstorm --research` |
-| `refactor`, `smell`, `code health` | `/dw-brainstorm --refactor` |
+| `refactor`, `smell`, `code health`, `tech debt` | `/dw-refactor` |
 | `ui`, `design`, `redesign` | `/dw-redesign-ui` |
 | `intel`, `onde está`, `o que usa` | `/dw-intel` (ou `--build`) |
 | `contexto`, `tokens`, `agente lento` | `/dw-context-budget` |
@@ -114,6 +117,7 @@ Auto-invocados por comandos primários mas disponíveis standalone.
 | `skills`, `skill health`, `bloat` | `/dw-skill-health` |
 | `analyze`, `rules`, `convenções` | `/dw-analyze-project` |
 | `constitution`, `princípios` | `/dw-analyze-project` (Step 8) |
+| `oportunidades de seguranca`, `ideias de hardening`, `melhorar seguranca` | `/dw-opportunities "security"` |
 | `security`, `vulnerabilidades`, `cve`, `deps` | `/dw-secure-audit` |
 | `secret`, `sast`, `semgrep`, `gitleaks`, `trivy` | `/dw-secure-audit` |
 | `adr`, `decisão` | `/dw-adr` |
@@ -148,7 +152,10 @@ Sem match: surface padrão + nota.
 **P: Onde entra segurança?**
 - `/dw-review` auto-invoca `/dw-secure-audit` para stacks suportadas; `/dw-autopilot` trata como gate nomeado antes de commit/PR; `/dw-generate-pr` reforça o summary aprovado mais recente.
 
+**P: Como descubro o que fazer depois?**
+- `/dw-opportunities` escaneia o projeto instalado e sugere oportunidades de produto, UX, automacao, refactor e seguranca.
+
 **P: O que aconteceu com outros comandos?**
-- v1.0.0 consolidou a surface antiga de comandos. Mergers: create-prd/techspec/tasks → `/dw-plan`; run-task/run-plan → `/dw-run`; code-review/review-implementation → `/dw-review`; run-qa/fix-qa → `/dw-qa`; security-check/deps-audit → `/dw-secure-audit`; map-codebase → `/dw-intel --build`; deep-research e refactoring-analysis → `/dw-brainstorm --research/--refactor`. Removidos: revert-task (use `git revert` direto).
+- v1.0.0 consolidou a surface antiga de comandos. Mergers: create-prd/techspec/tasks → `/dw-plan`; run-task/run-plan → `/dw-run`; code-review/review-implementation → `/dw-review`; run-qa/fix-qa → `/dw-qa`; security-check/deps-audit → `/dw-secure-audit`; map-codebase → `/dw-intel --build`; deep-research → `/dw-brainstorm --research`; refactoring-analysis agora roteia para `/dw-refactor`. Removidos: revert-task (use `git revert` direto).
 
 </system_instructions>

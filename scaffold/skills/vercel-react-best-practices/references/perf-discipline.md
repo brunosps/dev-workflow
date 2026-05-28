@@ -119,4 +119,4 @@ Optimize in this order; don't jump to (5) before (1).
 
 ## Integration with dev-workflow
 
-Use with `dw-refactoring-analysis` when flagging perf-related smells: cite the metric, the measurement tool, and the suggested rule from the `rules/` directory. Without those three, a perf "smell" is a guess.
+Use with `/dw-refactor` when flagging perf-related smells: cite the metric, the measurement tool, and the suggested rule from the `rules/` directory. Without those three, a perf "smell" is a guess.

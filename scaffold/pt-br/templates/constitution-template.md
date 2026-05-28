@@ -71,7 +71,7 @@ mode: defaults | custom
 **P-008 — Queries N+1 são flagueadas em code review** (severity: info)
 **Regra:** Loops ou operações em lista que disparam chamadas DB/HTTP por item devem batchar (ex: `IN (...)`, `findMany`, DataLoader) ou ser explicitamente justificadas.
 **Why:** Padrões N+1 escalam linearmente com tamanho dos dados e silenciosamente degradam até que a carga de produção revele.
-**Enforcement:** `dw-code-review` e `dw-refactoring-analysis` detectam padrões await-em-loop contra módulos de repository / API client.
+**Enforcement:** `/dw-review` e `/dw-refactor` detectam padrões await-em-loop contra módulos de repository / API client.
 
 ---
 

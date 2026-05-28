@@ -2,7 +2,7 @@
 
 A **deep module** absorbs complexity behind a narrow public surface. Its callers see a small, stable API and get a lot of work done per call. A **shallow module** is the opposite — small interface AND small implementation, so it adds an indirection without absorbing any complexity. Or worse: a god-module, deep implementation BUT huge interface, where the surface itself is the complexity.
 
-The refactor-audit mode of `/dw-brainstorm` checks every candidate module against this framing alongside the Fowler smell taxonomy. A "code smell" can mislead if the construct is actually a deep wrapper doing its job correctly.
+`/dw-refactor` and the refactor-audit mode of `/dw-brainstorm` check every candidate module against this framing alongside the Fowler smell taxonomy. A "code smell" can mislead if the construct is actually a deep wrapper doing its job correctly.
 
 ## The premise
 

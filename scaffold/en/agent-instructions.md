@@ -14,7 +14,7 @@ Before picking a command from the Trigger Map, gauge the change's actual scope. 
 | **Small** | ≤3 files, no migration, no new endpoint, can be summarized in one sentence. Examples: typo, log message, single-line config, dependency bump, version pin. | Just do it inline. No `dw-*` command. |
 | **Medium** | Clear feature or bug, <10 numbered tasks expected, single component or single service, no architectural decisions. Examples: add a form field with validation, fix a regression in a known module, wire a new API endpoint into an existing handler. | `/dw-bugfix` (for bugs) or `/dw-plan` (for features) — straight, not via `/dw-autopilot`. |
 | **Large** | Multi-component feature, ≥10 tasks expected, touches multiple modules, has user-visible UX surface AND backend. Examples: add a new entity end-to-end (model + migration + API + UI), introduce a third-party integration, redesign a flow. | `/dw-autopilot "<wish>"` — first invocation plans and stops; second invocation resumes via `/dw-goal` for Run → Review → QA/Fix → Review, then Commit → PR. |
-| **Complex** | New domain, ambiguous requirements, architectural decision required, regulatory or compliance surface, or scope that spans multiple PRDs. Examples: introduce event sourcing, rebuild auth, multi-tenancy, a new product line. | `/dw-brainstorm "<idea>"` first (auto-dispatches research/council modes), then `/dw-plan --council` so the techspec stage runs the multi-advisor debate. |
+| **Complex** | New domain, ambiguous requirements, architectural decision required, regulatory or compliance surface, or scope that spans multiple PRDs. Examples: introduce event sourcing, rebuild auth, multi-tenancy, a new product line. | `/dw-opportunities` first if the idea is not yet known; otherwise `/dw-brainstorm "<idea>"` (auto-dispatches research/council modes), then `/dw-plan --council` so the techspec stage runs the multi-advisor debate. |
 
 **Safety valve:** if you start in Small or Medium but the work reveals it's actually Large (the inline listing exceeds 5 steps, or `/dw-bugfix` triggers its `Step 5.0` valve), STOP and escalate. There is no flag to bypass. Escalation is the correct outcome.
 
@@ -49,7 +49,10 @@ Before picking a command from the Trigger Map, gauge the change's actual scope. 
 | "Just the code quality review" | `/dw-review --code-only` |
 | "Time to commit" / changes are validated and ready | `/dw-commit` |
 | "Open a PR" / "Ship this" | `/dw-generate-pr` |
-| "Brainstorm X" / "Explore ideas" / "Research X" / "Code-health audit" / "Find tech debt" | `/dw-brainstorm "X"` (auto-dispatches grill / prototype / council / research / refactor-audit / onepager based on signals) |
+| "Suggest new ideas" / "What should we build next?" / "Find opportunities" / "Roadmap ideas" | `/dw-opportunities` |
+| "What security improvements should we consider?" / "Find security opportunities" | `/dw-opportunities "security"` |
+| "Brainstorm X" / "Explore this idea" / "Research X" | `/dw-brainstorm "X"` (auto-dispatches grill / prototype / council / research / onepager based on signals) |
+| "Code-health audit" / "Find tech debt" / "Refactor opportunities" / "Smells in X" | `/dw-refactor "X"` |
 | "Where is X?" / "What uses Y?" / "How is Z structured?" | `/dw-intel "<question>"` |
 | "Rebuild the codebase index" / "Refresh intel" | `/dw-intel --build` |
 | "Context is heavy" / "Audit token usage" / "Why is the agent slow?" | `/dw-context-budget` |

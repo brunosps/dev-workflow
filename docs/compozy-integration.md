@@ -26,7 +26,7 @@ O dev-workflow historicamente distribui prompts e templates. O Compozy trata ski
 - **Hard gates**: `/dw-plan techspec` bloqueia se PRD tem Open Questions abertas; `/dw-generate-pr` bloqueia sem `dw-verify` PASS; `/dw-qa --fix` bloqueia mudança de status sem reteste + verify; `/dw-secure-audit` bloqueia commit/PR quando há SECRET/CRITICAL/HIGH.
 - **Circular dependency detection**: `/dw-plan tasks` faz grafo de deps e aborta se houver ciclo antes de escrever `tasks.md`.
 - **Codebase-aware task enrichment**: `/dw-plan tasks` usa exploração de codebase para preencher Relevant Files / Dependent Files / Related Rules em cada task (aditivo, não bloqueia).
-- **De-duplication em review**: `/dw-review` e `/dw-brainstorm --refactor` aplicam as 5 regras de `dw-review-rigor` para evitar N findings idênticos em N arquivos.
+- **De-duplication em review**: `/dw-review` e `/dw-refactor` aplicam as 5 regras de `dw-review-rigor` para evitar N findings idênticos em N arquivos.
 - **Memory thread**: `/dw-run`, `/dw-goal`, `/dw-autopilot`, `/dw-pause` e `/dw-resume` usam `dw-memory` para persistir contexto cross-task com discipline.
 
 ### Novos commands / comandos consolidados

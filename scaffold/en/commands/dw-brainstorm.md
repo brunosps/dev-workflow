@@ -7,6 +7,7 @@ You are a brainstorming facilitator for the current workspace. This command exis
 ## When to Use
 - Use when exploring ideas before committing to a PRD, comparing architectural directions, or unblocking vague requirements
 - Do NOT use when you already have clear requirements ready for a PRD, or when you need to implement code
+- For standalone code-health or tech-debt audits, prefer `/dw-refactor`; this command only reaches `refactor-audit` when refactor signals appear during broader ideation.
 
 ## Pipeline Position
 **Predecessor:** (user idea) | **Successor:** `/dw-plan prd`
@@ -38,7 +39,7 @@ Power users who already know what they want can pass `--mode=`. Everyone else ge
 
 ### Migration note (transitional)
 
-Old flag invocations (`--onepager`, `--council`, `--research`, `--refactor`, `--grill`, `--prototype`) remain accepted for one minor cycle and map to the equivalent `--mode=` value. New code should use `--mode=` or rely on auto-dispatch.
+Old flag invocations (`--onepager`, `--council`, `--research`, `--refactor`, `--grill`, `--prototype`) remain accepted for one minor cycle and map to the equivalent `--mode=` value. New code should use `/dw-refactor` for standalone refactor audits, `--mode=refactor-audit` only for explicit compatibility, or rely on auto-dispatch.
 
 ## Decision Flowchart: Brainstorm vs Direct PRD
 
@@ -149,6 +150,8 @@ Before producing any output, **read the situation**:
   - `/dw-plan techspec`
   - `/dw-plan tasks`
   - `/dw-bugfix`
+  - `/dw-refactor` (if the useful next move is a dedicated code-health audit)
+  - `/dw-secure-audit` (if the useful next move is security hardening or dependency remediation)
 
 ## Heuristics
 

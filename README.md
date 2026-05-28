@@ -26,7 +26,7 @@ npx @brunosps00/dev-workflow install-deps
 
 ## Commands
 
-dev-workflow v1.1.4 ships **31 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v1.1.4 ships **33 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
 ### Tier 1 — Gateway (3)
 
@@ -36,13 +36,14 @@ dev-workflow v1.1.4 ships **31 commands** organized into four tiers. Most users 
 | **`/dw-bugfix "description"`** | A bug report or pasted error. Triages bug-vs-feature-vs-scope, surgical fix or routes to a PRD. |
 | **`/dw-help [keyword]`** | Discover commands. Pass a keyword for shortcuts; `--advanced` reveals internal commands. |
 
-### Tier 2 — Pipeline granular (9)
+### Tier 2 — Pipeline granular (10)
 
 Use these when you want step-by-step control instead of `/dw-autopilot`.
 
 | Command | What |
 |---------|------|
-| **`/dw-brainstorm "idea"`** | Refine an idea before PRD. Flags: `--onepager` (durable artifact), `--council` (multi-advisor debate), `--research` (multi-source cited research), `--refactor` (Fowler code-smell catalog). |
+| **`/dw-opportunities [focus]`** | Scan the installed project, especially `/dw-analyze-project` outputs (`.dw/rules/`, `.dw/intel/`, concerns, constitution, `DESIGN.md`), for product, UX, automation, refactor, and security opportunities. `--research` adds cited external context when needed. |
+| **`/dw-brainstorm "idea"`** | Refine a concrete idea before PRD. Flags: `--onepager` (durable artifact), `--council` (multi-advisor debate), `--research` (multi-source cited research). |
 | **`/dw-plan "feature"`** | PRD → TechSpec → Tasks sequentially with checkpoints. Stages: `prd`, `techspec`, `tasks`. Mandatory clarification questions, source-grounding, constitution gate, final consistency check. |
 | **`/dw-run [task-id]`** | Execute tasks. Default: all pending in dependency order with wave-based parallel dispatch. Single-task: pass an ID. `--resume` continues an interrupted plan. |
 | **`/dw-review`** | Level 2 (PRD coverage mapping) + Level 3 (code quality). Hard gates on dw-verify PASS, secure-audit, constitution violations. Flags: `--coverage-only`, `--code-only`, `--bugfix <slug>` (review a bugfix at `.dw/bugfixes/<slug>/`). |
@@ -52,12 +53,13 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 | **`/dw-commit`** | Atomic Conventional Commits for pending changes. Applies `dw-git-discipline` (one intent per commit, lint+tests+build green before). |
 | **`/dw-generate-pr [target]`** | Push the branch, draft a PR body with summary + test plan, open the browser. Hard gates: dw-verify PASS + secure-audit. |
 
-### Tier 3 — Specialty (10)
+### Tier 3 — Specialty (11)
 
 | Command | What |
 |---------|------|
 | **`/dw-analyze-project`** | Scans the repo, writes `.dw/rules/` (per-module conventions, anti-patterns, naming). Step 8 offers `.dw/constitution.md`; Step 9 writes `.dw/rules/concerns.md`; Step 10 can synthesize a frontend `DESIGN.md` from existing tokens. Run once per project; refresh after major refactors. |
 | **`/dw-redesign-ui "target"`** | Audits a frontend page, runs the `dw-ui-discipline` 4-question grounding, proposes 2-3 design directions, ships the redesign. WCAG 2.2 AA accessibility floor is non-negotiable; UI diffs can also run the deterministic impeccable slop detector. |
+| **`/dw-refactor "target"`** | Audits a target for refactor opportunities using Fowler smells, `dw-simplification`, deep-modules analysis, and behavior-preserving test gates. This is the explicit route for code-health and tech-debt work. |
 | **`/dw-functional-doc`** | Maps screens + user flows into a functional doc, validated end-to-end with Playwright. Uses the WSL-resilient browser resolver and can capture guided functional video evidence. |
 | **`/dw-context-budget`** | Audits context overhead from commands, skills, agents, instruction files, and MCPs. |
 | **`/dw-harness-audit`** | Deterministic health scorecard for the dev-workflow install, agents, wrappers, MCPs, and gates. |
@@ -90,7 +92,7 @@ These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help 
 /dw-autopilot          ------>  Second invocation: /dw-goal → Security Gate → Commit → PR
     --- OR step-by-step ---
 
-/dw-brainstorm  -->  /dw-plan           -->  .dw/spec/prd-{name}/{prd,techspec,tasks}.md
+/dw-opportunities --> /dw-brainstorm --> /dw-plan --> .dw/spec/prd-{name}/{prd,techspec,tasks}.md
                           |
                     /dw-goal             -->  /dw-run → /dw-review → /dw-qa → /dw-review → /dw-secure-audit
                           |
@@ -101,7 +103,9 @@ Manual alternative after /dw-plan:
 
 Shortcuts:
   /dw-intel "question"         Query codebase intelligence
+  /dw-opportunities [focus]    Suggest next product, UX, automation, refactor, and security opportunities
   /dw-redesign-ui "target"     Visual redesign of a page or component
+  /dw-refactor "target"        Refactor opportunity audit for a module or code area
 ```
 
 ## Constitution
@@ -261,12 +265,12 @@ These are not slash commands — they are primitives other commands call to enfo
 |-------|-------------|------------|-------------|
 | **dw-verify** | Enforces fresh verification evidence before any completion, commit, or PR claim — with Iron Law, gate function, and Verification Report template | `/dw-run`, `/dw-goal`, `/dw-qa --fix`, `/dw-bugfix`, `/dw-review`, `/dw-generate-pr` | [Compozy](https://github.com/compozy/compozy) `cy-final-verify` |
 | **dw-memory** | Two-tier workflow memory (shared `MEMORY.md` + per-task `<N>_memory.md`) with promotion test and compaction rules, so cross-task context persists cleanly | `/dw-run`, `/dw-goal`, `/dw-autopilot`, `/dw-pause`, `/dw-resume` | [Compozy](https://github.com/compozy/compozy) `cy-workflow-memory` |
-| **dw-review-rigor** | Review discipline: de-duplication, severity ordering, verify-intent-before-flagging, skip-linter-issues, signal-over-volume | `/dw-review`, `/dw-brainstorm --refactor` | [Compozy](https://github.com/compozy/compozy) `cy-review-round` |
+| **dw-review-rigor** | Review discipline: de-duplication, severity ordering, verify-intent-before-flagging, skip-linter-issues, signal-over-volume | `/dw-review`, `/dw-refactor`, `/dw-brainstorm --mode=refactor-audit` | [Compozy](https://github.com/compozy/compozy) `cy-review-round` |
 | **dw-council** | Multi-advisor debate (3-5 archetypes) with steel-manning, concession tracking, and dissent-preserving synthesis. Opt-in only. | `/dw-brainstorm --council`, `/dw-plan techspec --council` | [Compozy](https://github.com/compozy/compozy) `cy-idea-factory` |
 | **dw-codebase-intel** | Codebase intelligence (`stack.json`, `files.json`, `apis.json`, `deps.json`, `arch.md`) with incremental updates and query patterns. Cross-cutting reference: `api-design-discipline` (Hyrum's Law, contract-first, error semantics) used when techspecs design API endpoints. | `/dw-intel`, `/dw-intel --build`, `/dw-plan techspec` | [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) (MIT) + [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
 | **dw-execute-phase** | Goal-backward 6-dimension plan verification (`plan-checker`) and wave-based parallel task execution (`executor`) with atomic commit, deviation handling, and checkpoint recovery | `/dw-run`, `/dw-goal`, `/dw-autopilot` | [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) (MIT) |
-| **dw-source-grounding** | Detect → Fetch → Implement → Cite protocol with `[source: <url>, version: X.Y, retrieved: YYYY-MM-DD]` citations. Strict source-priority hierarchy (Tier 1 official docs > Tier 2 maintainer blogs > Tier 3 Stack Overflow as discovery only). | `/dw-plan techspec`, `/dw-secure-audit --plan`, `/dw-brainstorm --research` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
-| **dw-simplification** | Chesterton's Fence (understand WHY before changing), behavior-preserving refactor protocol (test gate before/after), complexity metrics (cyclomatic, cognitive, depth, fan-out), Rule of 500 for large refactors | `/dw-review`, `/dw-brainstorm --refactor` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
+| **dw-source-grounding** | Detect → Fetch → Implement → Cite protocol with `[source: <url>, version: X.Y, retrieved: YYYY-MM-DD]` citations. Strict source-priority hierarchy (Tier 1 official docs > Tier 2 maintainer blogs > Tier 3 Stack Overflow as discovery only). | `/dw-plan techspec`, `/dw-secure-audit --plan`, `/dw-opportunities --research`, `/dw-brainstorm --research` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
+| **dw-simplification** | Chesterton's Fence (understand WHY before changing), behavior-preserving refactor protocol (test gate before/after), complexity metrics (cyclomatic, cognitive, depth, fan-out), Rule of 500 for large refactors | `/dw-review`, `/dw-refactor`, `/dw-brainstorm --mode=refactor-audit` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
 | **dw-debug-protocol** | Stop-the-line discipline plus six-step triage (Reproduce → Localize → Reduce → Fix Root Cause → Guard → Verify End-to-End). Error categorization matrix; instrument-first non-reproducible-bug strategy. | `/dw-bugfix`, `/dw-qa --fix` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
 | **dw-git-discipline** | Trunk-based pattern (1-3 day branches, daily rebase, feature flags), atomic commit discipline (one intent per commit; refactor separate from feature), Conventional Commits, branch hygiene | `dw-commit`, `dw-generate-pr` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
 
@@ -324,10 +328,11 @@ npx @brunosps00/dev-workflow help                          # Show help
 After running `npx @brunosps00/dev-workflow init`:
 
 1. **Run `/dw-analyze-project`** in your AI assistant to generate project rules
-2. **Run `/dw-brainstorm`** to start planning a new feature
-3. **Run `/dw-help`** to see all available commands and workflows
-4. **(Optional) Run `npx @brunosps00/dev-workflow install-deps`** to install Playwright + react-doctor and check Trivy/Semgrep/gitleaks/syft + Docker
-5. **Run `/dw-intel --build`** once your project has source files to build the queryable index in `.dw/intel/`
+2. **Run `/dw-opportunities`** when you want the project to suggest what to improve next
+3. **Run `/dw-brainstorm`** when you already have an idea and want to refine it
+4. **Run `/dw-help`** to see all available commands and workflows
+5. **(Optional) Run `npx @brunosps00/dev-workflow install-deps`** to install Playwright + react-doctor and check Trivy/Semgrep/gitleaks/syft + Docker
+6. **Run `/dw-intel --build`** once your project has source files to build the queryable index in `.dw/intel/`
 
 ## Acknowledgements
 
@@ -351,6 +356,8 @@ Session continuity and adaptive routing patterns adapted from [`tech-leads-club/
 
 Four patterns from [`mattpocock/skills`](https://github.com/mattpocock/skills) by Matt Pocock (MIT) were integrated **without adding new commands or skills** — instead they fold into the existing surface as internal modes and inline guidance: (1) **grill-with-docs** → `/dw-brainstorm` `grill` mode (interview discipline that stress-tests plan vocabulary against `.dw/rules/`); (2) **prototype** → `/dw-brainstorm` `prototype` mode (LOGIC terminal app or UI variant dispatch); (3) **improve-codebase-architecture** → `dw-simplification/references/deep-modules.md` (deletion test, locality, leverage, seam, adapter diagnostic invoked by the `refactor-audit` mode); (4) **zoom-out** → one-paragraph guidance in `agent-instructions.md`. The same release also collapses `/dw-brainstorm`'s six legacy flags into a single full-flow entry point that auto-dispatches modes based on project signals.
 
+Opportunity discovery and the explicit `/dw-refactor` surface were inspired by patterns observed in [`pedronauck/skills`](https://github.com/pedronauck/skills), especially `game-changing-features` (10x opportunity framing) and `refactoring-analysis` (Fowler-smell prioritization). dev-workflow does not install or depend on that repository at runtime, and the command text here is a clean-room adaptation of the workflow shape rather than copied skill content.
+
 ## Migration from v0.x (1.0.0 is a consolidation release)
 
 v1.0.0 consolidated the legacy command surface into the current `dw-*` pipeline. **The `dev-workflow init`, `update`, and `repair` flows auto-remove obsolete wrappers and known removed command sources**; no manual action required.
@@ -372,7 +379,7 @@ v1.0.0 consolidated the legacy command surface into the current `dw-*` pipeline.
 | `/dw-deps-audit` | `/dw-secure-audit --plan` |
 | `/dw-map-codebase` | `/dw-intel --build` |
 | `/dw-deep-research` | `/dw-brainstorm --research` |
-| `/dw-refactoring-analysis` | `/dw-brainstorm --refactor` |
+| `/dw-refactoring-analysis` | `/dw-refactor` |
 
 ### Removed (1)
 
@@ -394,7 +401,7 @@ On the next `npx @brunosps00/dev-workflow update`, the following happens automat
 
 ### Backwards compatibility
 
-**There is none** — v1.0.0 is a clean cut per design. There are no aliases. Calling `/dw-create-prd` will not work; use `/dw-plan prd`. Update your team's runbooks and AI-agent instructions (CLAUDE.md / AGENTS.md) accordingly; the auto-trigger map in `agent-instructions.md` is already updated.
+**There is none for the v0.x removed command names** — v1.0.0 was a clean cut per design. Calling `/dw-create-prd` will not work; use `/dw-plan prd`. `/dw-refactor` is a new explicit command surface for the current refactor-audit protocol; it does not restore the old `/dw-refactoring-analysis` name. Update your team's runbooks and AI-agent instructions (CLAUDE.md / AGENTS.md) accordingly; the auto-trigger map in `agent-instructions.md` is already updated.
 
 ### CLAUDE.md / AGENTS.md updates
 

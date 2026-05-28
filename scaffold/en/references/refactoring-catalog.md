@@ -1,6 +1,6 @@
 # Refactoring Catalog — Before/After Examples
 
-Reference for `/dw-brainstorm --refactor`. Based on Fowler's refactoring catalog.
+Reference for `/dw-refactor` and `/dw-brainstorm --mode=refactor-audit`. Based on Fowler's refactoring catalog.
 
 ## 1. Long Function → Extract Function
 

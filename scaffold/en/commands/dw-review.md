@@ -209,7 +209,7 @@ When both levels run, a consolidated report at `<target>/QA/review-consolidated.
 - Skipping `dw-verify` to "ship the review faster" — produces APPROVED verdicts on broken code.
 - Issuing APPROVED with KNOWN critical findings deferred to "next sprint" — that's REJECTED with a workaround plan.
 - Flagging linter-level findings as review findings (duplicates the linter; noise).
-- Suggesting refactors that aren't in scope of the PRD (use `/dw-brainstorm --refactor` separately if you want a refactor agenda).
+- Suggesting refactors that aren't in scope of the PRD (use `/dw-refactor` separately if you want a refactor agenda).
 - Generating the report without actually running the test/build/lint suite — verdict is decorative without evidence.
 
 ## Final Guidelines

@@ -7,6 +7,7 @@ Você é um facilitador de brainstorming para o workspace atual. Este comando ex
 ## Quando Usar
 - Use quando quiser explorar ideias antes de criar um PRD, comparar direções arquiteturais ou destravar requisitos vagos
 - NÃO use quando já tiver requisitos claros prontos para um PRD, ou quando precisar implementar código
+- Para auditorias standalone de code health ou tech debt, prefira `/dw-refactor`; este comando so chega em `refactor-audit` quando sinais de refactor aparecem durante ideacao mais ampla.
 
 ## Posição no Pipeline
 **Antecessor:** (ideia do usuário) | **Sucessor:** `/dw-plan prd`
@@ -38,7 +39,7 @@ Power users que já sabem o que querem podem passar `--mode=`. Todo mundo mais g
 
 ### Nota de migração (transitória)
 
-Invocações antigas com flags (`--onepager`, `--council`, `--research`, `--refactor`, `--grill`, `--prototype`) continuam aceitas por um ciclo minor e mapeiam para o `--mode=` equivalente. Código novo deve usar `--mode=` ou confiar no auto-dispatch.
+Invocacoes antigas com flags (`--onepager`, `--council`, `--research`, `--refactor`, `--grill`, `--prototype`) continuam aceitas por um ciclo minor e mapeiam para o `--mode=` equivalente. Codigo novo deve usar `/dw-refactor` para auditoria standalone de refactor, `--mode=refactor-audit` apenas para compatibilidade explicita, ou confiar no auto-dispatch.
 
 ## Fluxograma de Decisão: Brainstorm vs PRD Direto
 
@@ -149,6 +150,8 @@ Antes de produzir qualquer output, **leia a situação**:
   - `/dw-plan techspec`
   - `/dw-plan tasks`
   - `/dw-bugfix`
+  - `/dw-refactor` (se o proximo passo util for uma auditoria dedicada de code health)
+  - `/dw-secure-audit` (se o proximo passo util for hardening de seguranca ou remediacao de dependencias)
 
 ## Heuristicas
 

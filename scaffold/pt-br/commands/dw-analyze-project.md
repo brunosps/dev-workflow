@@ -26,7 +26,7 @@ Você é um assistente especializado em análise de projetos de software. Sua ta
 As rules geradas por este comando são consumidas por:
 - `/dw-run` -- lê rules para padrões de implementação
 - `/dw-review --code-only` -- lê rules para verificações de conformidade
-- `/dw-brainstorm --refactor` -- lê rules para contexto do projeto
+- `/dw-refactor` -- lê rules para contexto do projeto
 - `/dw-plan techspec` -- lê rules para decisões de arquitetura
 
 <critical>NUNCA modifique código fonte, apenas leia e documente</critical>

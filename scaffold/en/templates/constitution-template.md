@@ -71,7 +71,7 @@ mode: defaults | custom
 **P-008 — N+1 queries are flagged at code review** (severity: info)
 **Rule:** Loops or list operations that issue per-item database/HTTP calls must batch (e.g., `IN (...)`, `findMany`, DataLoader) or be explicitly justified.
 **Why:** N+1 patterns scale linearly with data size and silently degrade until production load reveals them.
-**Enforcement:** `dw-code-review` and `dw-refactoring-analysis` detect await-in-loop patterns against repository / API client modules.
+**Enforcement:** `/dw-review` and `/dw-refactor` detect await-in-loop patterns against repository / API client modules.
 
 ---
 

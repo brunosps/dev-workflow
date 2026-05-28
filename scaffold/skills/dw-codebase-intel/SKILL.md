@@ -11,7 +11,7 @@ allowed-tools:
 
 # dw-codebase-intel
 
-Bundled skill that gives dev-workflow native **codebase intelligence** — a queryable knowledge base of the project's stack, file graph, API surface, dependencies, and architecture. Other commands (`/dw-plan prd`, `/dw-plan techspec`, `/dw-review --code-only`, `/dw-brainstorm --refactor`, `/dw-brainstorm`, etc.) read from this index instead of re-exploring the codebase on every invocation.
+Bundled skill that gives dev-workflow native **codebase intelligence** — a queryable knowledge base of the project's stack, file graph, API surface, dependencies, and architecture. Other commands (`/dw-plan prd`, `/dw-plan techspec`, `/dw-review --code-only`, `/dw-opportunities`, `/dw-refactor`, `/dw-brainstorm`, etc.) read from this index instead of re-exploring the codebase on every invocation.
 
 ## Why a skill (not inline)
 

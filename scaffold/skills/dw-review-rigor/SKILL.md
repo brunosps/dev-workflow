@@ -14,7 +14,7 @@ A set of rules the caller applies while producing a review report. This skill do
 
 ## When Invoked
 
-By `/dw-review --code-only`, `/dw-review --coverage-only`, `/dw-brainstorm --refactor`. The caller has already identified a scope (files, a PR, a codebase area). This skill governs how findings are selected, deduplicated, ordered, and phrased.
+By `/dw-review --code-only`, `/dw-review --coverage-only`, `/dw-refactor`, and `/dw-brainstorm --mode=refactor-audit`. The caller has already identified a scope (files, a PR, a codebase area). This skill governs how findings are selected, deduplicated, ordered, and phrased.
 
 ## Required Inputs
 
@@ -124,7 +124,7 @@ The caller emits:
 
 - `/dw-review --code-only` — applies all five rules to its Level-3 review output; uses prior reports in `.dw/spec/*/reviews/` to dedupe across rounds.
 - `/dw-review --coverage-only` — applies de-dup + severity-ordering when listing gaps between PRD requirements and code.
-- `/dw-brainstorm --refactor` — applies rules 1, 2, 4, 5 when cataloging code smells (rule 3 adapts: a "smell" with a justifying ADR becomes a `low` finding at most).
+- `/dw-refactor` — applies rules 1, 2, 4, 5 when cataloging code smells (rule 3 adapts: a "smell" with a justifying ADR becomes a `low` finding at most).
 
 Callers should mention this skill in their "Skills Complementares" section.
 

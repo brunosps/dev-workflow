@@ -209,7 +209,7 @@ Quando ambos níveis rodam, relatório consolidado em `<target>/QA/review-consol
 - Pular `dw-verify` pra "shipar review mais rápido" — produz APROVADO em código quebrado.
 - Emitir APROVADO com critical findings KNOWN diferidos pra "próximo sprint" — isso é REPROVADO com plano de contorno.
 - Flagar findings nível-linter como review findings (duplica linter; ruído).
-- Sugerir refactors fora do escopo do PRD (use `/dw-brainstorm --refactor` separado se quiser agenda de refactor).
+- Sugerir refactors fora do escopo do PRD (use `/dw-refactor` separado se quiser agenda de refactor).
 - Gerar relatório sem rodar test/build/lint suite — verdict decorativo sem evidência.
 
 ## Diretrizes finais
