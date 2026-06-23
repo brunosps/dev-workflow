@@ -24,6 +24,17 @@
       "bundled": true
     },
     {
+      "name": "dw-cli-run",
+      "kind": "protocol",
+      "tier": "core",
+      "owner": "dw-codex-run,dw-claude-run,dw-copilot-run",
+      "trigger": "Fire an AI CLI (Codex/Claude/Copilot) in a dedicated git worktree to implement a prepared prompt; resumable per-task session; STOP for the gate",
+      "expected_output": "Audit-logged run with a 0-10 dual evaluation, a resumable session-id sidecar, and a STOP-for-gate Structured Return.",
+      "load_policy": "lazy-references",
+      "context_limit": 18000,
+      "bundled": true
+    },
+    {
       "name": "dw-codebase-intel",
       "kind": "protocol",
       "tier": "core",

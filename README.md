@@ -26,7 +26,7 @@ npx @brunosps00/dev-workflow install-deps
 
 ## Commands
 
-dev-workflow v1.2.1 ships **33 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v1.2.1 ships **36 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
 ### Tier 1 — Gateway (3)
 
@@ -69,7 +69,7 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 | **`/dw-install-azure-skills`** | **Opt-in.** Clones curated Azure skills from [`MicrosoftDocs/Agent-Skills`](https://github.com/MicrosoftDocs/Agent-Skills) (CC-BY-4.0) into `.agents/skills/azure/` and registers the [Microsoft Learn MCP Server](https://learn.microsoft.com/en-us/training/support/mcp-get-started) (HTTP, no-auth). Interactive category selection (Compute / Data & Storage / AI & ML / Networking / Identity & Security / DevOps / Observability / Integration / Architecture / All). Re-run to refresh from upstream. Also available as CLI: `npx @brunosps00/dev-workflow install-azure-skills`. |
 | **`/dw-install-aws-skills`** | **Opt-in.** Clones curated AWS skills from [`aws/agent-toolkit-for-aws`](https://github.com/aws/agent-toolkit-for-aws) (Apache 2.0) into `.agents/skills/aws/` and registers the unified [AWS MCP Server](https://docs.aws.amazon.com/aws-mcp/) (stdio via `uvx mcp-proxy-for-aws@latest`). **Requires `uv`, `aws cli ≥ 2.32.0`, and AWS credentials.** Interactive category selection (Core / Analytics / Database / EC2 / Migration / Networking / Operations / Security / Serverless / Storage / All). The agent gains `aws___call_aws` (executes 15,000+ AWS APIs) and `aws___run_script` (Python sandboxed) — review `.dw/references/aws-mcp-instructions.md` for the destructive-operations protocol. Also available as CLI: `npx @brunosps00/dev-workflow install-aws-skills [--region=<aws-region>]`. |
 
-### Tier 4 — Hidden/Internal (9)
+### Tier 4 — Hidden/Internal (12)
 
 These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help --advanced`.
 
@@ -79,6 +79,9 @@ These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help 
 | **`/dw-intel "question"`** | Query codebase intelligence (`.dw/intel/`). `--build` (re)creates the index. | `/dw-plan`, `/dw-review`, `/dw-bugfix` |
 | **`/dw-secure-audit`** | **Security Gate** (phase after review/QA, before commit/PR): OWASP + Semgrep SAST (diff/generated code) + gitleaks secrets + Trivy SCA/IaC + lockfile + supply-chain + outdated. Rigoroso: secrets/CRITICAL/HIGH block (secrets have no ADR escape). Flags: `--scan-only`, `--plan`, `--execute`. See [docs/security-gate.md](docs/security-gate.md). | `/dw-review`, `/dw-autopilot` (explicit step), enforced by `/dw-generate-pr` |
 | **`/dw-goal "<objective>"`** | Durable objective contract. Uses Codex native `/goal` when available and `.dw/goals/` everywhere for Codex, Copilot, Claude Code, and OpenCode. | `/dw-autopilot` after planning |
+| **`/dw-claude-run`** | Fire `claude -p` (headless) in a dedicated git worktree to implement a prepared prompt/spec. Claude adapter over the `dw-cli-run` protocol: durable audit log, resumable session via `--session-id`, 0–10 dual evaluation, STOP for the gate. Never the main checkout; never merges. | manual delegation step |
+| **`/dw-codex-run`** | Fire `codex exec` in a dedicated git worktree to implement a prepared prompt/spec. Codex adapter over the `dw-cli-run` protocol: durable audit log, resumable per-task session, 0–10 dual evaluation, STOP for the gate. Never the main checkout; never merges. | manual delegation step |
+| **`/dw-copilot-run`** | Fire `copilot -p` (GitHub Copilot CLI) in a dedicated git worktree to implement a prepared prompt/spec. Copilot adapter over the `dw-cli-run` protocol: durable audit log, resumable session, 0–10 dual evaluation, STOP for the gate. Never the main checkout; never merges. | manual delegation step |
 | **`/dw-find-skills "query"`** | Searches `npx skills` ecosystem, vets, installs. | manual when extending the bundle |
 | **`/dw-update`** | Updates dev-workflow to latest npm release with rollback snapshot. | manual maintenance |
 | **`/dw-subtask-start`** | Creates a minimal input packet for a subagent without injecting the parent transcript. | parent agent before delegation |
