@@ -5,10 +5,15 @@
   "bin": {
     "dev-workflow": "./bin/dev-workflow.js"
   },
+  "scripts": {
+    "validate": "node lib/validate.js",
+    "build:plugin": "node lib/build-plugin.js"
+  },
   "files": [
     "bin/",
     "lib/",
     "scaffold/",
+    ".claude-plugin/",
     "README.md",
     "LICENSE"
   ],

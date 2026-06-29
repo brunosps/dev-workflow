@@ -1,0 +1,13 @@
+{
+  "name": "brunosps00-dev-workflow",
+  "owner": {
+    "name": "Bruno Santos"
+  },
+  "plugins": [
+    {
+      "name": "dev-workflow",
+      "source": "./",
+      "description": "Standalone, à-la-carte skills from the dev-workflow pipeline: minimalism, search-first, simplification, verification, security review, and more."
+    }
+  ]
+}
