@@ -42,7 +42,7 @@ Exportable skills (no `.dw/` pipeline required): `dw-minimalism`, `dw-search-fir
 
 ## Commands
 
-dev-workflow v1.3.0 ships **36 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v1.4.0 ships **36 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
 ### Tier 1 — Gateway (3)
 
