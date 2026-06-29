@@ -39,6 +39,7 @@ When available under `./.agents/skills/`, use these as planning support:
 - `dw-council` (opt-in via `--council`): multi-advisor stress-test on the major architectural decision during TechSpec stage.
 - `dw-codebase-intel`: consulted for API conventions, architecture patterns, naming when designing the TechSpec.
 - `dw-search-first`: **REQUIRED** before adding a new dependency, integration, MCP server, reusable helper, or framework-level abstraction.
+- `dw-minimalism`: **REQUIRED** before specifying new modules/services — pressure-tests scope with the YAGNI ladder so the TechSpec doesn't over-build; composes with `dw-search-first`.
 - `dw-context-budget`: use when the plan exceeds 12 tasks, touches 30+ files, or requires loading many docs/skills.
 
 ## Agent Dispatch

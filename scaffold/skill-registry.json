@@ -10,6 +10,8 @@
       "expected_output": "A selected API testing recipe and evidence path for the active stack.",
       "load_policy": "lazy-references",
       "context_limit": 12000,
+      "invocation": "explicit",
+      "exportable": true,
       "bundled": true
     },
     {
@@ -21,6 +23,8 @@
       "expected_output": "A selected service recipe and composition guidance.",
       "load_policy": "lazy-references",
       "context_limit": 12000,
+      "invocation": "explicit",
+      "exportable": true,
       "bundled": true
     },
     {
@@ -123,6 +127,19 @@
       "bundled": true
     },
     {
+      "name": "dw-minimalism",
+      "kind": "protocol",
+      "tier": "core",
+      "owner": "dw-run,dw-plan,dw-review",
+      "trigger": "Before writing new code, infrastructure, or abstractions: YAGNI decision ladder and lite/full/ultra intensity",
+      "expected_output": "A minimalism verdict (build/reuse/inline/skip) with the ladder rung that justified it.",
+      "load_policy": "always-small",
+      "context_limit": 8000,
+      "invocation": "model",
+      "exportable": true,
+      "bundled": true
+    },
+    {
       "name": "dw-review-rigor",
       "kind": "protocol",
       "tier": "core",
@@ -142,6 +159,7 @@
       "expected_output": "Adopt/wrap/compose/build decision with checked search channels.",
       "load_policy": "always-small",
       "context_limit": 6000,
+      "exportable": true,
       "bundled": true
     },
     {
@@ -164,6 +182,7 @@
       "expected_output": "Simplification target, risk, behavior-preserving checks, and recommendation.",
       "load_policy": "lazy-references",
       "context_limit": 12000,
+      "exportable": true,
       "bundled": true
     },
     {
@@ -208,6 +227,7 @@
       "expected_output": "Fresh verification report with cited command evidence.",
       "load_policy": "always-small",
       "context_limit": 12000,
+      "exportable": true,
       "bundled": true
     },
     {
@@ -219,6 +239,8 @@
       "expected_output": "Rewritten prose with AI-writing tells removed and voice preserved.",
       "load_policy": "lazy-references",
       "context_limit": 6000,
+      "invocation": "explicit",
+      "exportable": true,
       "bundled": true
     },
     {
@@ -230,6 +252,8 @@
       "expected_output": "Selected Remotion rule references and implementation guidance.",
       "load_policy": "lazy-references",
       "context_limit": 8000,
+      "invocation": "explicit",
+      "exportable": true,
       "bundled": true
     },
     {
@@ -241,6 +265,7 @@
       "expected_output": "High-confidence security findings or explicit pass.",
       "load_policy": "lazy-references",
       "context_limit": 14000,
+      "exportable": true,
       "bundled": true
     },
     {
@@ -252,6 +277,8 @@
       "expected_output": "Selected performance rule references and metric-driven recommendations.",
       "load_policy": "lazy-references",
       "context_limit": 12000,
+      "invocation": "explicit",
+      "exportable": true,
       "bundled": true
     }
   ]

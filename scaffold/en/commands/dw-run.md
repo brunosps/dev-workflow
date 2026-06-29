@@ -35,6 +35,7 @@ When available under `./.agents/skills/`, these skills are invoked per task:
 - `dw-testing-discipline`: applies the placement doctrine, 6 agent guardrails, and 25 anti-patterns when adding tests during the task.
 - `dw-ui-discipline`: when the task touches UI, the 4 grounding questions must be answered before any visual decision lands.
 - `dw-llm-eval`: when the task touches AI feature code paths, the reference dataset + oracle ladder rules apply.
+- `dw-minimalism`: **before writing new code** — climb the YAGNI decision ladder (need it? reuse? stdlib? native? installed dep? one line?) at the active intensity, then write the minimum. Hands new dependencies to `dw-search-first`.
 - `vercel-react-best-practices`: when the task touches React/Next.js performance.
 
 ## Constitution Gate
