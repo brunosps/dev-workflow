@@ -26,6 +26,8 @@ SNAPSHOT_DIR=".dw/.backup/$(date -u +%Y%m%dT%H%M%SZ)"
 mkdir -p "$SNAPSHOT_DIR"
 cp -r .dw/commands .dw/templates .dw/references .dw/scripts "$SNAPSHOT_DIR/" 2>/dev/null
 [ -d .agents/skills ] && cp -r .agents/skills "$SNAPSHOT_DIR/agents-skills" 2>/dev/null
+# .claude/settings.json is now mutated by update (MCPs + hooks + statusLine)
+[ -f .claude/settings.json ] && mkdir -p "$SNAPSHOT_DIR/claude" && cp .claude/settings.json "$SNAPSHOT_DIR/claude/settings.json" 2>/dev/null
 echo "Snapshot saved to $SNAPSHOT_DIR"
 ```
 
@@ -127,7 +129,7 @@ If invoked with `--rollback`:
 1. List snapshots in `.dw/.backup/`
 2. If none exist: STOP and report "No snapshot available"
 3. If more than one exists: ask the user which to restore (default: most recent)
-4. Confirm with the user: "Restore snapshot `<path>`? This OVERWRITES `.dw/commands/`, `.dw/templates/`, `.dw/references/`, `.dw/scripts/`, and `.agents/skills/`. Proceed? [y/N]"
+4. Confirm with the user: "Restore snapshot `<path>`? This OVERWRITES `.dw/commands/`, `.dw/templates/`, `.dw/references/`, `.dw/scripts/`, `.agents/skills/`, and `.claude/settings.json`. Proceed? [y/N]"
 5. Only after `y`: copy back
 
 ```bash
@@ -136,6 +138,7 @@ cp -r "$SNAPSHOT_DIR/templates"  .dw/
 cp -r "$SNAPSHOT_DIR/references" .dw/ 2>/dev/null
 cp -r "$SNAPSHOT_DIR/scripts"    .dw/ 2>/dev/null
 [ -d "$SNAPSHOT_DIR/agents-skills" ] && cp -r "$SNAPSHOT_DIR/agents-skills" .agents/skills 2>/dev/null
+[ -f "$SNAPSHOT_DIR/claude/settings.json" ] && cp "$SNAPSHOT_DIR/claude/settings.json" .claude/settings.json 2>/dev/null
 ```
 
 6. Report: snapshot restored, version likely recovered (read from `.dw/commands/dw-help.md` or metadata if present)
