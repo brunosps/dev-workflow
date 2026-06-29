@@ -16,6 +16,7 @@ This will:
 5. Install bundled skills (`dw-verify`, `dw-memory`, `dw-review-rigor`, `dw-ui-discipline`, `dw-testing-discipline`, `security-review`, etc.) to `.agents/skills/`
 6. Generate skill wrappers and project agents for Claude Code, Codex, Copilot, and OpenCode
 7. Configure MCP servers (Context7 + Playwright)
+8. Install enforcement hooks (git guardrails) + a statusline into `.claude/settings.json` (merge-aware — your own hooks/statusline are never overwritten)
 
 > **Compozy-inspired disciplines.** Since 0.5.0, dev-workflow bundles three primitives — `dw-verify`, `dw-memory`, `dw-review-rigor` — adapted from the [Compozy](https://github.com/compozy/compozy) project and invoked internally by existing commands. See [docs/compozy-integration.md](docs/compozy-integration.md) for what was ported and what was not.
 
@@ -23,6 +24,21 @@ Optional dependencies (Playwright browsers, react-doctor, Trivy, Semgrep, gitlea
 ```bash
 npx @brunosps00/dev-workflow install-deps
 ```
+
+### Install individual skills (à-la-carte)
+
+Beyond the full pipeline, the standalone disciplines are also published as a Claude Code plugin, so you can adopt one skill without scaffolding the whole workflow:
+
+```bash
+# Claude Code: add the marketplace, then install the plugin
+/plugin marketplace add brunosps00/dev-workflow
+/plugin install dev-workflow@brunosps00-dev-workflow
+
+# or via the skills ecosystem
+npx skills add brunosps00/dev-workflow
+```
+
+Exportable skills (no `.dw/` pipeline required): `dw-minimalism`, `dw-search-first`, `dw-simplification`, `dw-verify`, `humanizer`, `security-review`, `vercel-react-best-practices`, `remotion-best-practices`, `api-testing-recipes`, `docker-compose-recipes`. The plugin manifest is generated from the skill registry (`npm run build:plugin`); pipeline-bound skills (`dw-execute-phase`, `dw-memory`, `dw-codebase-intel`, `dw-cli-run`) are intentionally not exported.
 
 ## Commands
 
@@ -249,7 +265,7 @@ npx @brunosps00/dev-workflow subtask list
 
 ## Bundled Skills
 
-Skills installed to `.agents/skills/` for use by all commands. The bundle is governed by `scaffold/skill-registry.json`, which records each skill's kind, tier, owner, trigger, expected output, load policy, and context limit.
+Skills installed to `.agents/skills/` for use by all commands. The bundle is governed by `scaffold/skill-registry.json`, which records each skill's kind, tier, owner, trigger, expected output, load policy, context limit, invocation control (`model` vs `explicit`), and à-la-carte `exportable` flag.
 
 Skill kinds:
 
@@ -274,6 +290,7 @@ These are not slash commands — they are primitives other commands call to enfo
 | **dw-execute-phase** | Goal-backward 6-dimension plan verification (`plan-checker`) and wave-based parallel task execution (`executor`) with atomic commit, deviation handling, and checkpoint recovery | `/dw-run`, `/dw-goal`, `/dw-autopilot` | [`get-shit-done-cc`](https://github.com/gsd-build/get-shit-done) (MIT) |
 | **dw-source-grounding** | Detect → Fetch → Implement → Cite protocol with `[source: <url>, version: X.Y, retrieved: YYYY-MM-DD]` citations. Strict source-priority hierarchy (Tier 1 official docs > Tier 2 maintainer blogs > Tier 3 Stack Overflow as discovery only). | `/dw-plan techspec`, `/dw-secure-audit --plan`, `/dw-opportunities --research`, `/dw-brainstorm --research` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
 | **dw-simplification** | Chesterton's Fence (understand WHY before changing), behavior-preserving refactor protocol (test gate before/after), complexity metrics (cyclomatic, cognitive, depth, fan-out), Rule of 500 for large refactors | `/dw-review`, `/dw-refactor`, `/dw-brainstorm --mode=refactor-audit` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
+| **dw-minimalism** | Pre-generation YAGNI decision ladder (need it? reuse? stdlib? native? installed dep? one line?) with `lite`/`full`/`ultra` intensity. The missing rung between `dw-search-first` (dependencies) and `dw-simplification` (post-hoc cleanup). | `/dw-run`, `/dw-plan`, `/dw-review` | [`DietrichGebert/ponytail`](https://github.com/DietrichGebert/ponytail) (MIT) |
 | **dw-debug-protocol** | Stop-the-line discipline plus six-step triage (Reproduce → Localize → Reduce → Fix Root Cause → Guard → Verify End-to-End). Error categorization matrix; instrument-first non-reproducible-bug strategy. | `/dw-bugfix`, `/dw-qa --fix` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
 | **dw-git-discipline** | Trunk-based pattern (1-3 day branches, daily rebase, feature flags), atomic commit discipline (one intent per commit; refactor separate from feature), Conventional Commits, branch hygiene | `dw-commit`, `dw-generate-pr` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) |
 
@@ -346,6 +363,8 @@ Source-driven development, code simplification, debugging discipline, and git wo
 Spec-Driven Development patterns — declarative constitution (`.dw/constitution.md`), cross-artifact consistency check (PRD ↔ TechSpec ↔ Tasks), and template override layer (`.dw/templates/overrides/`) — adapted from [`github/spec-kit`](https://github.com/github/spec-kit) by GitHub (MIT). dev-workflow specifics: embedded into existing commands instead of new slash commands, severity-graded enforcement (`info`/`high`/`critical`) with ADR-justified deviation as the escape hatch, ausência-of-constitution never blocks (auto-installs defaults and continues), and integration with the analytical `.dw/rules/` already produced by `/dw-analyze-project`.
 
 UI discipline (`dw-ui-discipline`) and testing doctrine (`dw-testing-discipline`) are original works in this repository. Earlier dev-workflow versions (≤0.13.x) drew on `pedronauck/skills` `ui-craft` and `testing-boss` as inspiration, but in v0.14.0 those skills were rewritten clean-room after a license audit confirmed that the upstream repo has no explicit LICENSE file at root — the README's MIT claim is unverified. The underlying ideas (grounding before design; behavior over mocks; mutation over coverage) are widely-documented general software engineering principles available in many sources (Beck, Fowler, Meszaros, Feathers, Google SRE Book, WCAG specifications). Browser-DevTools patterns from [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) (MIT) live inside `dw-testing-discipline/references/` (`security-boundary.md`, `three-workflow-patterns.md`).
+
+Minimalism discipline (`dw-minimalism`), per-skill invocation control (`disable-model-invocation` on hidden/internal command wrappers), the git-guardrails enforcement hook, and à-la-carte plugin distribution were adapted from [`DietrichGebert/ponytail`](https://github.com/DietrichGebert/ponytail) (MIT — the "lazy senior" decision ladder, intensity modes, and statusline) and [`mattpocock/skills`](https://github.com/mattpocock/skills) (MIT — user-vs-model invocation and `git-guardrails-claude-code`). See [docs/skills-ecosystem-comparison.md](docs/skills-ecosystem-comparison.md) for the full gap analysis and what was and was not adopted.
 
 Incident response (`dw-incident-response`) adapted from [`wilsto/claude-code-starter-kit/incident-response`](https://github.com/wilsto/claude-code-starter-kit) (MIT). The 5-phase workflow structure and runbook templates come from there. wilsto credits the upstream `wshobson/agents` plugin `incident-response` (v1.3.0); attribution chain preserved. Additional reading cited in the skill: Google SRE Book, Etsy Debriefing Facilitation Guide, PagerDuty Incident Response Documentation.
 
