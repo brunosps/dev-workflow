@@ -38,6 +38,23 @@ Each rule has nuance read `references/core-rules.md` for the long version with e
 - Verifying browser-side trust boundaries (auth, CSRF, headers) → `references/security-boundary.md`.
 - Picking which test workflow applies (UI / network / perf) → `references/three-workflow-patterns.md`.
 
+## Step 0 — detect the runner before writing any test
+
+Do not assume `npm test`. The package manager and the test runner are different things — confirm both:
+
+1. Read `package.json` `scripts.test` (plus `test:watch` / `test:coverage`), or the language equivalent (`pyproject.toml`/`tox.ini`, `Cargo.toml`, `*.csproj`, `go.mod`).
+2. Identify the actual runner: jest / vitest / mocha / `node:test` / `bun:test` / pytest / `go test` / `cargo test` / `dotnet test`.
+3. Invoke it through the project's package manager, not a hardcoded `npm`:
+
+| Manager | test | watch | coverage |
+|---|---|---|---|
+| npm | `npm test` | `npm test -- --watch` | `npm run test:coverage` |
+| pnpm | `pnpm test` | `pnpm test --watch` | `pnpm test:coverage` |
+| yarn | `yarn test` | `yarn test --watch` | `yarn coverage` |
+| bun (native) | `bun test` | `bun test --watch` | `bun test --coverage` |
+
+**Bun gotcha:** `bun test` runs Bun's native runner (`bun:test`); `bun run test` runs whatever `scripts.test` is (often jest/vitest). They are not interchangeable — use the one the project actually configures. When unsure, confirm with `<runner> --help`.
+
 ## Reference router
 
 | Doing what | Read |

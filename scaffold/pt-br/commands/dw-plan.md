@@ -70,6 +70,8 @@ A ferramenta e obrigatoria no planejamento porque preserva escolhas explicitas d
 
 Se `.dw/intel/` não existir, caia para `.dw/rules/` e grep direto. Sugira `/dw-intel --build` para popular o intel.
 
+Se `.dw/memory/instincts/` tiver entradas, carregue as de confidence ≥0.7 cujo `trigger` case com a feature (lazy, só por trigger) — codificam convenções aprendidas pelo `/dw-learn` que valem respeitar no spec.
+
 ## Estágio 1 — Geração de PRD
 
 Roda em modo padrão OU `plan prd`.

@@ -31,6 +31,7 @@ Quando disponíveis em `./.agents/skills/`, estas skills são invocadas por task
 
 - `dw-verify`: **SEMPRE** — antes do commit de cada task, produz Verification Report (test + lint + build GREEN). Sem PASS, sem commit. Iron Law de verificação.
 - `dw-memory`: **SEMPRE** — lê workflow memory no início; atualiza no fim com promotion test (lições que valem pra próxima task são promovidas pra MEMORY.md compartilhada).
+- Instincts (lazy): no início da task, carregue também qualquer instinct de alta confiança (`.dw/memory/instincts/`, confidence ≥0.7) cujo `trigger` case com a task — convenções aprendidas promovidas pelo `/dw-learn`. Case por trigger; nunca carregue o conjunto inteiro.
 - `dw-execute-phase`: fornece agentes `plan-checker` (verificação goal-backward em 6 dimensões antes do código ser tocado) e `executor` (commit atômico + deviation handling).
 - `dw-testing-discipline`: aplica placement doctrine, 6 agent guardrails e 25 anti-patterns ao adicionar testes.
 - `dw-ui-discipline`: quando task toca UI, as 4 grounding questions precisam ser respondidas antes de qualquer decisão visual.

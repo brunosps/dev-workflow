@@ -70,6 +70,10 @@ Bugs cluster into a small number of categories. Knowing the category narrows whe
 | Configuration | Works dev, fails prod | Env vars, secrets, build flags, infra config |
 | Logic | Branch returns wrong result | Guard conditions, off-by-one, boolean polarity |
 
+## When the agent is the bug (not the code)
+
+Sometimes the failure is in the agent's own run — it loops, drifts off the objective, claims an edit it never made, or its reasoning degraded — not in the code under test. That is a different diagnosis. See `references/agent-degradation.md` for the symptom→cause table and the ordered recovery heuristics (restate objective → verify world state → shrink scope → one discriminating check → retry once).
+
 ## Non-reproducible bugs
 
 Some bugs only happen in production, only on certain users, only at certain times. Don't fix them on intuition. The protocol in `references/non-reproducible-strategy.md` covers:

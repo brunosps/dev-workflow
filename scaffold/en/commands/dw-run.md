@@ -31,6 +31,7 @@ When available under `./.agents/skills/`, these skills are invoked per task:
 
 - `dw-verify`: **ALWAYS** — before each task's commit, produces a Verification Report (test + lint + build all GREEN). Without PASS, no commit. The Iron Law of verification.
 - `dw-memory`: **ALWAYS** — reads workflow memory at task start; updates at task end with the promotion test (lessons that apply to next task get promoted to shared MEMORY.md).
+- Instincts (lazy): at task start, also load any high-confidence instinct (`.dw/memory/instincts/`, confidence ≥0.7) whose `trigger` matches the task — learned project conventions promoted by `/dw-learn`. Match by trigger only; never bulk-load the set.
 - `dw-execute-phase`: provides `plan-checker` (6-dimension goal-backward verification before any code is touched in plan mode) and `executor` (atomic commit + deviation handling) agents.
 - `dw-testing-discipline`: applies the placement doctrine, 6 agent guardrails, and 25 anti-patterns when adding tests during the task.
 - `dw-ui-discipline`: when the task touches UI, the 4 grounding questions must be answered before any visual decision lands.

@@ -139,6 +139,7 @@ If MISSING > 0, the verdict suggests revisiting `/dw-plan tasks` to scope or `/d
    - General patterns: no `any` types in TS, no `console.log` in prod, error handling, multi-tenancy.
    - Backend patterns from `.dw/rules/<backend>.md`: Clean Architecture, use-case return types, DTOs, parameterized queries.
    - Frontend patterns from `.dw/rules/<frontend>.md`: Server Components default, forms patterns, design system.
+   - Curated baseline: check the diff against the active stack's `.dw/rules-library/<stack>.md` (+ `common.md`) as the declarative bar. The project's own `.dw/rules/` and `.dw/constitution.md` override it where they differ.
 
 3. **Constitution compliance** (against `.dw/constitution.md`):
    - For each principle, check diff for violations per the principle's Enforcement line.

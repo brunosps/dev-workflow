@@ -213,6 +213,10 @@ Para cada projeto/módulo detectado, identificar:
 | **Containerização** | Dockerfile, docker-compose.yml |
 | **Monorepo tools** | Turborepo, Nx, Lerna, pnpm workspaces |
 
+#### Baseline curada (rules-library)
+
+Após detectar a(s) stack(s), consulte `.dw/config/stack-mappings.json`: cada stack casada aponta para sua baseline curada em `.dw/rules-library/` (`common.md` + `<stack>.md`) — o default declarativo "como um bom código se parece aqui". **Referencie** esses arquivos (NÃO copie para `.dw/rules/`): as rules analíticas que você escreve descrevem o que o código É; a library descreve o que ele DEVERIA ser. Carregue só os arquivos das stacks casadas para proteger o budget de contexto.
+
 #### Baseline de Saúde do Frontend
 
 Quando React for detectado, execute `npx react-doctor@latest --verbose` e inclua o health score nas rules geradas como métrica baseline.
@@ -680,7 +684,7 @@ Três opções:
 
 **Opção A — Sintetizar:**
 
-1. Ler `.dw/rules/index.md` + cada `.dw/rules/{module}.md`.
+1. Ler `.dw/rules/index.md` + cada `.dw/rules/{module}.md`, mais a baseline curada da(s) stack(s) detectada(s) em `.dw/rules-library/` (`common.md` + `<stack>.md`). Um princípio da baseline que o projeto já segue é uma proposta bem-fundamentada — cite o arquivo da rules-library como evidência.
 2. Propor 5–8 princípios. Cada um deve:
    - Ter ID único `P-NNN`.
    - Mapear para uma observação em `.dw/rules/` (citar o arquivo + seção).

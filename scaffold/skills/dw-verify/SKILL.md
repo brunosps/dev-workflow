@@ -160,7 +160,7 @@ Verification failure is information, not a dead end. Protocol:
 
 Discover the project gate before claiming success. Prefer documented gates in `.dw/rules/`, then package scripts such as `verify`, `check`, `ci`, or `test`, then Makefile/just/pyproject equivalents. If no verification command exists, state that explicitly in the Verification Report and avoid completion language.
 
-Load `references/verification-discovery-and-attribution.md` when you need the full discovery checklist, command integration table, or attribution notes.
+Load `references/verification-discovery-and-attribution.md` for the discovery checklist and attribution notes, or `references/pre-check-and-status.md` for the cheap diff-hygiene grep and the compact polling status line.
 
 ## Structured Return
 

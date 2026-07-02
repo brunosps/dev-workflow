@@ -99,6 +99,18 @@ If a simplification touches >500 lines, **don't do it manually**. Use:
 
 Manual edits across hundreds of lines are how subtle bugs creep in.
 
+## Refactor risk levels
+
+Before removing or restructuring, categorize by blast radius and act in that order — never all at once:
+
+| Risk | Examples | Discipline |
+|------|----------|-----------|
+| **SAFE** | Unused exports, unused deps, unreachable branches | Batch-remove, run the gate after each batch, commit |
+| **CAREFUL** | Consolidate duplicates, extract/inline, rename symbol | One or two per commit; re-read callers first |
+| **RISKY** | Change a public API, alter a data structure, extract a layer | One per commit; regression tests first; pair review / ADR |
+
+Start with SAFE and graduate only after the gate is green. For finding SAFE candidates on JS/TS (and other ecosystems), see `references/dead-code-tools.md`. This composes with Chesterton's Fence (Rule 1) — a tool calling code "unused" still needs the WHY check before deletion (reflection, dynamic imports, and framework entry points are invisible to static analysis).
+
 ## Verification protocol
 
 Before committing the simplification:
@@ -139,6 +151,7 @@ In the formal Level 3 review (post-Level 2 chain from `dw-review-implementation`
 - `references/complexity-metrics.md` — when each metric (cyclomatic, cognitive, depth, fanout) actually matters; how to measure cheaply.
 - `references/behavior-preserving.md` — characterization tests, refactor with test gate, rollback patterns, codemod tooling per language.
 - `references/deep-modules.md` — high-leverage modules behind small interfaces; deletion test, locality, leverage, seam, adapter diagnostic; anti-patterns (shallow wrapper, god-module). Invoked by `/dw-refactor` and `/dw-brainstorm` refactor-audit mode.
+- `references/dead-code-tools.md` — per-ecosystem tools that surface SAFE-tier dead-code candidates (knip/depcheck/ts-prune for JS/TS; vulture/ruff for Python; deadcode/staticcheck for Go; cargo-udeps for Rust). Candidates still pass Chesterton's Fence before deletion.
 
 ## Inspired by
 

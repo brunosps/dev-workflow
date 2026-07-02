@@ -12,11 +12,11 @@ This will:
 1. Ask you to select a language (English or Portuguese)
 2. Create `.dw/commands/` with workflow commands
 3. Create `.dw/templates/` with document templates (PRD, TechSpec, Tasks, ADR, etc.)
-4. Create `.dw/rules/` (populated by `/dw-analyze-project`)
+4. Create `.dw/rules/` (populated by `/dw-analyze-project`) + a curated `.dw/rules-library/` declarative baseline per stack (loaded lazily via `.dw/config/stack-mappings.json`)
 5. Install bundled skills (`dw-verify`, `dw-memory`, `dw-review-rigor`, `dw-ui-discipline`, `dw-testing-discipline`, `security-review`, etc.) to `.agents/skills/`
 6. Generate skill wrappers and project agents for Claude Code, Codex, Copilot, and OpenCode
 7. Configure MCP servers (Context7 + Playwright)
-8. Install enforcement hooks (git guardrails) + a statusline into `.claude/settings.json` (merge-aware — your own hooks/statusline are never overwritten)
+8. Install enforcement hooks (git guardrails + a `SessionEnd` token-cost tracker → `.dw/metrics/costs.jsonl`) + a statusline (branch · active spec · minimalism mode · today's estimated spend) into `.claude/settings.json` (merge-aware — your own hooks/statusline are never overwritten)
 
 > **Compozy-inspired disciplines.** Since 0.5.0, dev-workflow bundles three primitives — `dw-verify`, `dw-memory`, `dw-review-rigor` — adapted from the [Compozy](https://github.com/compozy/compozy) project and invoked internally by existing commands. See [docs/compozy-integration.md](docs/compozy-integration.md) for what was ported and what was not.
 
@@ -42,7 +42,7 @@ Exportable skills (no `.dw/` pipeline required): `dw-minimalism`, `dw-search-fir
 
 ## Commands
 
-dev-workflow v1.4.0 ships **36 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v1.5.0 ships **37 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
 ### Tier 1 — Gateway (3)
 
@@ -69,7 +69,7 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 | **`/dw-commit`** | Atomic Conventional Commits for pending changes. Applies `dw-git-discipline` (one intent per commit, lint+tests+build green before). |
 | **`/dw-generate-pr [target]`** | Push the branch, draft a PR body with summary + test plan, open the browser. Hard gates: dw-verify PASS + secure-audit. |
 
-### Tier 3 — Specialty (11)
+### Tier 3 — Specialty (12)
 
 | Command | What |
 |---------|------|
@@ -80,6 +80,7 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 | **`/dw-context-budget`** | Audits context overhead from commands, skills, agents, instruction files, and MCPs. |
 | **`/dw-harness-audit`** | Deterministic health scorecard for the dev-workflow install, agents, wrappers, MCPs, and gates. |
 | **`/dw-skill-health`** | Audits installed skills and agents for bloat, duplication, and missing references. |
+| **`/dw-learn`** | Synthesizes durable decisions (confidence-tagged), bugfixes, deviations, and git history into atomic confidence-weighted **instincts** you approve at `.dw/memory/instincts/`; can propose constitution principles. On-demand and human-in-the-loop — **no always-on observer**. |
 | **`/dw-new-project`** | Bootstrap a new project from empty directory. Stack interview, wraps official `create-*` tools, composes docker-compose for dev, seeds `.env`, scripts, CI, `.dw/rules/`. |
 | **`/dw-dockerize`** | Reads existing project, detects stack + runtime deps, proposes Dockerfile + docker-compose for dev/prod with explicit trade-offs (Conservative/Balanced/Bold). |
 | **`/dw-install-azure-skills`** | **Opt-in.** Clones curated Azure skills from [`MicrosoftDocs/Agent-Skills`](https://github.com/MicrosoftDocs/Agent-Skills) (CC-BY-4.0) into `.agents/skills/azure/` and registers the [Microsoft Learn MCP Server](https://learn.microsoft.com/en-us/training/support/mcp-get-started) (HTTP, no-auth). Interactive category selection (Compute / Data & Storage / AI & ML / Networking / Identity & Security / DevOps / Observability / Integration / Architecture / All). Re-run to refresh from upstream. Also available as CLI: `npx @brunosps00/dev-workflow install-azure-skills`. |

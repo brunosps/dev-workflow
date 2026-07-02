@@ -225,6 +225,10 @@ For each module/project detected, identify:
 | **Auth** | NextAuth, Passport, Keycloak, Auth0, etc. | Dependencies + auth-related files |
 | **API Style** | REST, GraphQL, tRPC, gRPC | Route definitions, schema files |
 
+#### Curated baseline (rules-library)
+
+After detecting the stack(s), consult `.dw/config/stack-mappings.json`: each matched stack points to its curated baseline in `.dw/rules-library/` (`common.md` + `<stack>.md`) — the declarative "what good code looks like here" default. **Reference** these files (do NOT copy them into `.dw/rules/`): the analytical rules you write describe what the code IS; the library describes what it SHOULD be. Load only the matched stacks' files to protect the context budget.
+
 #### Frontend Health Baseline
 
 When React is detected, run `npx react-doctor@latest --verbose` and include the health score in the generated rules as a baseline metric.
@@ -740,7 +744,7 @@ Three options:
 
 **Option A — Synthesize:**
 
-1. Read `.dw/rules/index.md` + each `.dw/rules/{module}.md`.
+1. Read `.dw/rules/index.md` + each `.dw/rules/{module}.md`, plus the curated baseline for the detected stack(s) in `.dw/rules-library/` (`common.md` + `<stack>.md`). A baseline principle the project already follows is a well-grounded proposal — cite the rules-library file as its evidence.
 2. Propose 5–8 principles. Each must:
    - Have a unique `P-NNN` ID.
    - Map to an observation in `.dw/rules/` (cite the rule file + section).

@@ -80,7 +80,7 @@ For human-readable analysis (architecture overview, module conventions, anti-pat
 3. Search `files.json` for matching exports.
 4. Search `arch.md` (full-text) for the keyword.
 5. Cross-reference with `deps.json` if the query is about a library.
-6. Return a structured answer with file paths cited.
+6. Return a structured answer with file paths cited, each tagged with a `relevance` (0–1, or high/medium/low) and a one-line reason — so the calling command reads the high-relevance files first and skips the rest, instead of loading the whole result set. Ordering by relevance is what keeps intel queries token-lean.
 
 If no `.dw/intel/` exists at all, `/dw-intel` falls back to `.dw/rules/` (seeded by `/dw-new-project` or `/dw-analyze-project`) and direct grep over the codebase.
 
@@ -105,6 +105,8 @@ If no `.dw/intel/` exists at all, `/dw-intel` falls back to `.dw/rules/` (seeded
 
 - **Iterative retrieval**: subagents should not load broad file sets blindly. They perform at most three search/evaluate/refine cycles, then read only high-relevance files.
 - **Codemaps**: `.dw/intel/codemaps/*.md` stores short maps optimized for agent context instead of forcing repeated source reads.
+- **Data-flow tracing**: `arch.md` includes at least one end-to-end request lifecycle for a representative feature — entry → validation → auth → service → data → response, with the `file:function` at each hop — so agents learn *how data moves*, not just where files sit. This is the single highest-leverage entry for reducing broad exploratory reads.
+- **Relevance-scored answers**: `/dw-intel` query results are ranked by relevance (see "How `/dw-intel` Reads This", step 6) so callers act on the top hits and skip the tail.
 
 ## Inspired by
 

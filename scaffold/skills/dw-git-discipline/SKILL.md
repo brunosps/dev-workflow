@@ -78,6 +78,7 @@ When wired into `/dw-generate-pr`, every PR must:
 | Branch is 5 days old, tons of conflicts | Rebase from main daily; don't let drift compound |
 | PR has 2,000 lines | Split. Identify natural seams: schema, backend, frontend, tests |
 | Stuck mid-merge with conflicts | Resolve, don't `git checkout --theirs` blindly. The conflict is information |
+| Rebase or merge to integrate? | Local-only branch → **rebase** onto `main` (linear history). Shared/pushed branch → **merge** (never rebase history others have pulled) |
 
 ## What this skill does NOT do
 

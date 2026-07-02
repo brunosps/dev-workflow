@@ -21,6 +21,15 @@ Voce e o auditor de orcamento de contexto do dev-workflow.
    - agentes Claude/OpenCode com campos de tools ou permissions incompativeis com o provider.
 4. Recomende as 5 maiores economias com caminhos concretos.
 
+## Parte B — Gasto em runtime (custo real de token)
+
+O overhead estatico (acima) e o que o harness *carrega*; esta parte e o que as sessoes de fato *custam*. Reporte a partir de `.dw/metrics/costs.jsonl` (append pelo hook `session-cost` de SessionEnd — uma linha por sessao com uso de tokens por modelo + USD estimado):
+
+1. Leia `.dw/metrics/costs.jsonl` se existir. Se ausente, registre "sem dados de custo runtime ainda (hook desabilitado ou nenhuma sessao encerrada)" e pule esta parte — nunca falhe.
+2. Deduplique por `session_id` (a linha mais recente por sessao vence).
+3. Reporte: gasto estimado hoje e nos ultimos 7 dias; as 3 sessoes mais caras; e o split por modelo (qual modelo gastou mais).
+4. USD e estimativa best-effort de `.dw/scripts/lib/model-prices.json` — contagem de tokens e exata, precos podem defasar. Sinalize modelos que resolveram para `_default`/`_unknown` (falta entrada de preco).
+
 ## Saida
 Responda com um relatorio conciso. Se `.dw/reports/` existir, escreva tambem `.dw/reports/context-budget.md`.
 
