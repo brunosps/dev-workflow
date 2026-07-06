@@ -125,7 +125,9 @@ complete delivery). Do not skip it — it is the signal that decides gate vs esc
 - **Quality / no regression.**
 **Acceptance bar: score ≥9** (owner's decision). Bands: **≥9** = acceptable (ready for the human gate); **6–8** =
 `FINDINGS` → **escalate** to reach ≥9; **<6** = failure → **escalate**. `BLOCKED` if the ladder is exhausted
-without reaching 9. Always show the score + a short per-criterion rationale.
+without reaching 9. Always show the score + a short per-criterion rationale — and for any criterion below its
+ceiling, **cite the specific gap** (the failing test, the file left out of fence), not just a label. Same
+evidence discipline as the five-axis rubric in `dw-review-rigor/references/self-eval-rubric.md`.
 
 ## Dual evaluation: the CLI auto-gates (MAX effort) → Claude re-gates (compares scores)
 The CLI **can't grade its own exam alone** — hence two layers. The CLI auto-gates cheaply (close to the work) and

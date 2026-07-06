@@ -26,6 +26,9 @@ Voce e o auditor do harness dev-workflow.
 4. Cite paths ausentes, referencias quebradas, arquivos gerenciados stale, e skills sem retorno estruturado.
 5. Recomende os 3 principais fixes.
 
+## Triagem de degradacao em runtime (sob demanda)
+O scorecard acima e saude deterministica da **instalacao**. Se o problema for o *agente* se comportando mal em runtime (loops, desvio do objetivo, edicoes alucinadas, raciocinio degradado), o diagnostico e outro: aponte o usuario para `.agents/skills/dw-debug-protocol/references/agent-degradation.md` (tabela sintoma→causa + recovery ordenado). Apenas informativo — nao afeta o scorecard.
+
 ## Saida
 Retorne um scorecard e nao altere arquivos. Para drift de arquivo gerenciado, indique `dev-workflow repair`.
 

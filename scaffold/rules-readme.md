@@ -23,3 +23,11 @@ Run the `/dw-analyze-project` command inside your AI assistant to scan your code
 These rules are automatically read by workflow commands (`create-prd`, `create-techspec`, `run-task`, etc.) to ensure generated artifacts follow your project's conventions.
 
 Re-run `/dw-analyze-project` whenever your stack or conventions change significantly.
+
+## Related: the curated baseline library
+
+This directory (`.dw/rules/`) is **analytical** — what the code IS. It is complemented by
+`.dw/rules-library/` — a **curated declarative baseline** (what good code SHOULD look like) shipped per
+stack, loaded lazily via `.dw/config/stack-mappings.json` — and by `.dw/constitution.md` — the principles
+your team commits to. `/dw-analyze-project` references the library to seed constitution proposals; you don't
+edit the library here. See `.dw/rules-library/README.md`.

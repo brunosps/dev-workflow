@@ -21,6 +21,15 @@ You are the context budget auditor for dev-workflow.
    - Claude/OpenCode agent files with provider-incompatible tool or permission fields.
 4. Recommend the top 5 savings with concrete paths.
 
+## Part B — Runtime spend (actual token cost)
+
+Static overhead (above) is what the harness *loads*; this part is what sessions actually *cost*. Report from `.dw/metrics/costs.jsonl` (appended by the `session-cost` SessionEnd hook — one row per session with per-model token usage + estimated USD):
+
+1. Read `.dw/metrics/costs.jsonl` if present. If absent, note "no runtime cost data yet (hook disabled or no session has ended)" and skip this part — never fail.
+2. Dedupe by `session_id` (latest row per session wins).
+3. Report: estimated spend today and over the last 7 days; the 3 most expensive sessions; and the per-model split (which model burned the most).
+4. USD is a best-effort estimate from `.dw/scripts/lib/model-prices.json` — token counts are exact, prices may drift. Flag any model that resolved to `_default`/`_unknown` (missing price entry to add).
+
 ## Output
 Write a concise report in chat. If `.dw/reports/` exists, also write `.dw/reports/context-budget.md`.
 

@@ -139,6 +139,7 @@ Se FALTANDO > 0, o veredicto sugere revisitar `/dw-plan tasks` pra escopar ou `/
    - Padrões gerais: sem `any` em TS, sem `console.log` em prod, error handling, multi-tenancy.
    - Backend patterns de `.dw/rules/<backend>.md`: Clean Architecture, use-case return types, DTOs, queries parametrizadas.
    - Frontend patterns de `.dw/rules/<frontend>.md`: Server Components default, forms patterns, design system.
+   - Baseline curada: verifique o diff contra a `.dw/rules-library/<stack>.md` (+ `common.md`) da stack ativa como régua declarativa. As `.dw/rules/` do projeto e a `.dw/constitution.md` sobrepõem onde diferirem.
 
 3. **Constitution compliance** (contra `.dw/constitution.md`):
    - Para cada princípio, checar diff por violações conforme linha Enforcement do princípio.

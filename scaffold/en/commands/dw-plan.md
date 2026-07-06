@@ -70,6 +70,8 @@ The tool is mandatory for planning because it preserves explicit user choices an
 
 If `.dw/intel/` doesn't exist, fall back to `.dw/rules/` and direct grep. Suggest `/dw-intel --build` to populate intel for richer downstream context.
 
+If `.dw/memory/instincts/` has entries, load any with confidence ≥0.7 whose `trigger` matches the feature (lazy, by trigger only) — they encode learned project conventions from `/dw-learn` worth respecting in the spec.
+
 ## Stage 1 — PRD generation
 
 Runs when default mode OR `plan prd`.

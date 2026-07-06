@@ -49,6 +49,35 @@ function minimalismMode(cwd) {
   }
 }
 
+function costToday(cwd) {
+  // Sum today's estimated spend from .dw/metrics/costs.jsonl (written by the
+  // session-cost SessionEnd hook). Dedupe by session (latest row wins). Fail SAFE.
+  try {
+    const file = join(cwd, '.dw', 'metrics', 'costs.jsonl');
+    if (!existsSync(file)) return '';
+    const today = new Date().toISOString().slice(0, 10);
+    const bySession = new Map();
+    for (const line of readFileSync(file, 'utf-8').split('\n')) {
+      if (!line.trim()) continue;
+      let r;
+      try {
+        r = JSON.parse(line);
+      } catch {
+        continue;
+      }
+      if (!r || typeof r.total_usd !== 'number' || !r.ts) continue;
+      const key = r.session_id || r.ts;
+      const prev = bySession.get(key);
+      if (!prev || r.ts > prev.ts) bySession.set(key, { ts: r.ts, usd: r.total_usd });
+    }
+    let sum = 0;
+    for (const v of bySession.values()) if (v.ts.slice(0, 10) === today) sum += v.usd;
+    return sum > 0 ? `~$${sum.toFixed(2)}/d` : '';
+  } catch {
+    return '';
+  }
+}
+
 function activeSpec(cwd) {
   try {
     const specDir = join(cwd, '.dw', 'spec');
@@ -80,6 +109,8 @@ async function main() {
   const spec = activeSpec(cwd);
   if (spec) parts.push(spec);
   parts.push(`min:${minimalismMode(cwd)}`);
+  const cost = costToday(cwd);
+  if (cost) parts.push(cost);
 
   process.stdout.write(`dw · ${parts.join(' · ')}`);
 }

@@ -34,7 +34,7 @@ Find the project's design source-of-truth in this order:
 4. Component library config — `components.json` for shadcn, theme exports.
 5. Storybook stories (implicit canonical components).
 
-If **at least one** exists: it wins. Defer to it. If a needed token is missing (e.g., a danger-secondary color), propose adding it to the authority FIRST, not inline.
+**Stop at the first match** in this list — that source is the authority; defer to it and do not override it with a lower rung or a training-data default. If a needed token is missing (e.g., a danger-secondary color), propose adding it to the authority FIRST, not inline.
 
 If **none exists**: read `references/curated-defaults.md` and pick one of the 10 neutral palettes + one of the 10 font pairings shipped there. Mark the choice in the techspec/PR description: "Design source: no project authority found; using curated default `<name>`; recommend establishing `DESIGN.md`."
 

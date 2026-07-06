@@ -21,6 +21,17 @@ By `/dw-review --code-only`, `/dw-review --coverage-only`, `/dw-refactor`, and `
 - The scope the caller is reviewing (file paths, directories, or PR diff).
 - Optional: prior review reports in `.dw/spec/prd-*/reviews/` — so this round only surfaces NEW findings.
 
+## Pre-Report Gate
+
+Before writing ANY finding, clear four checks — if any is "no"/"unsure", downgrade or drop it (an unactionable finding is noise):
+
+1. **Location** — exact file and line?
+2. **Failure mode** — a concrete input/state and the bad outcome it produces?
+3. **Context** — read the surrounding code (callers, imports, tests), not just the flagged line?
+4. **Severity** — defensible against Rule 2's definitions? (a missing JSDoc is never HIGH)
+
+Report only findings you are **>80% confident** are real. A style preference no rule backs is not a finding. See `references/false-positives.md` for patterns LLM reviewers habitually mis-flag.
+
 ## The Five Rules
 
 ### 1. De-duplicate before writing
@@ -111,6 +122,7 @@ The caller emits:
 2. **Counts** — critical / high / medium / low.
 3. **Findings** — ordered by severity, each in the format above.
 4. **Well-implemented aspects** — short bulleted list, calibrates tone.
+5. **Self-score** — rate the report on the five axes in `references/self-eval-rubric.md`; any axis below top cites the gap, then fix (<30s) or flag.
 
 ## Critical Rules
 
