@@ -35,7 +35,7 @@
       "trigger": "Fire an AI CLI (Codex/Claude/Copilot) in a dedicated git worktree to implement a prepared prompt; resumable per-task session; STOP for the gate",
       "expected_output": "Audit-logged run with a 0-10 dual evaluation, a resumable session-id sidecar, and a STOP-for-gate Structured Return.",
       "load_policy": "lazy-references",
-      "context_limit": 18000,
+      "context_limit": 19000,
       "bundled": true
     },
     {

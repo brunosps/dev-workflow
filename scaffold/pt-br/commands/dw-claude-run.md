@@ -11,18 +11,19 @@ para implementar um prompt/spec ja preparado, captura a execucao inteira num log
 
 | Slot | Valor Claude |
 |---|---|
-| `DISPATCH` | `UUID=$(cat /proc/sys/kernel/random/uuid); cd <WORKTREE> && claude -p --session-id "$UUID" --model <MODEL> --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <PROMPT>)" </dev/null > <AUDIT>/<slug>.log 2>&1` |
+| `DISPATCH` | `UUID=$(cat /proc/sys/kernel/random/uuid); cd <WORKTREE> && claude -p --session-id "$UUID" --model <MODEL> --effort <EFFORT> --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <PROMPT>)" </dev/null > <AUDIT>/<slug>.log 2>&1` |
 | `STREAM` | `--output-format stream-json --include-partial-messages --verbose` (`--verbose` e **obrigatorio** com `stream-json` no modo `-p`) |
 | `AUTO` | `--dangerously-skip-permissions` (auto-aprovacao headless; justificavel porque a worktree e isolada). Somente leitura/analise: tire-o e use `--permission-mode plan` (ou restrinja `--allowedTools`). |
-| `RESUME <id>` | `cd <WORKTREE> && claude --resume "$UUID" -p --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <FOLLOWUP_PROMPT>)" </dev/null >> <AUDIT>/<slug>.log 2>&1` |
+| `RESUME <id>` | `cd <WORKTREE> && claude --resume "$UUID" -p --effort <EFFORT> --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <FOLLOWUP_PROMPT>)" </dev/null >> <AUDIT>/<slug>.log 2>&1` |
 | `RESUME_LAST` | `claude -c -p …` (continua a conversa mais recente nesta cwd) |
 | `SESSION_ID` | **FIXADO por voce** — voce passa `--session-id "$UUID"` na 1a run, entao o id e conhecido de antemao. Gere-o (`cat /proc/sys/kernel/random/uuid` ou `uuidgen`) e grave em `<AUDIT>/<slug>.session` ANTES/no dispatch. Sem scraping do stream — o Claude e o caso facil. |
 | `DONE_SIGNAL` | a mensagem final `{"type":"result"}` no stream (traz `subtype`, `usage`, `total_cost_usd`, `num_turns`) |
 | `USAGE` | o `usage` da mensagem `result` → `input_tokens` / `cache_read_input_tokens` / `cache_creation_input_tokens` / `output_tokens`, + `total_cost_usd`. Extrair: `grep -oE '"usage":\{[^}]*\}' <AUDIT>/<slug>.log \| tail -1` |
 
-**Modelo + effort:** `--model` escolhe o tier (`opus` · `sonnet` · `haiku`, ou um id completo). O Claude nao tem
-flag numerica de effort; mapeie "escalonamento" para o tier do modelo (e, quando precisar, peca extended thinking
-no prompt). Comece um tier abaixo do teto; escale conforme a `dw-cli-run`.
+**Modelo + effort:** `--model` escolhe o tier (`opus` · `sonnet` · `haiku`, ou um id completo). `--effort` escolhe
+o budget de raciocinio: `low` · `medium` · `high` · `xhigh` · `max` (suportado pelo Claude CLI ≥ 2.1.206). Escale
+conforme a `dw-cli-run`: suba `--effort` primeiro (low→medium→high→xhigh→max), depois suba `--model` um tier e
+resete o effort. Comece um notch abaixo do teto.
 
 ## Resume de sessao (o coracao)
 Como voce passa `--session-id "$UUID"`, o id e **fixo e conhecido** no dispatch — grave-o em
@@ -38,6 +39,8 @@ o Claude recarrega a mesma conversa (raciocinio + arquivos ja tocados). Fallback
 | `<PROMPT>` | caminho do prompt/spec preparado | `.dw/spec/prd-billing-integrador/codex-prompt.md` |
 | `<slug>` | chave da tarefa p/ arquivos de audit/sessao | `prd-billing-integrador` |
 | `<AUDIT>` | dir de auditoria duravel FORA da worktree | `~/code/vizzita/.dw/cli-run` |
+| `<MODEL>` | tier do Claude ou id completo do modelo | `opus` / `sonnet` / `haiku` |
+| `<EFFORT>` | budget de raciocinio (Claude CLI ≥ 2.1.206) | `low` / `medium` / `high` / `xhigh` / `max` |
 
 Retorne pelo **Structured Return** da `dw-cli-run` (Status/Score/Scope/Evidence/Artifacts/Decisions/Risks/
 Telemetria/Next Step), incluindo o `session-id` fixo (UUID), o caminho do sidecar, e o comando `RESUME` exato pra
