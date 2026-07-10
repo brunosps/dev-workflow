@@ -341,7 +341,7 @@ entre turns e escreve arquivos. Por ser stateful e mutante, começa **só com in
 
 <critical>Intenção explícita de Grill = `--mode=grill`, uma frase direta como "me questione" / "grill me" / "grilla esse plano", OU um **sim** à oferta única abaixo. O Signal Reading automático pode **recomendar** Grill, mas DEVE pedir uma autorização explícita antes de iniciar a sessão ou escrever QUALQUER arquivo. Um brainstorm normal nunca escreve artefatos de Grill só porque o vocabulário parece instável.</critical>
 
-<critical>`grill` e `option-matrix` são **mutuamente exclusivos** num turn. Grill converge decisões; NÃO gera matriz de opções nem recomendação. Após o alinhamento, Grill pode **oferecer** option-matrix como fase posterior separada e explicitamente anunciada.</critical>
+<critical>`grill` e `option-matrix` são **mutuamente exclusivos** num turn. Grill converge decisões; NÃO gera matriz de opções nem um veredito final de option-matrix — mas **cada pergunta da entrevista ainda carrega uma resposta recomendada** (com rationale e uma alternativa/trade-off). "Sem recomendação" se refere só ao veredito de option-matrix, nunca à recomendação por pergunta. Após o alinhamento, Grill pode **oferecer** option-matrix como fase posterior separada e explicitamente anunciada.</critical>
 
 <critical>Pergunte exatamente UMA decisão não-resolvida por interação, e espere. Nunca despeje uma lista de perguntas.</critical>
 
@@ -435,7 +435,7 @@ O modo grill produz:
 - **Um one-pager estendido** em `.dw/spec/ideas/<slug>.md` (schema `1.1`) — `aligned` só após confirmação explícita, senão `draft`/`paused`.
 - **PRD / TechSpec atualizado** só se explicitamente ativo e a mudança foi mostrada antes.
 - **ADR roteado opcional** via `/dw-adr --scope=…` se os três critérios valem e o usuário aprova.
-- **NÃO** produz option matrix ou recomendação (mutuamente exclusivos; option-matrix é fase posterior separada se oferecida e aceita).
+- **NÃO** produz option matrix nem um veredito final de option-matrix — mas cada pergunta da entrevista ainda carrega uma resposta recomendada (option-matrix é fase posterior separada se oferecida e aceita).
 
 ### Quando a disciplina dobra
 

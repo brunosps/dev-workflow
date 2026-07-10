@@ -3,8 +3,9 @@ id: NNN
 status: Proposed
 title: [Título imperativo curto da decisão]
 date: YYYY-MM-DD
-prd: [slug do PRD, ex: prd-user-auth]
-schema_version: "1.0"
+scope: repo | prd
+prd: [slug do PRD para scope=prd, ex: prd-user-auth; "n/a" para scope=repo]
+schema_version: "1.1"
 supersedes: null
 superseded_by: null
 ---
@@ -46,8 +47,11 @@ Proposed | Accepted | Deprecated | Superseded by ADR-XXX
 
 ## Related
 
-- PRD: `.dw/spec/[prd-slug]/prd.md`
-- TechSpec: `.dw/spec/[prd-slug]/techspec.md` (se aplicável)
+<!-- scope=prd: linke o PRD/TechSpec dono. scope=repo: sem PRD dono — omita as linhas de PRD/TechSpec
+     (ou escreva "n/a") e linke `.dw/constitution.md` / `.dw/rules/` só quando genuinamente aplicáveis. -->
+
+- PRD: `.dw/spec/[prd-slug]/prd.md` (só scope=prd; "n/a" para scope=repo)
+- TechSpec: `.dw/spec/[prd-slug]/techspec.md` (se aplicável; só scope=prd)
 - Tasks afetadas: [lista de tasks, se aplicável]
 - ADRs relacionadas: [lista, se aplicável]
 

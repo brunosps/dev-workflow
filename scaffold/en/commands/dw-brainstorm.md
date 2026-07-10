@@ -341,7 +341,7 @@ turns and it writes files. Because it is stateful and mutating, it starts **only
 
 <critical>Explicit intent to Grill = `--mode=grill`, a direct phrase like "grill me" / "grill this plan", OR a **yes** to the one-time offer below. Automatic Signal Reading may **recommend** Grill, but it MUST request one explicit authorization before starting the session or writing ANY file. A normal brainstorm never writes Grill artifacts just because the vocabulary looks unstable.</critical>
 
-<critical>`grill` and `option-matrix` are **mutually exclusive** in a turn. Grill converges decisions; it does NOT generate an option matrix or a recommendation. After alignment, Grill may **offer** option-matrix as a separate, explicitly announced later phase.</critical>
+<critical>`grill` and `option-matrix` are **mutually exclusive** in a turn. Grill converges decisions; it does NOT generate an option matrix or a single final option-matrix verdict — but **every interview question still carries a recommended answer** (with rationale and an alternative/trade-off). "No recommendation" refers only to the option-matrix verdict, never to the per-question recommendation. After alignment, Grill may **offer** option-matrix as a separate, explicitly announced later phase.</critical>
 
 <critical>Ask exactly ONE unresolved decision per interaction, then wait. Never dump a list of questions.</critical>
 
@@ -433,7 +433,7 @@ grill mode produces:
 - **An extended one-pager** at `.dw/spec/ideas/<slug>.md` (schema `1.1`) — `aligned` only after explicit confirmation, otherwise `draft`/`paused`.
 - **Updated PRD / TechSpec** only if explicitly active and the change was shown first.
 - **Optional routed ADR** via `/dw-adr --scope=…` if the three criteria hold and the user approves.
-- **NO** option matrix or recommendation (mutually exclusive; option-matrix is a separate later phase if offered and accepted).
+- **NO** option matrix and no single final option-matrix verdict — but every interview question still carries a recommended answer (option-matrix is a separate later phase if offered and accepted).
 
 ### When the discipline bends
 

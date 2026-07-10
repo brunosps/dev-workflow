@@ -29,8 +29,16 @@ ADRs are created via `/dw-adr`, which routes by `--scope`:
   (a greenfield grill naturally produces repo-scoped ADRs).
 - **`--scope=prd`** → `.dw/spec/<prd>/adrs/adr-NNN.md`. Decisions bound to a specific active PRD.
 
-Default resolution when scope is unspecified: the uniquely active PRD → `prd`; no active PRD → `repo`; several
-active PRDs (ambiguous) → **ask**, don't guess. `NNN` is sequential within the chosen scope's ADR directory.
+Default resolution when scope is unspecified (`--scope=` is always authoritative): the uniquely **active** PRD →
+`prd`; no active PRD → `repo`; several active PRDs (ambiguous) → **ask**, don't guess. `NNN` is sequential within
+the chosen scope's ADR directory.
+
+**Active vs historical PRD** — deterministic and conservative, reading only evidence the repo already records
+(never guessing): a PRD directory is a candidate only when it is **not terminal** (its `prd.md` status is not
+shipped/merged/delivered/done/archived/superseded/cancelled). Choose the active one by precedence — an **explicit
+target** (named PRD or `PRD_PATH`) → the **active session** (`.dw/STATE.md`) → the **current `feat/prd-<slug>`
+branch**. If more than one non-terminal PRD survives with no disambiguating signal, **ask**. The authoritative
+rule lives in the `/dw-adr` "Active PRD" section.
 
 ## What qualifies
 

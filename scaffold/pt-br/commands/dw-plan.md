@@ -63,12 +63,21 @@ A ferramenta e obrigatoria no planejamento porque preserva escolhas explicitas d
 
 ### Handoff alinhado (do grill do `/dw-brainstorm`)
 
-Antes do Stage 1, verifique se há um one-pager de ideia alinhado em `.dw/spec/ideas/<slug>.md` (schema `1.1`, `status: aligned`) e o vocabulário canônico em `.dw/domain/**`. Quando presente:
+Antes do Stage 1, verifique se há um one-pager de ideia em `.dw/spec/ideas/<slug>.md` e o vocabulário canônico em `.dw/domain/**`.
+
+<critical>Valide o handoff e FALHE FECHADO. Credite um handoff alinhado — i.e. suprima as perguntas de produto que suas decisões cobrem — SOMENTE quando TODAS valem:
+- `schema_version: "1.1"`;
+- `status: aligned`;
+- `alignment.confirmed_by_user: true`;
+- toda branch de dependência resolvida (nenhum nó de decisão aberto);
+- contradições glossário/código fechadas;
+- nenhuma entrada **bloqueante** resta em Remaining Decisions.
+Se QUALQUER check falha — ou o arquivo está malformado, internamente inconsistente, `draft` ou `paused` — o one-pager é **input, não handoff confiável**: leia para contexto, mas trate todas as suas decisões como **descobertas** e pergunte normalmente. Nunca suprima uma pergunta de produto só pela força do `status: aligned`; `alignment.confirmed_by_user: true` e uma árvore resolvida, não-bloqueante e sem contradições também são exigidos.</critical>
+
+Quando (e só quando) o handoff é totalmente válido:
 - Carregue suas **Resolved Decisions**, **Evidence** e links de **Canonical Vocabulary**.
 - Marque toda dimensão de PRD que essas decisões cobrem como **já coberta** (cite o one-pager como evidência) — NÃO re-pergunte.
 - Só dimensões descobertas viram perguntas, uma por vez.
-
-Um one-pager em `draft`/`paused` (não alinhado) é input, não handoff — trate suas decisões abertas como descobertas.
 
 ### Coverage matrices
 

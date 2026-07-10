@@ -63,12 +63,21 @@ The tool is mandatory for planning because it preserves explicit user choices an
 
 ### Aligned handoff (from `/dw-brainstorm` grill)
 
-Before Stage 1, check for an aligned idea one-pager at `.dw/spec/ideas/<slug>.md` (schema `1.1`, `status: aligned`) and the canonical vocabulary in `.dw/domain/**`. When present:
+Before Stage 1, check for an idea one-pager at `.dw/spec/ideas/<slug>.md` and the canonical vocabulary in `.dw/domain/**`.
+
+<critical>Validate the handoff and FAIL CLOSED. Credit an aligned handoff — i.e. suppress the product questions its decisions cover — ONLY when EVERY one of these holds:
+- `schema_version: "1.1"`;
+- `status: aligned`;
+- `alignment.confirmed_by_user: true`;
+- every dependency branch is resolved (no open decision node);
+- glossary/code contradictions are closed;
+- no **blocking** entry remains under Remaining Decisions.
+If ANY check fails — or the file is malformed, internally inconsistent, `draft`, or `paused` — the one-pager is **input, not a trusted handoff**: read it for context, but treat all its decisions as **uncovered** and ask them normally. Never suppress a product question on the strength of `status: aligned` alone; `alignment.confirmed_by_user: true` and a resolved, non-blocking, contradiction-free tree are required too.</critical>
+
+When (and only when) the handoff is fully valid:
 - Load its **Resolved Decisions**, **Evidence**, and **Canonical Vocabulary** links.
 - Mark every PRD dimension those decisions cover as **already covered** (cite the one-pager as the evidence) — do NOT re-ask them.
 - Only uncovered dimensions become questions, asked one at a time.
-
-A one-pager that is `draft`/`paused` (not aligned) is input, not a handoff — treat its open decisions as uncovered.
 
 ### Coverage matrices
 

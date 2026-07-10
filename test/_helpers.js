@@ -24,6 +24,10 @@ const FILES = {
     en: 'scaffold/en/commands/dw-adr.md',
     pt: 'scaffold/pt-br/commands/dw-adr.md',
   },
+  adrTemplate: {
+    en: 'scaffold/en/templates/adr-template.md',
+    pt: 'scaffold/pt-br/templates/adr-template.md',
+  },
   plan: {
     en: 'scaffold/en/commands/dw-plan.md',
     pt: 'scaffold/pt-br/commands/dw-plan.md',

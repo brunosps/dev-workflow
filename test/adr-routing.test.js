@@ -23,15 +23,15 @@ test('repo scope works before any PRD (EN + PT)', () => {
 });
 
 test('default resolution: unique PRD -> prd, none -> repo, multiple -> ask (EN)', () => {
-  includes(assert, aEn, 'Exactly one active PRD', 'EN adr');
-  includes(assert, aEn, 'No PRD exists', 'EN adr');
-  includes(assert, aEn, 'do not guess', 'EN adr');
+  includes(assert, aEn, 'Exactly one candidate', 'EN adr');
+  includes(assert, aEn, 'no PRD exists', 'EN adr');
+  includes(assert, aEn, 'never guess', 'EN adr');
 });
 
 test('default resolution: unique PRD -> prd, none -> repo, multiple -> ask (PT)', () => {
-  includes(assert, aPt, 'Exatamente um PRD ativo', 'PT adr');
-  includes(assert, aPt, 'Nenhum PRD existe', 'PT adr');
-  includes(assert, aPt, 'não adivinhe', 'PT adr');
+  includes(assert, aPt, 'Exatamente um candidato', 'PT adr');
+  includes(assert, aPt, 'nenhum PRD existe', 'PT adr');
+  includes(assert, aPt, 'nunca adivinhe', 'PT adr');
 });
 
 test('ADR gate requires all three criteria plus explicit approval (EN)', () => {

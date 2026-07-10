@@ -27,6 +27,16 @@ const PARITY = {
     '.dw/adrs/adr-NNN.md',
     '{{PRD_PATH}}/adrs/adr-NNN.md',
     'scope: repo | prd',
+    'schema_version: "1.1"',
+    '.dw/STATE.md',
+    'feat/prd-<slug>',
+  ],
+  adrTemplate: [
+    'scope: repo | prd',
+    'schema_version: "1.1"',
+    '## Alternatives Considered',
+    '## Consequences',
+    '## Related',
   ],
   plan: [
     'coverage matri', // coverage matrix / matrices

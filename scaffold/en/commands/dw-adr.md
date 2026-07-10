@@ -1,5 +1,5 @@
 <system_instructions>
-You are an architectural-decision recorder. Your job is to create an **Architecture Decision Record (ADR)** documenting an important technical decision made during the current PRD phase.
+You are an architectural-decision recorder. Your job is to create an **Architecture Decision Record (ADR)** documenting an important technical decision — either repo-wide (`--scope=repo`, valid even before any PRD exists) or bound to an active PRD (`--scope=prd`).
 
 ## When to Use
 - Use when an architectural or design decision has been made and needs to be recorded for future reference (library choice, communication pattern, performance tradeoff, compliance-imposed constraint, etc.)
@@ -22,10 +22,22 @@ The ADR is **additive**: it does not replace any pipeline stage. Any existing co
 | `repo` | `.dw/adrs/adr-NNN.md` | Repo-wide decision, and any decision made **before a PRD exists**. |
 | `prd` | `{{PRD_PATH}}/adrs/adr-NNN.md` | Decision bound to a specific active PRD. |
 
-**Default resolution** when `--scope` is not given:
-- Exactly one active PRD in `.dw/spec/prd-*/` → default to `prd` (that PRD).
-- No PRD exists → default to `repo`.
-- Two or more active PRDs (ambiguous) → **ask** which PRD, or `repo`; do not guess.
+**Default resolution** when `--scope` is not given (`--scope=` is always authoritative and overrides this):
+
+1. Determine the **candidate active PRDs** (see "Active PRD" below) — PRD directories in `.dw/spec/prd-*/` that are NOT terminal/historical.
+2. Exactly one candidate → default to `prd` (that PRD).
+3. Zero candidates (no PRD exists, or every PRD is terminal) → default to `repo`.
+4. Two or more candidates with no disambiguating signal → **ask** which PRD (or `repo`); never guess.
+
+### Active PRD (operational definition)
+
+Distinguish an **active** PRD from a **historical/terminal** one deterministically and conservatively, using evidence already in the repo — in this precedence:
+
+1. **Explicit target** — a PRD named in the request or passed as `{{PRD_PATH}}`. Wins outright.
+2. **Active session** — the PRD referenced by `.dw/STATE.md` (the current working spec), when present.
+3. **Current branch** — a `feat/prd-<slug>` checkout points at `prd-<slug>`.
+
+A PRD directory is **terminal/historical** (excluded from candidates) when its `prd.md` frontmatter/status marks it shipped, merged, delivered, done, archived, superseded, or cancelled. When none of signals 1–3 disambiguate and more than one non-terminal PRD remains, **ask** — do not guess. This reads only what the repo already records; it never invents state, a status field, or a migration.
 
 Numbering (`NNN`) is sequential **within the chosen scope's** ADR directory — repo ADRs and per-PRD ADRs have independent counters.
 
@@ -76,8 +88,8 @@ status: Proposed | Accepted | Deprecated | Superseded
 title: [ADR title]
 date: YYYY-MM-DD
 scope: repo | prd
-prd: [PRD slug, or "n/a" when scope=repo]
-schema_version: "1.0"
+prd: [PRD slug for scope=prd, or "n/a" for scope=repo]
+schema_version: "1.1"
 ---
 
 # ADR-NNN: [Title]
@@ -136,7 +148,7 @@ This command is inspired by the ADR pattern in `/tmp/compozy/.agents/skills/cy-c
 
 - Paths are `.dw/spec/<prd>/adrs/` instead of `.compozy/tasks/<name>/adrs/`
 - 4 minimum questions instead of Compozy's longer interactive flow (aligned with the concise style of other dw-* commands)
-- Explicit integration with `schema_version` of v1.0 templates
+- Explicit integration with `schema_version` v1.1 templates (adds `scope`; the PRD link is conditional so repo-scoped ADRs are coherent)
 
 Credit: Compozy project.
 
