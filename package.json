@@ -6,8 +6,10 @@
     "dev-workflow": "./bin/dev-workflow.js"
   },
   "scripts": {
+    "test": "node --test test/*.test.js",
     "validate": "node lib/validate.js",
-    "build:plugin": "node lib/build-plugin.js"
+    "build:plugin": "node lib/build-plugin.js",
+    "pack:check": "npm pack --dry-run"
   },
   "files": [
     "bin/",

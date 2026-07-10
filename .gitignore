@@ -4,9 +4,16 @@
 .claude/
 .codex/
 .agents/
-.github/
 .opencode/
 skills-lock.json
+
+# .github/ is a local generated footprint (Copilot/agent wrappers) EXCEPT the
+# committed CI workflow, which is source. Ignore everything under .github/ but
+# keep .github/workflows/ci.yml tracked; generated agents stay ignored.
+.github/*
+!.github/workflows/
+.github/workflows/*
+!.github/workflows/ci.yml
 
 # Node
 node_modules/
