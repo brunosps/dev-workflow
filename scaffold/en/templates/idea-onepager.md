@@ -1,10 +1,18 @@
 ---
 type: idea-onepager
-schema_version: "1.0"
-status: draft
+schema_version: "1.1"
+status: draft | paused | aligned
 date: YYYY-MM-DD
 classification: improves | consolidates | new
+alignment:
+  confirmed_by_user: false   # set true ONLY when the user explicitly confirms shared understanding
+  confirmed_on: null         # ISO date of that confirmation
 ---
+
+> **Schema 1.1.** The `## Grill Alignment` block below is populated by a `/dw-brainstorm` grill session. Without a
+> Grill, leave that block empty and keep `status: draft`. `status: aligned` is allowed ONLY when every dependency
+> branch is resolved, glossary/code contradictions are closed, no blocking decision remains, and the user has
+> explicitly confirmed shared understanding — otherwise use `draft` or `paused`.
 
 # Idea: [Short, imperative title]
 
@@ -80,6 +88,40 @@ Ideally 2-4 stories. If it's more than 5, it's probably not MVP.]
 
 - [Question 1 affecting scope]
 - [Question 2 affecting priority]
+
+## Grill Alignment
+
+_(schema 1.1 — filled by a `/dw-brainstorm` grill session; consumed by `/dw-plan`, which does NOT re-ask resolved decisions. Leave empty for a non-grilled one-pager.)_
+
+### Resolved Decisions
+
+| Decision | Recommended | Chosen | Alternative rejected | Evidence |
+|----------|-------------|--------|----------------------|----------|
+| [the decision] | [what Grill recommended] | [what the user chose] | [the rejected option + its trade-off] | [one-pager/repo source] |
+
+### Evidence
+
+[Facts discovered during Grill from the repo/rules/intel/docs — each with its source (`path:line`, doc, or intel query) — that were used instead of asking the user.]
+
+- **[fact]** — source: `[path:line or doc]`
+
+### Canonical Vocabulary
+
+[Links into `.dw/domain/**` for the terms this idea depends on. Do not restate definitions here — point to the glossary.]
+
+- **[Term]** → `.dw/domain/glossary.md#term` (or `.dw/domain/contexts/<slug>.md#term` for a multi-context project)
+
+### Remaining Decisions
+
+[Non-blocking decisions still open after alignment, with their owner. A blocking decision means the one-pager is NOT `aligned`.]
+
+- **[open decision]** — owner: [who] — blocking? [no]
+
+### Alignment State
+
+- **State:** `draft` | `paused` | `aligned`
+- **Shared understanding confirmed by user:** [yes/no — `aligned` requires an explicit yes]
+- **Why not aligned (if draft/paused):** [the blocking node or unclosed contradiction that stopped alignment]
 
 ## Next Step
 

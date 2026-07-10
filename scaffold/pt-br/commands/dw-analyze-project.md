@@ -32,6 +32,7 @@ As rules geradas por este comando são consumidas por:
 <critical>NUNCA modifique código fonte, apenas leia e documente</critical>
 <critical>Gere os arquivos de rules em .dw/rules/ na raiz do workspace</critical>
 <critical>Inclua exemplos de código do próprio projeto nas rules geradas</critical>
+<critical>PRESERVE os artefatos de domínio do fluxo de Grill. `.dw/domain/**` (glossary / context-map / arquivos por contexto) é vocabulário canônico curado à mão, dono do `/dw-brainstorm` grill — este comando NUNCA pode regenerar, mesclar ou sobrescrevê-lo. Quando `.dw/domain/**` existe, LEIA e LINKE a partir de `.dw/rules/index.md`; não copie seus termos para os arquivos auto-gerados de `.dw/rules/`. Este comando é dono de `.dw/rules/**`; o fluxo de Grill é dono de `.dw/domain/**`.</critical>
 
 ## Objetivo
 
@@ -454,7 +455,10 @@ workspace-root/
 ## Referência Rápida
 - Ver [{módulo}]({módulo}.md) para rules detalhadas por módulo
 - Ver [integrations.md](integrations.md) para comunicação entre projetos (se monorepo)
+- Ver [glossário de domínio](../domain/glossary.md) — ou [context map](../domain/context-map.md) — para vocabulário canônico (só quando `.dw/domain/` existe; dono do Grill, read-only aqui, nunca regenerado)
 ```
+
+> Quando `.dw/domain/**` existe, adicione o(s) link(s) de Domain Vocabulary acima ao `index.md` gerado e deixe os arquivos de domínio intocados. Quando não existe, omita o link — este comando nunca cria `.dw/domain/**` (só o `/dw-brainstorm` grill cria, após autorização explícita).
 
 #### 7.2 `.dw/rules/integrations.md` (apenas para monorepo / multi-projeto)
 
@@ -824,6 +828,7 @@ Este passo é aditivo e reversível; nunca edita código de componente, só docu
 - [ ] Step 9 (mapa de concerns) apresentou candidatos, aguardou aprovação, escreveu `.dw/rules/concerns.md` (ou anotou que não há sinais)
 - [ ] Passo 10 (autoridade de design) rodou para projetos frontend: autoridade existente respeitada, ou `DESIGN.md` gerado a partir de tokens reais, ou bootstrap via curated-defaults recomendado
 - [ ] Blocos com marker preserved em concerns.md mantidos verbatim no refresh
+- [ ] `.dw/domain/**` (glossary / context-map) preservado verbatim e linkado do index.md quando presente — nunca regenerado ou sobrescrito
 
 ## Exemplo de Uso
 

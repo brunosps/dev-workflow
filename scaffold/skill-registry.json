@@ -61,6 +61,30 @@
       "bundled": true
     },
     {
+      "name": "dw-domain-modeling",
+      "kind": "protocol",
+      "tier": "specialty",
+      "owner": "dw-brainstorm,dw-analyze-project",
+      "trigger": "Native Grill domain vocabulary: challenge fuzzy/overloaded terms, cross-check against code, persist a canonical glossary to .dw/domain",
+      "expected_output": "Canonical terms with discouraged synonyms persisted lazily to .dw/domain (single or multi-context), or fuzzy-term findings.",
+      "load_policy": "lazy-references",
+      "context_limit": 12000,
+      "exportable": false,
+      "bundled": true
+    },
+    {
+      "name": "dw-grilling",
+      "kind": "protocol",
+      "tier": "specialty",
+      "owner": "dw-brainstorm,dw-plan",
+      "trigger": "Native Grill decision-tree interview: sharpen a plan/PRD to shared understanding, exactly one decision per turn with a recommended answer",
+      "expected_output": "A dependency-ordered decision tree, resolved decisions with recommendations, and an explicit shared-understanding gate.",
+      "load_policy": "lazy-references",
+      "context_limit": 12000,
+      "exportable": false,
+      "bundled": true
+    },
+    {
       "name": "dw-debug-protocol",
       "kind": "protocol",
       "tier": "core",

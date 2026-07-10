@@ -1,10 +1,18 @@
 ---
 type: idea-onepager
-schema_version: "1.0"
-status: draft
+schema_version: "1.1"
+status: draft | paused | aligned
 date: YYYY-MM-DD
 classification: improves | consolidates | new
+alignment:
+  confirmed_by_user: false   # true SOMENTE quando o usuário confirma explicitamente o shared understanding
+  confirmed_on: null         # data ISO dessa confirmação
 ---
+
+> **Schema 1.1.** O bloco `## Grill Alignment` abaixo é preenchido por uma sessão de grill do `/dw-brainstorm`. Sem
+> Grill, deixe esse bloco vazio e mantenha `status: draft`. `status: aligned` é permitido SOMENTE quando cada branch
+> de dependência está resolvida, contradições glossário/código estão fechadas, nenhuma decisão bloqueante resta, e o
+> usuário confirmou explicitamente o shared understanding — senão use `draft` ou `paused`.
 
 # Ideia: [Título curto e imperativo]
 
@@ -80,6 +88,40 @@ Idealmente 2-4 stories. Se são mais de 5, provavelmente não é MVP.]
 
 - [Pergunta 1 que afeta escopo]
 - [Pergunta 2 que afeta prioridade]
+
+## Grill Alignment
+
+_(schema 1.1 — preenchido por uma sessão de grill do `/dw-brainstorm`; consumido pelo `/dw-plan`, que NÃO re-pergunta decisões resolvidas. Deixe vazio para um one-pager sem grill.)_
+
+### Resolved Decisions
+
+| Decisão | Recomendado | Escolhido | Alternativa rejeitada | Evidência |
+|---------|-------------|-----------|-----------------------|-----------|
+| [a decisão] | [o que o Grill recomendou] | [o que o usuário escolheu] | [a opção rejeitada + seu trade-off] | [fonte no one-pager/repo] |
+
+### Evidence
+
+[Fatos descobertos durante o Grill no repo/rules/intel/docs — cada um com sua fonte (`path:line`, doc, ou query de intel) — usados em vez de perguntar ao usuário.]
+
+- **[fato]** — fonte: `[path:line ou doc]`
+
+### Canonical Vocabulary
+
+[Links para `.dw/domain/**` dos termos de que esta ideia depende. Não repita definições aqui — aponte para o glossário.]
+
+- **[Termo]** → `.dw/domain/glossary.md#termo` (ou `.dw/domain/contexts/<slug>.md#termo` num projeto multi-contexto)
+
+### Remaining Decisions
+
+[Decisões não-bloqueantes ainda abertas após o alinhamento, com seu dono. Uma decisão bloqueante significa que o one-pager NÃO está `aligned`.]
+
+- **[decisão aberta]** — dono: [quem] — bloqueante? [não]
+
+### Alignment State
+
+- **State:** `draft` | `paused` | `aligned`
+- **Shared understanding confirmado pelo usuário:** [sim/não — `aligned` exige um sim explícito]
+- **Por que não alinhado (se draft/paused):** [o nó bloqueante ou contradição não fechada que parou o alinhamento]
 
 ## Next Step
 
