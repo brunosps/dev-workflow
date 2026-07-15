@@ -22,6 +22,12 @@ test('dw-new-project keeps the docs-first NestJS contract in both languages', ()
     assert.match(command, /Mailpit/);
     assert.match(command, /apps (?:on|no) host/);
     assert.match(command, /@nestjs\/cli@latest new/);
+    assert.match(
+      command,
+      locale === 'en'
+        ? /Apps scaffolded directly into `apps\/web\/` or `apps\/api\/` are already in place and must not be moved again/
+        : /Apps scaffoldados diretamente em `apps\/web\/` ou `apps\/api\/` ja estao no lugar e nao devem ser movidos novamente/
+    );
 
     assert.match(onePager, /NestJS/);
     assert.match(onePager, /Postgres\s?\+\s?pgvector/);

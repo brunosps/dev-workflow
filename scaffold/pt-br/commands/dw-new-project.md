@@ -150,7 +150,7 @@ Para **fullstack-NextJS+NestJS** ou **fullstack-NextJS+FastAPI**: rode dois scaf
 #### 3.2 Compor monorepo (so se fullstack)
 
 Se fullstack:
-1. Mova os apps scaffoldados para `apps/<nome>/`.
+1. Se um app foi scaffoldado fora do caminho final do workspace, mova-o para `apps/<nome>/`. Apps scaffoldados diretamente em `apps/web/` ou `apps/api/` ja estao no lugar e nao devem ser movidos novamente.
 2. Crie `pnpm-workspace.yaml` (ou equivalente), `package.json` raiz com scripts de workspace, `tsconfig.base.json` se TS config compartilhado.
 3. Se o usuario escolheu Turborepo: adicione `turbo.json` com pipelines `dev`, `build`, `lint`, `test`.
 4. Se o usuario escolheu Nx: rode `pnpm dlx nx@latest init` apos os apps estarem no lugar; integre como projetos Nx.
