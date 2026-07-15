@@ -4,7 +4,7 @@ This file describes how `/dw-new-project` and `/dw-dockerize` merge the standalo
 
 ## The merge algorithm
 
-1. **Pick the selected services.** From the interview answers (or from stack detection in `dw-dockerize`), get the list of services to include. Example: `[postgres, redis, mailhog, minio]`.
+1. **Pick the selected services.** From the interview answers (or from stack detection in `dw-dockerize`), get the list of services to include. Example: `[postgres-pgvector, mailpit, minio]`.
 2. **Read each `services/<name>.yml`** as a standalone fragment. Each file declares ONE top-level service block (e.g., `postgres:`) plus comments at the bottom describing the volumes block to merge.
 3. **Concatenate under a single `services:` map.** Indent each block under `services:` in the final file. Order does not matter for compose, but for readability sort by tier: storage → cache/queue → search → email → observability → proxy.
 4. **Collect the volumes.** Each recipe's comments list the named volumes it needs. Aggregate them under a top-level `volumes:` block. Example:
@@ -31,7 +31,7 @@ This file describes how `/dw-new-project` and `/dw-dockerize` merge the standalo
          condition: service_healthy
    ```
 
-8. **Add the app service(s) at the end.** For monorepo projects, declare an `api` service (and `web` if backend serves the frontend) that builds from the local Dockerfile.dev and binds the source as a volume for hot reload.
+8. **Apply the selected dev topology.** For `everything in Compose`, add the app service(s) at the end and bind source for hot reload. For `apps on host`, do not generate app services or Dockerfile.dev files; expose only infrastructure ports and point application-facing env vars at `localhost`.
 
 ## Final file shape
 
@@ -42,15 +42,15 @@ This file describes how `/dw-new-project` and `/dw-dockerize` merge the standalo
 services:
   # --- storage tier ---
   postgres:
-    # ... contents from services/postgres.yml
+    # ... contents from services/postgres-pgvector.yml
 
   # --- cache tier ---
   redis:
     # ... contents from services/redis.yml
 
   # --- email-in-dev (capture only) ---
-  mailhog:
-    # ... contents from services/mailhog.yml
+  mailpit:
+    # ... contents from services/mailpit.yml
 
   # --- object storage ---
   minio:
@@ -72,7 +72,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      mailhog:
+      mailpit:
         condition: service_started
       minio:
         condition: service_healthy

@@ -23,7 +23,9 @@ POSTGRES_PORT=5432
 DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 ```
 
-Compose performs variable substitution in `.env` references, so the application sees `DATABASE_URL` already-resolved.
+Compose performs variable substitution in `.env` references. When the application also runs in Compose, use service DNS such as `postgres`; when applications run on the host, the committed example must use `localhost` and the published host port instead.
+
+For the PostgreSQL + pgvector recipe, use the same connection variables. The image provides the extension binaries, but `CREATE EXTENSION IF NOT EXISTS vector` belongs in the application's reviewed migrations, not container startup scripts.
 
 ## What goes in `.env.example` vs `.env`
 

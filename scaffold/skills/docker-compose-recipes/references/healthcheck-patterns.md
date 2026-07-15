@@ -13,6 +13,7 @@ Every recipe ships a healthcheck. App services that depend on infra MUST gate st
 | RabbitMQ | `rabbitmq-diagnostics ping` | Built-in; takes ~30s to be ready, hence `start_period: 30s` |
 | LocalStack | `curl -sf http://localhost:4566/_localstack/health \| grep -q running` | Internal endpoint reports per-service readiness |
 | MailHog | `wget --spider http://localhost:8025` | UI port responds when SMTP is also ready |
+| Mailpit | `wget --spider http://localhost:8025` | UI port responds when SMTP is also ready |
 | Mailpit | `wget --spider http://localhost:8025` | Same |
 | smtp4dev | `wget --spider http://localhost:80` | UI on internal port 80 |
 | MinIO | `curl -f http://localhost:9000/minio/health/live` | Documented liveness endpoint |
@@ -41,8 +42,8 @@ api:
       condition: service_healthy   # waits for the healthcheck to pass
     redis:
       condition: service_healthy
-    mailhog:
-      condition: service_started   # MailHog is light enough that started == ready
+    mailpit:
+      condition: service_healthy
 ```
 
 `service_healthy` is the strictest gate — no traffic until the healthcheck has passed at least once. Use it for all data stores. Use `service_started` only for stateless services (proxy, mail capture).
