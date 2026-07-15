@@ -14,7 +14,6 @@ Every recipe ships a healthcheck. App services that depend on infra MUST gate st
 | LocalStack | `curl -sf http://localhost:4566/_localstack/health \| grep -q running` | Internal endpoint reports per-service readiness |
 | MailHog | `wget --spider http://localhost:8025` | UI port responds when SMTP is also ready |
 | Mailpit | `wget --spider http://localhost:8025` | UI port responds when SMTP is also ready |
-| Mailpit | `wget --spider http://localhost:8025` | Same |
 | smtp4dev | `wget --spider http://localhost:80` | UI on internal port 80 |
 | MinIO | `curl -f http://localhost:9000/minio/health/live` | Documented liveness endpoint |
 | Meilisearch | `curl -f http://localhost:7700/health` | Documented |
@@ -46,7 +45,7 @@ api:
       condition: service_healthy
 ```
 
-`service_healthy` is the strictest gate — no traffic until the healthcheck has passed at least once. Use it for all data stores. Use `service_started` only for stateless services (proxy, mail capture).
+`service_healthy` is the strictest gate — no traffic until the healthcheck has passed at least once. Use it for every dependency that declares a healthcheck, including Mailpit. Use `service_started` only when a dependency has no healthcheck to gate on.
 
 ## Common mistakes
 

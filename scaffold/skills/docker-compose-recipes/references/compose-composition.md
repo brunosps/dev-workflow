@@ -73,7 +73,7 @@ services:
       redis:
         condition: service_healthy
       mailpit:
-        condition: service_started
+        condition: service_healthy
       minio:
         condition: service_healthy
 
