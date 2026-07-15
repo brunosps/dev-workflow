@@ -1,6 +1,8 @@
 # Env var conventions
 
-All recipes reference env vars via `${VAR:-default}` so a project's `.env` (or `.env.example`) is the single source of truth.
+Recipes reference non-secret env vars via `${VAR:-default}`. The pgvector recipe uses `${VAR:?error}` for its database password so Compose stops when the value is missing or empty. A project's `.env` is the local source of truth; `.env.example` documents required keys without supplying reusable credentials.
+
+[source: https://docs.docker.com/reference/compose-file/interpolation/, version: Compose Specification, retrieved: 2026-07-15]
 
 ## Naming pattern
 
@@ -15,21 +17,22 @@ When a project uses Postgres, the `.env.example` should declare BOTH the service
 ```dotenv
 # Postgres (consumed by the postgres service)
 POSTGRES_USER=app
-POSTGRES_PASSWORD=app
+# Required: generate a unique value in .env before running Compose.
+POSTGRES_PASSWORD=
 POSTGRES_DB=app
 POSTGRES_PORT=5432
 
-# Application-side connection string
-DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+# Application-side connection string for apps running on the host
+DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}
 ```
 
 Compose performs variable substitution in `.env` references. When the application also runs in Compose, use service DNS such as `postgres`; when applications run on the host, the committed example must use `localhost` and the published host port instead.
 
-For the PostgreSQL + pgvector recipe, use the same connection variables. The image provides the extension binaries, but `CREATE EXTENSION IF NOT EXISTS vector` belongs in the application's reviewed migrations, not container startup scripts.
+For the PostgreSQL + pgvector recipe, use the same connection variables. Copy `.env.example` to `.env`, set `POSTGRES_PASSWORD` to a unique generated local value, then run Compose. Do not place a working password in `.env.example`. The image provides the extension binaries, but `CREATE EXTENSION IF NOT EXISTS vector` belongs in the application's reviewed migrations, not container startup scripts.
 
 ## What goes in `.env.example` vs `.env`
 
-- `.env.example` — committed. Holds DEFAULTS that are safe for dev and template values for prod.
+- `.env.example` — committed. Holds non-secret defaults and empty required secret keys; it never contains a working database password.
 - `.env` — gitignored. Real values for the user's local machine.
 
 Never commit a `.env`. Always commit a `.env.example`.

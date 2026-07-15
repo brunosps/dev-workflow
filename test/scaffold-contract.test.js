@@ -36,12 +36,67 @@ test('dw-new-project keeps the docs-first NestJS contract in both languages', ()
   }
 });
 
-test('pgvector recipe pins the approved PostgreSQL 18 image and data path', () => {
+test('pgvector recipe is immutable and requires local-only credentials', () => {
   const recipe = read('scaffold/skills/docker-compose-recipes/services/postgres-pgvector.yml');
 
-  assert.match(recipe, /pgvector\/pgvector:0\.8\.2-pg18/);
+  assert.match(
+    recipe,
+    /^  image: pgvector\/pgvector:0\.8\.2-pg18@sha256:42e7f6b4e1eceb02ff14e3e6bc6108bbe259abbe83879dc1845d0da1ddeb555d$/m
+  );
+  assert.match(
+    recipe,
+    /POSTGRES_PASSWORD: \$\{POSTGRES_PASSWORD:\?Set POSTGRES_PASSWORD in \.env\}/
+  );
+  assert.match(recipe, /- "127\.0\.0\.1:\$\{POSTGRES_PORT:-5432\}:5432"/);
   assert.match(recipe, /postgres_data:\/var\/lib\/postgresql/);
   assert.match(recipe, /CREATE EXTENSION IF NOT EXISTS vector/);
+});
+
+test('pgvector scaffold surfaces never recommend a known password', () => {
+  const envConventions = read(
+    'scaffold/skills/docker-compose-recipes/references/env-conventions.md'
+  );
+  const pgvectorSurfaces = [
+    'scaffold/skills/docker-compose-recipes/services/postgres-pgvector.yml',
+    'scaffold/skills/docker-compose-recipes/references/env-conventions.md',
+    'scaffold/skills/docker-compose-recipes/references/prod-vs-dev.md',
+    'scaffold/skills/docker-compose-recipes/SKILL.md',
+    'scaffold/en/commands/dw-new-project.md',
+    'scaffold/en/commands/dw-dockerize.md',
+    'scaffold/en/templates/project-onepager.md',
+    'scaffold/pt-br/commands/dw-new-project.md',
+    'scaffold/pt-br/commands/dw-dockerize.md',
+    'scaffold/pt-br/templates/project-onepager.md',
+  ];
+  const content = pgvectorSurfaces.map(read).join('\n');
+
+  assert.doesNotMatch(content, /POSTGRES_PASSWORD=app\b/);
+  assert.doesNotMatch(content, /\$\{POSTGRES_PASSWORD:-app\}/);
+  assert.match(envConventions, /^POSTGRES_PASSWORD=$/m);
+});
+
+test('pgvector documentation restricts the bundled image to trusted local development', () => {
+  const skill = read('scaffold/skills/docker-compose-recipes/SKILL.md');
+  const prodVsDev = read('scaffold/skills/docker-compose-recipes/references/prod-vs-dev.md');
+
+  assert.match(skill, /trusted single-user local workstation/i);
+  assert.match(skill, /production, (?:on )?remote development hosts, or (?:on )?shared CI runners/i);
+  assert.match(prodVsDev, /pgvector\/pgvector:0\.8\.2-pg18/);
+  assert.match(
+    prodVsDev,
+    /production, (?:on )?remote development hosts, or (?:on )?shared CI runners/i
+  );
+
+  for (const locale of ['en', 'pt-br']) {
+    const newProject = read(`scaffold/${locale}/commands/dw-new-project.md`);
+    const dockerize = read(`scaffold/${locale}/commands/dw-dockerize.md`);
+    const onePager = read(`scaffold/${locale}/templates/project-onepager.md`);
+
+    for (const surface of [newProject, dockerize, onePager]) {
+      assert.match(surface, /pgvector\/pgvector:0\.8\.2-pg18/);
+      assert.match(surface, /shared CI runner|runner de CI compartilhado/i);
+    }
+  }
 });
 
 test('Mailpit is the maintained, pinned email capture default', () => {
