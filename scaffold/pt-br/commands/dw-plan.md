@@ -55,7 +55,36 @@ Claude Code e OpenCode podem usar agentes nativos. Codex e Copilot usam `.agents
 
 <critical>Quando uma ferramenta estruturada de entrevista/input do usuario estiver disponivel, `/dw-plan` DEVE usa-la para as perguntas de clarificacao de PRD e TechSpec. Nao rebaixe para chat comum por conveniencia. Se nenhuma ferramenta desse tipo existir no runtime, faca as mesmas perguntas no chat e registre explicitamente: `Ferramenta de entrevista estruturada indisponivel; usando fallback em chat.`</critical>
 
-A ferramenta e obrigatoria no planejamento porque preserva escolhas explicitas do usuario e impede o agent de responder as proprias perguntas. Cada estagio mantem sua propria cota: PRD exige 7+ perguntas de produto; TechSpec exige 7+ perguntas tecnicas.
+A ferramenta e obrigatoria no planejamento porque preserva escolhas explicitas do usuario e impede o agent de responder as proprias perguntas.
+
+## Entrevista dirigida por cobertura (sem cotas fixas de perguntas)
+
+<critical>`/dw-plan` NÃO faz um número fixo de perguntas. Cada estágio monta uma **coverage matrix** sobre suas dimensões obrigatórias, descobre fatos do repo/rules/intel/artefatos de domínio, **credita evidência já resolvida num handoff de Grill alinhado**, e então pergunta — uma decisão por vez — SOMENTE as dimensões que continuam descobertas. Nunca re-pergunte uma decisão de produto que o usuário já resolveu no Grill.</critical>
+
+### Handoff alinhado (do grill do `/dw-brainstorm`)
+
+Antes do Stage 1, verifique se há um one-pager de ideia em `.dw/spec/ideas/<slug>.md` e o vocabulário canônico em `.dw/domain/**`.
+
+<critical>Valide o handoff e FALHE FECHADO. Credite um handoff alinhado — i.e. suprima as perguntas de produto que suas decisões cobrem — SOMENTE quando TODAS valem:
+- `schema_version: "1.1"`;
+- `status: aligned`;
+- `alignment.confirmed_by_user: true`;
+- toda branch de dependência resolvida (nenhum nó de decisão aberto);
+- contradições glossário/código fechadas;
+- nenhuma entrada **bloqueante** resta em Remaining Decisions.
+Se QUALQUER check falha — ou o arquivo está malformado, internamente inconsistente, `draft` ou `paused` — o one-pager é **input, não handoff confiável**: leia para contexto, mas trate todas as suas decisões como **descobertas** e pergunte normalmente. Nunca suprima uma pergunta de produto só pela força do `status: aligned`; `alignment.confirmed_by_user: true` e uma árvore resolvida, não-bloqueante e sem contradições também são exigidos.</critical>
+
+Quando (e só quando) o handoff é totalmente válido:
+- Carregue suas **Resolved Decisions**, **Evidence** e links de **Canonical Vocabulary**.
+- Marque toda dimensão de PRD que essas decisões cobrem como **já coberta** (cite o one-pager como evidência) — NÃO re-pergunte.
+- Só dimensões descobertas viram perguntas, uma por vez.
+
+### Coverage matrices
+
+- **Dimensões do PRD:** objetivos, usuários-alvo, limites de escopo, métricas de sucesso, estratégia de rollout, pontos de integração, edge cases.
+- **Dimensões do TechSpec:** domain placement, data flow, dependências, core interfaces, estratégia de testes, reuse-vs-build, integração multi-projeto (quando aplicável).
+
+Para cada estágio: monte a matriz, marque cada dimensão `coberta` (fato descoberto ou evidência alinhada creditada) ou `descoberta`, e pergunte só as `descobertas` — uma decisão por turn, cada uma com resposta recomendada. **Decisões técnicas que um Grill de produto não cobriu ainda podem ser perguntadas durante o TechSpec** — Grill alinha vocabulário e decisões de produto, não o design técnico completo.
 
 ## Constitution Gate
 
@@ -78,11 +107,11 @@ Roda em modo padrão OU `plan prd`.
 
 ### Pré-requisitos
 - Ideia ou tópico do usuário.
-- (Opcional) one-pager de brainstorm em `.dw/spec/ideas/<slug>.md` via `/dw-brainstorm --onepager`.
+- (Opcional) um one-pager de ideia do `/dw-brainstorm` em `.dw/spec/ideas/<slug>.md`. Se estiver `status: aligned` (schema `1.1`, de uma sessão de Grill), consuma como handoff — suas Resolved Decisions são creditadas, não re-perguntadas (ver Entrevista dirigida por cobertura).
 
 ### Comportamento obrigatório
 
-1. **Perguntas de clarificação (MÍNIMO 7).** Antes de escrever qualquer coisa, use a ferramenta de entrevista estruturada quando disponivel para fazer 7+ perguntas cobrindo: objetivos, usuários-alvo, limites de escopo, métricas de sucesso, estratégia de rollout, pontos de integração, edge cases. Se a ferramenta estiver indisponivel, use fallback em chat e registre o fallback.
+1. **Coverage matrix sobre as dimensões do PRD** (objetivos, usuários-alvo, limites de escopo, métricas de sucesso, estratégia de rollout, pontos de integração, edge cases). Monte a matriz, credite evidência de handoff alinhado e fatos descobertos do repo, e pergunte SOMENTE as dimensões descobertas — uma decisão por vez, cada uma com resposta recomendada — usando a ferramenta de entrevista estruturada quando disponível (registre o fallback em chat caso contrário). Sem contagem fixa de perguntas; nunca re-pergunte uma decisão resolvida num one-pager alinhado.
 2. **Web search MÍNIMO 3 queries** para padrões de mercado, contexto regulatório, abordagens de competidores quando relevante.
 3. **Constitution alignment.** Cada requisito funcional (FR-N.M) inclui linha `Constitution Alignment: respects P-NNN, P-MMM` OU `no applicable principle: <motivo>`.
 4. **Awareness multi-projeto.** Se feature cruza projetos do workspace, consulte `.dw/rules/integrations.md` e documente escopo na seção "Projetos Impactados".
@@ -106,7 +135,7 @@ Roda em modo padrão (após aprovação do PRD) OU `plan techspec` OU `plan --fr
 ### Comportamento obrigatório
 
 1. **Hard gate: open questions do PRD.** Se `.dw/spec/prd-<feature>/prd.md` tem seção "Open Questions" com itens não resolvidos, PARE e peça pra usuário resolver primeiro.
-2. **Perguntas de clarificação (MÍNIMO 7).** Use a ferramenta de entrevista estruturada quando disponivel para fazer perguntas tecnicas cobrindo: domain placement, data flow, dependências, core interfaces, estratégia de testes, reuse-vs-build, integração multi-projeto se aplicável. Se a ferramenta estiver indisponivel, use fallback em chat e registre o fallback.
+2. **Coverage matrix sobre as dimensões do TechSpec** (domain placement, data flow, dependências, core interfaces, estratégia de testes, reuse-vs-build, integração multi-projeto quando aplicável). Credite evidência de handoff alinhado e fatos descobertos, e pergunte SOMENTE as dimensões descobertas — uma decisão por vez — usando a ferramenta de entrevista estruturada quando disponível (registre o fallback em chat caso contrário). Decisões técnicas não cobertas por um Grill de produto ainda podem ser perguntadas aqui. Sem contagem fixa de perguntas.
 3. **Web search MÍNIMO 3 queries** + Context7 MCP para framework/library specifics.
 4. **Source grounding (`dw-source-grounding`).** Toda decisão de framework/library carrega `[source: <url>, version: X.Y, retrieved: YYYY-MM-DD]`.
 5. **Constitution gate.** Cada decisão arquitetural lista `Respects: P-NNN` ou `Deviates: P-NNN — justification: <slug ADR ou racional>`. Desvios de princípios `severity: high/critical` sem ADR → PARE.
@@ -187,7 +216,7 @@ Após plan completo, o diretório do PRD contém:
 
 ## Diretrizes finais
 
-- Cada estágio tem sua própria cota de perguntas de clarificação — não recicle. Estágios diferentes precisam de framing diferente. Use a ferramenta de entrevista estruturada sempre que disponivel.
+- Cada estágio roda uma coverage matrix sobre suas próprias dimensões — sem cota fixa de perguntas. Credite evidência de handoff alinhado e fatos descobertos; pergunte só decisões descobertas, uma por vez. Estágios diferentes precisam de framing diferente. Use a ferramenta de entrevista estruturada sempre que disponivel.
 - Web search é obrigatório; Context7 MCP para libraries. Sem pular pra "acho que sei a versão mais recente."
 - Constitution gate roda na entrada de cada estágio; defaults são auto-instalados quando ausente (nunca bloqueia).
 - Os três estágios produzem Markdown commitado — esses são os artefatos canônicos de planejamento. Eles evoluem com a feature.
