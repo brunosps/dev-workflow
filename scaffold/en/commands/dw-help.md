@@ -38,12 +38,13 @@ Use `/dw-autopilot "wish"` as the gateway for most feature work. The granular co
 | `/dw-commit` | Atomic Conventional Commits for pending work. |
 | `/dw-generate-pr [target]` | Push branch, draft PR body, open browser. |
 
-## Tier 3 — Specialty (11)
+## Tier 3 — Specialty (12)
 
 | Command | What |
 |---------|------|
 | `/dw-analyze-project` | Scan the repo, write `.dw/rules/`, offer `.dw/constitution.md`, generate `.dw/rules/concerns.md`, and synthesize frontend `DESIGN.md` when tokens exist. |
 | `/dw-redesign-ui "target"` | Audit, propose 2-3 design directions, ship. Enforces UI grounding + WCAG; can run the deterministic impeccable slop detector. |
+| `/dw-open-design --brief <file>` | Generate or iterate headless Open Design HTML prototypes via `od`, with explicit `--agent codex|claude`, file verification, JSONL audit, and visual gate. |
 | `/dw-refactor "target"` | Audit code-health and tech debt with Fowler smells, deep-modules analysis, and behavior-preserving test gates. |
 | `/dw-functional-doc` | Map screens + flows into a functional doc validated with Playwright; uses WSL-resilient browser resolution. |
 | `/dw-context-budget` | Audit context overhead from commands, skills, agents, instructions, and MCPs. |
@@ -112,6 +113,7 @@ Match the keyword and suggest:
 | `research`, `compare`, `state of the art` | `/dw-brainstorm --research` |
 | `refactor`, `smell`, `code health`, `tech debt` | `/dw-refactor` |
 | `ui`, `design`, `redesign` | `/dw-redesign-ui` |
+| `open design`, `prototype`, `prototipo`, `od cli`, `html prototype` | `/dw-open-design --brief <file>` or `/dw-open-design --brief-glob "<glob>" --agent claude` |
 | `intel`, `where is`, `what uses` | `/dw-intel` (or `--build` to (re)create the index) |
 | `context`, `tokens`, `slow agent` | `/dw-context-budget` |
 | `harness`, `install`, `wrappers`, `agents` | `/dw-harness-audit` |
