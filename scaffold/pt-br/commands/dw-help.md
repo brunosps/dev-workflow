@@ -42,7 +42,7 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 |---------|-------|
 | `/dw-analyze-project` | Scan do repo, escreve `.dw/rules/`, oferece `.dw/constitution.md`, gera `.dw/rules/concerns.md` e sintetiza `DESIGN.md` em frontend quando há tokens. |
 | `/dw-redesign-ui "target"` | Audit, propõe 2-3 direções, entrega. Enforça UI grounding + WCAG; pode rodar o detector determinístico do impeccable. |
-| `/dw-open-design --brief <file>` | Gera ou itera prototipos HTML headless via Open Design `od`, com `--agent codex|claude` explicito, verificacao de arquivo, audit JSONL e gate visual. |
+| `/dw-open-design --brief <file>` | Gera, itera ou faz `--refactor` de prototipos HTML headless via Open Design `od`; refina briefs primeiro, pode capturar prints atuais com `--url --viewports` ou `--screenshot`, depois verifica arquivo + gate visual. |
 | `/dw-refactor "target"` | Audita code health e tech debt com smells Fowler, deep-modules e gates de teste preservando comportamento. |
 | `/dw-functional-doc` | Mapeia screens + flows em doc funcional validado com Playwright; usa resolução de browser resiliente no WSL. |
 | `/dw-context-budget` | Audita contexto de commands, skills, agentes, instrucoes e MCPs. |
@@ -109,7 +109,7 @@ Auto-invocados por comandos primários mas disponíveis standalone.
 | `research`, `compara`, `estado da arte` | `/dw-brainstorm --research` |
 | `refactor`, `smell`, `code health`, `tech debt` | `/dw-refactor` |
 | `ui`, `design`, `redesign` | `/dw-redesign-ui` |
-| `open design`, `prototype`, `prototipo`, `od cli`, `html prototype` | `/dw-open-design --brief <file>` ou `/dw-open-design --brief-glob "<glob>" --agent claude` |
+| `open design`, `prototype`, `prototipo`, `od cli`, `html prototype` | `/dw-open-design --brief <file>`, `/dw-open-design --brief-glob "<glob>" --agent claude` ou `/dw-open-design --refactor --url <url> --viewports "1440x900,375x812"` |
 | `intel`, `onde está`, `o que usa` | `/dw-intel` (ou `--build`) |
 | `contexto`, `tokens`, `agente lento` | `/dw-context-budget` |
 | `harness`, `install`, `wrappers`, `agentes` | `/dw-harness-audit` |
