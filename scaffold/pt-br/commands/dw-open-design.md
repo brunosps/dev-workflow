@@ -20,6 +20,10 @@ rode gate visual Playwright/Firefox e **PARE para o gate do dono** antes de qual
 | `--agent <codex|claude>` | estado/config -> `codex` | Agente repassado ao `od run start --agent`. |
 | `--platform <text>` | `Web responsivo desktop-first e mobile-safe` | Resposta pre-preenchida para o discovery da skill `web-prototype`. |
 | `--deep-link-id <id>` | nenhum | Valor usado no gate comportamental `?aberto=<id>` + Esc. |
+| `--refactor` | falso | Modo redesign/refactor de tela existente; captura prints atuais e ancora o brief no estado visivel + codigo real. |
+| `--url <url>` | nenhum | URL de app rodando para capturar prints atuais via Playwright Firefox. |
+| `--viewports <lista>` | `1440x900,375x812` | Viewports separados por virgula para `--refactor --url`; expanda conforme a dor (ex.: `1920x1080` para tabela larga). |
+| `--screenshot <path>` | repetivel | Print atual ja capturado quando nao houver `--url`; copie para `_refs/<slug>/`. |
 
 ## 0. Refinar o brief
 
@@ -71,6 +75,58 @@ Para o mock nao mentir: usar enums/status reais, dados de exemplo realistas no i
 ```
 
 So depois de persistir esse arquivo anexe o apendice headless em `.dw/.open-design/runs/` e despache a run.
+
+### 0R. Modo refactor/redesign
+
+Quando `--refactor` estiver presente, a fase 0 continua obrigatoria. Prints complementam a ancoragem no codigo; eles
+nao substituem leitura de contracts, enums, permissoes, estados, design system e prototipos irmaos.
+
+Capture ou copie os prints atuais para dentro da pasta importada, em `_refs/<slug>/`, antes de persistir o brief:
+
+```bash
+node .dw/scripts/open-design/capture-current.mjs \
+  --target "$TARGET_DIR" \
+  --slug "<slug>" \
+  --url "<url>" \
+  --viewports "1440x900,375x812"
+```
+
+Sem URL de app rodando, aceite prints prontos repetindo `--screenshot`:
+
+```bash
+node .dw/scripts/open-design/capture-current.mjs \
+  --target "$TARGET_DIR" \
+  --slug "<slug>" \
+  --screenshot "./antes-1440-light.png" \
+  --screenshot "./antes-375-dark.png"
+```
+
+Regras de captura:
+
+| Caso | Exigencia |
+|---|---|
+| Viewports | Default sensato: desktop `1440x900` + mobile `375x812`. O agente escolhe/expande conforme a dor: bug mobile inclui `375x812`; tabela larga inclui `1920x1080`; tablet/console inclui `768x1024`. |
+| Temas | Capture light e dark quando aplicavel. O helper usa `light,dark` por default e grava nomes como `_refs/<slug>/atual-1440-light.png` e `_refs/<slug>/atual-375-dark.png`. |
+| Caminho robusto | O agente do `od` le imagens do filesystem do projeto. Referencie caminhos relativos dentro do target; nao dependa de flag de imagem no `run start`. |
+| Higiene | `_refs/` e material de referencia nao devem virar prototipo. Se o projeto-alvo versiona prototipos finais, documente limpeza ou adicione `<target>/_refs/` ao `.gitignore` conforme a convencao local. |
+
+O brief refinado do modo refactor deve adicionar este bloco:
+
+```markdown
+## Referencias da tela atual
+Abra e ANALISE os prints antes de escrever:
+- `_refs/<slug>/atual-1440-light.png`
+- `_refs/<slug>/atual-375-dark.png`
+
+## O que esta errado hoje
+<dor apontando elementos visiveis nos prints: densidade, hierarquia, tabela, filtros, estados, contraste, mobile, etc.>
+
+## A ideia da mudanca
+<o que muda e por que; decisao de interacao/visual proposta pelo usuario ou pelo agente apos ler codigo e prints>
+
+## Preservar
+<fluxos, campos, permissoes, estados, copys, affordances e integracoes que nao podem mudar>
+```
 
 ## Pre-flight
 

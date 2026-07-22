@@ -20,6 +20,10 @@ Playwright/Firefox visual gate, and **STOP for the owner's gate** before any com
 | `--agent <codex|claude>` | state/config -> `codex` | Agent forwarded to `od run start --agent`. |
 | `--platform <text>` | `Responsive web, desktop-first and mobile-safe` | Pre-filled discovery answer for the `web-prototype` skill. |
 | `--deep-link-id <id>` | none | Value used by the behavioral gate for `?aberto=<id>` + Esc. |
+| `--refactor` | false | Existing-screen redesign/refactor mode; captures current screenshots and grounds the brief in visible state + real code. |
+| `--url <url>` | none | Running app URL for current screenshot capture via Playwright Firefox. |
+| `--viewports <list>` | `1440x900,375x812` | Comma-separated viewports for `--refactor --url`; expand as the pain requires (for example `1920x1080` for a wide table). |
+| `--screenshot <path>` | repeatable | Already-captured current screenshot when there is no `--url`; copy it into `_refs/<slug>/`. |
 
 ## 0. Refine The Brief
 
@@ -72,6 +76,58 @@ So the mock does not lie: use real enums/statuses, realistic sample data in the 
 
 Only after persisting this file should you append the headless appendix under `.dw/.open-design/runs/` and dispatch
 the run.
+
+### 0R. Refactor/Redesign Mode
+
+When `--refactor` is present, phase 0 remains mandatory. Screenshots complement grounding in code; they do not
+replace reading contracts, enums, permissions, states, the design system, and sibling prototypes.
+
+Capture or copy current screenshots into the imported folder, under `_refs/<slug>/`, before persisting the brief:
+
+```bash
+node .dw/scripts/open-design/capture-current.mjs \
+  --target "$TARGET_DIR" \
+  --slug "<slug>" \
+  --url "<url>" \
+  --viewports "1440x900,375x812"
+```
+
+Without a running app URL, accept existing screenshots by repeating `--screenshot`:
+
+```bash
+node .dw/scripts/open-design/capture-current.mjs \
+  --target "$TARGET_DIR" \
+  --slug "<slug>" \
+  --screenshot "./before-1440-light.png" \
+  --screenshot "./before-375-dark.png"
+```
+
+Capture rules:
+
+| Case | Requirement |
+|---|---|
+| Viewports | Sensible default: desktop `1440x900` + mobile `375x812`. The agent chooses/expands as the pain requires: mobile bug includes `375x812`; wide table includes `1920x1080`; tablet/console includes `768x1024`. |
+| Themes | Capture light and dark when applicable. The helper uses `light,dark` by default and writes names like `_refs/<slug>/atual-1440-light.png` and `_refs/<slug>/atual-375-dark.png`. |
+| Robust path | The `od` agent reads images from the project filesystem. Reference relative paths inside the target; do not depend on an image flag in `run start`. |
+| Hygiene | `_refs/` and reference material must not become prototypes. If the target project tracks final prototypes, document cleanup or add `<target>/_refs/` to `.gitignore` according to local convention. |
+
+The refined refactor brief must add this block:
+
+```markdown
+## Current Screen References
+Open and ANALYZE the screenshots before writing:
+- `_refs/<slug>/atual-1440-light.png`
+- `_refs/<slug>/atual-375-dark.png`
+
+## What Is Wrong Today
+<pain pointing to visible elements in the screenshots: density, hierarchy, table, filters, states, contrast, mobile, etc.>
+
+## The Change Idea
+<what changes and why; interaction/visual decision proposed by the user or by the agent after reading code and screenshots>
+
+## Preserve
+<flows, fields, permissions, states, copy, affordances, and integrations that must not change>
+```
 
 ## Pre-flight
 
