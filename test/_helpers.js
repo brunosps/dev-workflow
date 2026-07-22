@@ -44,6 +44,10 @@ const FILES = {
     en: 'scaffold/en/templates/idea-onepager.md',
     pt: 'scaffold/pt-br/templates/idea-onepager.md',
   },
+  openDesign: {
+    en: 'scaffold/en/commands/dw-open-design.md',
+    pt: 'scaffold/pt-br/commands/dw-open-design.md',
+  },
 };
 
 const SKILLS = {

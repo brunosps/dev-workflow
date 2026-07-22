@@ -68,6 +68,24 @@ const PARITY = {
     '.dw/domain/',
     'confirmed_by_user',
   ],
+  openDesign: [
+    'OD_CLI_DIR',
+    '~/.dw/vendor/open-design',
+    'OD_DATA_DIR',
+    'OD_CHAT_RUN_INACTIVITY_TIMEOUT_MS=1800000',
+    '--agent "$AGENT"',
+    'web-prototype',
+    'design-system default',
+    '.dw/.open-design/state.json',
+    '.dw/.open-design/runs/',
+    'gate-prototype.mjs',
+    '?aberto=<id>',
+    'replaceState',
+    'role="dialog"',
+    'codex_core::shell_snapshot',
+    '`codex`',
+    '`claude`',
+  ],
 };
 
 for (const [name, tokens] of Object.entries(PARITY)) {
