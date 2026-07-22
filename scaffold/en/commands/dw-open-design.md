@@ -7,6 +7,7 @@ Playwright/Firefox visual gate, and **STOP for the owner's gate** before any com
 <critical>NEVER use the user's GUI state. Always run with an isolated per-project `OD_DATA_DIR`, for example `.dw/.open-design/data/`.</critical>
 <critical>NEVER commit a rejected prototype. The gate is dual >=9: automated gate + your own visual score >=9, then owner gate.</critical>
 <critical>The agent (`codex` or `claude`) must always be explicit in `od run start --agent <agent>`. If the user does not pass one, resolve from project config/state; fallback `codex`.</critical>
+<critical>NEVER dispatch the user's raw request to `od`. This command's value is refining the prompt first: ground it in real code, structure the brief, qualify states/themes/a11y/deep-link, persist the reviewable brief, and only then append the headless appendix.</critical>
 
 ## Inputs
 
@@ -19,6 +20,58 @@ Playwright/Firefox visual gate, and **STOP for the owner's gate** before any com
 | `--agent <codex|claude>` | state/config -> `codex` | Agent forwarded to `od run start --agent`. |
 | `--platform <text>` | `Responsive web, desktop-first and mobile-safe` | Pre-filled discovery answer for the `web-prototype` skill. |
 | `--deep-link-id <id>` | none | Value used by the behavioral gate for `?aberto=<id>` + Esc. |
+
+## 0. Refine The Brief
+
+Before any daemon pre-flight or `od` call, turn the user's intent into a qualified brief. Do not send the user's raw
+sentence to the runner.
+
+Required contract:
+
+| Step | Requirement |
+|---|---|
+| Ground in reality | If the screen exists, read its real code: columns, enums, actions, states, permissions, contracts, and domain. Also read the project's design system, sibling prototypes, and design guides. Inventing a field, status, or action is forbidden. |
+| Structure | Rewrite the request into the standard skeleton below, filling real paths and the exact output file. |
+| Qualify | Cover loading/skeleton, empty, error/failure, light + dark, a11y, local design-system limits (for example <=6 cards/filters), responsiveness, and deep-link. |
+| Persist | Save the refined brief inside the project, for example `<target>/PROMPT-<slug>.md`. It is a reviewable owner deliverable, not a disposable scratch file. |
+| Review if already ready | If the user already provides a qualified brief, do a quick checklist review, patch only gaps, and persist the final version. |
+
+Standard refined brief skeleton:
+
+```markdown
+# <screen/prototype title>
+
+Paste this brief into Open Design. Exact output file: `<OUTPUT_FILE>`.
+
+## 1. Why
+<real user/product pain; observable problem this prototype must solve>
+
+## 2. Interaction Decision
+<navigation, opening, selection, filters, sorting, editing, and confirmation pattern>
+
+## 3. Layout/List
+Table/list based only on REAL columns:
+
+| Real column | Source/contract | Presentation | State/limit |
+|---|---|---|---|
+| <name> | <file/API/schema> | <text, badge, action> | <truncate, empty, error> |
+
+## 4. Detail/Actions
+<drawer/modal/detail page; contextual actions allowed by real state/permission>
+
+## 5. Domain Fidelity
+So the mock does not lie: use real enums/statuses, realistic sample data in the project's language, and include rare/broken states that exist in the domain.
+
+## 6. Visual Direction
+<tokens, components, density, inherited references, sibling prototypes, and design-system limits>
+
+## Deliver
+- `<OUTPUT_FILE>`
+- `<OUTPUT_FILE>.artifact.json` when there is a sidecar
+```
+
+Only after persisting this file should you append the headless appendix under `.dw/.open-design/runs/` and dispatch
+the run.
 
 ## Pre-flight
 

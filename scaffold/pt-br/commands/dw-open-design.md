@@ -7,6 +7,7 @@ rode gate visual Playwright/Firefox e **PARE para o gate do dono** antes de qual
 <critical>NUNCA use o estado da GUI do usuario. Sempre rode com `OD_DATA_DIR` isolado por projeto, por exemplo `.dw/.open-design/data/`.</critical>
 <critical>NUNCA commite prototipo reprovado. O gate e dual >=9: gate automatico + avaliacao visual propria >=9, depois gate do dono.</critical>
 <critical>O agente (`codex` ou `claude`) deve ser sempre explicito em `od run start --agent <agent>`. Se o usuario nao passar, resolva de config/estado do projeto; fallback `codex`.</critical>
+<critical>NUNCA despache o pedido cru do usuario para o `od`. O valor deste comando e refinar o prompt primeiro: ancore no codigo real, estruture o brief, qualifique estados/temas/a11y/deep-link, persista o brief revisavel e so entao anexe o apendice headless.</critical>
 
 ## Inputs
 
@@ -19,6 +20,57 @@ rode gate visual Playwright/Firefox e **PARE para o gate do dono** antes de qual
 | `--agent <codex|claude>` | estado/config -> `codex` | Agente repassado ao `od run start --agent`. |
 | `--platform <text>` | `Web responsivo desktop-first e mobile-safe` | Resposta pre-preenchida para o discovery da skill `web-prototype`. |
 | `--deep-link-id <id>` | nenhum | Valor usado no gate comportamental `?aberto=<id>` + Esc. |
+
+## 0. Refinar o brief
+
+Antes de qualquer pre-flight de daemon ou chamada ao `od`, transforme a intencao do usuario em um brief qualificado.
+Nao envie a frase crua do usuario para o runner.
+
+Contrato obrigatorio:
+
+| Etapa | Exigencia |
+|---|---|
+| Ancorar na realidade | Se a tela existe, leia o codigo real dela: colunas, enums, acoes, estados, permissoes, contracts e dominio. Leia tambem design system, prototipos irmaos e guias de design do projeto. E proibido inventar campo, status ou acao. |
+| Estruturar | Reescreva o pedido no esqueleto padrao abaixo, preenchendo paths reais e arquivo de saida exato. |
+| Qualificar | Cubra loading/skeleton, empty/vazio, erro/falha, light + dark, a11y, limites do design system local (ex.: <=6 cards/filtros), responsividade e deep-link. |
+| Persistir | Salve o brief refinado dentro do projeto, por exemplo `<target>/PROMPT-<slug>.md`. Ele e entregavel revisavel pelo dono, nao arquivo descartavel. |
+| Revisar se ja vier pronto | Se o usuario trouxer um brief ja qualificado, faca uma revisao rapida por checklist, ajuste apenas lacunas e persista a versao final. |
+
+Esqueleto padrao do brief refinado:
+
+```markdown
+# <titulo da tela/prototipo>
+
+Cole este brief no Open Design. Arquivo de saida exato: `<OUTPUT_FILE>`.
+
+## 1. Por que
+<dor real do usuario/produto; problema observavel que este prototipo precisa resolver>
+
+## 2. Decisao de interacao
+<padrao de navegacao, abertura, selecao, filtros, ordenacao, edicao e confirmacoes>
+
+## 3. Layout/lista
+Tabela/lista baseada apenas em colunas REAIS:
+
+| Coluna real | Origem/contract | Como aparece | Estado/limite |
+|---|---|---|---|
+| <nome> | <arquivo/API/schema> | <texto, badge, acao> | <truncate, vazio, erro> |
+
+## 4. Detalhe/acoes
+<drawer/modal/pagina de detalhe; acoes contextuais permitidas por estado/permissao real>
+
+## 5. Fidelidade de dominio
+Para o mock nao mentir: usar enums/status reais, dados de exemplo realistas no idioma do projeto e incluir estados raros/quebrados que existem no dominio.
+
+## 6. Direcao visual
+<tokens, componentes, densidade, referencias herdadas, prototipos irmaos e limites do design system>
+
+## Entregar
+- `<OUTPUT_FILE>`
+- `<OUTPUT_FILE>.artifact.json` se houver sidecar
+```
+
+So depois de persistir esse arquivo anexe o apendice headless em `.dw/.open-design/runs/` e despache a run.
 
 ## Pre-flight
 

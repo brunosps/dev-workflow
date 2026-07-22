@@ -22,6 +22,9 @@ test('dw-open-design scaffold files carry the validated headless protocol', () =
     const body = read(rel);
     includes(assert, body, '<system_instructions>', rel);
     includes(assert, body, '<critical>', rel);
+    includes(assert, body, '## 0.', rel);
+    includes(assert, body, '<target>/PROMPT-<slug>.md', rel);
+    includes(assert, body, rel.includes('/en/') ? 'raw request' : 'pedido cru', rel);
     includes(assert, body, 'OD_CHAT_RUN_INACTIVITY_TIMEOUT_MS=1800000', rel);
     includes(assert, body, '--agent "$AGENT"', rel);
     includes(assert, body, 'project import-folder', rel);
