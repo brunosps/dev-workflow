@@ -1,13 +1,15 @@
 {
   "name": "@brunosps00/dev-workflow",
-  "version": "1.5.0",
+  "version": "1.7.0",
   "description": "AI-driven development workflow commands for any project. Scaffolds a complete PRD-to-PR pipeline with multi-platform AI assistant support.",
   "bin": {
     "dev-workflow": "./bin/dev-workflow.js"
   },
   "scripts": {
+    "test": "node --test test/*.test.js",
     "validate": "node lib/validate.js",
-    "build:plugin": "node lib/build-plugin.js"
+    "build:plugin": "node lib/build-plugin.js",
+    "pack:check": "npm pack --dry-run"
   },
   "files": [
     "bin/",
@@ -40,7 +42,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/brunosantos/dev-workflow"
+    "url": "https://github.com/brunosps/dev-workflow"
   },
   "author": "Bruno Santos"
 }

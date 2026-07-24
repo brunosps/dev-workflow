@@ -20,8 +20,8 @@ Internal modes (the dispatcher picks 1+):
 
 | Mode | Auto-fires when |
 |------|-----------------|
-| **option-matrix** (always-on default) | Default surface: 3-7 options (conservative / balanced / bold) with `[IMPROVES] / [CONSOLIDATES] / [NEW]` tags. Always runs unless a hard override says otherwise. |
-| **grill** | Vocabulary feels unsettled — user terms differ from `.dw/rules/` / `.dw/constitution.md`, or two synonyms compete in the same conversation, or a contributor proposes a name that clashes with the glossary. |
+| **option-matrix** (default surface) | 3-7 options (conservative / balanced / bold) with `[IMPROVES] / [CONSOLIDATES] / [NEW]` tags. Runs by default **except when Grill is the active phase** — `grill` and `option-matrix` are mutually exclusive in a turn (a hard override or an authorized Grill also skips it). |
+| **grill** (native, stateful — needs explicit authorization) | The plan/PRD or its vocabulary feels unsettled. Signal Reading may **recommend** Grill, but it is a stateful alignment session that writes to `.dw/domain/**` and the one-pager; it starts only on **explicit intent** — `--mode=grill`, a direct phrase like "grill me" / "me questione", or a **yes** to the one-time offer. Mutually exclusive with `option-matrix`. |
 | **prototype** | User asks "is this state model right?" / "what should this look like?" with no clear answer; or the next sensible step is to RUN code, not write words. |
 | **council** | Two or more competing approaches surface with no obvious winner; or consensus forms too quickly (false-consensus signal). |
 | **research** | The question depends on external state-of-the-art ("what's the current best practice for X", multi-source comparisons, regulatory or framework landscape). |
@@ -68,6 +68,8 @@ When available in the project under `./.agents/skills/`, use these skills to enr
 - `dw-ui-discipline`: use when brainstorming involves frontend or UI direction — its hard-gate (scene sentence, surface job) is a generative forcing function during ideation, not just a review check. Also picked up by the **prototype** mode's UI branch.
 - `vercel-react-best-practices`: use when brainstorming React/Next.js architecture or performance trade-offs.
 - `security-review`: use when brainstorming touches auth, data handling, or security-sensitive features.
+- `dw-grilling`: the interview engine of the **grill** mode — a dependency-ordered decision tree, exactly one decision per turn, each with a recommended answer. Internal, loaded by path; never exported.
+- `dw-domain-modeling`: the vocabulary engine of the **grill** mode — canonical glossary in `.dw/domain/**`, fuzzy/overloaded-term challenge, code cross-checks, and the rare-ADR policy. Internal, loaded by path; never exported.
 
 ## Template Reference
 
@@ -92,9 +94,9 @@ Before producing any output, **read the situation**:
 1. Inspect `.dw/spec/prd-*/`, `.dw/rules/`, `.dw/constitution.md`, `.dw/intel/` if they exist. Note the project's current vocabulary and recent PRDs.
 2. Inspect recent git activity (`git log --oneline -20`) to detect ongoing work.
 3. Re-read the user's request against the Auto-Dispatch table at the top of this file. Match signals to modes.
-4. Decide the dispatch: **option-matrix** always runs unless an explicit mode override skips it. Other modes (grill, prototype, council, research, refactor-audit, onepager) fire **additively** when their signals are present.
-5. State the dispatch decision to the user in one short line: e.g., "Dispatching: option-matrix + onepager (PRD is one step away)" or "Dispatching: grill (vocabulary unsettled in current PRD)". Do not bury this — surface it before running.
-6. Then proceed with the modes in this order (when chained): grill → research → option-matrix → council → refactor-audit → prototype → onepager. Skip modes not in the dispatch.
+4. Decide the dispatch: **option-matrix** runs by default unless an explicit mode override skips it OR Grill is the active phase (the two are mutually exclusive). **grill** is never auto-started — if its signals appear, **recommend** it and request one explicit authorization before starting the stateful session or writing any file (a normal brainstorm must not write Grill artifacts just because vocabulary looks unstable). The other modes (prototype, council, research, refactor-audit, onepager) fire **additively** when their signals are present.
+5. State the dispatch decision to the user in one short line: e.g., "Dispatching: option-matrix + onepager (PRD is one step away)" or, for grill, a recommendation needing consent: "Recommending: grill (vocabulary unsettled) — authorize to start the stateful session?". Do not bury this — surface it before running.
+6. Then proceed with the modes in this order (when chained): grill (only if authorized) → research → option-matrix → council → refactor-audit → prototype → onepager. Because grill and option-matrix are mutually exclusive, an authorized Grill runs to alignment first and only **offers** option-matrix as a separate, explicitly announced later phase. Skip modes not in the dispatch.
 
 ### Standard flow (option-matrix mode)
 
@@ -181,7 +183,7 @@ At the end, always leave the user in one of these situations:
 - With the one-pager at `.dw/spec/ideas/<slug>.md` (if **onepager** mode fired)
 - With the research report at `~/Documents/<Topic>_Research_<date>/` (if **research** mode fired)
 - With the refactor plan at `<target>/refactor-plan.md` (if **refactor-audit** mode fired)
-- With sharpened glossary entries in `.dw/rules/` (if **grill** mode fired)
+- With canonical glossary entries in `.dw/domain/**` and an aligned idea one-pager (if **grill** ran with authorization)
 - With a runnable throwaway prototype + verdict template (if **prototype** mode fired)
 
 ## Mode: research (multi-source research)
@@ -331,57 +333,114 @@ Saved to `<target>/refactor-plan.md`:
 - Proposing refactors that aren't tested or testable → high risk, won't ship.
 - Ignoring documented architectural decisions in `.dw/rules/` → flagging intentional design as smell.
 
-## Mode: grill (domain-grilling)
+## Mode: grill (native stateful alignment)
 
-Fires when vocabulary feels unsettled — user terms differ from `.dw/rules/` / `.dw/constitution.md`, two synonyms compete in the same conversation, or a contributor proposes a name that clashes with the glossary. Override: `--mode=grill`. Replaces the option-generation default with an **interview-style stress-test** of the plan/PRD against the project's domain vocabulary. Each round of questions sharpens one piece. Updates `.dw/rules/` (or `.dw/constitution.md`) inline as terms crystallize — never deferred to "after the conversation."
+Grill is a **stateful alignment session** that interviews the plan/PRD to *shared understanding* and persists
+canonical vocabulary to `.dw/domain/**`. It is **not** a normal brainstorm turn: it holds a decision tree across
+turns and it writes files. Because it is stateful and mutating, it starts **only on explicit intent**.
 
-<critical>Ask ONE question at a time. Wait for the answer. Don't dump a list of 5 questions and hope for the best.</critical>
+<critical>Explicit intent to Grill = `--mode=grill`, a direct phrase like "grill me" / "grill this plan", OR a **yes** to the one-time offer below. Automatic Signal Reading may **recommend** Grill, but it MUST request one explicit authorization before starting the session or writing ANY file. A normal brainstorm never writes Grill artifacts just because the vocabulary looks unstable.</critical>
 
-### When to use grill mode
+<critical>`grill` and `option-matrix` are **mutually exclusive** in a turn. Grill converges decisions; it does NOT generate an option matrix or a single final option-matrix verdict — but **every interview question still carries a recommended answer** (with rationale and an alternative/trade-off). "No recommendation" refers only to the option-matrix verdict, never to the per-question recommendation. After alignment, Grill may **offer** option-matrix as a separate, explicitly announced later phase.</critical>
 
-- Before `/dw-plan prd` when the domain feels unsettled or the team uses competing terms.
+<critical>Ask exactly ONE unresolved decision per interaction, then wait. Never dump a list of questions.</critical>
+
+Grill is powered by two internal skills (loaded by path from `./.agents/skills/`, never exported):
+- **`dw-grilling`** — the decision-tree interview engine (dependency ordering, one decision per turn, a
+  recommended answer for every question, facts discovered rather than asked, the shared-understanding gate).
+- **`dw-domain-modeling`** — the vocabulary engine (canonical terms, fuzzy/overloaded-term challenge, code
+  cross-checks, and safe lazy persistence to `.dw/domain/**`).
+
+### When Grill is the right move
+
+- Before `/dw-plan prd` when the domain or the plan feels unsettled or the team uses competing terms.
 - After `/dw-plan prd` when reviewers flag ambiguous language in the PRD.
-- During architectural discussion when "module", "service", "component" are being used interchangeably and you need to pin the canonical term.
-- When a contributor proposes a name that doesn't match the project's existing glossary.
+- When "module", "service", "component" (or two synonyms) are used interchangeably and the canonical term must be pinned.
+- When a proposed name clashes with the existing glossary, or a plan hides unresolved decisions.
 
-### During-session disciplines
+When these signals appear during auto-dispatch, **recommend** Grill in one line and offer to start it — e.g.
+*"The plan leaves 4 product decisions open and `Account` is overloaded. Start a Grill session (stateful, writes to
+`.dw/domain/**` and the one-pager)? [yes/no]"*. Start only on an explicit yes.
 
-1. **Challenge against the glossary.** Read `.dw/rules/index.md` + per-module `.dw/rules/<module>.md` + `.dw/constitution.md`. Flag terminology conflicts the instant the user uses a term that differs from (or contradicts) what's already documented.
+### The session (after authorization)
 
-2. **Sharpen fuzzy language.** When the user says "the user thing" or "the order stuff", propose a precise canonical term. Don't pretend you understood — push back.
+1. **Build the decision tree first.** Before the first question, inspect project facts — current PRDs/TechSpecs,
+   `.dw/rules/`, `.dw/intel/` (via `/dw-intel`), `.dw/constitution.md`, `.dw/domain/**`, and recent git activity —
+   and build a decision tree **ordered by dependencies** (never ask a downstream decision before its blocker).
+2. **Ask exactly one unresolved decision per interaction and wait.** Each question includes: evidence when
+   available (with source), the recommended answer, a short rationale, and a meaningful alternative/trade-off.
+   Follow `dw-grilling` (`references/interview-loop.md`, `references/decision-tree.md`).
+3. **Facts are discovered, decisions are asked.** Look facts up in the repo/rules/intel/docs; put only genuine
+   decisions to the user, and leave the choice to the user.
+4. **Sharpen vocabulary with `dw-domain-modeling`.** Challenge fuzzy/overloaded terms, stress-test with concrete
+   edge-case scenarios, and cross-check each term against the code (surface `file:line` contradictions).
+5. **A resolved answer authorizes the matching update.** Once a decision is resolved, you may persist the
+   corresponding glossary/alignment change (see allowlist). ADR creation still requires a **separate explicit
+   approval** — never auto-create one.
 
-3. **Discuss concrete scenarios.** Force precision via specific edge cases: "What happens to the Order in state X when event Y arrives during retry Z?" Vague answers go back as further questions.
+### Allowed stateful writes (only after authorization + the relevant decision is resolved)
 
-4. **Cross-reference code.** When the user states a behavior, glance at the codebase to confirm it. Surface contradictions: "You said the API returns `OrderId` but `src/api/orders.ts:42` returns `{ order_id, status }`." Don't argue from generalities.
+- `.dw/domain/**` — the canonical glossary / context-map (via `dw-domain-modeling`).
+- The active `.dw/spec/ideas/<slug>.md` one-pager (extended to schema `1.1`, below).
+- An **explicitly active** PRD/TechSpec — only **after showing the proposed change** and getting agreement.
+- Routed ADR paths via `/dw-adr --scope=repo|prd` (after separate ADR approval).
 
-5. **Update `.dw/rules/` inline.** When a term crystallizes, write it into the appropriate rules file in the same conversation turn. Lazy file creation: if the file doesn't exist, create it. Format follows the glossary discipline established by the project (see `.dw/rules/index.md` for shape).
+**Never edit source code during Grill.** If authorization is absent, keep interviewing and report what you *would*
+persist.
 
-6. **Skip implementation details in the glossary.** `.dw/rules/` and `.dw/constitution.md` describe vocabulary and principles — not implementation. "Order: a customer's request to purchase one or more items, in one of these states: pending, paid, shipped, delivered, refunded" is fine. "Order: a TypeScript class in `src/orders/`" is implementation leak.
+### Native domain artifacts (not `.dw/rules/`, not root `CONTEXT.md`)
+
+Canonical vocabulary lives in `.dw/domain/**`, created **lazily** only after a term is resolved and write
+authorization exists:
+
+- Single context → `.dw/domain/glossary.md`.
+- Multiple contexts → `.dw/domain/context-map.md` + `.dw/domain/contexts/<slug>.md`.
+
+A glossary definition is one or two sentences that say what the domain term **is**, lists discouraged synonyms
+(`_Avoid:_`), and excludes implementation details, requirements, scratch notes, and general programming concepts.
+Do **not** store human-curated vocabulary in the auto-generated `.dw/rules/` module files. `/dw-analyze-project`
+reads and links `.dw/domain/**` and must preserve it, never regenerate it.
+
+### Aligned handoff — the idea one-pager (schema `1.1`)
+
+Grill extends `.dw/spec/ideas/<slug>.md` to schema `1.1`, adding: **Resolved Decisions** (each with the recommended
+answer, the user's choice, and the alternative rejected), **Evidence** (facts discovered with sources),
+**Canonical Vocabulary** (links into `.dw/domain/**`), **Remaining Decisions**, and **Alignment State**.
+
+Set `status: aligned` **only when all** of these hold: every dependency branch is resolved, glossary/code
+contradictions are closed, no blocking open decision remains, AND the user **explicitly confirms** shared
+understanding. Otherwise persist a `draft`/`paused` state (with the decision tree and open nodes) and **stop**.
+`/dw-plan` consumes an aligned handoff without re-asking the resolved product decisions.
 
 ### ADR creation discipline
 
-Only propose an ADR via `/dw-adr` when **all three** hold:
+Only offer an ADR (via `/dw-adr --scope=repo|prd`) when **all three** hold — and creation always needs a separate
+explicit user approval (`dw-domain-modeling/references/adr-policy.md`):
 
 | Criterion | Test |
 |-----------|------|
-| **Hard to reverse** | If we change this in 6 months, does it cost >1 week of work? |
+| **Hard to reverse** | If we change this in 6 months, does it cost meaningfully more than a day? |
 | **Surprising without context** | Would a new contributor reasonably reach a different decision? |
 | **Genuine trade-off** | Was there a real alternative we considered and chose against? |
 
-If any is missing, skip the ADR. Don't ADR every casual decision — that turns the ADR folder into noise.
+Scope routing: `repo` → `.dw/adrs/adr-NNN.md` (works before any PRD); `prd` → `.dw/spec/<prd>/adrs/adr-NNN.md`.
+If any criterion is missing, skip the ADR — don't turn the ADR log into noise.
 
 ### Output
 
 grill mode produces:
-- **Updated `.dw/rules/<module>.md`** or `.dw/constitution.md` with crystallized terms.
-- **Updated PRD / TechSpec** if grilling happens mid-plan (terms in the artifact are aligned with the glossary).
-- **Optional `.dw/spec/<prd>/adrs/adr-NNN.md`** if criteria above hold.
-- **NO** option matrix or recommendation (that's option-matrix mode; grill is purely about sharpening). If the dispatcher chained grill+option-matrix, the option matrix runs in a separate phase.
+- **Canonical vocabulary in `.dw/domain/**`** (glossary, or context-map + per-context files) for resolved terms.
+- **An extended one-pager** at `.dw/spec/ideas/<slug>.md` (schema `1.1`) — `aligned` only after explicit confirmation, otherwise `draft`/`paused`.
+- **Updated PRD / TechSpec** only if explicitly active and the change was shown first.
+- **Optional routed ADR** via `/dw-adr --scope=…` if the three criteria hold and the user approves.
+- **NO** option matrix and no single final option-matrix verdict — but every interview question still carries a recommended answer (option-matrix is a separate later phase if offered and accepted).
 
 ### When the discipline bends
 
-- **Greenfield project with no `.dw/rules/`**: grill anyway; the conversation produces the FIRST entries in `.dw/rules/index.md`. That's the value.
-- **Cosmetic terminology disagreements** ("should we call it `userId` or `user_id`?"): skip grill mode; use a coding-conventions ADR or `.dw/rules/index.md` Naming section.
+- **Greenfield project with no `.dw/domain/`**: grill anyway (once authorized); the session produces the FIRST
+  entries in `.dw/domain/glossary.md`. That's the value. ADRs before any PRD route to `--scope=repo`.
+- **Cosmetic terminology disagreements** ("should we call it `userId` or `user_id`?"): skip grill; use a
+  coding-conventions note in `.dw/rules/index.md` Naming — a naming style is not a domain term.
 
 ## Mode: prototype (throwaway prototype)
 
@@ -445,8 +504,20 @@ The codebase-grounded idea refinement pattern is inspired by [`addyosmani/agent-
 - Output at `.dw/spec/ideas/<slug>.md` (sibling of `prd-<slug>/`) instead of `docs/ideas/` — preserves dev-workflow path conventions.
 - Integration with the existing pipeline: `/dw-plan prd` accepts the one-pager as input, reducing clarification questions.
 
-The **grill** and **prototype** modes are adapted from [`mattpocock/skills/grill-with-docs`](https://github.com/mattpocock/skills/tree/main/grill-with-docs) and [`mattpocock/skills/prototype`](https://github.com/mattpocock/skills/tree/main/prototype) (Matt Pocock, MIT). dev-workflow adaptation: integrated as INTERNAL auto-dispatched modes rather than separate skills, paths rebased on `.dw/rules/` + `.dw/spec/<prd>/`, ADR creation gated on the 3-criteria test (hard-to-reverse + surprising + genuine trade-off).
+The **grill** mode is a native reimplementation of Matt Pocock's grilling discipline (MIT), drawing on three
+upstream skills: [`skills/engineering/grill-with-docs`](https://github.com/mattpocock/skills/blob/main/skills/engineering/grill-with-docs/SKILL.md)
+(interview that produces docs as it goes), [`skills/productivity/grilling`](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md)
+(one-decision-at-a-time interview with a recommended answer, facts looked up not asked, shared-understanding gate),
+and [`skills/engineering/domain-modeling`](https://github.com/mattpocock/skills/blob/main/skills/engineering/domain-modeling/SKILL.md)
+(canonical glossary, fuzzy-term challenge, rare ADRs). dev-workflow adaptations: behavior is reimplemented in this
+repo's voice (no upstream prose copied) and extracted into two **internal, non-exported** skills — `dw-grilling`
+and `dw-domain-modeling` — invoked by this mode; the glossary lives in **`.dw/domain/**`** (not upstream's root
+`CONTEXT.md` and not our auto-generated `.dw/rules/`); Grill is a **stateful session that requires one explicit
+authorization** before writing; alignment produces an idea one-pager at schema `1.1` consumed by `/dw-plan`; and
+ADR creation is gated on the 3-criteria test and routed via `/dw-adr --scope=repo|prd`. The **prototype** mode is
+adapted from [`mattpocock/skills/prototype`](https://github.com/mattpocock/skills) (MIT) as an internal
+auto-dispatched mode.
 
-Credit: Addy Osmani (idea-refine) and Matt Pocock (grill-with-docs, prototype).
+Credit: Addy Osmani (idea-refine) and Matt Pocock (grill-with-docs, grilling, domain-modeling, prototype).
 
 </system_instructions>

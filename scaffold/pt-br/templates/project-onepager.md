@@ -23,20 +23,21 @@ services: []
 |--------|---------|---------------|
 | Forma | frontend / backend / fullstack | [por que essa forma — superficie unica, API para parceiros, etc.] |
 | Frontend | Next.js / Vite+React / n/a | [por que esse framework — SSR, simplicidade SPA, etc.] |
-| Backend | FastAPI / ASP.NET Core minimal / Axum / Fastify / n/a | [por que — expertise do time, ecosystem, alvo de latencia] |
-| Database | Postgres / MySQL / SQLite / MongoDB / nenhum | [por que esse DB — relacional, JSON-heavy, transacional, etc.] |
+| Backend | NestJS / Fastify / FastAPI / ASP.NET Core minimal / Axum / n/a | [por que — expertise do time, ecosystem, alvo de latencia] |
+| Database | Postgres / Postgres+pgvector / MySQL / SQLite / MongoDB / nenhum | [por que esse DB — relacional, vetorial, transacional, etc.] |
 | Cache | Redis / Memcached / nenhum | [por que ou por que nao] |
-| Fila | BullMQ / Celery / RabbitMQ / LocalStack SQS / nenhum | [por que ou nao + sync vs async workers] |
-| Email — dev | MailHog (default) / Mailpit / smtp4dev / nenhum | [normalmente MailHog — captura only, nunca envia real] |
+| Fila | pg-boss / BullMQ / Celery / RabbitMQ / LocalStack SQS / nenhum | [por que ou nao + sync vs async workers] |
+| Email — dev | Mailpit (default) / MailHog / smtp4dev / nenhum | [normalmente Mailpit — captura only, nunca envia real] |
 | Email — prod | SMTP / SendGrid / Resend / Postmark / SES / nenhum | [por que esse provider — volume, deliverability, custo] |
 | Object storage | S3 / MinIO (dev) / GCS / nenhum | [por que ou nao] |
 | Search | Meilisearch / Typesense / Elasticsearch / nenhum | [por que esse engine — features, escala, simplicidade] |
 | Observability | Sentry / OTel + Jaeger / nenhum | [por que essa abordagem — so error tracking, tracing completo, etc.] |
 | Reverse proxy | Traefik / Caddy / nenhum | [normalmente so multi-host dev ou prod] |
-| Auth | NextAuth / Lucia / Clerk / fastapi-users / dotnet Identity / JWT custom / nenhum | [por que — social login, B2B, etc.] |
+| Auth | Auth.js / OIDC generico / Clerk / fastapi-users / dotnet Identity / JWT custom / nenhum | [por que — social login, B2B, etc.] |
 | Linter / formatter | Biome / ESLint+Prettier / Ruff+Black / dotnet format / cargo fmt+clippy | [preferencia do time] |
 | Package manager | pnpm / npm / yarn / poetry / uv / cargo / dotnet | [preferencia do time] |
-| Monorepo orchestrator | pnpm workspaces / npm workspaces / Turborepo / Nx / n/a | [so para fullstack — caching/build] |
+| Workspace + task runner | pnpm workspaces + Turborepo / npm workspaces / Nx / n/a | [so para fullstack — caching/build] |
+| Topologia de dev | apps no host / tudo no Compose | [trade-off de hot reload e paridade] |
 | CI | GitHub Actions / nenhum | [normalmente GitHub Actions; pular so para repos nao-publicos] |
 
 ## Servicos & Infra
@@ -47,7 +48,7 @@ services: []
 |---------|--------------|----|--------------------|
 | postgres | 5432 | — | POSTGRES_USER=app, POSTGRES_PASSWORD=app, POSTGRES_DB=app |
 | redis | 6379 | — | (sem auth em dev) |
-| mailhog | 1025 (smtp), 8025 (UI) | http://localhost:8025 | (sem auth) |
+| mailpit | 1025 (smtp), 8025 (UI) | http://localhost:8025 | (sem auth) |
 | ... | ... | ... | ... |
 
 ## Diagrama da Arquitetura
@@ -59,12 +60,12 @@ services: []
 [ Browser ] -> [ Next.js (apps/web) ]
 
 # Fullstack
-[ Browser ] -> [ Next.js (apps/web) ] -> [ FastAPI (apps/api) ] -> [ Postgres ]
+[ Browser ] -> [ Next.js (apps/web) ] -> [ NestJS (apps/api) ] -> [ Postgres ]
                                                                 |-> [ Redis ]
-                                                                |-> [ MailHog ]
+                                                                |-> [ Mailpit ]
 
 # Com observability
-... -> [ FastAPI ] -> { OTLP } -> [ Jaeger ]
+... -> [ NestJS ] -> { OTLP } -> [ Jaeger ]
 ```
 
 ## Arquivos Gerados
@@ -75,7 +76,7 @@ services: []
 {{TARGET_DIR}}/
 ├── apps/
 │   ├── web/                      (criado por `pnpm create next-app`)
-│   └── api/                      (scaffold inline — FastAPI)
+│   └── api/                      (criado por `pnpm dlx @nestjs/cli` ou scaffold escolhido)
 ├── packages/
 │   └── shared/                   (criado pelo /dw-new-project)
 ├── docker-compose.dev.yml        (composto a partir de .agents/skills/docker-compose-recipes/)

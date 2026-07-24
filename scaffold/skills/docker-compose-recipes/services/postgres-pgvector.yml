@@ -1,0 +1,31 @@
+# PostgreSQL 18 + pgvector 0.8.2 — relational and vector database
+# Env vars: POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_PORT (default 5432)
+# Application-side: derive DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+# The image ships pgvector; create the extension in an application migration with: CREATE EXTENSION IF NOT EXISTS vector;
+
+postgres:
+  image: pgvector/pgvector:0.8.2-pg18
+  restart: unless-stopped
+  environment:
+    POSTGRES_USER: ${POSTGRES_USER:-app}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    POSTGRES_DB: ${POSTGRES_DB:-app}
+  ports:
+    - "${POSTGRES_PORT:-5432}:5432"
+  volumes:
+    - postgres_data:/var/lib/postgresql
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-app}"]
+    interval: 5s
+    timeout: 3s
+    retries: 10
+    start_period: 5s
+
+# volumes block to merge:
+# volumes:
+#   postgres_data: {}
+#
+# Prod notes:
+# - Use a current patch release derived from PostgreSQL 18 and pgvector 0.8.2 or newer compatible patch.
+# - Move POSTGRES_PASSWORD to a secret and remove the public port mapping.
+# - Keep CREATE EXTENSION and vector indexes in reviewed application migrations.

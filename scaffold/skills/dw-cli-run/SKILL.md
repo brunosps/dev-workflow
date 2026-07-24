@@ -129,19 +129,21 @@ without reaching 9. Always show the score + a short per-criterion rationale — 
 ceiling, **cite the specific gap** (the failing test, the file left out of fence), not just a label. Same
 evidence discipline as the five-axis rubric in `dw-review-rigor/references/self-eval-rubric.md`.
 
-## Dual evaluation: the CLI auto-gates (MAX effort) → Claude re-gates (compares scores)
+## Dual evaluation: the CLI auto-gates (max effort) → the parent re-gates (compares scores)
 The CLI **can't grade its own exam alone** — hence two layers. The CLI auto-gates cheaply (close to the work) and
-**Claude audits independently** and **compares the scores** (catches an inflated self-score).
+**the parent/orchestrator audits independently** and **compares the scores** (catches an inflated self-score). The
+parent is the dispatching session — possibly Claude itself; the re-gate is provider-neutral.
 1. **CLI auto-gate (loop, MAX effort).** The prompt MUST instruct: after implementing, **run the SAME gate** and
    give a **self-score 0–10**; **fix and re-run while the self-score <9 or the gate isn't green**, at max effort.
    Stop at self-score ≥9 + green gate (or report `blockers`). The final report carries the self-score + per
    criterion.
-2. **Claude re-gate (independent).** When the CLI declares pass, the parent **re-runs the SAME gate** (fan-out,
-   prefer Workflow → `/workflows`) and gives its **own 0–10** — without trusting the self-score.
-3. **Compare + decide.** Claude ≥9 and small gap → **PASS** (ready for the owner's merge decision). Claude <9 OR a
+2. **Parent re-gate (independent).** When the CLI declares pass, the parent/orchestrator **re-runs the SAME gate**
+   (fan-out, prefer Workflow → `/workflows`) and gives its **own 0–10** — without trusting the self-score (a worker
+   never signs off on its own exam, even when that worker is Claude).
+3. **Compare + decide.** Parent ≥9 and small gap → **PASS** (ready for the owner's merge decision). Parent <9 OR a
    large gap (CLI overestimated) → re-execute: hand the gaps back via **session resume** (step 5, max effort) and
-   repeat 1→2→3 until it converges. **The score that counts for acceptance is Claude's**; the self-score is signal
-   + an inflation detector. Always record both scores + the gap in the Structured Return.
+   repeat 1→2→3 until it converges. **The score that counts for acceptance is the parent's**; the self-score is
+   signal + an inflation detector. Always record both scores + the gap in the Structured Return.
 
 ## Graded escalation on failure
 If the score is low / the gate failed / the CLI didn't finish, **re-run the SAME task one notch up** — gradual, no
@@ -199,7 +201,7 @@ The stream ends with the adapter's `USAGE` block (token counts). Extract it from
   right worktree, ready for the gate; `FINDINGS` = ran, score 6–8 or caveats (uncommitted/out-of-fence/partial);
   `BLOCKED` = missing CLI/credential/worktree/prompt/adapter table, or escalation exhausted without reaching 9;
   `NOT_APPLICABLE` = no worktree+prompt → still planning.
-- **Score:** **Claude's score** (0–10 — counts for acceptance, bar ≥9) + the **CLI self-score** + the **gap**;
+- **Score:** **the parent's score** (0–10 — counts for acceptance, bar ≥9) + the **CLI self-score** + the **gap**;
   per-criterion rationale (conformance/gate/completeness/hygiene/quality). Large gap = inflated self-score.
 - **Scope:** worktree + branch + prompt used; CLI + model + effort + sandbox/auto mode; escalation notches taken.
 - **Evidence:** path of the durable audit log + final-message file; stream JSONL excerpt; `git status`/diff of the

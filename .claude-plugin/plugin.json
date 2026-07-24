@@ -1,11 +1,11 @@
 {
   "name": "dev-workflow",
   "description": "Standalone, à-la-carte skills from the dev-workflow pipeline: minimalism, search-first, simplification, verification, security review, and more.",
-  "version": "1.5.0",
+  "version": "1.7.0",
   "author": {
     "name": "Bruno Santos"
   },
-  "homepage": "https://github.com/brunosantos/dev-workflow",
+  "homepage": "https://github.com/brunosps/dev-workflow",
   "license": "MIT",
   "keywords": [
     "ai",

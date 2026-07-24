@@ -55,7 +55,36 @@ Claude Code and OpenCode can use native project agents. Codex and Copilot use `.
 
 <critical>When a structured interview/user-input tool is available, `/dw-plan` MUST use it for PRD and TechSpec clarification questions. Do not downgrade to plain chat merely for convenience. If no such tool exists in the runtime, ask the same questions in chat and explicitly record: `Structured interview tool unavailable; using chat fallback.`</critical>
 
-The tool is mandatory for planning because it preserves explicit user choices and prevents the agent from answering its own questions. Each stage keeps its own quota: PRD requires 7+ product questions; TechSpec requires 7+ technical questions.
+The tool is mandatory for planning because it preserves explicit user choices and prevents the agent from answering its own questions.
+
+## Coverage-driven interview (no fixed question quotas)
+
+<critical>`/dw-plan` does NOT ask a fixed number of questions. Each stage builds a **coverage matrix** over its required dimensions, discovers facts from the repo/rules/intel/domain artifacts, **credits evidence already resolved in an aligned Grill handoff**, and then asks — one decision at a time — ONLY the dimensions that remain uncovered. Never re-ask a product decision the user already resolved during Grill.</critical>
+
+### Aligned handoff (from `/dw-brainstorm` grill)
+
+Before Stage 1, check for an idea one-pager at `.dw/spec/ideas/<slug>.md` and the canonical vocabulary in `.dw/domain/**`.
+
+<critical>Validate the handoff and FAIL CLOSED. Credit an aligned handoff — i.e. suppress the product questions its decisions cover — ONLY when EVERY one of these holds:
+- `schema_version: "1.1"`;
+- `status: aligned`;
+- `alignment.confirmed_by_user: true`;
+- every dependency branch is resolved (no open decision node);
+- glossary/code contradictions are closed;
+- no **blocking** entry remains under Remaining Decisions.
+If ANY check fails — or the file is malformed, internally inconsistent, `draft`, or `paused` — the one-pager is **input, not a trusted handoff**: read it for context, but treat all its decisions as **uncovered** and ask them normally. Never suppress a product question on the strength of `status: aligned` alone; `alignment.confirmed_by_user: true` and a resolved, non-blocking, contradiction-free tree are required too.</critical>
+
+When (and only when) the handoff is fully valid:
+- Load its **Resolved Decisions**, **Evidence**, and **Canonical Vocabulary** links.
+- Mark every PRD dimension those decisions cover as **already covered** (cite the one-pager as the evidence) — do NOT re-ask them.
+- Only uncovered dimensions become questions, asked one at a time.
+
+### Coverage matrices
+
+- **PRD dimensions:** goals, target users, scope boundaries, success metrics, rollout strategy, integration points, edge cases.
+- **TechSpec dimensions:** domain placement, data flow, dependencies, core interfaces, test strategy, reuse-vs-build, multi-project integration (when applicable).
+
+For each stage: build the matrix, mark each dimension `covered` (fact discovered or aligned evidence credited) or `uncovered`, then ask only the `uncovered` ones — one decision per turn, each with a recommended answer. **Technical decisions a product Grill did not cover may still be asked during TechSpec** — Grill aligns product vocabulary and product decisions, not the full technical design.
 
 ## Constitution Gate
 
@@ -78,11 +107,11 @@ Runs when default mode OR `plan prd`.
 
 ### Prerequisites for this stage
 - Idea or topic from the user.
-- (Optional) brainstorm one-pager from `/dw-brainstorm --onepager` at `.dw/spec/ideas/<slug>.md`.
+- (Optional) an idea one-pager from `/dw-brainstorm` at `.dw/spec/ideas/<slug>.md`. If it is `status: aligned` (schema `1.1`, from a Grill session), consume it as a handoff — its Resolved Decisions are credited, not re-asked (see Coverage-driven interview).
 
 ### Required behavior
 
-1. **Clarification questions (MINIMUM 7).** Before writing anything, use the structured interview tool when available to ask 7+ focused questions covering: goals, target users, scope boundaries, success metrics, rollout strategy, integration points, edge cases. If the tool is unavailable, use chat fallback and record that fallback.
+1. **Coverage matrix over the PRD dimensions** (goals, target users, scope boundaries, success metrics, rollout strategy, integration points, edge cases). Build the matrix, credit any aligned-handoff evidence and facts discovered from the repo, then ask ONLY the uncovered dimensions — one decision at a time, each with a recommended answer — using the structured interview tool when available (record the chat fallback otherwise). No fixed question count; never re-ask a decision resolved in an aligned one-pager.
 2. **Web search MINIMUM 3 queries** for market patterns, regulatory context, competitor approaches when relevant.
 3. **Constitution alignment.** Each functional requirement (FR-N.M) includes a `Constitution Alignment: respects P-NNN, P-MMM` line OR `no applicable principle: <reason>`.
 4. **Multi-project awareness.** If the feature spans multiple projects in the workspace, consult `.dw/rules/integrations.md` and document scope in the PRD's "Impacted Projects" section.
@@ -106,7 +135,7 @@ Runs when default mode (after PRD approval) OR `plan techspec` OR `plan --from t
 ### Required behavior
 
 1. **Hard gate: PRD open questions.** If `.dw/spec/prd-<feature>/prd.md` has an "Open Questions" section with unresolved items, STOP and ask the user to resolve them first.
-2. **Clarification questions (MINIMUM 7).** Use the structured interview tool when available to ask technical questions covering: domain placement, data flow, dependencies, core interfaces, test strategy, reuse-vs-build, multi-project integration if applicable. If the tool is unavailable, use chat fallback and record that fallback.
+2. **Coverage matrix over the TechSpec dimensions** (domain placement, data flow, dependencies, core interfaces, test strategy, reuse-vs-build, multi-project integration when applicable). Credit aligned-handoff evidence and discovered facts, then ask ONLY uncovered dimensions — one decision at a time — using the structured interview tool when available (record the chat fallback otherwise). Technical decisions not covered by a product Grill may still be asked here. No fixed question count.
 3. **Web search MINIMUM 3 queries** for technical patterns + Context7 MCP for framework/library specifics.
 4. **Source grounding (`dw-source-grounding`).** Every framework/library decision ships with `[source: <url>, version: X.Y, retrieved: YYYY-MM-DD]`.
 5. **Constitution gate.** Each architectural decision lists `Respects: P-NNN` or `Deviates: P-NNN — justification: <ADR slug or rationale>`. Deviations from `severity: high/critical` principles without ADR → STOP.
@@ -187,7 +216,7 @@ After full plan run, the PRD directory contains:
 
 ## Final Guidelines
 
-- Each stage has its own clarification question quota — don't recycle. Different stages need different framing. Use the structured interview tool whenever available.
+- Each stage runs a coverage matrix over its own dimensions — no fixed question quota. Credit aligned-handoff evidence and discovered facts; ask only uncovered decisions, one at a time. Different stages need different framing. Use the structured interview tool whenever available.
 - Web search is mandatory; Context7 MCP for libraries. No skipping for "I think I know the latest version."
 - Constitution gate runs at every stage entry; defaults are auto-installed when missing (never blocks).
 - All three stages produce committed Markdown — these are the canonical planning artifacts. They evolve with the feature.

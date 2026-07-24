@@ -11,18 +11,19 @@ session**, score the delivery 0–10, escalate on failure, and **STOP for the ga
 
 | Slot | Claude value |
 |---|---|
-| `DISPATCH` | `UUID=$(cat /proc/sys/kernel/random/uuid); cd <WORKTREE> && claude -p --session-id "$UUID" --model <MODEL> --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <PROMPT>)" </dev/null > <AUDIT>/<slug>.log 2>&1` |
+| `DISPATCH` | `UUID=$(cat /proc/sys/kernel/random/uuid); cd <WORKTREE> && claude -p --session-id "$UUID" --model <MODEL> --effort <EFFORT> --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <PROMPT>)" </dev/null > <AUDIT>/<slug>.log 2>&1` |
 | `STREAM` | `--output-format stream-json --include-partial-messages --verbose` (`--verbose` is **required** with `stream-json` in `-p` mode) |
 | `AUTO` | `--dangerously-skip-permissions` (headless auto-approve; justified because the worktree is isolated). Read-only/analysis: drop it and pass `--permission-mode plan` (or restrict `--allowedTools`). |
-| `RESUME <id>` | `cd <WORKTREE> && claude --resume "$UUID" -p --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <FOLLOWUP_PROMPT>)" </dev/null >> <AUDIT>/<slug>.log 2>&1` |
+| `RESUME <id>` | `cd <WORKTREE> && claude --resume "$UUID" -p --effort <EFFORT> --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <FOLLOWUP_PROMPT>)" </dev/null >> <AUDIT>/<slug>.log 2>&1` |
 | `RESUME_LAST` | `claude -c -p …` (continue the most recent conversation in this cwd) |
 | `SESSION_ID` | **FIXED by you** — you pass `--session-id "$UUID"` on the first run, so the id is known up front. Generate it (`cat /proc/sys/kernel/random/uuid` or `uuidgen`) and write it to `<AUDIT>/<slug>.session` BEFORE/at dispatch. No stream-scraping needed — Claude is the easy case. |
 | `DONE_SIGNAL` | the final `{"type":"result"}` message in the stream (carries `subtype`, `usage`, `total_cost_usd`, `num_turns`) |
 | `USAGE` | the `result` message `usage` → `input_tokens` / `cache_read_input_tokens` / `cache_creation_input_tokens` / `output_tokens`, plus `total_cost_usd`. Extract: `grep -oE '"usage":\{[^}]*\}' <AUDIT>/<slug>.log \| tail -1` |
 
-**Model + effort:** `--model` selects the tier (`opus` · `sonnet` · `haiku`, or a full id). Claude has no numeric
-effort flag; map "escalation" to model tier (and, when needed, ask for extended thinking in the prompt). Start one
-tier below the ceiling; escalate per `dw-cli-run`.
+**Model + effort:** `--model` selects the tier (`opus` · `sonnet` · `haiku`, or a full id). `--effort` selects the
+reasoning budget: `low` · `medium` · `high` · `xhigh` · `max` (supported by the Claude CLI ≥ 2.1.206). Escalate per
+`dw-cli-run`: raise `--effort` first (low→medium→high→xhigh→max), then bump `--model` one tier and reset effort.
+Start one notch below the ceiling.
 
 ## Session resume (the heart)
 Because you pass `--session-id "$UUID"`, the id is **fixed and known** at dispatch — write it to
@@ -38,6 +39,8 @@ Because you pass `--session-id "$UUID"`, the id is **fixed and known** at dispat
 | `<PROMPT>` | prepared prompt/spec path | `.dw/spec/prd-billing-integrador/codex-prompt.md` |
 | `<slug>` | task key for audit/session files | `prd-billing-integrador` |
 | `<AUDIT>` | durable audit dir OUTSIDE the worktree | `~/code/vizzita/.dw/cli-run` |
+| `<MODEL>` | Claude tier or full model id | `opus` / `sonnet` / `haiku` |
+| `<EFFORT>` | reasoning budget (Claude CLI ≥ 2.1.206) | `low` / `medium` / `high` / `xhigh` / `max` |
 
 Return via the `dw-cli-run` **Structured Return** (Status/Score/Scope/Evidence/Artifacts/Decisions/Risks/Telemetry/
 Next Step), including the fixed `session-id` (UUID), its sidecar path, and the exact `RESUME` command to continue.

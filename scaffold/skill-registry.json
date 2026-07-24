@@ -35,7 +35,7 @@
       "trigger": "Fire an AI CLI (Codex/Claude/Copilot) in a dedicated git worktree to implement a prepared prompt; resumable per-task session; STOP for the gate",
       "expected_output": "Audit-logged run with a 0-10 dual evaluation, a resumable session-id sidecar, and a STOP-for-gate Structured Return.",
       "load_policy": "lazy-references",
-      "context_limit": 18000,
+      "context_limit": 19000,
       "bundled": true
     },
     {
@@ -58,6 +58,30 @@
       "expected_output": "Advisor positions, tension synthesis, and decision recommendation.",
       "load_policy": "lazy-references",
       "context_limit": 12000,
+      "bundled": true
+    },
+    {
+      "name": "dw-domain-modeling",
+      "kind": "protocol",
+      "tier": "specialty",
+      "owner": "dw-brainstorm,dw-analyze-project",
+      "trigger": "Native Grill domain vocabulary: challenge fuzzy/overloaded terms, cross-check against code, persist a canonical glossary to .dw/domain",
+      "expected_output": "Canonical terms with discouraged synonyms persisted lazily to .dw/domain (single or multi-context), or fuzzy-term findings.",
+      "load_policy": "lazy-references",
+      "context_limit": 12000,
+      "exportable": false,
+      "bundled": true
+    },
+    {
+      "name": "dw-grilling",
+      "kind": "protocol",
+      "tier": "specialty",
+      "owner": "dw-brainstorm,dw-plan",
+      "trigger": "Native Grill decision-tree interview: sharpen a plan/PRD to shared understanding, exactly one decision per turn with a recommended answer",
+      "expected_output": "A dependency-ordered decision tree, resolved decisions with recommendations, and an explicit shared-understanding gate.",
+      "load_policy": "lazy-references",
+      "context_limit": 12000,
+      "exportable": false,
       "bundled": true
     },
     {
