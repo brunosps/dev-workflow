@@ -29,7 +29,8 @@ exercem bem.
 | Controle de invocação de skill | só `name`/`description` nos wrappers | **`disable-model-invocation`** | modos por toggle | **Adotar** → flag `userInvoked` + campo `invocation` |
 | Enforcement no harness | prosa (`dw-git-discipline`, `dw-verify`) | `git-guardrails-claude-code` (hook) | hooks `pre_llm_call` + statusline | **Adotar** → hook git-guardrails + statusline |
 | Distribuição à-la-carte | só instalador de pipeline | plugin + skills.sh | plugin multi-plataforma | **Adotar** → `.claude-plugin/` gerado do registry |
-| Glossário/linguagem de domínio | `.dw/rules` + constitution + concerns | `CONTEXT.md` | — | Já coberto — skip |
+| Glossário/linguagem de domínio | `.dw/rules` + constitution + concerns | `CONTEXT.md` + `CONTEXT-MAP.md` (domain-modeling) | — | **Adotar** → Grill nativo (`dw-grilling` + `dw-domain-modeling`) + `.dw/domain/` |
+| Entrevista de alinhamento (grilling) | grill como modo de prosa | `grill-with-docs` + `grilling` (skills dedicadas) | — | **Adotar** → sessão stateful nativa com decision tree + gate |
 | Handoff entre sessões | `/dw-pause` + `.dw/STATE.md` | `/handoff` | — | Já coberto — skip |
 | Arquitetura/deep modules | já portado em `dw-simplification` | `improve-codebase-architecture` | — | Já coberto — skip |
 | Versionamento multi-skill | pacote npm único | Changesets | Changesets | Não aplicável — skip |
@@ -91,11 +92,39 @@ hooks/statusLine que o usuário definiu (uma statusline custom é respeitada e a
 saírem de sincronia com o registry. O instalador de pipeline (`dev-workflow init`) permanece
 inalterado — a distribuição à-la-carte é um caminho paralelo, não um substituto.
 
+### 5. Grill nativo — entrevista de alinhamento + domain modeling (de mattpocock)
+
+Reimplementação nativa (na nossa voz, sem copiar prosa upstream) de três skills do
+[`mattpocock/skills`](https://github.com/mattpocock/skills) (MIT):
+
+- [`skills/engineering/grill-with-docs`](https://github.com/mattpocock/skills/blob/main/skills/engineering/grill-with-docs/SKILL.md)
+- [`skills/productivity/grilling`](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md)
+- [`skills/engineering/domain-modeling`](https://github.com/mattpocock/skills/blob/main/skills/engineering/domain-modeling/SKILL.md)
+  (+ `CONTEXT-FORMAT.md` e `ADR-FORMAT.md`)
+
+O comportamento vira o modo `grill` do `/dw-brainstorm`, apoiado em duas skills bundled **internas e
+não-exportadas**: `dw-grilling` (árvore de decisão ordenada por dependência, exatamente uma decisão por turn com
+resposta recomendada, fatos descobertos e não perguntados, gate de shared-understanding) e `dw-domain-modeling`
+(vocabulário canônico, desafio de termos vagos/sobrecarregados, cross-check com o código, política de ADR raro).
+Ambas registradas em `skill-registry.json` com `exportable: false` (não entram no manifest à-la-carte) e o
+contrato de Structured Return exigido pelo `lib/skill-registry.js`.
+
+Diferenças intencionais do `.dw/`:
+
+- Glossário em **`.dw/domain/**`** (`glossary.md`, ou `context-map.md` + `contexts/<slug>.md`), **não** no
+  `CONTEXT.md`/`CONTEXT-MAP.md` da raiz do upstream nem no `.dw/rules/` auto-gerado (que é análise do código).
+- Grill é **stateful e mutante** → exige **uma autorização explícita** antes de iniciar a sessão ou escrever;
+  `grill` e `option-matrix` são mutuamente exclusivos (option-matrix vira fase posterior separada, se oferecida).
+- Alinhamento produz um one-pager de ideia no **schema `1.1`** (Resolved Decisions, Evidence, Canonical
+  Vocabulary, Remaining Decisions, Alignment State) consumido pelo `/dw-plan` sem re-perguntar decisões resolvidas.
+- ADRs roteados por `/dw-adr --scope=repo|prd`, gated no teste 3-critérios com aprovação explícita separada.
+- `/dw-analyze-project` lê e linka `.dw/domain/**` e **preserva** (nunca regenera nem sobrescreve).
+
 ## O que NÃO foi portado (e por quê)
 
-1. **`CONTEXT.md` / glossário compartilhado (mattpocock)** — já coberto por `.dw/rules/`,
-   `.dw/constitution.md` e `.dw/rules/concerns.md`, que carregam linguagem e convenções do
-   projeto de forma mais rica.
+1. **`CONTEXT.md` na raiz (mattpocock)** — a *disciplina* de domain-modeling FOI adotada (seção 5 acima), mas o
+   glossário curado vive em `.dw/domain/**`, não num `CONTEXT.md` na raiz; `.dw/rules/`, `.dw/constitution.md` e
+   `.dw/rules/concerns.md` continuam sendo análise/princípios auto-gerados, separados do vocabulário curado.
 2. **`/handoff` (mattpocock)** — já coberto por `/dw-pause` + `.dw/STATE.md` (decisões,
    bloqueios, todos, open loops) e `/dw-resume`.
 3. **`improve-codebase-architecture` / deep modules (mattpocock)** — já portado para
@@ -122,8 +151,14 @@ inalterado — a distribuição à-la-carte é um caminho paralelo, não um subs
 | Reconcile de settings | `lib/hooks.js` | — |
 | Seed init-only do modo | `.dw/minimalism.json` (via `lib/init.js`) | — |
 | Manifests à-la-carte | `.claude-plugin/plugin.json` + `marketplace.json` via `lib/build-plugin.js` | ambos |
-| Gate do repo | `lib/validate.js` (`npm run validate`) | — |
+| Gate do repo | `lib/validate.js` (`npm run validate`) + suíte `node:test` (`npm test`) | — |
 | Checagens de saúde | `lib/doctor.js` (`checkHooks`) | — |
+| Skill de grilling | `scaffold/skills/dw-grilling/SKILL.md` (+ references) | mattpocock (grilling / grill-with-docs) |
+| Skill de domain-modeling | `scaffold/skills/dw-domain-modeling/SKILL.md` (+ references) | mattpocock (domain-modeling) |
+| Modo grill nativo | `scaffold/{en,pt-br}/commands/dw-brainstorm.md` | — |
+| Artefatos de domínio | `.dw/domain/**` (criados lazy pelo grill autorizado) | — |
+| One-pager schema 1.1 | `scaffold/{en,pt-br}/templates/idea-onepager.md` | — |
+| Roteamento de ADR | `scaffold/{en,pt-br}/commands/dw-adr.md` (`--scope=repo\|prd`) | mattpocock (ADR-FORMAT) |
 
 ## Segurança do update
 
@@ -141,8 +176,11 @@ Ambos os repositórios de referência são MIT. As adoções preservam os crédi
 
 - `DietrichGebert/ponytail` (MIT, 2026 Dietrich Gebert) — decision ladder, modos de
   intensidade e statusline, na base de `dw-minimalism` e do `statusline.mjs`.
-- `mattpocock/skills` (MIT) — distinção user/model-invoked (`disable-model-invocation`) e
-  `git-guardrails-claude-code`, na base do controle de invocação e do hook git-guardrails.
+- `mattpocock/skills` (MIT) — distinção user/model-invoked (`disable-model-invocation`),
+  `git-guardrails-claude-code`, e as skills `grill-with-docs` / `grilling` / `domain-modeling` (com
+  `CONTEXT-FORMAT.md` + `ADR-FORMAT.md`), na base do controle de invocação, do hook git-guardrails e do Grill
+  nativo (`dw-grilling` + `dw-domain-modeling`). Comportamento reimplementado na nossa voz; nenhuma prosa upstream
+  copiada.
 
 A atribuição também consta no `SKILL.md` de `dw-minimalism`, no `README.md` (Acknowledgements)
 e nos cabeçalhos dos scripts de hook.
