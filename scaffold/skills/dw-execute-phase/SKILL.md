@@ -80,7 +80,7 @@ Detail in `references/atomic-commits.md` (deviation entry format) and `reference
 Every task ends with exactly one git commit:
 
 ```
-feat(<scope>): <task title> (RF-XX)
+feat(<scope>): <task title> (#<task-id>)
 
 <one-line summary of what this commit delivers>
 
@@ -89,8 +89,10 @@ feat(<scope>): <task title> (RF-XX)
 - Tests added/updated: <list>
 - Deviations: <link to deviations.md entry, if any>
 
-Closes RF-XX (partial — see tasks.md).
+Closes <REQ-ID> (partial — see tasks.md).
 ```
+
+`<REQ-ID>` is copied verbatim from `tasks.md` — `FR-N.M` in English projects, `RF-N.M` in Portuguese ones. This skill is shared by both; never hardcode a prefix.
 
 The commit message format is consistent across waves so `/dw-generate-pr` can build a clean PR body. See `references/atomic-commits.md`.
 

@@ -12,7 +12,7 @@ status: pending
 
 [Breve descrição da tarefa]
 
-**Requisitos Funcionais cobertos**: RF[X.Y], RF[X.Z] (máximo 2 por task)
+**Requisitos Funcionais cobertos**: RF-X.Y, RF-X.Z (máximo 2 por task)
 
 <requirements>
 [Lista de requisitos obrigatórios]

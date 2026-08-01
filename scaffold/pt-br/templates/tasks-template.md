@@ -19,11 +19,13 @@ feat/prd-[nome-funcionalidade]
 
 ## Tarefas
 
-| Task | Descrição | RFs | Status |
-|------|-----------|-----|--------|
-| 1.0 | [Título] | RF1.1, RF1.2 | Pendente |
-| 2.0 | [Título] | RF2.1 | Pendente |
-| 3.0 | [Título] | RF3.1, RF3.2 | Pendente |
+| Task | Descrição | RFs | Status | Commit |
+|------|-----------|-----|--------|--------|
+| 1.0 | [Título] | RF-1.1, RF-1.2 | Pendente | — |
+| 2.0 | [Título] | RF-2.1 | Pendente | — |
+| 3.0 | [Título] | RF-3.1, RF-3.2 | Pendente | — |
+
+`Commit` guarda o SHA curto escrito de volta pelo `/dw-run` quando a task fecha (passo 6). É o que torna o diff da task localizável depois — deixe `—` até a task commitar.
 
 ## Progresso
 

@@ -88,7 +88,7 @@ For each wave:
 Format (per `references/atomic-commits.md`):
 
 ```
-<type>(<scope>): <task title> (RF-XX)
+<type>(<scope>): <task title> (#<task-id>)
 
 <one-line summary>
 
@@ -97,8 +97,10 @@ Format (per `references/atomic-commits.md`):
 - Tests added/updated: <list>
 - Deviations: <link or "none">
 
-Closes RF-XX (partial — full close on tasks.md completion).
+Closes <REQ-ID> (partial — full close on tasks.md completion).
 ```
+
+`<REQ-ID>` is copied verbatim from `tasks.md` (`FR-N.M` in English projects, `RF-N.M` in Portuguese ones) — never assume a prefix.
 
 Type from Conventional Commits (`feat`, `fix`, `refactor`, `test`, `docs`, `chore`). Scope from task domain. Run `git add -A && git commit` once.
 

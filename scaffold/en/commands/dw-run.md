@@ -75,7 +75,7 @@ When available under `./.agents/skills/`, these skills are invoked per task:
    - Atomic commit message: `feat(<scope>): <task title> (#<task-id>)`.
    - Reference the FRs covered.
    - One task = one commit (unless the task explicitly has subtask milestones that earn separate commits).
-6. **Update tasks.md:** mark this task as `Done` with the commit SHA.
+6. **Update tasks.md:** set this task's `Status` to `Done` and write the short SHA (`git rev-parse --short HEAD`) into its `Commit` column. This is the only record linking a task to its diff — do not skip it.
 7. **Report:** what was done, what tests were added, what was validated.
 
 ### STOP CONDITIONS

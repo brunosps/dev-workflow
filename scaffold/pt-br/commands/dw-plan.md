@@ -113,7 +113,7 @@ Roda em modo padrão OU `plan prd`.
 
 1. **Coverage matrix sobre as dimensões do PRD** (objetivos, usuários-alvo, limites de escopo, métricas de sucesso, estratégia de rollout, pontos de integração, edge cases). Monte a matriz, credite evidência de handoff alinhado e fatos descobertos do repo, e pergunte SOMENTE as dimensões descobertas — uma decisão por vez, cada uma com resposta recomendada — usando a ferramenta de entrevista estruturada quando disponível (registre o fallback em chat caso contrário). Sem contagem fixa de perguntas; nunca re-pergunte uma decisão resolvida num one-pager alinhado.
 2. **Web search MÍNIMO 3 queries** para padrões de mercado, contexto regulatório, abordagens de competidores quando relevante.
-3. **Constitution alignment.** Cada requisito funcional (FR-N.M) inclui linha `Constitution Alignment: respects P-NNN, P-MMM` OU `no applicable principle: <motivo>`.
+3. **Constitution alignment.** Cada requisito funcional (RF-N.M) inclui linha `Constitution Alignment: respects P-NNN, P-MMM` OU `no applicable principle: <motivo>`.
 4. **Awareness multi-projeto.** Se feature cruza projetos do workspace, consulte `.dw/rules/integrations.md` e documente escopo na seção "Projetos Impactados".
 5. **Output:** `.dw/spec/prd-<feature-slug>/prd.md`.
 

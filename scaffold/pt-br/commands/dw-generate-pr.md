@@ -106,6 +106,19 @@
 
     3. **Instruir o usuário** a colar o body (Ctrl+V) no campo de descrição
 
+    ### 6. Registrar a PR de volta na spec
+
+    A URL da PR só existe depois que o usuário clica em "Create". Assim que existir, escreva de volta — senão nada do lado `.dw/` registra qual PR entregou o trabalho, e a trilha termina na branch.
+
+    ```bash
+    # Caminho rápido: resolve depois que a PR existe. Precisa do GitHub CLI; pule em silêncio se ausente.
+    gh pr view --json url -q .url 2>/dev/null
+    ```
+
+    - Se resolver uma URL, anexe na seção `## Related` do PRD como `- PR: <url>`.
+    - Se `gh` não existir ou a PR ainda não foi criada, imprima a linha exata para o usuário colar e siga. **Nunca bloqueie o comando nisso** — é registro, não gate.
+    - Para branches de bugfix, anexe a mesma linha em `.dw/bugfixes/<NNN-slug>/SUMMARY.md` sob `## Related`.
+
     ## Template da PR (copiar para clipboard)
 
     ```markdown

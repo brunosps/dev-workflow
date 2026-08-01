@@ -50,7 +50,7 @@ Then verify each level against the actual plan files.
 
 - `prd_path` (from spawn prompt): `.dw/spec/prd-<slug>/`
 - Reads:
-  - `<prd_path>/prd.md` — the goal, requirements (RF-XX), acceptance criteria
+  - `<prd_path>/prd.md` — the goal, requirements (`<REQ-ID>`, see Dimension 1), acceptance criteria
   - `<prd_path>/techspec.md` — architecture decisions
   - `<prd_path>/tasks.md` — the plan to verify
   - `<prd_path>/<NN>_task.md` — per-task detail
@@ -62,15 +62,17 @@ Then verify each level against the actual plan files.
 
 ### Dimension 1: Requirement Coverage
 
-**Question:** Does every PRD requirement (RF-XX) have at least one task addressing it?
+<critical>Requirement IDs are language-dependent. English projects number them `FR-N.M`; Portuguese projects `RF-N.M`. This skill is shared by both — NEVER hardcode a prefix. Read the IDs verbatim from `prd.md` and match those exact strings in `tasks.md`. `<REQ-ID>` below stands for whichever form the project uses.</critical>
+
+**Question:** Does every PRD requirement have at least one task addressing it?
 
 **Process:**
-1. Extract every numbered requirement from `prd.md`
-2. For each RF-XX, search `tasks.md` for tasks tagged with that RF
+1. Extract every numbered requirement ID from `prd.md` verbatim (`FR-1.1`, `RF-1.1`, …)
+2. For each `<REQ-ID>`, search `tasks.md` for tasks tagged with that exact ID
 3. List uncovered requirements
 
-**Pass:** every RF has at least one task.
-**Revise:** ≥1 RF has no task; the planner missed it.
+**Pass:** every requirement has at least one task.
+**Revise:** ≥1 requirement has no task; the planner missed it.
 **Block:** the PRD has no requirements at all (plan can't verify).
 
 ### Dimension 2: Task Completeness
@@ -174,7 +176,7 @@ After running all 6 dimensions:
 
 ### REVISE — Dimension 1: Requirement Coverage
 
-- **RF-04** ("user can reset password via email link") has no task. Suggested: add task between 05 and 06.
+- **FR-4.1** ("user can reset password via email link") has no task. Suggested: add task between 05 and 06.
 
 ### REVISE — Dimension 2: Task Completeness
 

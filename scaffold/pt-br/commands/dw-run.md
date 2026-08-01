@@ -75,7 +75,7 @@ Quando disponíveis em `./.agents/skills/`, estas skills são invocadas por task
    - Mensagem atômica: `feat(<scope>): <título da task> (#<task-id>)`.
    - Referencie FRs cobertos.
    - Uma task = um commit (exceto se task tem subtask milestones explícitos que ganham commits separados).
-6. **Atualizar tasks.md:** marcar task como `Done` com SHA do commit.
+6. **Atualizar tasks.md:** marcar `Status` da task como `Done` e escrever o SHA curto (`git rev-parse --short HEAD`) na coluna `Commit`. Esse é o único registro que liga a task ao seu diff — não pule.
 7. **Reportar:** o que foi feito, testes adicionados, o que foi validado.
 
 ### CONDIÇÕES DE PARADA

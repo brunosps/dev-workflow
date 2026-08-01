@@ -7,7 +7,7 @@ Every task in a phase commits exactly once. This drives traceability (a task's d
 Strict format. No deviations.
 
 ```
-<type>(<scope>): <task title> (RF-XX)
+<type>(<scope>): <task title> (#<task-id>)
 
 <one-line summary>
 
@@ -16,8 +16,10 @@ Strict format. No deviations.
 - Tests added/updated: <comma-separated list, or "none">
 - Deviations: <link to deviations.md entry, or "none">
 
-Closes RF-XX (partial — full close on tasks.md completion).
+Closes <REQ-ID> (partial — full close on tasks.md completion).
 ```
+
+<critical>`<REQ-ID>` is the requirement ID exactly as `prd.md` and `tasks.md` write it. English projects use `FR-N.M`; Portuguese projects use `RF-N.M`. This skill is shared by both — copy the ID verbatim, never assume a prefix.</critical>
 
 ### Field rules
 
@@ -36,7 +38,7 @@ Closes RF-XX (partial — full close on tasks.md completion).
 
 **`<task title>`** — copy from `tasks.md` task line. Imperative, concise. "Add login endpoint", not "Added login endpoint" or "Adding login endpoint".
 
-**`(RF-XX)`** — the requirement this task closes. If the task contributes to multiple, list the primary; mention the others in the body.
+**`(#<task-id>)`** — the task ID from `tasks.md` (`#1.0`, `#2.3`). This is what makes the commit findable from the task index — `/dw-run` writes the resulting SHA back into the `tasks.md` Commit column.
 
 **`<one-line summary>`** — one sentence answering "what does this commit deliver?". Different from the title (which is the task title); this is the OUTCOME.
 
@@ -44,12 +46,14 @@ Closes RF-XX (partial — full close on tasks.md completion).
 
 **Deviations link** — `.dw/spec/prd-<slug>/deviations.md#deviation-03-1` if the task triggered a Rule 1 or 2 deviation.
 
-**Closes line** — `Closes RF-XX (partial — full close on tasks.md completion)` because one task usually doesn't fully close a requirement; the whole phase does. Final task in the phase changes "(partial — ...)" to "(full)".
+**Closes line** — `Closes <REQ-ID> (partial — full close on tasks.md completion)` because one task usually doesn't fully close a requirement; the whole phase does. Final task in the phase changes "(partial — ...)" to "(full)". If the task closes more than one requirement, list them comma-separated.
 
 ## Examples
 
+Both examples come from an English project (`FR-`); a Portuguese project writes `RF-` in the same slots.
+
 ```
-feat(auth): wire JWT middleware to all /api/* routes (RF-04)
+feat(auth): wire JWT middleware to all /api/* routes (#4.0)
 
 Authenticated routes now reject requests without valid Bearer tokens.
 
@@ -58,11 +62,11 @@ Authenticated routes now reject requests without valid Bearer tokens.
 - Tests added/updated: src/middleware/auth.test.ts (12 cases — happy path, expired, malformed, missing)
 - Deviations: none
 
-Closes RF-04 (partial — full close on tasks.md completion).
+Closes FR-4.1 (partial — full close on tasks.md completion).
 ```
 
 ```
-test(orders): add integration tests for order creation flow (RF-07)
+test(orders): add integration tests for order creation flow (#7.0)
 
 Covers happy path, payment failure, inventory mismatch.
 
@@ -71,7 +75,7 @@ Covers happy path, payment failure, inventory mismatch.
 - Tests added/updated: tests/integration/orders.test.ts (8 cases)
 - Deviations: .dw/spec/prd-checkout-v2/deviations.md#deviation-08-1
 
-Closes RF-07 (partial — full close on tasks.md completion).
+Closes FR-7.2 (partial — full close on tasks.md completion).
 ```
 
 ## Verification before commit

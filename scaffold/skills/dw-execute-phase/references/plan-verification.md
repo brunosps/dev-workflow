@@ -10,12 +10,14 @@ Mid-execution discovery of plan flaws is expensive: context burned, partial comm
 
 ### 1. Requirement Coverage
 
-**Goal:** every PRD requirement (RF-XX) has at least one task addressing it.
+**Goal:** every PRD requirement (`<REQ-ID>`) has at least one task addressing it.
+
+<critical>`<REQ-ID>` is language-dependent: `FR-N.M` in English projects, `RF-N.M` in Portuguese ones. This skill is shared by both — extract the IDs verbatim from `prd.md` and match those exact strings downstream; never hardcode a prefix.</critical>
 
 **Steps:**
-1. Extract numbered requirements from `prd.md`. Pattern: `### RF-NN` or `**RF-NN:**` or numbered list under "Functional Requirements".
-2. Build `Set<RF>` of expected requirements.
-3. Scan `tasks.md` and `<NN>_task.md` files for `Closes RF-XX` / `RF: RF-XX` / `Requirement: RF-XX` markers.
+1. Extract numbered requirements from `prd.md`. Pattern: `### <REQ-ID>` or `**<REQ-ID>:**` or numbered list under "Functional Requirements" / "Requisitos Funcionais".
+2. Build `Set<REQ-ID>` of expected requirements.
+3. Scan `tasks.md` and `<NN>_task.md` files for `Closes <REQ-ID>` / the `FRs`/`RFs` table column / `Requirement: <REQ-ID>` markers.
 4. Compute `uncovered = expected - addressed`.
 
 **Pass:** `uncovered` is empty.
