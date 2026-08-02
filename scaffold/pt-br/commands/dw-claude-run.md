@@ -13,7 +13,11 @@ para implementar um prompt/spec ja preparado, captura a execucao inteira num log
 |---|---|
 | `DISPATCH` | `UUID=$(cat /proc/sys/kernel/random/uuid); cd <WORKTREE> && claude -p --session-id "$UUID" --model <MODEL> --effort <EFFORT> --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <PROMPT>)" </dev/null > <AUDIT>/<slug>.log 2>&1` |
 | `STREAM` | `--output-format stream-json --include-partial-messages --verbose` (`--verbose` e **obrigatorio** com `stream-json` no modo `-p`) |
-| `AUTO` | `--dangerously-skip-permissions` (auto-aprovacao headless; justificavel porque a worktree e isolada). Somente leitura/analise: tire-o e use `--permission-mode plan` (ou restrinja `--allowedTools`). |
+| `MODEL` | `--model <MODEL>` — `opus` · `sonnet` · `haiku` · `fable`, ou um id completo (`claude-opus-5`) |
+| `EFFORT` | `--effort <EFFORT>` — `low` · `medium` · `high` · `xhigh` · `max` |
+| `AUTO` | `--dangerously-skip-permissions` (auto-aprovacao headless para dispatch **WRITE**; justificavel porque a worktree e isolada) |
+| `AUTO_READONLY` | `--permission-mode plan` (opcionalmente `--allowedTools <lista>`). Nunca combine com `AUTO`. |
+| `NO_MCP` | `--strict-mcp-config` sem nenhum `--mcp-config` → sobe zero MCP servers |
 | `RESUME <id>` | `cd <WORKTREE> && claude --resume "$UUID" -p --effort <EFFORT> --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <FOLLOWUP_PROMPT>)" </dev/null >> <AUDIT>/<slug>.log 2>&1` |
 | `RESUME_LAST` | `claude -c -p …` (continua a conversa mais recente nesta cwd) |
 | `SESSION_ID` | **FIXADO por voce** — voce passa `--session-id "$UUID"` na 1a run, entao o id e conhecido de antemao. Gere-o (`cat /proc/sys/kernel/random/uuid` ou `uuidgen`) e grave em `<AUDIT>/<slug>.session` ANTES/no dispatch. Sem scraping do stream — o Claude e o caso facil. |

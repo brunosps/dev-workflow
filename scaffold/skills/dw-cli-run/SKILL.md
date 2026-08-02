@@ -27,7 +27,11 @@ with these slots. Substitute them into the steps below — everything else is id
 |---|---|
 | `DISPATCH` | first-run command (background, streaming → audit log, `</dev/null`) |
 | `STREAM` | flag(s) that make it emit parseable streaming events (JSON/JSONL) |
-| `AUTO` | auto-approve / non-interactive flag (justified by the isolated worktree) |
+| `MODEL` | flag that selects the model tier for this dispatch |
+| `EFFORT` | flag that selects the reasoning budget for this dispatch |
+| `AUTO` | auto-approve / non-interactive flag for a **WRITE** dispatch (justified by the isolated worktree) |
+| `AUTO_READONLY` | plan/sandbox flag for a **READ-ONLY** dispatch (makes edits impossible; no worktree needed) |
+| `NO_MCP` | flag that starts the CLI with no MCP servers (cold-start trim) |
 | `RESUME <id>` | re-run command that **continues the SAME session/context** by id |
 | `RESUME_LAST` | "resume the last session of this cwd" fallback |
 | `SESSION_ID` | how to obtain/fix the session-id (from the stream, a sidecar, or a flag) |
@@ -36,19 +40,29 @@ with these slots. Substitute them into the steps below — everything else is id
 
 If the command did not supply an adapter table, return `BLOCKED` — this skill is not invoked standalone.
 
-## RULE (hard) — never the main thread / main checkout
-Run **only** inside a **dedicated git worktree** (off main). **NEVER** fire the CLI in the repo's **main checkout**
-(the root tree on the primary branch, e.g. `~/code/<project>` on `main`) — the CLI edits autonomously and that
-would corrupt the owner's active tree. If the target is the main checkout, **ABORT** (`BLOCKED`) and instruct:
-create/use a worktree first (`git worktree add ../<project>-<slug> -b <branch> main`). Mandatory check before
-running: `git worktree list` → the target is a secondary worktree (not the one flagged as main) **AND** the CLI's
-`cwd` is that worktree.
+## Dispatch modes — WRITE and READ-ONLY
+
+Every dispatch declares its mode up front; it decides isolation, permission flags, and gate. **WRITE** edits and
+commits → worktree mandatory, `AUTO`, one per worktree, full 0–10 gate. **READ-ONLY** reads/reviews/reports → no
+worktree, `AUTO_READONLY`, freely parallel, score the report without a re-run gate. Per-mode detail:
+`references/dispatch-tuning.md`.
+
+<critical>RULE (hard) — a WRITE dispatch runs **only** inside a **dedicated git worktree** (off main). **NEVER** fire a WRITE dispatch in the repo's **main checkout** (the root tree on the primary branch, e.g. `~/code/<project>` on `main`) — the CLI edits autonomously and that would corrupt the owner's active tree. If the target is the main checkout, **ABORT** (`BLOCKED`) and instruct: create/use a worktree first (`git worktree add ../<project>-<slug> -b <branch> main`). Mandatory check before running: `git worktree list` → the target is a secondary worktree (not the one flagged as main) **AND** the CLI's `cwd` is that worktree.</critical>
+
+<critical>A READ-ONLY dispatch MAY run in the main checkout, because the read-only flags make autonomous edits impossible — that is the entire reason the worktree rule exists. This is NOT a relaxation of the WRITE rule: if the dispatch can write, it is a WRITE dispatch and the worktree is mandatory. When in doubt, treat it as WRITE. Never pass an auto-approve flag on a dispatch declared READ-ONLY.</critical>
 
 ## Pre-flight (fail early > run in the wrong place)
 1. `<cli> --version` answers (CLI + credentials present). Missing → `BLOCKED`.
-2. `git worktree list` — confirm the target worktree and that it is **not** the main checkout.
-3. A **prompt/spec** exists (what the CLI receives). Common conventions: `.dw/spec/<slug>/codex-prompt.md`
+2. **Declare the mode** (WRITE or READ-ONLY) and pick the matching `AUTO`/`AUTO_READONLY` slot.
+3. WRITE only: `git worktree list` — confirm the target worktree and that it is **not** the main checkout.
+4. A **prompt/spec** exists (what the CLI receives). Common conventions: `.dw/spec/<slug>/codex-prompt.md`
    (dev-workflow), `PROMPT.md`, `TASK.md`, or a path the owner names. **Read it** — it is the scope/fence/gate.
+
+## Cold-start cost
+A spawned CLI does not share the parent session's prompt cache and boots every configured MCP server first — on a
+small task that startup can outweigh the task. **Default: pass the adapter's `NO_MCP` slot on every dispatch whose
+prompt does not name an MCP capability.** Tool restriction, config trimming, and how to bind
+`.dw/config/routing.json` are in `references/dispatch-tuning.md` — read it when a dispatch feels overpriced.
 
 ## Where to run — pick the VEHICLE (the main thread NEVER runs inline)
 The main thread **orchestrates**; execution goes to one of these:
@@ -66,11 +80,12 @@ The main thread **orchestrates**; execution goes to one of these:
 ## Protocol
 1. **Resolve target.** Worktree + prompt path (from the user or inferred). Derive a `<slug>` (the spec slug or
    worktree tag) — it keys the durable audit log and the session sidecar.
-2. **Model + effort — the parent SIZES the complexity and proposes.** Read the prompt and size it; **propose**
-   model+effort with a one-line rationale (CLI-specific names live in the adapter table); the owner confirms or
-   overrides; if told "you pick", decide by heuristic. Signals: number of tasks; fence breadth; sensitive surface
-   (auth/security/tenant/migration/financial); "foundation/redesign/architectural" vs "mechanical fix/typo/docs";
-   E2E/secure-audit in the gate. Start **one notch below the ceiling** and escalate on failure (see Escalation).
+2. **Model + effort — routing table first, size only what it misses.** `.dw/config/routing.json` is the default
+   source: commit type → tier (`by_commit_type`), raised if the fence matches `escalate_on_surface`, then tier →
+   `MODEL`/`EFFORT` for the brand. Costs no reasoning, reproducible. Absent, or no declared type? Size it: propose
+   with a one-line rationale (signals: task count, fence breadth, sensitive surface, architectural vs mechanical,
+   E2E/secure-audit in the gate); the owner confirms or overrides. Either way start **one notch below the
+   ceiling**. A tier that keeps escalating is a routing bug — name the entry that mis-sized it.
 3. **Set up the durable audit dir (OUTSIDE the worktree).** `<AUDIT>=<main-repo-or-home>/.dw/cli-run/` — it MUST
    survive `git worktree remove` (the worktree's `QA/` is wiped on merge). Files: `<AUDIT>/<slug>.log` (stream),
    `<AUDIT>/<slug>.session` (session-id sidecar), optionally `<AUDIT>/<slug>.last.md` (final message).
@@ -129,32 +144,21 @@ without reaching 9. Always show the score + a short per-criterion rationale — 
 ceiling, **cite the specific gap** (the failing test, the file left out of fence), not just a label. Same
 evidence discipline as the five-axis rubric in `dw-review-rigor/references/self-eval-rubric.md`.
 
-## Dual evaluation: the CLI auto-gates (max effort) → the parent re-gates (compares scores)
-The CLI **can't grade its own exam alone** — hence two layers. The CLI auto-gates cheaply (close to the work) and
-**the parent/orchestrator audits independently** and **compares the scores** (catches an inflated self-score). The
-parent is the dispatching session — possibly Claude itself; the re-gate is provider-neutral.
-1. **CLI auto-gate (loop, MAX effort).** The prompt MUST instruct: after implementing, **run the SAME gate** and
-   give a **self-score 0–10**; **fix and re-run while the self-score <9 or the gate isn't green**, at max effort.
-   Stop at self-score ≥9 + green gate (or report `blockers`). The final report carries the self-score + per
-   criterion.
-2. **Parent re-gate (independent).** When the CLI declares pass, the parent/orchestrator **re-runs the SAME gate**
-   (fan-out, prefer Workflow → `/workflows`) and gives its **own 0–10** — without trusting the self-score (a worker
-   never signs off on its own exam, even when that worker is Claude).
-3. **Compare + decide.** Parent ≥9 and small gap → **PASS** (ready for the owner's merge decision). Parent <9 OR a
-   large gap (CLI overestimated) → re-execute: hand the gaps back via **session resume** (step 5, max effort) and
-   repeat 1→2→3 until it converges. **The score that counts for acceptance is the parent's**; the self-score is
-   signal + an inflation detector. Always record both scores + the gap in the Structured Return.
+## Dual evaluation: the worker auto-gates → the parent re-gates
+A worker **can't grade its own exam alone** — hence two layers. (1) The worker loops at max effort until its own
+score is ≥9 with a green gate. (2) The parent independently re-runs the SAME gate and scores it, without trusting
+the self-score — **a worker never signs off on its own exam, even when that worker is Claude**. (3) The parent's
+score is what counts; a large gap means the worker overestimated → hand the gaps back via session resume and
+repeat. Record both scores and the gap. Prefer a **different brand** for the re-gate when one is installed; with
+only one, re-gate in a separate dispatch at a different tier — never reuse the executing session. Full protocol:
+`references/dispatch-tuning.md`.
 
 ## Graded escalation on failure
 If the score is low / the gate failed / the CLI didn't finish, **re-run the SAME task one notch up** — gradual, no
-giving up on the first stumble, no jumping to the top.
-- **Ladder (one at a time):** first **effort** low→medium→high→xhigh (adapter names them); exhausted, bump the
-  **model** one tier and reset effort to high. Re-run and **re-score**.
-- **Continue vs restart:** coherent partial edits → **resume the session** (step 5, keeps context). Broken/dirty
-  worktree → **reset first** (`git -C <worktree> reset --hard && git clean -fd`) and run fresh at the higher notch
-  — don't stack error on error.
-- **Stop:** at **score ≥9** (ready for the gate) OR when **exhausted** (strongest model + max effort still below)
-  → `BLOCKED` with evidence. Announce each notch; with autonomy, escalate to the ceiling yourself.
+giving up on the first stumble, no jumping to the top. **Ladder:** effort first (`low`→`max`), then bump the model
+one tier and reset effort. **Stop** at score ≥9, or `BLOCKED` with evidence when the ceiling is exhausted.
+Announce each notch. Full ladder, continue-vs-restart rules, and how to read escalation as a routing-table signal:
+`references/dispatch-tuning.md`.
 
 ## Detailed output → direct the next step
 The delivery must be **detailed enough for the parent to decide the next step** — not an opaque "done". When it

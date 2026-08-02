@@ -13,7 +13,11 @@ implementar um prompt/spec ja preparado, captura a execucao inteira num log de a
 |---|---|
 | `DISPATCH` | `cd <WORKTREE> && codex exec --skip-git-repo-check -m <MODEL> --config model_reasoning_effort="<EFFORT>" --dangerously-bypass-approvals-and-sandbox --json -o <AUDIT>/<slug>.last.md "$(cat <PROMPT>)" </dev/null > <AUDIT>/<slug>.log 2>&1` |
 | `STREAM` | `--json` (eventos JSONL) |
-| `AUTO` | `--dangerously-bypass-approvals-and-sandbox` (sem sandbox + sem approvals = full access **com rede**, p/ o CLI rodar o gate; justificavel porque a worktree e isolada). Edicao sem gate de rede: `--sandbox workspace-write --full-auto`. Somente leitura/analise: `--sandbox read-only` (sem `--full-auto`). |
+| `MODEL` | `-m <MODEL>` — `gpt-5.5` · `gpt-5.3-codex` · `gpt-5.4` · `gpt-5.3-codex-spark` · `gpt-5.4-mini` |
+| `EFFORT` | `--config model_reasoning_effort="<EFFORT>"` — `low` · `medium` · `high` · `xhigh` |
+| `AUTO` | `--dangerously-bypass-approvals-and-sandbox` (sem sandbox + sem approvals = full access **com rede**, p/ o CLI rodar o gate; **somente dispatch WRITE**, justificavel porque a worktree e isolada). Edicao sem gate de rede: `--sandbox workspace-write --full-auto`. |
+| `AUTO_READONLY` | `--sandbox read-only` (sem `--full-auto`). Nunca combine com `AUTO`. |
+| `NO_MCP` | `-c mcp_servers='{}'` → sobe zero MCP servers, preserva auth e o resto do `config.toml`. Alternativa mais bruta: `--ignore-user-config` (tambem derruba os defaults de modelo — ai `MODEL` + `EFFORT` viram obrigatorios). |
 | `RESUME <id>` | `cd <WORKTREE> && codex exec resume <THREAD_ID> --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox --json "$(cat <FOLLOWUP_PROMPT>)" </dev/null >> <AUDIT>/<slug>.log 2>&1` |
 | `RESUME_LAST` | `codex exec resume --last …` (filtra por cwd = a worktree) |
 | `SESSION_ID` | Codex **nao tem flag pra fixar** o id → **capture** o thread id do stream da 1a run: `grep -oE '"thread_id":"[^"]*"' <AUDIT>/<slug>.log \| head -1` (do evento `thread.started`) → grave em `<AUDIT>/<slug>.session`. |

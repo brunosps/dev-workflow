@@ -13,7 +13,11 @@ the delivery 0–10, escalate on failure, and **STOP for the gate**.
 |---|---|
 | `DISPATCH` | `cd <WORKTREE> && codex exec --skip-git-repo-check -m <MODEL> --config model_reasoning_effort="<EFFORT>" --dangerously-bypass-approvals-and-sandbox --json -o <AUDIT>/<slug>.last.md "$(cat <PROMPT>)" </dev/null > <AUDIT>/<slug>.log 2>&1` |
 | `STREAM` | `--json` (JSONL events) |
-| `AUTO` | `--dangerously-bypass-approvals-and-sandbox` (no sandbox + no approvals = full access **with network** so the CLI can run the gate; justified because the worktree is isolated). Edits without a network gate: `--sandbox workspace-write --full-auto`. Read-only/analysis: `--sandbox read-only` (drop `--full-auto`). |
+| `MODEL` | `-m <MODEL>` — `gpt-5.5` · `gpt-5.3-codex` · `gpt-5.4` · `gpt-5.3-codex-spark` · `gpt-5.4-mini` |
+| `EFFORT` | `--config model_reasoning_effort="<EFFORT>"` — `low` · `medium` · `high` · `xhigh` |
+| `AUTO` | `--dangerously-bypass-approvals-and-sandbox` (no sandbox + no approvals = full access **with network** so the CLI can run the gate; **WRITE** dispatch only, justified because the worktree is isolated). Edits without a network gate: `--sandbox workspace-write --full-auto`. |
+| `AUTO_READONLY` | `--sandbox read-only` (drop `--full-auto`). Never combine with `AUTO`. |
+| `NO_MCP` | `-c mcp_servers='{}'` → boots zero MCP servers, keeps auth and the rest of `config.toml`. Blunter alternative: `--ignore-user-config` (also drops model defaults — then `MODEL` + `EFFORT` are mandatory). |
 | `RESUME <id>` | `cd <WORKTREE> && codex exec resume <THREAD_ID> --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox --json "$(cat <FOLLOWUP_PROMPT>)" </dev/null >> <AUDIT>/<slug>.log 2>&1` |
 | `RESUME_LAST` | `codex exec resume --last …` (filters by cwd = the worktree) |
 | `SESSION_ID` | Codex has **no flag to fix** the id → **capture** the thread id from the first run's stream: `grep -oE '"thread_id":"[^"]*"' <AUDIT>/<slug>.log \| head -1` (from the `thread.started` event) → write to `<AUDIT>/<slug>.session`. |

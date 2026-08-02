@@ -13,7 +13,11 @@ session**, score the delivery 0–10, escalate on failure, and **STOP for the ga
 |---|---|
 | `DISPATCH` | `UUID=$(cat /proc/sys/kernel/random/uuid); cd <WORKTREE> && claude -p --session-id "$UUID" --model <MODEL> --effort <EFFORT> --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <PROMPT>)" </dev/null > <AUDIT>/<slug>.log 2>&1` |
 | `STREAM` | `--output-format stream-json --include-partial-messages --verbose` (`--verbose` is **required** with `stream-json` in `-p` mode) |
-| `AUTO` | `--dangerously-skip-permissions` (headless auto-approve; justified because the worktree is isolated). Read-only/analysis: drop it and pass `--permission-mode plan` (or restrict `--allowedTools`). |
+| `MODEL` | `--model <MODEL>` — `opus` · `sonnet` · `haiku` · `fable`, or a full id (`claude-opus-5`) |
+| `EFFORT` | `--effort <EFFORT>` — `low` · `medium` · `high` · `xhigh` · `max` |
+| `AUTO` | `--dangerously-skip-permissions` (headless auto-approve for a **WRITE** dispatch; justified because the worktree is isolated) |
+| `AUTO_READONLY` | `--permission-mode plan` (optionally `--allowedTools <list>`). Never combine with `AUTO`. |
+| `NO_MCP` | `--strict-mcp-config` with no `--mcp-config` → boots zero MCP servers |
 | `RESUME <id>` | `cd <WORKTREE> && claude --resume "$UUID" -p --effort <EFFORT> --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <FOLLOWUP_PROMPT>)" </dev/null >> <AUDIT>/<slug>.log 2>&1` |
 | `RESUME_LAST` | `claude -c -p …` (continue the most recent conversation in this cwd) |
 | `SESSION_ID` | **FIXED by you** — you pass `--session-id "$UUID"` on the first run, so the id is known up front. Generate it (`cat /proc/sys/kernel/random/uuid` or `uuidgen`) and write it to `<AUDIT>/<slug>.session` BEFORE/at dispatch. No stream-scraping needed — Claude is the easy case. |

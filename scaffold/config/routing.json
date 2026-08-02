@@ -1,0 +1,60 @@
+{
+  "_note": "Dispatch routing for the CLI runners (/dw-claude-run, /dw-codex-run) via the dw-cli-run skill. Maps a task's Conventional-Commit type to a tier, and a tier to a concrete model + effort per brand. Seeded once on init and NEVER overwritten on update — model availability differs per account, so this file is yours to edit. Verify the model ids against `claude --help` / `codex --help` before trusting them; the shipped values are conservative defaults, not a guarantee that your account has access.",
+  "schema_version": "1.0",
+
+  "brands": {
+    "claude": { "detect": "claude --version" },
+    "codex": { "detect": "codex --version" }
+  },
+
+  "tiers": {
+    "light": {
+      "_use": "mechanical, low-ambiguity work; the answer is obvious and the diff is small",
+      "claude": { "model": "haiku", "effort": "low" },
+      "codex": { "model": "gpt-5.4-mini", "effort": "low" }
+    },
+    "standard": {
+      "_use": "normal feature and fix work",
+      "claude": { "model": "sonnet", "effort": "medium" },
+      "codex": { "model": "gpt-5.3-codex", "effort": "medium" }
+    },
+    "heavy": {
+      "_use": "architectural, security-sensitive, or wide-blast-radius work",
+      "claude": { "model": "opus", "effort": "high" },
+      "codex": { "model": "gpt-5.5", "effort": "high" }
+    }
+  },
+
+  "by_commit_type": {
+    "_note": "The task's type is already declared in tasks.md and in the atomic commit subject — no new inference needed.",
+    "chore": "light",
+    "docs": "light",
+    "style": "light",
+    "ci": "light",
+    "test": "standard",
+    "fix": "standard",
+    "feat": "standard",
+    "build": "standard",
+    "refactor": "standard",
+    "perf": "heavy"
+  },
+
+  "escalate_on_surface": {
+    "_note": "If the task's fence touches any of these, override the type-derived tier upward. Match against file paths and the task title.",
+    "tier": "heavy",
+    "patterns": ["auth", "session", "token", "credential", "migration", "payment", "billing", "invoice", "tenant", "crypto", "permission"]
+  },
+
+  "validation": {
+    "_note": "The worker never signs off on its own exam. Cross-brand is the default because a second vendor fails differently.",
+    "cross_brand": "preferred",
+    "degrade": "When only one brand is installed, validate in a SEPARATE dispatch at a different tier — never reuse the executing session.",
+    "acceptance_score": 9
+  },
+
+  "defaults": {
+    "_note": "Applied to every dispatch unless the prompt names a capability that needs otherwise.",
+    "no_mcp": true,
+    "read_only_skips_worktree": true
+  }
+}
