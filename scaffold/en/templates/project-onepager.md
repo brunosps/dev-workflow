@@ -44,12 +44,14 @@ services: []
 
 [Generated services from the docker-compose-recipes skill. Filled by /dw-new-project.]
 
-| Service | Port (host) | UI | Default credentials |
-|---------|-------------|----|--------------------|
-| postgres | 5432 | — | POSTGRES_USER=app, POSTGRES_PASSWORD=app, POSTGRES_DB=app |
+| Service | Port (host) | UI | Credentials |
+|---------|-------------|----|-------------|
+| postgres | 127.0.0.1:5432 | — | POSTGRES_USER=app, POSTGRES_PASSWORD required in `.env` (no default), POSTGRES_DB=app |
 | redis | 6379 | — | (no auth in dev) |
 | mailpit | 1025 (smtp), 8025 (UI) | http://localhost:8025 | (no auth) |
 | ... | ... | ... | ... |
+
+When Postgres + pgvector is selected, mark the bundled `pgvector/pgvector:0.8.2-pg18` image as restricted to a trusted single-user local workstation. It must not be proposed for production, remote development hosts, or shared CI runners.
 
 ## Architecture Diagram
 

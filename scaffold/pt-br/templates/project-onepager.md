@@ -44,12 +44,14 @@ services: []
 
 [Servicos gerados a partir da skill docker-compose-recipes. Preenchido pelo /dw-new-project.]
 
-| Servico | Porta (host) | UI | Credenciais default |
-|---------|--------------|----|--------------------|
-| postgres | 5432 | — | POSTGRES_USER=app, POSTGRES_PASSWORD=app, POSTGRES_DB=app |
+| Servico | Porta (host) | UI | Credenciais |
+|---------|--------------|----|-------------|
+| postgres | 127.0.0.1:5432 | — | POSTGRES_USER=app, POSTGRES_PASSWORD obrigatoria no `.env` (sem default), POSTGRES_DB=app |
 | redis | 6379 | — | (sem auth em dev) |
 | mailpit | 1025 (smtp), 8025 (UI) | http://localhost:8025 | (sem auth) |
 | ... | ... | ... | ... |
+
+Quando Postgres + pgvector for selecionado, marque a imagem bundled `pgvector/pgvector:0.8.2-pg18` como restrita a uma workstation local confiavel de um unico usuario. Ela nao pode ser proposta para producao, host de desenvolvimento remoto ou runner de CI compartilhado.
 
 ## Diagrama da Arquitetura
 

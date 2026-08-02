@@ -2,16 +2,17 @@
 # Env vars: POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_PORT (default 5432)
 # Application-side: derive DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 # The image ships pgvector; create the extension in an application migration with: CREATE EXTENSION IF NOT EXISTS vector;
+# Scope: trusted single-user local workstation only. The loopback port supports applications running on the host.
 
 postgres:
-  image: pgvector/pgvector:0.8.2-pg18
+  image: pgvector/pgvector:0.8.2-pg18@sha256:42e7f6b4e1eceb02ff14e3e6bc6108bbe259abbe83879dc1845d0da1ddeb555d
   restart: unless-stopped
   environment:
     POSTGRES_USER: ${POSTGRES_USER:-app}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     POSTGRES_DB: ${POSTGRES_DB:-app}
   ports:
-    - "${POSTGRES_PORT:-5432}:5432"
+    - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
   volumes:
     - postgres_data:/var/lib/postgresql
   healthcheck:
@@ -25,7 +26,8 @@ postgres:
 # volumes:
 #   postgres_data: {}
 #
-# Prod notes:
-# - Use a current patch release derived from PostgreSQL 18 and pgvector 0.8.2 or newer compatible patch.
-# - Move POSTGRES_PASSWORD to a secret and remove the public port mapping.
+# Deployment restriction:
+# - Do not use this image in production, on remote development hosts, or on shared CI runners.
+# - For those environments, select a separately reviewed image or managed service and rerun the security gate.
+# - Use a secret manager and do not publish the data-tier port.
 # - Keep CREATE EXTENSION and vector indexes in reviewed application migrations.
