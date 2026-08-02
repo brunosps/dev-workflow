@@ -129,10 +129,10 @@ Cada opcao lista estimativa de tamanho final, notas de attack surface, debug-abi
 
 Apresente os servicos detectados na Fase 0.3 como checklist. Usuario pode:
 - **Aceitar** — incluir todos os detectados no `docker-compose.dev.yml`
-- **Adicionar** — incluir extras (ex.: MailHog se SMTP usado em codigo, Jaeger se OTel)
+- **Adicionar** — incluir extras (ex.: Mailpit se SMTP usado em codigo, Jaeger se OTel)
 - **Remover** — dropar um detectado (ex.: Postgres gerenciado em dev tambem)
 
-Sempre ofereca MailHog se algum lib de envio de email foi detectada e nao tem servico de email no dev.
+Sempre ofereca Mailpit se algum lib de envio de email foi detectada e nao tem servico de email no dev.
 
 Se pgvector for detectado no projeto, nao ha recipe bundled a que recorrer — ela foi removida porque a imagem carregava CVEs sem correcao upstream. Mantenha a imagem que o projeto ja usa e diga claramente ao usuario que ela precisa de revisao propria: uma imagem reconstruida, ou um Postgres gerenciado com a extensao `vector` habilitada. Nao troque a imagem por conta propria.
 
@@ -222,7 +222,7 @@ Requisitos chave (toda linguagem):
 - `restart: always`.
 - Network interna. SEM portas publicas exceto via reverse proxy.
 - Secrets via bloco `secrets:` ou manager externo.
-- Drope servicos so-de-dev (sem MailHog, Mailpit, smtp4dev, LocalStack, MinIO a menos que explicitamente preciso em prod).
+- Drope servicos so-de-dev (sem Mailpit, Mailpit, smtp4dev, LocalStack, MinIO a menos que explicitamente preciso em prod).
 - Para busca vetorial, use imagem revisada separadamente ou servico Postgres gerenciado com a extensao `vector`; este projeto nao distribui imagem pgvector validada.
 
 **`.dockerignore`** prod: mais restritivo que dev. Exclua testes, `tests/`, `.github/`, `.dw/`, `.agents/`, todo markdown exceto licenca.
@@ -264,7 +264,7 @@ mode: <dev|prod|both|audit|dry-run>
 languages: [...]
 frameworks: { web: '...', api: '...' }
 services_detected: [postgres, redis, ...]
-services_added: [mailhog, ...]
+services_added: [mailpit, ...]
 base_image_strategy: <conservative|balanced|bold>
 ---
 ```
@@ -300,7 +300,7 @@ Secoes:
 - <critical>Nunca sobrescreva em silencio. Se `Dockerfile`/`docker-compose.*.yml`/`.dockerignore` existe, default para `--audit`.</critical>
 - <critical>Imagens prod NUNCA incluem secrets, tooling SDK de dev, source nao compilado, ou fixtures de teste.</critical>
 - <critical>Imagens prod SEMPRE rodam como usuario nao-root.</critical>
-- <critical>Compose prod NUNCA inclui MailHog, Mailpit, smtp4dev, LocalStack, ou servicos so-de-dev.</critical>
+- <critical>Compose prod NUNCA inclui Mailpit, Mailpit, smtp4dev, LocalStack, ou servicos so-de-dev.</critical>
 - <critical>Se `--audit` acha CRITICAL (secrets em ENV, root user, portas publicas em data tier), Next Steps lista o fix como REQUIRED antes de deploy.</critical>
 - NAO use tag `:latest` em lugar nenhum.
 - NAO execute comandos compose deste comando — gere arquivos, o usuario roda `docker compose up`.

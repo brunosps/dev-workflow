@@ -82,7 +82,7 @@ Use `AskUserQuestion` quando disponivel; senao prompts numerados. Pergunte em **
 6. **Database**: Postgres / MySQL / SQLite (arquivo, sem service) / MongoDB (fora do escopo dos compose recipes — anote e siga sem service se escolhido) / nenhum. Nao ha recipe bundled de pgvector: a imagem carregava CVEs sem correcao upstream e nenhum artefato bundled conseguia limpa-las. Se o projeto precisar de busca vetorial, anote e deixe o usuario escolher uma imagem revisada separadamente ou um Postgres gerenciado com a extensao habilitada.
 7. **Cache**: Redis / Memcached / nenhum
 8. **Fila / message broker**: pg-boss (Node + Postgres, sem service extra), BullMQ (so Node + Redis), Celery (so Python), RabbitMQ (qualquer), LocalStack SQS (qualquer), nenhum. Se escolheu, pergunte tambem se vai ter workers async.
-9. **Email — captura em dev** (default: **Mailpit**, so pergunte se quer override): Mailpit / MailHog / smtp4dev / pular
+9. **Email — captura em dev** (default: **Mailpit**, so pergunte se quer override): Mailpit / smtp4dev / pular
 10. **Email — destino em prod** (so pergunte se quer email): SMTP relay / SendGrid / Resend / Postmark / SES / pular
 11. **Object storage**: S3 (real, sem service) / MinIO (dev) / GCS (sem service) / nenhum
 12. **Search**: Meilisearch / Typesense / Elasticsearch / nenhum
@@ -218,7 +218,7 @@ Scaffold minimo:
 | Database | <db ou n/a> |
 | Cache | <cache ou n/a> |
 | Fila | <fila ou n/a> |
-| Email (dev) | <mailpit|mailhog|smtp4dev|nenhum> |
+| Email (dev) | <mailpit|smtp4dev|nenhum> |
 | Search | <search ou n/a> |
 | Observability | <observability ou n/a> |
 | Reverse proxy | <traefik|nenhum> |
@@ -324,7 +324,7 @@ monorepo: <pnpm-workspaces|turborepo|nx|none>
 
 - <critical>NUNCA pule o gate de aprovacao da Fase 2. Se rodando em contexto nao-interativo, aborte com: "/dw-new-project exige aprovacao interativa; rerode com --dry-run para so planejar."</critical>
 - <critical>NUNCA rode tools `create-*` fora de `{{TARGET_DIR}}`. CWD de cada comando e o target dir.</critical>
-- <critical>Se MailHog/Mailpit/smtp4dev foi selecionado, NUNCA tambem ligue um SMTP real em dev. O compose de dev SEMPRE captura.</critical>
+- <critical>Se Mailpit/smtp4dev foi selecionado, NUNCA tambem ligue um SMTP real em dev. O compose de dev SEMPRE captura.</critical>
 - <critical>Se uma tool `create-*` falha, PARE. Nao siga para gerar compose — scaffold parcial confunde os comandos seguintes.</critical>
 - NAO pin de versao SDK Node/Python/.NET/Rust dentro do projeto a nao ser que o usuario peca; use `package.json` engines / `pyproject.toml` / `global.json` / `rust-toolchain.toml` para indicar intencao sem forcar.
 - NAO baked secrets em arquivo gerado. `.env.example` contem defaults nao secretos de dev e chaves secretas obrigatorias vazias; valores reais ficam em `.env` nao versionado.

@@ -12,7 +12,7 @@ A project's `.env` is the local source of truth; `.env.example` documents requir
 
 - **Service-scoped** vars use the upstream image's convention: `POSTGRES_USER`, `MYSQL_ROOT_PASSWORD`, `MEILI_MASTER_KEY`, etc. This avoids surprises when reading the image's documentation.
 - **Application-scoped** vars use a generic name that spans implementations: `DATABASE_URL`, `REDIS_URL`, `SMTP_HOST`, `AWS_ENDPOINT_URL`. The application reads these, not the service-specific ones.
-- **Port overrides** use `<SERVICE>_PORT` (or `<SERVICE>_<ROLE>_PORT` when there are several): `POSTGRES_PORT`, `MAILHOG_SMTP_PORT`, `MAILHOG_UI_PORT`, `RABBITMQ_PORT`, `RABBITMQ_UI_PORT`.
+- **Port overrides** use `<SERVICE>_PORT` (or `<SERVICE>_<ROLE>_PORT` when there are several): `POSTGRES_PORT`, `MAILPIT_SMTP_PORT`, `MAILPIT_UI_PORT`, `RABBITMQ_PORT`, `RABBITMQ_UI_PORT`.
 
 ## Mapping between service vars and app vars
 
@@ -50,11 +50,11 @@ Never commit a `.env`. Always commit a `.env.example`.
 | Redis URL | `REDIS_URL` | `REDIS_PASSWORD` (if set) |
 | RabbitMQ URL | `AMQP_URL` | `RABBITMQ_USER`, `RABBITMQ_PASSWORD` |
 | AWS-compatible | `AWS_ENDPOINT_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | LocalStack: `test`/`test`. MinIO: `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD` |
-| SMTP | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_SECURE` | Service hostname (`mailhog`/`mailpit`/`smtp4dev`) + recipe's SMTP port |
+| SMTP | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_SECURE` | Service hostname (`mailpit`/`smtp4dev`) + recipe's SMTP port |
 | OTel | `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://jaeger:4318` |
 
 ## Reserved names
 
 The recipes use these env var names. Do NOT reuse them for unrelated config:
 
-`POSTGRES_*`, `MYSQL_*`, `MEILI_*`, `MINIO_*`, `RABBITMQ_*`, `MAILHOG_*`, `MAILPIT_*`, `SMTP4DEV_*`, `JAEGER_*`, `TRAEFIK_*`, `LOCALSTACK_*`, `ELASTIC_*`, `TYPESENSE_*`, `MEMCACHED_*`, `REDIS_*`.
+`POSTGRES_*`, `MYSQL_*`, `MEILI_*`, `MINIO_*`, `RABBITMQ_*`, `MAILPIT_*`, `SMTP4DEV_*`, `JAEGER_*`, `TRAEFIK_*`, `LOCALSTACK_*`, `ELASTIC_*`, `TYPESENSE_*`, `MEMCACHED_*`, `REDIS_*`.

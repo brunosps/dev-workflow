@@ -12,7 +12,6 @@ Every recipe ships a healthcheck. App services that depend on infra MUST gate st
 | Memcached | `echo stats | nc -w 1 localhost 11211 \| grep -q uptime` | Memcached has no native ping; stats command is the cheapest readiness signal |
 | RabbitMQ | `rabbitmq-diagnostics ping` | Built-in; takes ~30s to be ready, hence `start_period: 30s` |
 | LocalStack | `curl -sf http://localhost:4566/_localstack/health \| grep -q running` | Internal endpoint reports per-service readiness |
-| MailHog | `wget --spider http://localhost:8025` | UI port responds when SMTP is also ready |
 | Mailpit | `wget --spider http://localhost:8025` | UI port responds when SMTP is also ready |
 | smtp4dev | `wget --spider http://localhost:80` | UI on internal port 80 |
 | MinIO | `curl -f http://localhost:9000/minio/health/live` | Documented liveness endpoint |

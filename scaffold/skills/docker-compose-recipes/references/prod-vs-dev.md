@@ -46,7 +46,7 @@ Every credential-bearing dev recipe binds its host port to `127.0.0.1` so apps o
 - **Remove entirely from prod compose.** LocalStack is dev-only.
 - Replace with the real AWS endpoints; `AWS_ENDPOINT_URL` becomes unset (default to AWS).
 
-### MailHog / Mailpit / smtp4dev
+### Mailpit / smtp4dev
 
 - **Remove entirely from prod compose.** Email-in-dev tools are dev-only.
 - Replace with a real provider via `SMTP_*` or API client (SendGrid, Resend, Postmark, SES).
@@ -85,6 +85,6 @@ Every credential-bearing dev recipe binds its host port to `127.0.0.1` so apps o
 - Use `:latest` tags.
 - Expose data-tier ports publicly.
 - Pin any image by digest (it blocks the base-image security rebuilds prod depends on).
-- Include MailHog / Mailpit / smtp4dev / LocalStack.
+- Include Mailpit / smtp4dev / LocalStack.
 - Skip healthchecks.
 - Forget to set non-root `USER` in the application Dockerfile.

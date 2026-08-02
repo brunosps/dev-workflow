@@ -82,7 +82,7 @@ Use `AskUserQuestion` when available; otherwise plain numbered prompts. Ask in *
 6. **Database**: Postgres / MySQL / SQLite (file, no service) / MongoDB (out of scope for compose recipes — note and skip if chosen) / none. There is no bundled pgvector recipe: the image carried unfixed upstream CVEs and no bundled artifact could clear them. If the project needs vector search, note it and let the user pick a separately reviewed image or a managed Postgres with the extension enabled.
 7. **Cache**: Redis / Memcached / none
 8. **Queue / message broker**: pg-boss (Node + Postgres, no extra service), BullMQ (Node + Redis), Celery (Python only), RabbitMQ (any), LocalStack SQS (any), none. If chosen, also ask whether the project will have async workers.
-9. **Email — dev capture** (default: **Mailpit**, ask only if user wants to override): Mailpit / MailHog / smtp4dev / skip
+9. **Email — dev capture** (default: **Mailpit**, ask only if user wants to override): Mailpit / smtp4dev / skip
 10. **Email — prod target** (only ask if user wants email at all): SMTP relay / SendGrid / Resend / Postmark / SES / skip
 11. **Object storage**: S3 (real, no service in compose) / MinIO (dev) / GCS (no service) / none
 12. **Search**: Meilisearch / Typesense / Elasticsearch / none
@@ -218,7 +218,7 @@ Minimal scaffold:
 | Database | <db or n/a> |
 | Cache | <cache or n/a> |
 | Queue | <queue or n/a> |
-| Email (dev) | <mailpit|mailhog|smtp4dev|none> |
+| Email (dev) | <mailpit|smtp4dev|none> |
 | Search | <search or n/a> |
 | Observability | <observability or n/a> |
 | Reverse proxy | <traefik|none> |
@@ -324,7 +324,7 @@ monorepo: <pnpm-workspaces|turborepo|nx|none>
 
 - <critical>NEVER bypass the Phase 2 approval gate. If invoked in a non-interactive context, abort with: "/dw-new-project requires an interactive approval; rerun with --dry-run to plan-only."</critical>
 - <critical>NEVER run `create-*` tools outside `{{TARGET_DIR}}`. Each command's CWD is the target dir.</critical>
-- <critical>If MailHog/Mailpit/smtp4dev was selected, NEVER also wire a real SMTP into dev. The dev compose ALWAYS captures.</critical>
+- <critical>If Mailpit/smtp4dev was selected, NEVER also wire a real SMTP into dev. The dev compose ALWAYS captures.</critical>
 - <critical>If a `create-*` tool fails, STOP execution. Do not skip ahead to compose generation — partial scaffolds confuse later commands.</critical>
 - Do NOT pin Node/Python/.NET/Rust SDK versions inside the project unless the user asks; rely on `package.json` engines / `pyproject.toml` / `global.json` / `rust-toolchain.toml` to express intent without forcing.
 - Do NOT bake secrets into any generated file. `.env.example` has non-secret dev defaults and empty required secret keys; real values live in untracked `.env`.

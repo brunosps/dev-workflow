@@ -94,3 +94,27 @@ test('no recipe pins an image by digest', () => {
 
   assert.deepEqual(pinned, [], `digest pins block base-image security rebuilds: ${pinned.join(', ')}`);
 });
+
+// The opposite failure mode. A floating tag makes a scan result describe what was
+// pulled that day, not what the next user runs — minio/minio:latest reported
+// 6 CRITICAL / 76 HIGH with no way to say which build that was.
+test('no recipe floats on a `latest` tag', () => {
+  const floating = recipes
+    .filter(({ body }) => /^\s*image:\s*\S+:latest\s*$/m.test(body))
+    .map(({ name }) => name);
+
+  assert.deepEqual(floating, [], `floating tags are not reproducible: ${floating.join(', ')}`);
+});
+
+// Removed 2026-08-02 after a full image sweep. MailHog reported 109 CRITICAL /
+// 1250 HIGH with 1359 fixable — an image unrebuilt since 2020 — while Mailpit,
+// already the documented default, scans 0/0. Both do the same job.
+test('no bundled MailHog recipe ships', () => {
+  const names = recipes.map(({ name }) => name);
+  assert.ok(!names.includes('mailhog.yml'), 'mailhog.yml is back');
+
+  const referencing = recipes
+    .filter(({ body }) => /image:\s*\S*mailhog/i.test(body))
+    .map(({ name }) => name);
+  assert.deepEqual(referencing, [], `recipe(s) reference a MailHog image: ${referencing.join(', ')}`);
+});

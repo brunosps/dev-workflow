@@ -27,7 +27,7 @@ services: []
 | Database | Postgres / MySQL / SQLite / MongoDB / none | [why this DB — relational, transactional needs, etc. Vector search has no bundled recipe; name the reviewed image or managed service if the project needs it] |
 | Cache | Redis / Memcached / none | [why or why not] |
 | Queue | pg-boss / BullMQ / Celery / RabbitMQ / LocalStack SQS / none | [why or why not + sync vs async workers] |
-| Email — dev | Mailpit (default) / MailHog / smtp4dev / none | [usually Mailpit — capture only, never sends real mail] |
+| Email — dev | Mailpit (default) / smtp4dev / none | [usually Mailpit — capture only, never sends real mail] |
 | Email — prod | SMTP / SendGrid / Resend / Postmark / SES / none | [why this provider — volume, deliverability, cost] |
 | Object storage | S3 / MinIO (dev) / GCS / none | [why or why not] |
 | Search | Meilisearch / Typesense / Elasticsearch / none | [why this engine — features, scale, simplicity] |

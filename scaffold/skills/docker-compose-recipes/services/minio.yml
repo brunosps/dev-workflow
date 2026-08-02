@@ -1,9 +1,13 @@
 # MinIO — S3-compatible object storage (dev replacement for AWS S3)
+# Pinned, not `latest`: a floating tag makes a scan result describe what was pulled
+# that day rather than what the next user runs. This is the newest release published
+# to Docker Hub (2025-09-07); MinIO stopped pushing there afterwards, so `latest`
+# currently resolves to the same image — the pin buys reproducibility, not fewer CVEs.
 # Env vars: MINIO_ROOT_USER, MINIO_ROOT_PASSWORD, MINIO_API_PORT (default 9000), MINIO_UI_PORT (default 9001)
 # Application-side: AWS_ENDPOINT_URL=http://minio:9000; AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}; AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
 
 minio:
-  image: minio/minio:latest
+  image: minio/minio:RELEASE.2025-09-07T16-13-09Z
   restart: unless-stopped
   command: server /data --console-address ":9001"
   environment:

@@ -55,7 +55,6 @@ Each row points to `services/<name>.yml`.
 | RabbitMQ 3 (management-alpine) | Message broker + UI | `5672`, UI `15672` | `services/rabbitmq.yml` |
 | LocalStack | AWS-compatible local (S3, SQS, SNS, DynamoDB) | `4566` | `services/localstack.yml` |
 | Mailpit | Default email-in-dev (capture only, never sends) | SMTP `1025`, UI `8025` | `services/mailpit.yml` |
-| MailHog | Legacy email capture alternative | SMTP `1025`, UI `8025` | `services/mailhog.yml` |
 | smtp4dev | Windows-friendly SMTP capture | SMTP `2525`, UI `5000` | `services/smtp4dev.yml` |
 | MinIO | S3-compatible local | API `9000`, UI `9001` | `services/minio.yml` |
 | Meilisearch | Search engine (lightweight) | `7700` | `services/meilisearch.yml` |
