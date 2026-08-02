@@ -26,12 +26,24 @@ const recipes = fs
 // the next fix cannot be scoped to whichever file happens to be in the diff.
 const CREDENTIAL_KEY = /^\s*([A-Z0-9_]*(PASSWORD|PASS|MASTER_KEY|SECRET|TOKEN|API_KEY))\s*:\s*(.+)$/;
 
+// Credentials do not only appear as environment keys. typesense passed its API key
+// as a `command:` flag (`--api-key=${TYPESENSE_API_KEY:-typesense-dev-key}`), which
+// an environment-only check walks straight past. Match the interpolation itself.
+const CREDENTIAL_INTERPOLATION = /\$\{[A-Z0-9_]*(PASSWORD|PASS|MASTER_KEY|API_KEY|SECRET|TOKEN|KEY)[A-Z0-9_]*:-/;
+
 test('no compose recipe ships a default value for a credential', () => {
   const offenders = [];
 
   for (const { name, body } of recipes) {
     body.split('\n').forEach((line, i) => {
       if (line.trimStart().startsWith('#')) return;
+
+      // Anywhere in the line: environment value, command flag, healthcheck, entrypoint.
+      if (CREDENTIAL_INTERPOLATION.test(line)) {
+        offenders.push(`${name}:${i + 1} → ${line.trim()}`);
+        return;
+      }
+
       const m = line.match(CREDENTIAL_KEY);
       if (!m) return;
       // `${VAR:-default}` supplies a fallback; `${VAR:?msg}` and bare `${VAR}` do not.

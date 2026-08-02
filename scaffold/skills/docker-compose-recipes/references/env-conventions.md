@@ -1,6 +1,6 @@
 # Env var conventions
 
-Recipes reference non-secret env vars via `${VAR:-default}` — ports, users, database names. **Every credential uses `${VAR:?error}` instead**, so Compose refuses to start when the value is missing rather than falling back to a value published in this repository. That applies to `postgres`, `postgres-pgvector`, `mysql`, `elasticsearch`, `meilisearch`, `minio`, and `rabbitmq`; `test/compose-recipe-safety.test.js` enforces it across every recipe.
+Recipes reference non-secret env vars via `${VAR:-default}` — ports, users, database names. **Every credential uses `${VAR:?error}` instead**, so Compose refuses to start when the value is missing rather than falling back to a value published in this repository. That applies to `postgres`, `mysql`, `elasticsearch`, `meilisearch`, `minio`, and `rabbitmq`; `test/compose-recipe-safety.test.js` enforces it across every recipe.
 
 Authenticated services also publish on `127.0.0.1:` only. Docker's `"HOST:CONTAINER"` short form binds every host interface, which turns a local dev credential into a network-reachable one.
 
@@ -32,7 +32,7 @@ DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POST
 
 Compose performs variable substitution in `.env` references. When the application also runs in Compose, use service DNS such as `postgres`; when applications run on the host, the committed example must use `localhost` and the published host port instead.
 
-For the PostgreSQL + pgvector recipe, use the same connection variables. Copy `.env.example` to `.env`, set `POSTGRES_PASSWORD` to a unique generated local value, then run Compose. Do not place a working password in `.env.example`. The image provides the extension binaries, but `CREATE EXTENSION IF NOT EXISTS vector` belongs in the application's reviewed migrations, not container startup scripts.
+If a project needs the `vector` extension, there is no bundled recipe for it — use a separately reviewed image or a managed Postgres, with the same connection variables above. `CREATE EXTENSION IF NOT EXISTS vector` belongs in the application's reviewed migrations, never in a container startup script.
 
 ## What goes in `.env.example` vs `.env`
 

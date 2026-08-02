@@ -4,7 +4,7 @@ This file describes how `/dw-new-project` and `/dw-dockerize` merge the standalo
 
 ## The merge algorithm
 
-1. **Pick the selected services.** From the interview answers (or from stack detection in `dw-dockerize`), get the list of services to include. Example: `[postgres-pgvector, mailpit, minio]`.
+1. **Pick the selected services.** From the interview answers (or from stack detection in `dw-dockerize`), get the list of services to include. Example: `[postgres, mailpit, minio]`.
 2. **Read each `services/<name>.yml`** as a standalone fragment. Each file declares ONE top-level service block (e.g., `postgres:`) plus comments at the bottom describing the volumes block to merge.
 3. **Concatenate under a single `services:` map.** Indent each block under `services:` in the final file. Order does not matter for compose, but for readability sort by tier: storage → cache/queue → search → email → observability → proxy.
 4. **Collect the volumes.** Each recipe's comments list the named volumes it needs. Aggregate them under a top-level `volumes:` block. Example:
@@ -42,7 +42,7 @@ This file describes how `/dw-new-project` and `/dw-dockerize` merge the standalo
 services:
   # --- storage tier ---
   postgres:
-    # ... contents from services/postgres-pgvector.yml
+    # ... contents from services/postgres.yml
 
   # --- cache tier ---
   redis:

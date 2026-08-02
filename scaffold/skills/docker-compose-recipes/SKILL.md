@@ -1,6 +1,6 @@
 ---
 name: docker-compose-recipes
-description: Use for docker-compose service blocks (postgres, pgvector, redis, mailpit, minio, meilisearch, jaeger, traefik). Invoked by /dw-new-project, /dw-dockerize, or when composing dev/prod compose files.
+description: Use for docker-compose service blocks (postgres, redis, mailpit, minio, meilisearch, jaeger, traefik). Invoked by /dw-new-project, /dw-dockerize, or when composing dev/prod compose files.
 allowed-tools:
   - Read
   - Write
@@ -40,7 +40,7 @@ Do NOT use when:
 4. **Resolve port conflicts**: the recipes use widely-used defaults; if multiple services collide (e.g., two HTTP UIs on 8080), shift the second one in the merged compose and add a note in the README port table.
 5. **Wire env vars**: every recipe references `.env`-style variables. Consolidate them into the project's single `.env.example` using the conventions in `references/env-conventions.md`.
 6. **Healthchecks**: each recipe includes a healthcheck. Other services that depend on it should declare `depends_on: { <name>: { condition: service_healthy } }`. See `references/healthcheck-patterns.md`.
-7. **Dev vs Prod**: recipes default to dev (bind mounts, exposed ports, no restart policy). For prod, apply the transforms in `references/prod-vs-dev.md` (named volumes, internal ports, `restart: unless-stopped`, secrets via env, no UI exposure unless behind a proxy). The bundled pgvector image is local-only and must be replaced, not transformed for prod.
+7. **Dev vs Prod**: recipes default to dev (bind mounts, exposed ports, no restart policy). For prod, apply the transforms in `references/prod-vs-dev.md` (named volumes, internal ports, `restart: unless-stopped`, secrets via env, no UI exposure unless behind a proxy).
 
 ## Available Services
 
@@ -49,7 +49,6 @@ Each row points to `services/<name>.yml`.
 | Service | Use | Default port(s) | Recipe |
 |---------|-----|-----------------|--------|
 | Postgres 16 (alpine) | Relational DB | `5432` | `services/postgres.yml` |
-| PostgreSQL 18 + pgvector 0.8.2 | Relational + vector DB on a trusted local workstation | `5432` (loopback) | `services/postgres-pgvector.yml` |
 | MySQL 8 | Relational DB | `3306` | `services/mysql.yml` |
 | Redis 7 (alpine) | Cache, pub/sub, BullMQ backend | `6379` | `services/redis.yml` |
 | Memcached 1.6 (alpine) | Cache | `11211` | `services/memcached.yml` |
@@ -77,13 +76,12 @@ Each row points to `services/<name>.yml`.
 - **Pin major.minor** in every `image:` line. Patch updates are safe; major bumps are deliberate.
 - **Always include healthcheck**. No service is allowed to be opaque about readiness.
 - **Default to dev**. Prod transforms are explicit (see `prod-vs-dev.md`).
-- **pgvector is narrower than dev**. Use `pgvector/pgvector:0.8.6-pg18-trixie` only on a trusted single-user local workstation; never use it in production, on remote development hosts, or on shared CI runners.
 - **Email-in-dev defaults to Mailpit**. The user must opt OUT of capture-only email for dev — never silently route to a real SMTP.
 - **Secrets never in the recipe**. Env vars reference `.env`; defaults in the recipe are OK only for non-secret config.
 
 ## Inspired by
 
-Hand-curated by dev-workflow. Service defaults follow upstream documentation (Docker Hub `postgres`, `pgvector/pgvector`, `redis`, `axllent/mailpit`, `minio/minio`, `getmeili/meilisearch`, `jaegertracing/all-in-one`, `traefik`). Healthcheck patterns adapted from `docker-library/healthcheck` and the official compose docs.
+Hand-curated by dev-workflow. Service defaults follow upstream documentation (Docker Hub `postgres`, `redis`, `axllent/mailpit`, `minio/minio`, `getmeili/meilisearch`, `jaegertracing/all-in-one`, `traefik`). Healthcheck patterns adapted from `docker-library/healthcheck` and the official compose docs.
 
 ## Structured Return
 

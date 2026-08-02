@@ -24,7 +24,7 @@ services: []
 | Shape | frontend / backend / fullstack | [why this shape — single product surface, API for partners, etc.] |
 | Frontend | Next.js / Vite+React / n/a | [why this framework — SSR needs, SPA simplicity, etc.] |
 | Backend | NestJS / Fastify / FastAPI / ASP.NET Core minimal / Axum / n/a | [why this framework — team expertise, ecosystem, latency targets] |
-| Database | Postgres / Postgres+pgvector / MySQL / SQLite / MongoDB / none | [why this DB — relational, vector, transactional needs, etc.] |
+| Database | Postgres / MySQL / SQLite / MongoDB / none | [why this DB — relational, transactional needs, etc. Vector search has no bundled recipe; name the reviewed image or managed service if the project needs it] |
 | Cache | Redis / Memcached / none | [why or why not] |
 | Queue | pg-boss / BullMQ / Celery / RabbitMQ / LocalStack SQS / none | [why or why not + sync vs async workers] |
 | Email — dev | Mailpit (default) / MailHog / smtp4dev / none | [usually Mailpit — capture only, never sends real mail] |
@@ -51,7 +51,6 @@ services: []
 | mailpit | 1025 (smtp), 8025 (UI) | http://localhost:8025 | (no auth) |
 | ... | ... | ... | ... |
 
-When Postgres + pgvector is selected, mark the bundled `pgvector/pgvector:0.8.6-pg18-trixie` image as restricted to a trusted single-user local workstation. It must not be proposed for production, remote development hosts, or shared CI runners.
 
 ## Architecture Diagram
 

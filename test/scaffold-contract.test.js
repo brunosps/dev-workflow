@@ -17,7 +17,7 @@ test('dw-new-project keeps the docs-first NestJS contract in both languages', ()
     assert.match(command, /docs-first/);
     assert.match(command, /Next\.js \+ NestJS/);
     assert.match(command, /pnpm workspaces \+ Turborepo/);
-    assert.match(command, /Postgres \+ pgvector/);
+    assert.match(command, /Postgres/);
     assert.match(command, /pg-boss/);
     assert.match(command, /Mailpit/);
     assert.match(command, /apps (?:on|no) host/);
@@ -30,37 +30,23 @@ test('dw-new-project keeps the docs-first NestJS contract in both languages', ()
     );
 
     assert.match(onePager, /NestJS/);
-    assert.match(onePager, /Postgres\s?\+\s?pgvector/);
+    assert.match(onePager, /Postgres/);
     assert.match(onePager, /pg-boss/);
     assert.match(onePager, /Mailpit/);
   }
 });
 
-// Deliberately a tag, not a digest. A digest pin froze the base image and the same
-// bytes went from 1 to 22 CRITICAL in three weeks with no upgrade path. If someone
-// re-adds a digest here, that regression comes back silently.
-test('pgvector recipe tracks a rebuildable tag and requires local-only credentials', () => {
-  const recipe = read('scaffold/skills/docker-compose-recipes/services/postgres-pgvector.yml');
-
-  assert.match(recipe, /^  image: pgvector\/pgvector:0\.8\.6-pg18-trixie$/m);
-  assert.doesNotMatch(recipe, /@sha256:/, 'digest pin blocks base-image security rebuilds');
-  assert.match(
-    recipe,
-    /POSTGRES_PASSWORD: \$\{POSTGRES_PASSWORD:\?Set POSTGRES_PASSWORD in \.env\}/
-  );
-  assert.match(recipe, /- "127\.0\.0\.1:\$\{POSTGRES_PORT:-5432\}:5432"/);
-  assert.match(recipe, /postgres_data:\/var\/lib\/postgresql/);
-  assert.match(recipe, /CREATE EXTENSION IF NOT EXISTS vector/);
-});
-
-test('pgvector scaffold surfaces never recommend a known password', () => {
+// The recipe files are covered by compose-recipe-safety.test.js; this covers the
+// prose around them, where a "just use app/app to get started" example is just as
+// reachable and does not show up in a YAML scan.
+test('no compose surface recommends a working credential', () => {
   const envConventions = read(
     'scaffold/skills/docker-compose-recipes/references/env-conventions.md'
   );
-  const pgvectorSurfaces = [
-    'scaffold/skills/docker-compose-recipes/services/postgres-pgvector.yml',
+  const surfaces = [
     'scaffold/skills/docker-compose-recipes/references/env-conventions.md',
     'scaffold/skills/docker-compose-recipes/references/prod-vs-dev.md',
+    'scaffold/skills/docker-compose-recipes/references/compose-composition.md',
     'scaffold/skills/docker-compose-recipes/SKILL.md',
     'scaffold/en/commands/dw-new-project.md',
     'scaffold/en/commands/dw-dockerize.md',
@@ -69,44 +55,39 @@ test('pgvector scaffold surfaces never recommend a known password', () => {
     'scaffold/pt-br/commands/dw-dockerize.md',
     'scaffold/pt-br/templates/project-onepager.md',
   ];
-  const content = pgvectorSurfaces.map(read).join('\n');
+  const content = surfaces.map(read).join('\n');
 
-  assert.doesNotMatch(content, /POSTGRES_PASSWORD=app\b/);
-  assert.doesNotMatch(content, /\$\{POSTGRES_PASSWORD:-app\}/);
+  for (const pattern of [
+    /POSTGRES_PASSWORD=app\b/,
+    /MYSQL_ROOT_PASSWORD=root\b/,
+    /MINIO_ROOT_PASSWORD=minio\d+/,
+    /\$\{[A-Z0-9_]*(PASSWORD|PASS|MASTER_KEY|SECRET|TOKEN):-/,
+  ]) {
+    assert.doesNotMatch(content, pattern, `a compose surface documents a working credential: ${pattern}`);
+  }
+
   assert.match(envConventions, /^POSTGRES_PASSWORD=$/m);
 });
 
-// The image reference is read from the recipe rather than hard-coded, so a version
-// bump lands in one file instead of nine. Hard-coding it here is what let the docs
-// drift from the recipe in the first place.
-test('pgvector documentation restricts the bundled image to trusted local development', () => {
-  const recipe = read('scaffold/skills/docker-compose-recipes/services/postgres-pgvector.yml');
-  const imageRef = (recipe.match(/^\s*image:\s*(\S+)$/m) || [])[1];
-  assert.ok(imageRef, 'pgvector recipe declares no image');
-
-  const skill = read('scaffold/skills/docker-compose-recipes/SKILL.md');
-  const prodVsDev = read('scaffold/skills/docker-compose-recipes/references/prod-vs-dev.md');
-
-  assert.match(skill, /trusted single-user local workstation/i);
-  assert.match(skill, /production, (?:on )?remote development hosts, or (?:on )?shared CI runners/i);
-  assert.ok(prodVsDev.includes(imageRef), `prod-vs-dev.md must reference ${imageRef}`);
-  assert.match(
-    prodVsDev,
-    /production, (?:on )?remote development hosts, or (?:on )?shared CI runners/i
+// Removed 2026-08-02: the bundled image carried CRITICALs with no upstream fix and
+// no bundled artifact could clear them. If it returns, it must come back as a
+// deliberate decision with its own audit — not by someone re-adding a recipe file.
+test('no bundled pgvector recipe ships', () => {
+  const servicesDir = path.join(
+    root,
+    'scaffold',
+    'skills',
+    'docker-compose-recipes',
+    'services'
   );
+  const recipes = fs.readdirSync(servicesDir);
 
-  for (const locale of ['en', 'pt-br']) {
-    const surfaces = {
-      [`${locale}/dw-new-project.md`]: read(`scaffold/${locale}/commands/dw-new-project.md`),
-      [`${locale}/dw-dockerize.md`]: read(`scaffold/${locale}/commands/dw-dockerize.md`),
-      [`${locale}/project-onepager.md`]: read(`scaffold/${locale}/templates/project-onepager.md`),
-    };
+  assert.ok(!recipes.includes('postgres-pgvector.yml'), 'postgres-pgvector.yml is back');
 
-    for (const [label, surface] of Object.entries(surfaces)) {
-      assert.ok(surface.includes(imageRef), `${label} must reference ${imageRef}`);
-      assert.match(surface, /shared CI runner|runner de CI compartilhado/i);
-    }
-  }
+  const withPgvectorImage = recipes.filter((f) =>
+    /image:\s*\S*pgvector/.test(fs.readFileSync(path.join(servicesDir, f), 'utf8'))
+  );
+  assert.deepEqual(withPgvectorImage, [], `recipe(s) reference a pgvector image: ${withPgvectorImage}`);
 });
 
 test('Mailpit is the maintained, pinned email capture default', () => {

@@ -24,7 +24,7 @@ services: []
 | Forma | frontend / backend / fullstack | [por que essa forma — superficie unica, API para parceiros, etc.] |
 | Frontend | Next.js / Vite+React / n/a | [por que esse framework — SSR, simplicidade SPA, etc.] |
 | Backend | NestJS / Fastify / FastAPI / ASP.NET Core minimal / Axum / n/a | [por que — expertise do time, ecosystem, alvo de latencia] |
-| Database | Postgres / Postgres+pgvector / MySQL / SQLite / MongoDB / nenhum | [por que esse DB — relacional, vetorial, transacional, etc.] |
+| Database | Postgres / MySQL / SQLite / MongoDB / nenhum | [por que esse DB — relacional, transacional, etc. Busca vetorial nao tem recipe bundled; nomeie a imagem revisada ou servico gerenciado se o projeto precisar] |
 | Cache | Redis / Memcached / nenhum | [por que ou por que nao] |
 | Fila | pg-boss / BullMQ / Celery / RabbitMQ / LocalStack SQS / nenhum | [por que ou nao + sync vs async workers] |
 | Email — dev | Mailpit (default) / MailHog / smtp4dev / nenhum | [normalmente Mailpit — captura only, nunca envia real] |
@@ -51,7 +51,6 @@ services: []
 | mailpit | 1025 (smtp), 8025 (UI) | http://localhost:8025 | (sem auth) |
 | ... | ... | ... | ... |
 
-Quando Postgres + pgvector for selecionado, marque a imagem bundled `pgvector/pgvector:0.8.6-pg18-trixie` como restrita a uma workstation local confiavel de um unico usuario. Ela nao pode ser proposta para producao, host de desenvolvimento remoto ou runner de CI compartilhado.
 
 ## Diagrama da Arquitetura
 

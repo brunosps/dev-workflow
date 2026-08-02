@@ -16,9 +16,9 @@ The recipes default to **dev**. When `/dw-dockerize --prod` (or `--both`) emits 
 | Logging | Default driver | `json-file` with rotation, or ship to a log aggregator (Loki, CloudWatch) |
 | Resource limits | None (machine has plenty) | `mem_limit`, `cpus` set per service to prevent runaway containers |
 
-The bundled `pgvector/pgvector:0.8.6-pg18-trixie` image is a narrower exception to the generic transform table. It is allowed only on a trusted single-user local workstation. Do not use it in production, on remote development hosts, or on shared CI runners. The recipe tracks a tag rather than a digest on purpose: a digest freezes the base image and accrues CVEs with no upgrade path. Tracking a tag is not a production approval either. Use a separately reviewed image or managed Postgres service for every non-local environment.
+Every recipe tracks a tag rather than a digest on purpose: a digest freezes the base image and accrues CVEs with no upgrade path, since only a rebuild clears them. Tracking a tag is not a production approval either — a dev recipe still needs its own review before any non-local environment.
 
-The pgvector dev recipe binds its host port to `127.0.0.1` so apps on the same workstation can connect without publishing Postgres on every host interface. [source: https://docs.docker.com/reference/compose-file/services/#ports, version: Compose Specification, retrieved: 2026-07-15]
+Every credential-bearing dev recipe binds its host port to `127.0.0.1` so apps on the same workstation can connect without publishing the service on every host interface. [source: https://docs.docker.com/reference/compose-file/services/#ports, version: Compose Specification, retrieved: 2026-07-15]
 
 ## Per-service prod transforms
 
@@ -29,7 +29,6 @@ The pgvector dev recipe binds its host port to `127.0.0.1` so apps on the same w
 - Increase `start_period` to 60-120s (large data dirs take longer to recover).
 - Set up a logical backup (`pg_dump`/`mysqldump`) on a schedule, persisted off-host.
 - For Redis: enable AOF persistence (`appendonly yes`) and set `requirepass`.
-- For pgvector: replace the bundled `pgvector/pgvector:0.8.6-pg18-trixie` image rather than carrying it into a prod compose.
 
 ### RabbitMQ
 
@@ -85,7 +84,7 @@ The pgvector dev recipe binds its host port to `127.0.0.1` so apps on the same w
 - Ship secrets in committed files.
 - Use `:latest` tags.
 - Expose data-tier ports publicly.
-- Include the bundled `pgvector/pgvector:0.8.6-pg18-trixie` image.
+- Pin any image by digest (it blocks the base-image security rebuilds prod depends on).
 - Include MailHog / Mailpit / smtp4dev / LocalStack.
 - Skip healthchecks.
 - Forget to set non-root `USER` in the application Dockerfile.
