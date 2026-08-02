@@ -19,11 +19,13 @@ feat/prd-[feature-name]
 
 ## Tasks
 
-| Task | Description | FRs | Status |
-|------|-------------|-----|--------|
-| 1.0 | [Title] | FR1.1, FR1.2 | Pending |
-| 2.0 | [Title] | FR2.1 | Pending |
-| 3.0 | [Title] | FR3.1, FR3.2 | Pending |
+| Task | Description | FRs | Status | Commit |
+|------|-------------|-----|--------|--------|
+| 1.0 | [Title] | FR-1.1, FR-1.2 | Pending | — |
+| 2.0 | [Title] | FR-2.1 | Pending | — |
+| 3.0 | [Title] | FR-3.1, FR-3.2 | Pending | — |
+
+`Commit` holds the short SHA written back by `/dw-run` when the task closes (step 6). It is what makes a task's diff findable later — leave `—` until the task commits.
 
 ## Progress
 

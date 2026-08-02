@@ -109,6 +109,19 @@ Build the body following the template below, filling in with collected informati
 
 3. **Instruct the user** to paste the body (Ctrl+V) in the description field
 
+### 6. Record the PR back into the spec
+
+The PR URL only exists after the user clicks "Create". Once it does, write it back — otherwise nothing on the `.dw/` side ever records which PR delivered the work, and the trail ends at the branch.
+
+```bash
+# Fast path: resolves once the PR exists. Needs the GitHub CLI; skip silently if absent.
+gh pr view --json url -q .url 2>/dev/null
+```
+
+- If a URL resolves, append it to the PRD's `## Related` section as `- PR: <url>`.
+- If `gh` is unavailable or the PR isn't created yet, print the exact line for the user to paste and move on. **Never block the command on this** — it is a record, not a gate.
+- For bugfix branches, append the same line to `.dw/bugfixes/<NNN-slug>/SUMMARY.md` under `## Related` instead.
+
 ## PR Template (copy to clipboard)
 
 ```markdown
