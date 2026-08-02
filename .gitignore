@@ -1,10 +1,17 @@
 # Local AI-platform install footprints (created by `npx dev-workflow init`
 # in this repo when used as a self-host harness during development).
 # Each user's local setup; not part of the dev-workflow source.
+#
+# .dw/ belongs to this list for the same reason, with one extra: in a CONSUMER
+# project .dw/ is meant to be committed, but here it is the harness auditing its
+# own source, so it collects run artifacts (secure-audit reports, metrics, spec
+# drafts) that are local evidence rather than shipped source. The scaffold that
+# generates .dw/ lives in scaffold/ and IS tracked.
 .claude/
 .codex/
 .agents/
 .opencode/
+.dw/
 skills-lock.json
 
 # .github/ is a local generated footprint (Copilot/agent wrappers) EXCEPT the
