@@ -8,14 +8,14 @@ elasticsearch:
   environment:
     discovery.type: single-node
     xpack.security.enabled: "true"
-    ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-elastic}
+    ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:?Set ELASTIC_PASSWORD in .env}
     ES_JAVA_OPTS: "-Xms512m -Xmx512m"
   ports:
-    - "${ELASTICSEARCH_PORT:-9200}:9200"
+    - "127.0.0.1:${ELASTICSEARCH_PORT:-9200}:9200"
   volumes:
     - elasticsearch_data:/usr/share/elasticsearch/data
   healthcheck:
-    test: ["CMD-SHELL", "curl -fsu elastic:${ELASTIC_PASSWORD:-elastic} http://localhost:9200/_cluster/health | grep -E 'green|yellow'"]
+    test: ["CMD-SHELL", "curl -fsu elastic:${ELASTIC_PASSWORD} http://localhost:9200/_cluster/health | grep -E 'green|yellow'"]
     interval: 10s
     timeout: 5s
     retries: 10

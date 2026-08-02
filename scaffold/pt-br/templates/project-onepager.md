@@ -51,7 +51,7 @@ services: []
 | mailpit | 1025 (smtp), 8025 (UI) | http://localhost:8025 | (sem auth) |
 | ... | ... | ... | ... |
 
-Quando Postgres + pgvector for selecionado, marque a imagem bundled `pgvector/pgvector:0.8.2-pg18` como restrita a uma workstation local confiavel de um unico usuario. Ela nao pode ser proposta para producao, host de desenvolvimento remoto ou runner de CI compartilhado.
+Quando Postgres + pgvector for selecionado, marque a imagem bundled `pgvector/pgvector:0.8.6-pg18-trixie` como restrita a uma workstation local confiavel de um unico usuario. Ela nao pode ser proposta para producao, host de desenvolvimento remoto ou runner de CI compartilhado.
 
 ## Diagrama da Arquitetura
 

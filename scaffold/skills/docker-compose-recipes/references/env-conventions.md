@@ -1,6 +1,10 @@
 # Env var conventions
 
-Recipes reference non-secret env vars via `${VAR:-default}`. The pgvector recipe uses `${VAR:?error}` for its database password so Compose stops when the value is missing or empty. A project's `.env` is the local source of truth; `.env.example` documents required keys without supplying reusable credentials.
+Recipes reference non-secret env vars via `${VAR:-default}` — ports, users, database names. **Every credential uses `${VAR:?error}` instead**, so Compose refuses to start when the value is missing rather than falling back to a value published in this repository. That applies to `postgres`, `postgres-pgvector`, `mysql`, `elasticsearch`, `meilisearch`, `minio`, and `rabbitmq`; `test/compose-recipe-safety.test.js` enforces it across every recipe.
+
+Authenticated services also publish on `127.0.0.1:` only. Docker's `"HOST:CONTAINER"` short form binds every host interface, which turns a local dev credential into a network-reachable one.
+
+A project's `.env` is the local source of truth; `.env.example` documents required keys without supplying reusable credentials.
 
 [source: https://docs.docker.com/reference/compose-file/interpolation/, version: Compose Specification, retrieved: 2026-07-15]
 

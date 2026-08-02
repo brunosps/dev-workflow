@@ -36,13 +36,14 @@ test('dw-new-project keeps the docs-first NestJS contract in both languages', ()
   }
 });
 
-test('pgvector recipe is immutable and requires local-only credentials', () => {
+// Deliberately a tag, not a digest. A digest pin froze the base image and the same
+// bytes went from 1 to 22 CRITICAL in three weeks with no upgrade path. If someone
+// re-adds a digest here, that regression comes back silently.
+test('pgvector recipe tracks a rebuildable tag and requires local-only credentials', () => {
   const recipe = read('scaffold/skills/docker-compose-recipes/services/postgres-pgvector.yml');
 
-  assert.match(
-    recipe,
-    /^  image: pgvector\/pgvector:0\.8\.2-pg18@sha256:42e7f6b4e1eceb02ff14e3e6bc6108bbe259abbe83879dc1845d0da1ddeb555d$/m
-  );
+  assert.match(recipe, /^  image: pgvector\/pgvector:0\.8\.6-pg18-trixie$/m);
+  assert.doesNotMatch(recipe, /@sha256:/, 'digest pin blocks base-image security rebuilds');
   assert.match(
     recipe,
     /POSTGRES_PASSWORD: \$\{POSTGRES_PASSWORD:\?Set POSTGRES_PASSWORD in \.env\}/
@@ -75,25 +76,34 @@ test('pgvector scaffold surfaces never recommend a known password', () => {
   assert.match(envConventions, /^POSTGRES_PASSWORD=$/m);
 });
 
+// The image reference is read from the recipe rather than hard-coded, so a version
+// bump lands in one file instead of nine. Hard-coding it here is what let the docs
+// drift from the recipe in the first place.
 test('pgvector documentation restricts the bundled image to trusted local development', () => {
+  const recipe = read('scaffold/skills/docker-compose-recipes/services/postgres-pgvector.yml');
+  const imageRef = (recipe.match(/^\s*image:\s*(\S+)$/m) || [])[1];
+  assert.ok(imageRef, 'pgvector recipe declares no image');
+
   const skill = read('scaffold/skills/docker-compose-recipes/SKILL.md');
   const prodVsDev = read('scaffold/skills/docker-compose-recipes/references/prod-vs-dev.md');
 
   assert.match(skill, /trusted single-user local workstation/i);
   assert.match(skill, /production, (?:on )?remote development hosts, or (?:on )?shared CI runners/i);
-  assert.match(prodVsDev, /pgvector\/pgvector:0\.8\.2-pg18/);
+  assert.ok(prodVsDev.includes(imageRef), `prod-vs-dev.md must reference ${imageRef}`);
   assert.match(
     prodVsDev,
     /production, (?:on )?remote development hosts, or (?:on )?shared CI runners/i
   );
 
   for (const locale of ['en', 'pt-br']) {
-    const newProject = read(`scaffold/${locale}/commands/dw-new-project.md`);
-    const dockerize = read(`scaffold/${locale}/commands/dw-dockerize.md`);
-    const onePager = read(`scaffold/${locale}/templates/project-onepager.md`);
+    const surfaces = {
+      [`${locale}/dw-new-project.md`]: read(`scaffold/${locale}/commands/dw-new-project.md`),
+      [`${locale}/dw-dockerize.md`]: read(`scaffold/${locale}/commands/dw-dockerize.md`),
+      [`${locale}/project-onepager.md`]: read(`scaffold/${locale}/templates/project-onepager.md`),
+    };
 
-    for (const surface of [newProject, dockerize, onePager]) {
-      assert.match(surface, /pgvector\/pgvector:0\.8\.2-pg18/);
+    for (const [label, surface] of Object.entries(surfaces)) {
+      assert.ok(surface.includes(imageRef), `${label} must reference ${imageRef}`);
       assert.match(surface, /shared CI runner|runner de CI compartilhado/i);
     }
   }

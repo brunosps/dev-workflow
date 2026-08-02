@@ -77,7 +77,7 @@ Each row points to `services/<name>.yml`.
 - **Pin major.minor** in every `image:` line. Patch updates are safe; major bumps are deliberate.
 - **Always include healthcheck**. No service is allowed to be opaque about readiness.
 - **Default to dev**. Prod transforms are explicit (see `prod-vs-dev.md`).
-- **pgvector is narrower than dev**. Use `pgvector/pgvector:0.8.2-pg18` only on a trusted single-user local workstation; never use it in production, on remote development hosts, or on shared CI runners.
+- **pgvector is narrower than dev**. Use `pgvector/pgvector:0.8.6-pg18-trixie` only on a trusted single-user local workstation; never use it in production, on remote development hosts, or on shared CI runners.
 - **Email-in-dev defaults to Mailpit**. The user must opt OUT of capture-only email for dev — never silently route to a real SMTP.
 - **Secrets never in the recipe**. Env vars reference `.env`; defaults in the recipe are OK only for non-secret config.
 

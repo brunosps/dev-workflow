@@ -7,10 +7,10 @@ rabbitmq:
   restart: unless-stopped
   environment:
     RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-app}
-    RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-app}
+    RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in .env}
   ports:
-    - "${RABBITMQ_PORT:-5672}:5672"
-    - "${RABBITMQ_UI_PORT:-15672}:15672"
+    - "127.0.0.1:${RABBITMQ_PORT:-5672}:5672"
+    - "127.0.0.1:${RABBITMQ_UI_PORT:-15672}:15672"
   volumes:
     - rabbitmq_data:/var/lib/rabbitmq
   healthcheck:
