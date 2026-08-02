@@ -2,7 +2,6 @@
 name: dw-silent-failure-hunter
 description: Find swallowed errors, dangerous fallbacks, lost stack traces, and missing error propagation.
 tools: Read, Grep, Glob, Bash
-model: sonnet
 mode: subagent
 ---
 

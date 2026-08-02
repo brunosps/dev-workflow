@@ -2,7 +2,6 @@
 name: dw-security-reviewer
 description: Review auth, authorization, secrets, input handling, uploads, SQL, SSRF, XSS, and supply-chain risk.
 tools: Read, Grep, Glob, Bash
-model: sonnet
 mode: subagent
 ---
 

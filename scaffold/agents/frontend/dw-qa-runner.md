@@ -2,7 +2,6 @@
 name: dw-qa-runner
 description: Create and run UI/API QA scripts, evidence, and retest logs under QA folders.
 tools: Read, Write, Edit, Bash, Grep, Glob
-model: sonnet
 mode: subagent
 ---
 

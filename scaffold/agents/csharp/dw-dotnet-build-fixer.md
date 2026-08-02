@@ -2,7 +2,6 @@
 name: dw-dotnet-build-fixer
 description: Fix .NET build, test, restore, and analyzer failures with minimal changes.
 tools: Read, Write, Edit, Bash, Grep, Glob
-model: sonnet
 mode: subagent
 ---
 

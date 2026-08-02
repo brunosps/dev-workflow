@@ -2,7 +2,6 @@
 name: dw-build-fixer
 description: Fix build, typecheck, and lint failures with minimal diffs and no architectural rewrites.
 tools: Read, Write, Edit, Bash, Grep, Glob
-model: sonnet
 mode: subagent
 ---
 

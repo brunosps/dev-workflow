@@ -2,7 +2,6 @@
 name: dw-python-build-fixer
 description: Fix Python test, import, typing, and packaging failures with minimal changes.
 tools: Read, Write, Edit, Bash, Grep, Glob
-model: sonnet
 mode: subagent
 ---
 

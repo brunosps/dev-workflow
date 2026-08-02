@@ -2,7 +2,6 @@
 name: dw-test-author
 description: Add focused tests and regression coverage using project conventions and dw-testing-discipline.
 tools: Read, Write, Edit, Bash, Grep, Glob
-model: sonnet
 mode: subagent
 ---
 

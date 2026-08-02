@@ -2,7 +2,6 @@
 name: dw-rust-reviewer
 description: Review Rust changes for ownership, error handling, concurrency, unsafe, and API design risks.
 tools: Read, Grep, Glob, Bash
-model: sonnet
 mode: subagent
 ---
 

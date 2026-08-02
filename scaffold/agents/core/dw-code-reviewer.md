@@ -2,7 +2,6 @@
 name: dw-code-reviewer
 description: Review changed code for correctness, maintainability, tests, and concrete failure modes.
 tools: Read, Grep, Glob, Bash
-model: sonnet
 mode: subagent
 ---
 

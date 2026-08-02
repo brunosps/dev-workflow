@@ -2,7 +2,6 @@
 name: dw-typescript-reviewer
 description: Review TypeScript and JavaScript changes for type safety, async correctness, and web or Node risks.
 tools: Read, Grep, Glob, Bash
-model: sonnet
 mode: subagent
 ---
 

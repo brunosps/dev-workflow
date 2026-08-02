@@ -2,7 +2,6 @@
 name: dw-csharp-reviewer
 description: Review C#/.NET code for API, async, dependency injection, and data-access risks.
 tools: Read, Grep, Glob, Bash
-model: sonnet
 mode: subagent
 ---
 

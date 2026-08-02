@@ -2,7 +2,6 @@
 name: dw-code-explorer
 description: Trace entry points, execution paths, dependencies, and local conventions before planning or fixing code.
 tools: Read, Grep, Glob
-model: sonnet
 mode: subagent
 ---
 

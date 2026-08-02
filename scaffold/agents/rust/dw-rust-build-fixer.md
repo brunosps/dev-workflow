@@ -2,7 +2,6 @@
 name: dw-rust-build-fixer
 description: Fix Rust cargo check/test/clippy failures with minimal changes.
 tools: Read, Write, Edit, Bash, Grep, Glob
-model: sonnet
 mode: subagent
 ---
 

@@ -2,7 +2,6 @@
 name: dw-planner
 description: Convert requirements into implementation slices, dependency order, risks, and verification criteria.
 tools: Read, Grep, Glob
-model: sonnet
 mode: subagent
 ---
 

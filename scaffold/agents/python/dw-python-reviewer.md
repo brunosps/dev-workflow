@@ -2,7 +2,6 @@
 name: dw-python-reviewer
 description: Review Python changes for correctness, typing, async behavior, and framework risks.
 tools: Read, Grep, Glob, Bash
-model: sonnet
 mode: subagent
 ---
 
