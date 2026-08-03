@@ -17,6 +17,7 @@
     "scaffold/",
     ".claude-plugin/",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "keywords": [
