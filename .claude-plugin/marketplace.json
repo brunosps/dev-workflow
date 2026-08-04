@@ -1,5 +1,6 @@
 {
   "name": "brunosps00-dev-workflow",
+  "description": "À-la-carte dev-workflow skills for focused agent work: minimalism, search-first research, verification, security review, and code quality.",
   "owner": {
     "name": "Bruno Santos"
   },
