@@ -14,12 +14,71 @@ Six discrete steps. Each has a specific output. Don't move to the next without f
 - From a log line → find the surrounding context (request ID, user ID, timestamp); reconstruct the scenario.
 - Write a failing test FIRST when the bug is in pure logic. The test commits the bug to record before you fix it.
 
+### Feedback loop contract
+
+For a non-trivial bug, or whenever the first attempted fix did not work, do not theorize before you have a feedback loop. A good loop is:
+
+- **Single:** one command or one executable artifact, not a hand-managed sequence.
+- **Deterministic:** produces the same result often enough to trust the signal.
+- **Fast:** runs quickly enough that you can use it repeatedly while narrowing the cause.
+- **Agent-runnable:** executable by the agent without hidden credentials, private hardware, or unrecorded manual state.
+- **Red-capable:** proven to fail now, with the failure already observed and saved. "It should fail" is not enough.
+
+Small obvious bugs are exempt from the full checklist when the reproduction is already a single clear command or click path and the fix is truly surgical. The exemption ends immediately if the first fix fails or the bug touches multiple layers.
+
+### Loop repertoire
+
+Pick the smallest loop that can show the bug:
+
+| Loop type | Use when |
+|-----------|----------|
+| Focused test | The bug fits an existing unit, integration, contract, or E2E suite |
+| `curl` / HTTP client | The bug is an API request/response behavior |
+| CLI command | The symptom is triggered by a command-line entry point |
+| Headless browser | The bug depends on browser rendering, routing, storage, or user events |
+| Trace replay | You have a captured request/session/fixture that can be replayed |
+| Dedicated harness | The production entry point is too slow or noisy, but a public seam can be exercised directly |
+| Fuzz or repeat runner | The bug is input-sensitive or low-frequency but locally amplifiable |
+| `git bisect` | A known-good revision exists and the regression window matters |
+| Differential test | A new path should match an old implementation, another service, or a reference output |
+
+### HITL loop template
+
+Use this when the loop cannot be run by the agent because it needs credentials, private data, hardware, or a human click. Do not continue in the dark; ask for the missing artifact or access.
+
+```
+## Human-in-the-loop reproduction needed
+
+I cannot run the feedback loop myself because: <credential / hardware / private data / manual action>.
+
+Please provide one of:
+- A single command I can run locally or in CI.
+- A sanitized fixture, trace, screenshot sequence, or log bundle.
+- Temporary access or exact manual steps you will run.
+
+What I already tried:
+- <attempt 1 + result>
+- <attempt 2 + result>
+
+Once provided, I will first confirm the loop is red-capable before proposing the fix.
+```
+
+### After the loop is red-capable
+
+Only after the failing loop is observed:
+
+1. Minimize the case by removing one variable at a time.
+2. List 3-5 falsifiable hypotheses and rank them before testing any one.
+3. Instrument one variable at a time, with removable log prefixes such as `[DW-DEBUG:<slug>]`, so cleanup is mechanical.
+4. Keep the regression test on the right public seam; do not lock the test to internals.
+5. Remove temporary instrumentation before final verification.
+
 **Common pitfall:** "It happens sometimes." This is not a reproduction. Either:
 - Find a deterministic trigger (often there's a state precondition you missed), OR
 - Quantify the rate (8/10 runs) and treat the test as flaky-but-progress.
 - See `non-reproducible-strategy.md` for state/timing/env-dependent cases.
 
-**Done when:** You have a one-line command (or a series of clicks) that produces the bug ≥80% of the time.
+**Done when:** You have a one-line command, executable script, or short click path for a trivial UI bug that produces the bug ≥80% of the time. For non-trivial bugs, the loop also satisfies the feedback loop contract above, or the HITL blocker is recorded with explicit artifact/access requested from the user.
 
 ## Step 2 — Localize
 

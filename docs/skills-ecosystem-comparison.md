@@ -31,8 +31,10 @@ exercem bem.
 | Distribuição à-la-carte | só instalador de pipeline | plugin + skills.sh | plugin multi-plataforma | **Adotar** → `.claude-plugin/` gerado do registry |
 | Glossário/linguagem de domínio | `.dw/rules` + constitution + concerns | `CONTEXT.md` + `CONTEXT-MAP.md` (domain-modeling) | — | **Adotar** → Grill nativo (`dw-grilling` + `dw-domain-modeling`) + `.dw/domain/` |
 | Entrevista de alinhamento (grilling) | grill como modo de prosa | `grill-with-docs` + `grilling` (skills dedicadas) | — | **Adotar** → sessão stateful nativa com decision tree + gate |
+| Intake triage | `/dw-bugfix` tria bug vs feature depois que o pedido já entrou no fluxo de bugfix | `triage` como on-ramp issue-tracker-first, com labels como estado | — | **Adotar com adaptação forte** → `/dw-triage` local-first em `.dw/` |
 | Handoff entre sessões | `/dw-pause` + `.dw/STATE.md` | `/handoff` | — | Já coberto — skip |
-| Arquitetura/deep modules | já portado em `dw-simplification` | `improve-codebase-architecture` | — | Já coberto — skip |
+| Review avulso por ref | `/dw-review` fixo na base branch/PRD | fixed point validado antes da análise | — | **Adotar** → `/dw-review --since <ref>` |
+| Arquitetura/deep modules | checklist base em `dw-simplification` | categorias de dependência + Design It Twice | — | **Adotar parcialmente** → aprofundamento condicional em deep-modules |
 | Versionamento multi-skill | pacote npm único | Changesets | Changesets | Não aplicável — skip |
 | Definição de comando | markdown + JSON registry | markdown | TOML | Preferência — skip |
 
@@ -120,6 +122,120 @@ Diferenças intencionais do `.dw/`:
 - ADRs roteados por `/dw-adr --scope=repo|prd`, gated no teste 3-critérios com aprovação explícita separada.
 - `/dw-analyze-project` lê e linka `.dw/domain/**` e **preserva** (nunca regenera nem sobrescreve).
 
+### 6. `/dw-review --since <ref>` — ponto fixo verificado antes do review (de mattpocock)
+
+Adaptação da técnica observada em `mattpocock/skills`: antes de analisar um diff avulso, exigir um ponto de
+comparação explícito e validá-lo. No dev-workflow isso virou flag opt-in no comando existente
+`/dw-review --since <ref>`:
+
+- valida o ref com `git rev-parse --verify --quiet <ref>^{commit}`;
+- monta o diff reproduzível com `git diff <ref>...HEAD`;
+- lista o range com `git log <ref>..HEAD --oneline`;
+- aborta com mensagem acionável quando o ref não resolve ou quando o diff está vazio;
+- registra o comando de diff efetivo nos relatórios de coverage, code review e consolidado.
+
+Foi adotado o **three-dot** para preservar a semântica de review de PR: revisar o que `HEAD` mudou desde o
+merge-base com o ref verificado, sem incluir mudanças que existam apenas no ref. O fluxo default de
+`/dw-review` contra a base branch não foi alterado.
+
+Rejeitado: criar comando separado para review avulso ou trocar o comportamento default de `dw-review`.
+
+### 7. Deep-modules avançado — categoria de dependência + Design It Twice (de mattpocock)
+
+Adaptação parcial de técnicas de arquitetura de `mattpocock/skills`, sem copiar a skill upstream e sem criar
+nova skill. O material foi incorporado ao arquivo existente
+`scaffold/skills/dw-simplification/references/deep-modules.md`:
+
+- categorias de dependência (`in-process`, `local-substitutable`, `remote owned`, `true external`) que guiam a
+  estratégia de teste da seam;
+- alinhamento explícito com `dw-testing-discipline`: mocks isolam fronteiras, sistemas reais validam antes do
+  merge, e qualquer conflito aparente é resolvido a favor de `dw-testing-discipline`;
+- loop local de **Design It Twice** para gerar 3+ interfaces radicalmente diferentes antes de fechar uma seam.
+
+`/dw-refactor` carrega esse aprofundamento apenas quando o finding sobrevivente é interface rasa, vazamento de
+interface ou seam no lugar errado. O council não foi usado como mecanismo default porque `dw-council` é mais caro
+e voltado a decisões de produto/arquitetura high-stakes com múltiplas prioridades; a comparação de alternativas de
+interface é um loop local e específico. Council segue disponível só quando a interface também muda comportamento de
+produto, fronteiras de ownership, postura de segurança ou decisão arquitetural difícil de reverter.
+
+Rejeitado: copiar a skill completa de arquitetura, criar skill nova, reescrever `deep-modules.md`, ou exigir o
+loop de alternativas para refactors simples sem finding de seam/interface.
+
+### 8. Loop test-first sob demanda em `dw-testing-discipline` (de mattpocock)
+
+Adotada a técnica operacional de loop TDD estrito do [`mattpocock/skills`](https://github.com/mattpocock/skills)
+sem copiar a skill upstream: `scaffold/skills/dw-testing-discipline/references/tdd-loop.md`
+define confirmar a seam pública com o usuário antes do primeiro teste, escrever **um** teste
+vermelho por slice, executar e observar o vermelho real, implementar o mínimo para verde,
+executar e observar o verde, e só então avançar para o próximo slice.
+
+O `/dw-run` ganhou um gatilho explícito nas versões EN/PT: só usa esse modo quando a task ou o
+usuário pede `TDD`, `test first` ou `red-green-refactor`. O default continua sendo a disciplina
+existente: placement doctrine, seis agent guardrails, anti-patterns, testes em camada adequada e
+sem teste de internals.
+
+Rejeitado: tornar TDD o modo padrão do executor, escrever baterias de testes antes da primeira
+implementação, tratar refactor como parte do ciclo red-green, afrouxar mocks para acelerar o
+loop, ou testar private helpers. Onde o padrão upstream é mais estreito que o nosso, prevalecem
+as seis regras centrais do `dw-testing-discipline`; o `tdd-loop` é um modo de operação dentro
+delas, não uma substituição.
+
+### 9. Loop red-capable em `dw-debug-protocol` (de mattpocock)
+
+Adotada a técnica de não teorizar antes de existir um loop de feedback red-capable, atribuída ao
+[`mattpocock/skills`](https://github.com/mattpocock/skills), dentro do passo "Reproduce" do
+six-step triage. `scaffold/skills/dw-debug-protocol/references/six-step-triage.md` agora define
+o contrato do loop: único, determinístico o bastante, rápido, executável pelo agente e comprovado
+vermelho agora. Também inclui repertório de loops (teste focado, `curl`, CLI, browser headless,
+trace replay, harness dedicado, fuzz/repeat, `git bisect`, teste diferencial) e template HITL
+para pedir credencial, hardware, fixture, trace ou ação manual quando o agente não consegue rodar
+o loop sozinho.
+
+O `/dw-bugfix` EN/PT agora exige que `fix-report.md` registre `Loop command before fix` e
+`Loop command after fix`, ou, quando não houver loop executável, as tentativas e o pedido explícito
+de artefato/acesso. A regra vale para bug não trivial e para qualquer caso em que a primeira
+tentativa de fix falhe; bug trivial com reprodução óbvia e fix cirúrgico não paga a checklist
+completa.
+
+Rejeitado: transformar todo bug de uma linha em papelada, substituir o six-step triage, seguir
+no escuro quando o loop depende de input humano, instrumentar várias variáveis de uma vez, ou
+deixar logs temporários sem prefixo removível. A estratégia de bugs não-reprodutíveis continua
+coerente com isso: primeiro instrumenta para obter evidência/reprodução, depois corrige; guesses
+só entram pelo caminho explicitamente reconhecido e monitorado.
+
+### 10. `/dw-triage` — intake local-first antes do pipeline (de mattpocock)
+
+Adotada a técnica da skill `triage` de [`mattpocock/skills`](https://github.com/mattpocock/skills)
+(MIT): um on-ramp para trabalho que chega de fora, com categoria, estado, checagem de redundância,
+checagem de rejeições anteriores, checkpoint do dono, e roteamento para o próximo fluxo. A ideia
+central veio do upstream, onde `triage` move issues por uma máquina de estados baseada em papéis
+como `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human` e `wontfix`; o setup do
+upstream também registra que o issue tracker e as labels são a camada de estado compartilhada.
+
+No dev-workflow a adaptação é deliberadamente diferente: o substrato canônico é `.dw/` versionado,
+não labels/comentários de tracker. O novo comando escreve um registro por item em
+`.dw/triage/NNN-<slug>.md`, cria memória de rejeições em `.dw/out-of-scope/<concept>.md` apenas
+para conceitos rejeitados, e trata GitHub (`gh`) como enriquecimento opcional de leitura. O comando
+funciona 100% offline a partir de paste, arquivo local ou argumento explícito; se `gh` não existir,
+não houver autenticação ou o remote não for GitHub, ele pede texto/diff local e continua.
+
+Vocabulário adotado:
+
+- `ready-for-work` substitui `ready-for-agent`, porque no pipeline daqui a execução passa por
+  `/dw-bugfix` ou `/dw-plan prd` antes de chegar a `/dw-run`; "agent-ready" seria preciso demais
+  para o ponto errado do fluxo.
+- `needs-human` substitui `ready-for-human`, porque o estado não significa "pronto para uma pessoa
+  implementar", e sim "não delegável com segurança ainda" por decisão de design, acesso externo,
+  julgamento, ownership ou teste manual.
+
+Rejeitado: portar literalmente labels de GitHub como fonte da verdade, prometer Linear/Jira/GitLab
+sem ferramenta instalada, sincronizar automaticamente tracker ↔ `.dw/`, criar webhook/daemon,
+escrever comentários/labels/fechamentos remotos como efeito colateral, ou registrar
+"já implementado" em `.dw/out-of-scope/**`. Pedido já atendido vira `wontfix` no registro de
+triagem, apontando onde vive a implementação; out-of-scope fica reservado para rejeições reais com
+motivo durável.
+
+
 ## O que NÃO foi portado (e por quê)
 
 1. **`CONTEXT.md` na raiz (mattpocock)** — a *disciplina* de domain-modeling FOI adotada (seção 5 acima), mas o
@@ -127,8 +243,9 @@ Diferenças intencionais do `.dw/`:
    `.dw/rules/concerns.md` continuam sendo análise/princípios auto-gerados, separados do vocabulário curado.
 2. **`/handoff` (mattpocock)** — já coberto por `/dw-pause` + `.dw/STATE.md` (decisões,
    bloqueios, todos, open loops) e `/dw-resume`.
-3. **`improve-codebase-architecture` / deep modules (mattpocock)** — já portado para
-   `dw-simplification/references/deep-modules.md`.
+3. **`improve-codebase-architecture` completa (mattpocock)** — não foi copiada. O dev-workflow manteve
+   `dw-simplification/references/deep-modules.md` como fonte local e adotou apenas as técnicas aprovadas:
+   categorias de dependência, teste derivado da categoria e Design It Twice condicional.
 4. **Changesets (ambos)** — dev-workflow é um pacote npm único; versionamento multi-skill
    independente não se aplica.
 5. **Comandos em TOML (ponytail)** — a fonte da verdade do dev-workflow é markdown +
@@ -156,6 +273,9 @@ Diferenças intencionais do `.dw/`:
 | Skill de grilling | `scaffold/skills/dw-grilling/SKILL.md` (+ references) | mattpocock (grilling / grill-with-docs) |
 | Skill de domain-modeling | `scaffold/skills/dw-domain-modeling/SKILL.md` (+ references) | mattpocock (domain-modeling) |
 | Modo grill nativo | `scaffold/{en,pt-br}/commands/dw-brainstorm.md` | — |
+| Comando de intake triage | `scaffold/{en,pt-br}/commands/dw-triage.md` + templates `triage-*` | mattpocock (`triage`) |
+| Loop test-first sob demanda | `scaffold/skills/dw-testing-discipline/references/tdd-loop.md` + `scaffold/{en,pt-br}/commands/dw-run.md` | mattpocock (TDD loop estrito) |
+| Loop red-capable de debug | `scaffold/skills/dw-debug-protocol/references/six-step-triage.md` + `scaffold/{en,pt-br}/commands/dw-bugfix.md` | mattpocock (feedback loop antes de teorizar) |
 | Artefatos de domínio | `.dw/domain/**` (criados lazy pelo grill autorizado) | — |
 | One-pager schema 1.1 | `scaffold/{en,pt-br}/templates/idea-onepager.md` | — |
 | Roteamento de ADR | `scaffold/{en,pt-br}/commands/dw-adr.md` (`--scope=repo\|prd`) | mattpocock (ADR-FORMAT) |
@@ -178,9 +298,9 @@ Ambos os repositórios de referência são MIT. As adoções preservam os crédi
   intensidade e statusline, na base de `dw-minimalism` e do `statusline.mjs`.
 - `mattpocock/skills` (MIT) — distinção user/model-invoked (`disable-model-invocation`),
   `git-guardrails-claude-code`, e as skills `grill-with-docs` / `grilling` / `domain-modeling` (com
-  `CONTEXT-FORMAT.md` + `ADR-FORMAT.md`), na base do controle de invocação, do hook git-guardrails e do Grill
-  nativo (`dw-grilling` + `dw-domain-modeling`). Comportamento reimplementado na nossa voz; nenhuma prosa upstream
-  copiada.
+  `CONTEXT-FORMAT.md` + `ADR-FORMAT.md`) / `triage`, na base do controle de invocação, do hook git-guardrails,
+  do Grill nativo (`dw-grilling` + `dw-domain-modeling`) e da borda `/dw-triage`. Comportamento reimplementado
+  na nossa voz; nenhuma prosa upstream copiada.
 
 A atribuição também consta no `SKILL.md` de `dw-minimalism`, no `README.md` (Acknowledgements)
 e nos cabeçalhos dos scripts de hook.

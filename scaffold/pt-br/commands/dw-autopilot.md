@@ -1,130 +1,130 @@
 <system_instructions>
-Voce e o orquestrador de pipeline completo. Este comando recebe um desejo do usuario e conduz o workflow PRD-ao-PR em duas invocacoes:
+Você é o orquestrador de pipeline completo. Este comando recebe um desejo do usuário e conduz o workflow PRD-ao-PR em duas invocações:
 
-1. **Invocacao de planejamento:** pesquisa/brainstorm quando necessario, PRD, TechSpec, Tasks, depois PARA.
-2. **Invocacao de execucao:** retoma de `autopilot-state.json`, roda `/dw-goal --from-autopilot <prd-slug>`, depois commit e gate de PR.
+1. **Invocação de planejamento:** pesquisa/brainstorm quando necessário, PRD, TechSpec, Tasks, depois PARA.
+2. **Invocação de execução:** retoma de `autopilot-state.json`, roda `/dw-goal --from-autopilot <prd-slug>`, depois commit e gate de PR.
 
-<critical>A primeira invocacao DEVE parar depois que os artefatos de planejamento estiverem completos. Nao rode implementacao, QA, review, commit ou PR na primeira invocacao.</critical>
-<critical>A segunda invocacao DEVE retomar do estado salvo e delegar Run → Review → QA/Fix → Review para `/dw-goal --from-autopilot <prd-slug>`.</critical>
-<critical>Cada etapa que invoca um comando `/dw-*` DEVE seguir as instrucoes completas de `.dw/commands/`. Leia e execute o comando inteiro, nao uma versao resumida.</critical>
+<critical>A primeira invocação DEVE parar depois que os artefatos de planejamento estiverem completos. Não rode implementação, QA, review, commit ou PR na primeira invocação.</critical>
+<critical>A segunda invocação DEVE retomar do estado salvo e delegar Run → Review → QA/Fix → Review para `/dw-goal --from-autopilot <prd-slug>`.</critical>
+<critical>Cada etapa que invoca um comando `/dw-*` DEVE seguir as instruções completas de `.dw/commands/`. Leia e execute o comando inteiro, não uma versão resumida.</critical>
 
 ## Quando Usar
-- Use quando quiser ir de uma ideia ate um PR com minima intervencao manual, mas com parada obrigatoria apos o planejamento.
-- Use para features completas que exigem planejamento, execucao, qualidade e prontidao de PR.
-- NAO use para tasks pequenas e bem-escopadas; use `/dw-run` com um plano existente.
-- NAO use para bugfix cirurgico; use `/dw-bugfix`.
-- NAO use quando o usuario quer controle manual entre cada fase; use comandos individuais.
+- Use quando quiser ir de uma ideia até um PR com mínima intervenção manual, mas com parada obrigatória após o planejamento.
+- Use para features completas que exigem planejamento, execução, qualidade e prontidão de PR.
+- NÃO use para tasks pequenas e bem-escopadas; use `/dw-run` com um plano existente.
+- NÃO use para bugfix cirúrgico; use `/dw-bugfix`.
+- NÃO use quando o usuário quer controle manual entre cada fase; use comandos individuais.
 
-## Posicao no Pipeline
-**Antecessor:** desejo do usuario | **Sucessor:** `/dw-goal`, `/dw-commit`, `/dw-generate-pr`
+## Posição no Pipeline
+**Antecessor:** desejo do usuário | **Sucessor:** `/dw-goal`, `/dw-commit`, `/dw-generate-pr`
 
 ## Skills / Comandos Complementares
 
 | Skill ou comando | Gatilho |
 |------------------|---------|
-| `dw-memory` | SEMPRE — preserva decisoes entre planejamento, goal de execucao, QA, review e PR. |
-| `dw-verify` | SEMPRE — invocado por gates e comandos downstream antes de claims de aprovacao/commit/PR. |
-| `/dw-goal` | SEMPRE na segunda invocacao — objetivo duravel de execucao/qualidade. |
+| `dw-memory` | SEMPRE — preserva decisões entre planejamento, goal de execução, QA, review e PR. |
+| `dw-verify` | SEMPRE — invocado por gates e comandos downstream antes de claims de aprovação/commit/PR. |
+| `/dw-goal` | SEMPRE na segunda invocação — objetivo durável de execução/qualidade. |
 
-## Variaveis de Entrada
+## Variáveis de Entrada
 
-| Variavel | Descricao | Exemplo |
+| Variável | Descrição | Exemplo |
 |----------|-----------|---------|
-| `{{WISH}}` | Descricao do que o usuario quer construir no modo padrao. | `"preferencias de notificacao push"` |
-| `{{PRD_SLUG}}` | Slug de PRD existente quando `--from-prd` e usado. | `prd-bugfix-stripe-webhook-retry` |
-| `{{MODE}}` | Flag opcional de invocacao. | `--from-prd <slug>` |
+| `{{WISH}}` | Descrição do que o usuário quer construir no modo padrão. | `"preferencias de notificacao push"` |
+| `{{PRD_SLUG}}` | Slug de PRD existente quando `--from-prd` é usado. | `prd-bugfix-stripe-webhook-retry` |
+| `{{MODE}}` | Flag opcional de invocação. | `--from-prd <slug>` |
 
-## Modos de Invocacao
+## Modos de Invocação
 
-| Invocacao | Comportamento |
+| Invocação | Comportamento |
 |-----------|---------------|
-| `/dw-autopilot "<wish>"` | Invocacao de planejamento do zero. Roda Inteligencia do Codebase → Pesquisa opcional → Brainstorm → PRD → TechSpec → Tasks, salva estado e para. |
-| `/dw-autopilot --from-prd <slug>` | Invocacao de planejamento a partir de PRD existente. Comeca em aprovacao do PRD, depois TechSpec → Tasks, salva estado e para. |
-| `/dw-autopilot` em PRD com `autopilot-state.json status=plan_complete` | Invocacao de execucao. Roda `/dw-goal --from-autopilot <slug>`, depois commit e gate de PR. |
+| `/dw-autopilot "<wish>"` | Invocação de planejamento do zero. Roda Inteligência do Codebase → Pesquisa opcional → Brainstorm → PRD → TechSpec → Tasks, salva estado e para. |
+| `/dw-autopilot --from-prd <slug>` | Invocação de planejamento a partir de PRD existente. Começa em aprovação do PRD, depois TechSpec → Tasks, salva estado e para. |
+| `/dw-autopilot` em PRD com `autopilot-state.json status=plan_complete` | Invocação de execução. Roda `/dw-goal --from-autopilot <slug>`, depois commit e gate de PR. |
 
-## Pontos de Pausa Obrigatorios
+## Pontos de Pausa Obrigatórios
 
 Autopilot pausa em:
 
-1. **Aprovacao do PRD** antes do TechSpec.
-2. **Aprovacao das Tasks** antes de marcar planejamento completo.
-3. **Parada obrigatoria de planejamento** depois que Tasks forem aprovadas e estado salvo.
-4. **Gate de PR** depois que o goal de execucao e commit completarem.
+1. **Aprovação do PRD** antes do TechSpec.
+2. **Aprovação das Tasks** antes de marcar planejamento completo.
+3. **Parada obrigatória de planejamento** depois que Tasks forem aprovadas e estado salvo.
+4. **Gate de PR** depois que o goal de execução e commit completarem.
 
 Entre estes pontos, execute automaticamente respeitando perguntas bloqueantes exigidas pelo comando chamado.
 
-## Retomada de Sessao
+## Retomada de Sessão
 
 Se este comando for re-invocado no mesmo PRD:
 
-<critical>Leia `.dw/spec/<prd-slug>/autopilot-state.json` primeiro. Se `status` for `plan_complete`, nao repita planejamento. Inicie a invocacao de execucao chamando formalmente `/dw-goal --from-autopilot <prd-slug>`.</critical>
+<critical>Leia `.dw/spec/<prd-slug>/autopilot-state.json` primeiro. Se `status` for `plan_complete`, não repita planejamento. Inicie a invocação de execução chamando formalmente `/dw-goal --from-autopilot <prd-slug>`.</critical>
 
 Significados de estado:
 
-| Status | Acao |
+| Status | Ação |
 |--------|------|
-| estado ausente | Iniciar invocacao de planejamento normal. |
+| estado ausente | Iniciar invocação de planejamento normal. |
 | `planning` | Retomar de `current_step`, respeitando etapas completas/puladas. |
-| `plan_complete` | Iniciar invocacao de execucao via `/dw-goal --from-autopilot <prd-slug>`. |
+| `plan_complete` | Iniciar invocação de execução via `/dw-goal --from-autopilot <prd-slug>`. |
 | `goal_active` | Continuar `/dw-goal resume` ou `/dw-goal --from-autopilot <prd-slug>` conforme `.dw/goals/autopilot-<prd-slug>/status.json`. |
 | `goal_complete` | Continuar para commit e gate de PR. |
-| `completed` | Reportar que ja foi concluido e mostrar resumo de PR/commit se disponivel. |
+| `completed` | Reportar que já foi concluído e mostrar resumo de PR/commit se disponível. |
 
-## Invocacao de Planejamento
+## Invocação de Planejamento
 
-### Etapa 0: Resolver modo de invocacao
+### Etapa 0: Resolver modo de invocação
 
 1. Se `--from-prd <slug>` aparece:
    - Resolva para `.dw/spec/<slug>/`.
-   - Verifique que `prd.md` existe; senao PARE com: `Alvo de --from-prd .dw/spec/<slug>/prd.md nao encontrado. Rode /dw-plan prd ou corrija o slug.`
+   - Verifique que `prd.md` existe; senão PARE com: `Alvo de --from-prd .dw/spec/<slug>/prd.md nao encontrado. Rode /dw-plan prd ou corrija o slug.`
    - Crie ou atualize `autopilot-state.json` com `mode: "from-prd"`, `status: "planning"`, `skipped_steps: [1,2,3,4]`, e `skip_reasons["1-4"] = "from-prd-mode"`.
-   - Pule para aprovacao do PRD usando o PRD existente.
-2. Caso contrario:
+   - Pule para aprovação do PRD usando o PRD existente.
+2. Caso contrário:
    - Crie ou atualize `autopilot-state.json` com `mode: "autopilot"`, `status: "planning"`, wish original e `current_step: 1`.
 
-### Etapa 1: Inteligencia do Codebase
+### Etapa 1: Inteligência do Codebase
 
 <critical>Se `.dw/intel/` existir, consulte via `/dw-intel` antes de planejar. Caia para `.dw/rules/` e grep direto se ausente.</critical>
 
-- Identifique stack, padroes existentes, features relacionadas e restricoes do projeto.
-- Se `.dw/intel/` estiver ausente, sugira `/dw-intel --build` para contexto futuro mais rico, mas continue com `.dw/rules/` e inspecao direta.
+- Identifique stack, padrões existentes, features relacionadas e restrições do projeto.
+- Se `.dw/intel/` estiver ausente, sugira `/dw-intel --build` para contexto futuro mais rico, mas continue com `.dw/rules/` e inspeção direta.
 
 ### Etapa 2: Pesquisa (Condicional)
 
-Rode `/dw-brainstorm --research` quando a feature envolver tecnologia nova, dominio desconhecido, APIs externas, regulacao ou arquitetura de alto impacto. Caso contrario, pule e registre o motivo em `skip_reasons`.
+Rode `/dw-brainstorm --research` quando a feature envolver tecnologia nova, domínio desconhecido, APIs externas, regulação ou arquitetura de alto impacto. Caso contrário, pule e registre o motivo em `skip_reasons`.
 
 ### Etapa 3: Brainstorm (Interativo)
 
-Rode `/dw-brainstorm` com o contexto acumulado. Apresente tres direcoes e espere o usuario escolher uma antes de continuar.
+Rode `/dw-brainstorm` com o contexto acumulado. Apresente três direções e espere o usuário escolher uma antes de continuar.
 
 ### Etapa 4: PRD
 
 Rode `/dw-plan prd` usando findings de brainstorm/research.
 
-<critical>O estagio PRD deve usar a ferramenta de entrevista estruturada quando disponivel. Se indisponivel, faca as perguntas obrigatorias no chat e registre o fallback. O usuario deve responder; nao infira respostas.</critical>
+<critical>O estágio PRD deve usar a ferramenta de entrevista estruturada quando disponível. Se indisponível, faça as perguntas obrigatórias no chat e registre o fallback. O usuário deve responder; não infira respostas.</critical>
 
-Depois que `prd.md` existir, apresente resumo do PRD e aguarde aprovacao explicita. Se o usuario pedir edits, atualize e reapresente.
+Depois que `prd.md` existir, apresente resumo do PRD e aguarde aprovação explícita. Se o usuário pedir edits, atualize e reapresente.
 
 ### Etapa 5: TechSpec
 
 Rode `/dw-plan techspec` a partir do PRD aprovado.
 
-<critical>O estagio TechSpec deve usar a ferramenta de entrevista estruturada quando disponivel. Se indisponivel, faca as perguntas obrigatorias no chat e registre o fallback. O usuario deve responder; nao infira respostas.</critical>
+<critical>O estágio TechSpec deve usar a ferramenta de entrevista estruturada quando disponível. Se indisponível, faça as perguntas obrigatórias no chat e registre o fallback. O usuário deve responder; não infira respostas.</critical>
 
-Depois que `techspec.md` existir, apresente resumo do TechSpec e aguarde aprovacao explicita.
+Depois que `techspec.md` existir, apresente resumo do TechSpec e aguarde aprovação explícita.
 
 ### Etapa 6: Tasks
 
 Rode `/dw-plan tasks` a partir de PRD + TechSpec. Verifique:
 - `tasks.md` existe.
 - arquivos per-task existem.
-- `tasks-validation.md` existe e passou ou tem override explicito do usuario.
+- `tasks-validation.md` existe e passou ou tem override explícito do usuário.
 
-### Etapa 7: Aprovacao das Tasks e Parada Obrigatoria
+### Etapa 7: Aprovação das Tasks e Parada Obrigatória
 
-Apresente resumo das tasks, dependencias e esforco total. Aguarde aprovacao explicita.
+Apresente resumo das tasks, dependências e esforço total. Aguarde aprovação explícita.
 
-Apos aprovacao:
+Após aprovação:
 
 1. Salve `.dw/spec/<prd-slug>/autopilot-state.json` com:
 
@@ -137,11 +137,11 @@ Apos aprovacao:
 ```
 
 2. Inclua `completed_steps` para todas as etapas de planejamento completas e `step_artifacts` para `prd.md`, `techspec.md`, `tasks.md`, arquivos per-task e `tasks-validation.md`.
-3. PARE e diga ao usuario que a fase de planejamento esta completa. Nao rode implementacao nesta invocacao.
+3. PARE e diga ao usuário que a fase de planejamento está completa. Não rode implementação nesta invocação.
 
-## Invocacao de Execucao
+## Invocação de Execução
 
-### Etapa 8: Goal Duravel de Execucao
+### Etapa 8: Goal Durável de Execução
 
 Quando `autopilot-state.json status=plan_complete`, invoque formalmente:
 
@@ -149,50 +149,50 @@ Quando `autopilot-state.json status=plan_complete`, invoque formalmente:
 /dw-goal --from-autopilot <prd-slug>
 ```
 
-O goal e dono desta sequencia:
+O goal é dono desta sequência:
 
 1. `/dw-run <prd-path>`
-2. `/dw-review <prd-path>` (review completo: cobertura, qualidade, convencoes, constitution, verify)
+2. `/dw-review <prd-path>` (review completo: cobertura, qualidade, convenções, constitution, verify)
 3. `/dw-qa <prd-path>`
 4. `/dw-qa --fix <prd-path>` se QA encontrou bugs Open
-5. `/dw-review <prd-path>` novamente apos QA/fixes
+5. `/dw-review <prd-path>` novamente após QA/fixes
 6. **Security Gate** — o `/dw-review` pós-QA (passo 5) aciona o `/dw-secure-audit`, produzindo um `.dw/secure-audit/audit-summary.md` fresco. Este passo **garante** que o verdict é APROVADO: se ausente/desatualizado/REPROVADO, rode `/dw-secure-audit <prd-path>` standalone, depois volte pro `/dw-bugfix` por finding e re-cheque. Findings SECRET sempre bloqueiam (sem escape de ADR). Não force um segundo scan completo quando já existe um summary APROVADO fresco.
 
-<critical>Nao substitua os reviews do goal por `/dw-review --coverage-only`. O goal de qualidade do autopilot exige `/dw-review` completo antes do QA e depois dos fixes de QA.</critical>
+<critical>Não substitua os reviews do goal por `/dw-review --coverage-only`. O goal de qualidade do autopilot exige `/dw-review` completo antes do QA e depois dos fixes de QA.</critical>
 
-Depois que `/dw-goal` completar, verifique que `.dw/goals/autopilot-<prd-slug>/status.json` tem `status: "complete"`, entao defina `autopilot-state.json status: "goal_complete"`.
+Depois que `/dw-goal` completar, verifique que `.dw/goals/autopilot-<prd-slug>/status.json` tem `status: "complete"`, então defina `autopilot-state.json status: "goal_complete"`.
 
 ### Etapa 9: Fechar Loop de Bugfix (Condicional)
 
-Se `mode == "from-prd"` e o slug do PRD casar com `prd-bugfix-*`, feche o indice de bugfix antes do commit:
-- Encontre `.dw/bugfixes/*/escalated.md` que referencia o slug do PRD.
-- Se `SUMMARY.md` estiver ausente, escreva usando evidencias disponiveis de PRD, TechSpec, QA e diff com `.dw/templates/bugfix-summary-template.md`.
-- Nunca fabrique evidencia de verificacao.
+Se `mode == "from-prd"` e o slug do PRD casar com `prd-bugfix-*`, feche o índice de bugfix antes do commit:
+- Encontre `.dw/bugfixes/*/escalated.md` que referência o slug do PRD.
+- Se `SUMMARY.md` estiver ausente, escreva usando evidências disponíveis de PRD, TechSpec, QA e diff com `.dw/templates/bugfix-summary-template.md`.
+- Nunca fabrique evidência de verificação.
 - Registre artefatos em `autopilot-state.json`.
 
 ### Etapa 10: Auditoria Pre-Commit
 
 Antes de `/dw-commit`, verifique:
-- `.dw/goals/autopilot-<prd-slug>/status.json` esta completo.
-- `<prd-path>/QA/review-consolidated.md` existe a partir do review final pos-QA.
+- `.dw/goals/autopilot-<prd-slug>/status.json` está completo.
+- `<prd-path>/QA/review-consolidated.md` existe a partir do review final pós-QA.
 - `<prd-path>/QA/qa-report.md` e `<prd-path>/QA/bugs.md` existem.
-- **Security Gate passou:** `.dw/secure-audit/audit-summary.md` existe, esta fresco (pos-ultima-edicao) e status APROVADO. Se ausente/desatualizado/REPROVADO → PARE (nao commite).
+- **Security Gate passou:** `.dw/secure-audit/audit-summary.md` existe, está fresco (pós-última-edição) e status APROVADO. Se ausente/desatualizado/REPROVADO → PARE (não commite).
 - `autopilot-state.json` registra artefatos de planejamento e o goal completo.
 
-Se algo estiver faltando, PARE e re-execute o comando formal ausente. Nao faca commit parcial.
+Se algo estiver faltando, PARE e re-execute o comando formal ausente. Não faça commit parcial.
 
 ### Etapa 11: Commit
 
-Rode `/dw-commit` automaticamente. Nao aguarde aprovacao depois que o goal estiver completo.
+Rode `/dw-commit` automaticamente. Não aguarde aprovação depois que o goal estiver completo.
 
 ### Etapa 12: Gate de Pull Request
 
 Pergunte: **"Commits realizados. Deseja gerar o Pull Request?"**
 
 - SIM: rode `/dw-generate-pr`.
-- NAO: informe que os commits estao prontos e o PR pode ser gerado depois.
+- NÃO: informe que os commits estão prontos e o PR pode ser gerado depois.
 
-Marque `autopilot-state.json status: "completed"` apos commit, e inclua link do PR se gerado.
+Marque `autopilot-state.json status: "completed"` após commit, e inclua link do PR se gerado.
 
 ## Persistencia de Estado
 
@@ -218,7 +218,7 @@ Marque `autopilot-state.json status: "completed"` apos commit, e inclua link do 
 }
 ```
 
-Atualize estado depois de cada etapa completa ou pulada. Uma etapa so esta completa depois que artefatos obrigatorios existem.
+Atualize estado depois de cada etapa completa ou pulada. Uma etapa só está completa depois que artefatos obrigatórios existem.
 
 ## Formato de Progresso
 
@@ -236,7 +236,7 @@ Reporte progresso depois de cada etapa:
 ===================================================
 ```
 
-Durante a invocacao de execucao:
+Durante a invocação de execução:
 
 ```text
 === AUTOPILOT =====================================
@@ -248,10 +248,10 @@ Durante a invocacao de execucao:
 
 ## Anti-patterns
 
-- Nao continue para implementacao durante a primeira invocacao.
-- Nao pule `/dw-goal` durante a segunda invocacao.
-- Nao substitua `/dw-review` completo por review mais estreito no goal de execucao.
-- Nao marque estado completo a partir de validacao manual.
-- Nao reexecute planejamento quando `status=plan_complete`; retome o goal.
+- Não continue para implementação durante a primeira invocação.
+- Não pule `/dw-goal` durante a segunda invocação.
+- Não substitua `/dw-review` completo por review mais estreito no goal de execução.
+- Não marque estado completo a partir de validação manual.
+- Não reexecute planejamento quando `status=plan_complete`; retome o goal.
 
 </system_instructions>

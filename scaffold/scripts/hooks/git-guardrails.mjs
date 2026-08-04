@@ -14,13 +14,17 @@
  * error allows the command, so a hook bug never blocks the user.
  */
 
-const DANGEROUS = [
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+export const DANGEROUS = [
   { re: /\bgit\s+push\b[^\n|&;]*(--force\b|--force-with-lease\b|\s-f\b)/, why: 'force push rewrites remote history' },
   { re: /\bgit\s+push\b[^\n|&;]*(--delete\b|\s-d\b|\s:\S)/, why: 'deletes a remote branch' },
   { re: /\bgit\s+reset\b[^\n|&;]*--hard\b/, why: 'hard reset discards uncommitted work and rewrites the branch' },
   { re: /\bgit\s+clean\b[^\n|&;]*-[a-z]*f/, why: 'git clean -f permanently deletes untracked files' },
   { re: /\bgit\s+branch\b[^\n|&;]*\s-D\b/, why: 'force-deletes a branch that may be unmerged' },
   { re: /\bgit\s+checkout\b[^\n|&;]*\s(--\s+\.|\.\s*$)/, why: 'discards all local changes in the working tree' },
+  { re: /\bgit\s+restore\b[^\n|&;]*\s(--\s+)?\.(?=\s*(?:$|[|&;]))/, why: 'discards all local changes in the working tree' },
 ];
 
 function readStdin() {
@@ -38,6 +42,36 @@ function allow() {
   process.exit(0);
 }
 
+export function evaluatePayload(input) {
+  let payload;
+  try {
+    payload = JSON.parse(input);
+  } catch {
+    return null; // fail open
+  }
+
+  const command = payload && payload.tool_input && typeof payload.tool_input.command === 'string'
+    ? payload.tool_input.command
+    : '';
+  if (!command) return null;
+
+  for (const rule of DANGEROUS) {
+    if (rule.re.test(command)) {
+      return {
+        hookSpecificOutput: {
+          hookEventName: 'PreToolUse',
+          permissionDecision: 'deny',
+          permissionDecisionReason:
+            `Blocked by dev-workflow git guardrails: ${rule.why}. ` +
+            `If this is intentional, run it yourself outside the agent, or adjust .claude/settings.json hooks.`,
+        },
+      };
+    }
+  }
+
+  return null;
+}
+
 function deny(reason) {
   process.stdout.write(
     JSON.stringify({
@@ -52,28 +86,11 @@ function deny(reason) {
 }
 
 async function main() {
-  let payload;
-  try {
-    payload = JSON.parse(await readStdin());
-  } catch {
-    return allow(); // fail open
-  }
-
-  const command = payload && payload.tool_input && typeof payload.tool_input.command === 'string'
-    ? payload.tool_input.command
-    : '';
-  if (!command) return allow();
-
-  for (const rule of DANGEROUS) {
-    if (rule.re.test(command)) {
-      return deny(
-        `Blocked by dev-workflow git guardrails: ${rule.why}. ` +
-          `If this is intentional, run it yourself outside the agent, or adjust .claude/settings.json hooks.`,
-      );
-    }
-  }
-
-  return allow();
+  const result = evaluatePayload(await readStdin());
+  if (!result) return allow();
+  return deny(result.hookSpecificOutput.permissionDecisionReason);
 }
 
-main().catch(() => allow());
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch(() => allow());
+}

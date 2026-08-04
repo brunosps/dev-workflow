@@ -13,40 +13,40 @@ services: []
 
 # Projeto: [Nome do projeto]
 
-## Proposito
+## Propósito
 
-[Um paragrafo em linguagem de produto. Quem vai usar, qual problema resolve, como o sucesso se parece em 6-12 semanas. Evite linguagem de implementacao.]
+[Um parágrafo em linguagem de produto. Quem vai usar, qual problema resolve, como o sucesso se parece em 6-12 semanas. Evite linguagem de implementação.]
 
 ## Stack Selecionado
 
 | Camada | Escolha | Justificativa |
 |--------|---------|---------------|
-| Forma | frontend / backend / fullstack | [por que essa forma — superficie unica, API para parceiros, etc.] |
+| Forma | frontend / backend / fullstack | [por que essa forma — superfície única, API para parceiros, etc.] |
 | Frontend | Next.js / Vite+React / n/a | [por que esse framework — SSR, simplicidade SPA, etc.] |
-| Backend | NestJS / Fastify / FastAPI / ASP.NET Core minimal / Axum / n/a | [por que — expertise do time, ecosystem, alvo de latencia] |
-| Database | Postgres / MySQL / SQLite / MongoDB / nenhum | [por que esse DB — relacional, transacional, etc. Busca vetorial nao tem recipe bundled; nomeie a imagem revisada ou servico gerenciado se o projeto precisar] |
-| Cache | Redis / Memcached / nenhum | [por que ou por que nao] |
-| Fila | pg-boss / BullMQ / Celery / RabbitMQ / LocalStack SQS / nenhum | [por que ou nao + sync vs async workers] |
+| Backend | NestJS / Fastify / FastAPI / ASP.NET Core minimal / Axum / n/a | [por que — expertise do time, ecosystem, alvo de latência] |
+| Database | Postgres / MySQL / SQLite / MongoDB / nenhum | [por que esse DB — relacional, transacional, etc. Busca vetorial não tem recipe bundled; nomeie a imagem revisada ou serviço gerenciado se o projeto precisar] |
+| Cache | Redis / Memcached / nenhum | [por que ou por que não] |
+| Fila | pg-boss / BullMQ / Celery / RabbitMQ / LocalStack SQS / nenhum | [por que ou não + sync vs async workers] |
 | Email — dev | Mailpit (default) / smtp4dev / nenhum | [normalmente Mailpit — captura only, nunca envia real] |
 | Email — prod | SMTP / SendGrid / Resend / Postmark / SES / nenhum | [por que esse provider — volume, deliverability, custo] |
-| Object storage | S3 / MinIO (dev) / GCS / nenhum | [por que ou nao] |
+| Object storage | S3 / MinIO (dev) / GCS / nenhum | [por que ou não] |
 | Search | Meilisearch / Typesense / Elasticsearch / nenhum | [por que esse engine — features, escala, simplicidade] |
-| Observability | Sentry / OTel + Jaeger / nenhum | [por que essa abordagem — so error tracking, tracing completo, etc.] |
-| Reverse proxy | Traefik / Caddy / nenhum | [normalmente so multi-host dev ou prod] |
-| Auth | Auth.js / OIDC generico / Clerk / fastapi-users / dotnet Identity / JWT custom / nenhum | [por que — social login, B2B, etc.] |
-| Linter / formatter | Biome / ESLint+Prettier / Ruff+Black / dotnet format / cargo fmt+clippy | [preferencia do time] |
-| Package manager | pnpm / npm / yarn / poetry / uv / cargo / dotnet | [preferencia do time] |
-| Workspace + task runner | pnpm workspaces + Turborepo / npm workspaces / Nx / n/a | [so para fullstack — caching/build] |
+| Observability | Sentry / OTel + Jaeger / nenhum | [por que essa abordagem — só error tracking, tracing completo, etc.] |
+| Reverse proxy | Traefik / Caddy / nenhum | [normalmente só multi-host dev ou prod] |
+| Auth | Auth.js / OIDC genérico / Clerk / fastapi-users / dotnet Identity / JWT custom / nenhum | [por que — social login, B2B, etc.] |
+| Linter / formatter | Biome / ESLint+Prettier / Ruff+Black / dotnet format / cargo fmt+clippy | [preferência do time] |
+| Package manager | pnpm / npm / yarn / poetry / uv / cargo / dotnet | [preferência do time] |
+| Workspace + task runner | pnpm workspaces + Turborepo / npm workspaces / Nx / n/a | [só para fullstack — caching/build] |
 | Topologia de dev | apps no host / tudo no Compose | [trade-off de hot reload e paridade] |
-| CI | GitHub Actions / nenhum | [normalmente GitHub Actions; pular so para repos nao-publicos] |
+| CI | GitHub Actions / nenhum | [normalmente GitHub Actions; pular só para repos não-públicos] |
 
-## Servicos & Infra
+## Serviços & Infra
 
-[Servicos gerados a partir da skill docker-compose-recipes. Preenchido pelo /dw-new-project.]
+[Serviços gerados a partir da skill docker-compose-recipes. Preenchido pelo /dw-new-project.]
 
-| Servico | Porta (host) | UI | Credenciais |
+| Serviço | Porta (host) | UI | Credenciais |
 |---------|--------------|----|-------------|
-| postgres | 127.0.0.1:5432 | — | POSTGRES_USER=app, POSTGRES_PASSWORD obrigatoria no `.env` (sem default), POSTGRES_DB=app |
+| postgres | 127.0.0.1:5432 | — | POSTGRES_USER=app, POSTGRES_PASSWORD obrigatória no `.env` (sem default), POSTGRES_DB=app |
 | redis | 6379 | — | (sem auth em dev) |
 | mailpit | 1025 (smtp), 8025 (UI) | http://localhost:8025 | (sem auth) |
 | ... | ... | ... | ... |
@@ -71,7 +71,7 @@ services: []
 
 ## Arquivos Gerados
 
-[Preenchido pelo /dw-new-project apos Fase 3 — lista de arquivos criados com origem.]
+[Preenchido pelo /dw-new-project após Fase 3 — lista de arquivos criados com origem.]
 
 ```
 {{TARGET_DIR}}/
@@ -96,16 +96,16 @@ services: []
 
 ## Escopo MVP
 
-[A primeira feature menor que voce vai entregar. Pensada como user stories — vai dirigir a primeira rodada de /dw-plan prd.]
+[A primeira feature menor que você vai entregar. Pensada como user stories — vai dirigir a primeira rodada de /dw-plan prd.]
 
-- Como [persona], eu posso [acao] para que [beneficio]
-- Como [persona], eu posso [acao] para que [beneficio]
+- Como [persona], eu posso [ação] para que [benefício]
+- Como [persona], eu posso [ação] para que [benefício]
 
-Se voce ainda nao tem a primeira feature em mente, tudo bem — deixa placeholder e roda o /dw-plan prd quando tiver.
+Se você ainda não tem a primeira feature em mente, tudo bem — deixa placeholder e roda o /dw-plan prd quando tiver.
 
-## Nao Estou Fazendo (explicito)
+## Não Estou Fazendo (explícito)
 
-[Itens tentadores adiados. Forca disciplina de escopo.]
+[Itens tentadores adiados. Força disciplina de escopo.]
 
 - **[item 1]** — motivo: [fora do v1 porque...]
 - **[item 2]** — motivo: [pode virar v2 se a hipotese X validar]
@@ -113,19 +113,19 @@ Se voce ainda nao tem a primeira feature em mente, tudo bem — deixa placeholde
 ## Premissas-Chave
 
 - **[premissa sobre usuarios / mercado / escala]** — teste: [como validar]
-- **[premissa sobre latencia / volume / SLAs]** — teste: [load profile, metrica alvo]
+- **[premissa sobre latência / volume / SLAs]** — teste: [load profile, métrica alvo]
 
 ## Perguntas em Aberto
 
-[O que este one-pager nao consegue responder sozinho. Resolva antes do /dw-plan prd ou escale para um stakeholder.]
+[O que este one-pager não consegue responder sozinho. Resolva antes do /dw-plan prd ou escale para um stakeholder.]
 
 - [pergunta 1]
 - [pergunta 2]
 
-## Proximo Passo
+## Próximo Passo
 
 Escolha UM:
 
-- **`/dw-plan prd`** — quando voce tem a primeira feature em mente e quer rascunhar o PRD em cima deste stack
-- **`/dw-analyze-project`** — apos primeiro commit substancial, para enriquecer `.dw/rules/` com convencoes por modulo
-- **`/dw-secure-audit --plan --scan-only`** — para confirmar que nenhuma dep vulneravel veio dos templates `create-*`
+- **`/dw-plan prd`** — quando você tem a primeira feature em mente e quer rascunhar o PRD em cima deste stack
+- **`/dw-analyze-project`** — após primeiro commit substancial, para enriquecer `.dw/rules/` com convenções por módulo
+- **`/dw-secure-audit --plan --scan-only`** — para confirmar que nenhuma dep vulnerável veio dos templates `create-*`

@@ -4,7 +4,7 @@ Tasks within a phase have dependencies. Some can run in parallel; others must wa
 
 ## Wave computation
 
-Input: `tasks.md` with each task carrying a `Depends on:` field (none, or comma-separated task numbers).
+Input: `tasks.md` with each task carrying a `Depends on:` field (none, or comma-separated task IDs).
 
 Algorithm: topological sort.
 
@@ -13,25 +13,25 @@ Algorithm: topological sort.
 3. Wave assignment:
    - Wave 1 = tasks with zero dependencies
    - Wave N = tasks whose all dependencies are in waves 1..N-1
-4. Output: ordered list of waves, each wave a list of task numbers.
+4. Output: ordered list of waves, each wave a list of task IDs.
 
 ## Example
 
 ```
 tasks.md:
-- 01 Create user schema       Depends on: none
-- 02 Create user model        Depends on: 01
-- 03 Create order schema      Depends on: none
-- 04 Wire auth middleware     Depends on: 02
-- 05 Add login endpoint       Depends on: 04
-- 06 Add order endpoint       Depends on: 02, 03
-- 07 Wire validation rules    Depends on: 04, 06
+- 1.0 Create user schema       Depends on: none
+- 2.0 Create user model        Depends on: 1.0
+- 3.0 Create order schema      Depends on: none
+- 4.0 Wire auth middleware     Depends on: 2.0
+- 5.0 Add login endpoint       Depends on: 4.0
+- 6.0 Add order endpoint       Depends on: 2.0, 3.0
+- 7.0 Wire validation rules    Depends on: 4.0, 6.0
 
 Computed waves:
-Wave 1: [01, 03]            (no deps; can run in parallel)
-Wave 2: [02]                (depends on 01)
-Wave 3: [04, 06]            (depend on wave 2)
-Wave 4: [05, 07]            (depend on wave 3)
+Wave 1: [1.0, 3.0]          (no deps; can run in parallel)
+Wave 2: [2.0]               (depends on 1.0)
+Wave 3: [4.0, 6.0]          (depend on wave 2)
+Wave 4: [5.0, 7.0]          (depend on wave 3)
 ```
 
 ## Parallel execution within a wave
@@ -73,7 +73,7 @@ Each wave is a checkpoint:
 
 ## Order within a wave
 
-Within a wave, order doesn't matter logically (no deps between same-wave tasks). But for **commit history readability**, the executor should commit in numeric order of task number (01 commit before 02 even if both are wave 1). The parallel subagent results may arrive out of order; the executor collects and commits sequentially.
+Within a wave, order doesn't matter logically (no deps between same-wave tasks). But for **commit history readability**, the executor should commit in numeric order of task ID (1.0 commit before 2.0 even if both are wave 1). The parallel subagent results may arrive out of order; the executor collects and commits sequentially.
 
 This means: subagents return their changes (files written, but NOT committed). The executor commits them in numeric order.
 

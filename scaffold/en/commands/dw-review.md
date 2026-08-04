@@ -19,6 +19,7 @@ You are the review orchestrator. Runs both Level 2 (PRD compliance / coverage) a
 | `/dw-review --coverage-only` | Only Level 2 — maps every PRD requirement (or bugfix scope) to the code that delivers it. Skips code quality. |
 | `/dw-review --code-only` | Only Level 3 — code quality / convention / security checks. Skips PRD/scope mapping. |
 | `/dw-review --bugfix <NNN-slug>` | Targets a bugfix at `.dw/bugfixes/NNN-slug/` instead of a PRD. Level 2 maps the bugfix scope (TASK.md + fix-report.md + SUMMARY.md) to the code that delivers the fix; Level 3 checks the diff. Output: `.dw/bugfixes/NNN-slug/review/`. |
+| `/dw-review --since <ref>` | Ad-hoc review against a verified comparison point. Runs the normal selected levels, but the diff is computed from `<ref>` after the `--since` preflight below. |
 
 ## Inputs
 
@@ -26,7 +27,8 @@ You are the review orchestrator. Runs both Level 2 (PRD compliance / coverage) a
 |----------|-------------|---------|
 | `{{PRD_PATH}}` | Path to PRD directory (auto-detect from active branch if omitted; ignored when `--bugfix` is used) | `.dw/spec/prd-invoice-export` |
 | `{{BUGFIX_SLUG}}` | Bugfix slug when `--bugfix` flag is used | `001-login-not-working` |
-| `{{MODE}}` | `--coverage-only` / `--code-only` / `--bugfix <slug>` (optional; default = both, target = PRD) | — |
+| `{{SINCE_REF}}` | Git ref used when `--since <ref>` is passed | `v2.0.0`, `HEAD~3`, `main` |
+| `{{MODE}}` | `--coverage-only` / `--code-only` / `--bugfix <slug>` / `--since <ref>` (optional; default = both, target = PRD) | — |
 
 ## Target Resolution
 
@@ -37,6 +39,24 @@ The review runs against one of two target kinds. Compute `<target>` ONCE at the 
 2. **Bugfix target (`--bugfix <slug>`):** `<target>` = `.dw/bugfixes/<slug>/`. Artifacts read: `TASK.md` (the fix plan with numbered tasks 1..≤5), `fix-report.md` (verify evidence), `SUMMARY.md` (one-page record). There are no FRs in the PRD sense — instead, each numbered task in `TASK.md` is the unit of coverage. Output written to `<target>/review/`. Filenames: `review-coverage.md`, `dw-code-review.md`, `review-consolidated.md`.
 
 When the bugfix target is used, the Coverage mapping (Level 2) operates on the numbered tasks from `TASK.md` (not FR-N.M); a task is DELIVERED when (a) the files it claimed to touch are in the diff and (b) the regression test referenced in `fix-report.md` exists and runs. Orphan code in bugfix mode is anything in the diff that does not correspond to a numbered task — a strong signal the safety valve should have escalated to `/dw-plan`.
+
+## `--since <ref>` Preflight
+
+`--since` is opt-in. The default PRD/bugfix review keeps using the PRD branch creation point / base branch flow unchanged.
+
+When `--since <ref>` is passed, run this preflight before any Level 2 or Level 3 analysis:
+
+1. Resolve the fixed point:
+   - Run `git rev-parse --verify --quiet <ref>^{commit}`.
+   - If it fails, abort with: `REJECTED: --since ref '<ref>' does not resolve to a commit. Pass a valid commit, tag, or branch, then rerun /dw-review --since <ref>.`
+2. Build the review range:
+   - Diff command: `git diff <ref>...HEAD`.
+   - Commit command: `git log <ref>..HEAD --oneline`.
+   - Choice: three-dot diff is used so the reviewed patch is what `HEAD` changed since the merge-base with the verified ref, matching PR review semantics and avoiding changes that exist only on `<ref>`.
+3. Confirm the diff is not empty:
+   - Run `git diff --name-only <ref>...HEAD`.
+   - If it returns no paths, abort with: `APPROVED: no changes to review for git diff <ref>...HEAD. Pick an earlier --since ref or use the default PRD/base-branch review.`
+4. Record the resolved ref, the diff command, and the commit command in every generated review report so the review is reproducible.
 
 ## Complementary Skills
 
@@ -107,6 +127,9 @@ Saved to `<target>/QA/review-coverage.md` (PRD target) or `<target>/review/revie
 ```markdown
 # Coverage Review
 
+**Diff command:** git diff <effective-base-or-ref>...HEAD
+**Commit range:** git log <effective-base-or-ref>..HEAD --oneline
+
 ## Status by Functional Requirement
 
 | FR | Description | Status | Evidence | Commit |
@@ -133,7 +156,7 @@ If MISSING > 0, the verdict suggests revisiting `/dw-plan tasks` to scope or `/d
 
 ### Behavior
 
-1. **Diff analysis:** identify what changed since the PRD branch was created (`git diff <base-branch>...HEAD`).
+1. **Diff analysis:** identify what changed since the PRD branch was created (`git diff <base-branch>...HEAD`). If `--since <ref>` is used, use the preflight diff command instead.
 
 2. **Rules conformance** (against `.dw/rules/`):
    - General patterns: no `any` types in TS, no `console.log` in prod, error handling, multi-tenancy.
@@ -176,6 +199,13 @@ Saved to `<target>/QA/dw-code-review.md` (PRD target) or `<target>/review/dw-cod
 - **APPROVED WITH CAVEATS** — green but findings worth fixing in follow-up (filed with severities).
 - **REJECTED** — at least one hard gate failed. Specify which.
 
+The report MUST include:
+
+```markdown
+**Diff command:** git diff <effective-base-or-ref>...HEAD
+**Commit range:** git log <effective-base-or-ref>..HEAD --oneline
+```
+
 ## Consolidated output (default mode)
 
 When both levels run, a consolidated report at `<target>/QA/review-consolidated.md` (PRD target) or `<target>/review/review-consolidated.md` (bugfix target):
@@ -188,6 +218,7 @@ When both levels run, a consolidated report at `<target>/QA/review-consolidated.
 **Verification Report:** PASS
 **Security Audit:** PASS (or REJECTED with reasons)
 **Constitution Compliance:** PASS (or violations listed)
+**Diff command:** git diff <effective-base-or-ref>...HEAD
 
 ## Overall Verdict
 <line>

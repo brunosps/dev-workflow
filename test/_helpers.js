@@ -40,6 +40,30 @@ const FILES = {
     en: 'scaffold/en/commands/dw-claude-run.md',
     pt: 'scaffold/pt-br/commands/dw-claude-run.md',
   },
+  run: {
+    en: 'scaffold/en/commands/dw-run.md',
+    pt: 'scaffold/pt-br/commands/dw-run.md',
+  },
+  bugfix: {
+    en: 'scaffold/en/commands/dw-bugfix.md',
+    pt: 'scaffold/pt-br/commands/dw-bugfix.md',
+  },
+  triage: {
+    en: 'scaffold/en/commands/dw-triage.md',
+    pt: 'scaffold/pt-br/commands/dw-triage.md',
+  },
+  triageRecordTemplate: {
+    en: 'scaffold/en/templates/triage-record-template.md',
+    pt: 'scaffold/pt-br/templates/triage-record-template.md',
+  },
+  triageNeedsInfoTemplate: {
+    en: 'scaffold/en/templates/triage-needs-info-template.md',
+    pt: 'scaffold/pt-br/templates/triage-needs-info-template.md',
+  },
+  triageOutOfScopeTemplate: {
+    en: 'scaffold/en/templates/triage-out-of-scope-template.md',
+    pt: 'scaffold/pt-br/templates/triage-out-of-scope-template.md',
+  },
   onepager: {
     en: 'scaffold/en/templates/idea-onepager.md',
     pt: 'scaffold/pt-br/templates/idea-onepager.md',
@@ -47,6 +71,14 @@ const FILES = {
   openDesign: {
     en: 'scaffold/en/commands/dw-open-design.md',
     pt: 'scaffold/pt-br/commands/dw-open-design.md',
+  },
+  review: {
+    en: 'scaffold/en/commands/dw-review.md',
+    pt: 'scaffold/pt-br/commands/dw-review.md',
+  },
+  refactor: {
+    en: 'scaffold/en/commands/dw-refactor.md',
+    pt: 'scaffold/pt-br/commands/dw-refactor.md',
   },
 };
 

@@ -13,6 +13,7 @@ status: pending
 [Brief task description]
 
 **Functional Requirements covered**: FR-X.Y, FR-X.Z (maximum 2 per task)
+Depends on: none
 
 <requirements>
 [List of mandatory requirements]

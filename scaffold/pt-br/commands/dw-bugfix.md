@@ -38,7 +38,7 @@
 
     Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como suporte contextual sem substituir este comando:
 
-    - `dw-debug-protocol`: **SEMPRE** — conduz o bug pelo six-step triage (Reproduzir → Localizar → Reduzir → Fix Root Cause → Guardar → Verificar End-to-End). Stop-the-line discipline; root-cause sobre symptom; regression test commitado no mesmo commit atômico. Bugs não-reprodutíveis seguem o sub-protocolo instrument-first — sem fix por palpite a não ser com acknowledgement explícito.
+    - `dw-debug-protocol`: **SEMPRE** — conduz o bug pelo six-step triage (Reproduzir → Localizar → Reduzir → Fix Root Cause → Guardar → Verificar End-to-End). Stop-the-line discipline; root-cause sobre symptom; regression test commitado no mesmo commit atômico. Para bugs não triviais, ou depois que a primeira tentativa de fix falhar, o Passo 1 precisa estabelecer um loop de feedback red-capable antes de teorizar. Bugs não-reprodutíveis seguem o sub-protocolo instrument-first — sem fix por palpite a não ser com acknowledgement explícito.
     - `dw-verify`: **SEMPRE** — em modo Direto, invocada antes do commit da correção. O VERIFICATION REPORT deve mostrar que o sintoma original do bug não se reproduz mais (não apenas que os testes passam).
     - `vercel-react-best-practices`: use quando o bug afeta React/Next.js e há suspeita de problemas de render, hidratação, fetching, waterfall, bundle ou re-render
     - `dw-testing-discipline`: use quando a correção requer fluxo E2E/reteste reproduzível em web app — `references/playwright-recipes.md` pra recipes, core rules + 6 agent guardrails pra qualquer teste que o fix adicione, flaky-discipline se o bug aparece de forma intermitente.
@@ -208,6 +208,7 @@
     - Stack traces
     - Arquivos modificados recentemente
     - Se o bug for relacionado a UI ou depender de fluxo no navegador, complemente a coleta com `dw-testing-discipline` (playwright-recipes + three-workflow-patterns pra escolher o modo certo de verificação)
+    - Para bugs não triviais, ou quando a primeira tentativa de fix falhou, construa o loop de feedback red-capable do `dw-debug-protocol` antes de propor uma causa: um comando/artefato de loop, suficientemente determinístico, rápido, executável pelo agente e com vermelho observado. Se nenhum loop executável pelo agente for possível, registre as tentativas e peça ao usuário o artefato/acesso ausente com o template HITL de `references/six-step-triage.md`.
 
     ### 3. Perguntas de Clarificação (OBRIGATÓRIO - EXATAMENTE 3)
 
@@ -322,7 +323,7 @@
     1. Descubra o próximo `NNN` (ver seção Localização dos Arquivos).
     2. Crie `.dw/bugfixes/NNN-<slug>/` se ainda não foi criado no passo 5.0.
     3. Escreva `TASK.md` com a triagem, clarificações, causa raiz e plano aprovado como executado (use `.dw/templates/bugfix-template.md` como base).
-    4. Escreva `fix-report.md` com o VERIFICATION REPORT verbatim do `dw-verify` mais o trace antes/depois da reprodução.
+    4. Escreva `fix-report.md` com o VERIFICATION REPORT verbatim do `dw-verify` mais o trace antes/depois da reprodução. O relatório DEVE incluir `Loop command before fix` e `Loop command after fix` (ou o bloqueio HITL exato, tentativas feitas e artefato/acesso solicitado quando nenhum loop foi possível).
     5. Escreva `SUMMARY.md` usando `.dw/templates/bugfix-summary-template.md`. Preencha slug, data, status `Fixed`, severidade, related_concerns (do passo 1.5), Sintoma (verbatim), Causa Raiz (uma frase), Resolução (2-4 bullets), Arquivos Tocados, Verificação, Relacionado, Followups.
     6. Se o fix tocou uma concern listada em `.dw/rules/concerns.md`, anexe uma linha à coluna `Last incident` da row daquela concern (ou adicione uma row nova sob Histórico de Bugs Conhecidos) — preserve entradas escritas a mão entre `<!-- preserved:start -->`.
     7. Reporte os paths dos três arquivos no chat antes do passo de commit.
@@ -431,6 +432,7 @@
     - [ ] **Máximo 5 arquivos afetados**
     - [ ] **Sem migrations**
     - [ ] **Tarefa de teste incluída (framework correto do projeto)**
+    - [ ] **Loop de bug não trivial registrado: comando antes do fix + comando depois do fix, ou bloqueio HITL com tentativas + artefato/acesso solicitado**
     - [ ] Aguardando aprovação antes de executar
     - [ ] **`.dw/bugfixes/NNN-<slug>/{TASK,fix-report,SUMMARY}.md` escritos após verify PASS**
 
