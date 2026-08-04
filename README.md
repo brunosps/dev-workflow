@@ -42,14 +42,15 @@ Exportable skills (no `.dw/` pipeline required): `dw-minimalism`, `dw-search-fir
 
 ## Commands
 
-dev-workflow v2.0.0 ships **38 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v2.1.0 ships **39 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
-### Tier 1 — Gateway (3)
+### Tier 1 — Gateway (4)
 
 | Command | When |
 |---------|------|
 | **`/dw-autopilot "wish"`** | Default entry point in two invocations. First run completes PRD → TechSpec → Tasks and stops. Second run resumes from state, executes `/dw-goal --from-autopilot <slug>` for Run → Review → QA/Fix → Review, then Security Gate → Commit → PR. |
 | **`/dw-bugfix "description"`** | A bug report or pasted error. Triages bug-vs-feature-vs-scope, surgical fix or routes to a PRD. |
+| **`/dw-triage [item]`** | An external bug report, feature request, or PR. Checks whether it already exists and whether it was rejected before, verifies the claim, then routes to `/dw-bugfix`, `/dw-plan prd`, or `/dw-brainstorm --mode=grill`. Local-first in `.dw/triage/`; works with no network and no `gh`. |
 | **`/dw-help [keyword]`** | Discover commands. Pass a keyword for shortcuts; `--advanced` reveals internal commands. |
 
 ### Tier 2 — Pipeline granular (10)
@@ -62,19 +63,20 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 | **`/dw-brainstorm "idea"`** | Refine a concrete idea before PRD. Flags: `--onepager` (durable artifact), `--council` (multi-advisor debate), `--research` (multi-source cited research). |
 | **`/dw-plan "feature"`** | PRD → TechSpec → Tasks sequentially with checkpoints. Stages: `prd`, `techspec`, `tasks`. Mandatory clarification questions, source-grounding, constitution gate, final consistency check. |
 | **`/dw-run [task-id]`** | Execute tasks. Default: all pending in dependency order with wave-based parallel dispatch. Single-task: pass an ID. `--resume` continues an interrupted plan. |
-| **`/dw-review`** | Level 2 (PRD coverage mapping) + Level 3 (code quality). Hard gates on dw-verify PASS, secure-audit, constitution violations. Flags: `--coverage-only`, `--code-only`, `--bugfix <slug>` (review a bugfix at `.dw/bugfixes/<slug>/`). |
+| **`/dw-review`** | Level 2 (PRD coverage mapping) + Level 3 (code quality). Hard gates on dw-verify PASS, secure-audit, constitution violations. Flags: `--coverage-only`, `--code-only`, `--bugfix <slug>` (review a bugfix at `.dw/bugfixes/<slug>/`), `--since <ref>` (ad-hoc review from a verified comparison point). |
 | **`/dw-qa`** | Mode-aware QA. Auto-detects UI vs API. Flags: `--fix` (iterative QA + fix-retest loop), `--api`, `--ai` (AI eval against reference dataset), `--uat` (human-in-the-loop walkthrough), `--bugfix <slug>` (QA a bugfix). |
 | **`/dw-pause`** | Consolidate the current session's mental state into `.dw/STATE.md` (Decisions, Blockers, Todos, Deferred, Lessons, Open Loops). Used before long breaks or context-window compactions. |
 | **`/dw-resume`** | Read `.dw/STATE.md`, present a TLDR of where work left off, and suggest the next `dw-*` command. Never auto-executes. |
 | **`/dw-commit`** | Atomic Conventional Commits for pending changes. Applies `dw-git-discipline` (one intent per commit, lint+tests+build green before). |
 | **`/dw-generate-pr [target]`** | Push the branch, draft a PR body with summary + test plan, open the browser. Hard gates: dw-verify PASS + secure-audit. |
 
-### Tier 3 — Specialty (12)
+### Tier 3 — Specialty (13)
 
 | Command | What |
 |---------|------|
 | **`/dw-analyze-project`** | Scans the repo, writes `.dw/rules/` (per-module conventions, anti-patterns, naming). Step 8 offers `.dw/constitution.md`; Step 9 writes `.dw/rules/concerns.md`; Step 10 can synthesize a frontend `DESIGN.md` from existing tokens. Run once per project; refresh after major refactors. |
 | **`/dw-redesign-ui "target"`** | Audits a frontend page, runs the `dw-ui-discipline` 4-question grounding, proposes 2-3 design directions, ships the redesign. WCAG 2.2 AA accessibility floor is non-negotiable; UI diffs can also run the deterministic impeccable slop detector. |
+| **`/dw-open-design "brief"`** | Generates, iterates, or refactors headless Open Design HTML prototypes through the `od` CLI. Refines the brief before dispatch, runs with an explicit `--agent codex\|claude`, captures JSONL audit logs, and stops for a dual ≥9 visual gate. `--refactor` works from a live URL or from screenshots. |
 | **`/dw-refactor "target"`** | Audits a target for refactor opportunities using Fowler smells, `dw-simplification`, deep-modules analysis, and behavior-preserving test gates. This is the explicit route for code-health and tech-debt work. |
 | **`/dw-functional-doc`** | Maps screens + user flows into a functional doc, validated end-to-end with Playwright. Uses the WSL-resilient browser resolver and can capture guided functional video evidence. |
 | **`/dw-context-budget`** | Audits context overhead from commands, skills, agents, instruction files, and MCPs. |

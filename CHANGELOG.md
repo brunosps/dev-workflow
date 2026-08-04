@@ -10,6 +10,110 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > those versions were released, so they are summaries of what shipped, not
 > contemporaneous release notes. `git log` remains the authoritative record.
 
+## [2.1.0] — 2026-08-04
+
+Release driven by a skill-by-skill analysis of [mattpocock/skills](https://github.com/mattpocock/skills),
+whose philosophy is the opposite of this project's: small composable skills anchored
+to an issue tracker, against an opinionated pipeline with durable state in `.dw/`.
+What follows is the transferable technique, adapted — plus five defects of our own
+that the comparison exposed. What was deliberately **not** taken, and why, is
+recorded in [docs/skills-ecosystem-comparison.md](docs/skills-ecosystem-comparison.md).
+
+### Added
+
+- **`/dw-triage` — the intake boundary the pipeline never had.** External bug
+  reports, feature requests, and PRs previously had to be hand-converted into a
+  bugfix or a PRD before anything could touch them. One category (`bug` |
+  `enhancement`) and one state (`needs-triage` → `needs-info` | `ready-for-work` |
+  `needs-human` | `wontfix`), persisted in `.dw/triage/NNN-<slug>.md`, routing to
+  `/dw-bugfix`, `/dw-plan prd`, or `/dw-brainstorm --mode=grill`. Two mechanisms
+  carry the weight: **claims are verified before a brief is written** (bugs
+  reproduced from the reporter's steps, PR diffs checked against what they claim),
+  and `.dw/out-of-scope/<concept>.md` remembers rejections **by domain concept**
+  rather than by the request's wording, so a request refused in January is not
+  re-litigated in March. A `wontfix` for "already implemented" deliberately does
+  not write there — that store is memory of refusal, not of delivery.
+  It is local-first in the strict sense: `.dw/` is the source of truth and the
+  command works with no network and no `gh`. GitHub read via `gh` is optional
+  enrichment, and writing back is opt-in per write, never a side effect of triage.
+- **`### Decision Map` in the idea one-pager.** `dw-grilling` already instructed
+  the agent to record its decision tree so a session could resume — with nowhere
+  to record it, so the graph was rebuilt from scratch every time and what the last
+  session knew was still *undecided* was lost. Each node now carries a `State`
+  (`resolved` | `open-ready` | `open-blocked`), a `Depends on:` field reusing the
+  form `tasks.md` already uses, and an explicit `**Frontier:**` line so the next
+  session reads what is decidable now without recomputing the graph. `#### Decision
+  Fog` records what is known to be undecided but not yet sharp enough to phrase as
+  a decision. Grill resumes from the map instead of re-deriving it, never re-asks a
+  `resolved` node, and the alignment gate now also requires `Frontier: none`.
+  Schema stays at `1.1`: the section is optional, so existing one-pagers stay valid.
+- **`/dw-review --since <ref>`** — ad-hoc review against a verified comparison
+  point. Resolves the ref with `git rev-parse --verify`, aborts with an actionable
+  message if it does not resolve, aborts if the diff is empty rather than reviewing
+  nothing, and records the exact diff and commit commands in every report so the
+  review is reproducible. Three-dot, matching PR review semantics. The default
+  PRD/bugfix flow is unchanged.
+- **Test-first loop in `dw-testing-discipline`** (`references/tdd-loop.md`):
+  confirm the public seam with the user, one red test per vertical slice, run it
+  and **observe** the expected red, minimum green, next slice. Refactor is outside
+  the cycle. `/dw-run` uses it only on an explicit request — never by default.
+- **Red-capable feedback contract in `dw-debug-protocol`.** Reproduction was
+  specified as an outcome, not a procedure. A loop must now be single,
+  deterministic, fast, agent-runnable, and **proven red now** — "it should fail"
+  does not count — before any theorizing, with a repertoire of loop types and a
+  HITL template for when the loop needs credentials, hardware, or a human action.
+  `/dw-bugfix` records the loop command before and after the fix. Trivial bugs stay
+  exempt; the exemption ends when a first fix fails or the bug spans layers.
+- **Seam dependency categories and Design It Twice** in
+  `dw-simplification/references/deep-modules.md`. Classifying what a seam isolates
+  (in-process, local-substitutable, remote owned, true external) derives the test
+  strategy instead of reflexively mocking or running everything; interface findings
+  require three-plus proposals under distinct constraints before one is recommended.
+  Loaded from `/dw-refactor` only for interface/seam findings, so simple refactors
+  stay cheap.
+- **`AGENTS.md` and `CLAUDE.md`** at the repo root. A project whose product is
+  agent instructions had none for maintaining itself; the invariants existed only
+  as tests that fail after the mistake.
+
+### Fixed
+
+- **`git restore .` bypassed the git guardrails entirely.** `git checkout .` was
+  blocked while `git restore .`, `git restore -- .`, `git restore --staged
+  --worktree .` and `git restore --source=<ref> .` — which discard exactly the same
+  uncommitted work — passed through. The hook had **no test at all**, which is why
+  the hole survived. It now has one that invokes the script for real over stdin,
+  including a case that runs it from a directory whose name contains a space.
+- **`Depends on:` was parsed by the wave executor but existed in no template.**
+  `/dw-plan` told each task to declare its dependencies and
+  `dw-execute-phase/references/wave-coordination.md` built the parallel graph by
+  topological sort from that field — while `tasks-template.md` had no column for it
+  and `task-template.md` no field. The graph rested on data nothing produced. The
+  field now has a home in both, and `wave-coordination.md` uses the `1.0` task IDs
+  the pipeline actually writes instead of the `01` form its example carried.
+- **`/dw-brainstorm --research` wrote outside the repo.** Reports went to
+  `~/Documents/<Topic>_Research_<date>/`, so `/dw-plan` and `/dw-intel` could not
+  consume research the pipeline itself produced. They now land under the active
+  spec, or under `.dw/spec/research/` when standalone.
+- **The marketplace manifest had no description**, which `claude plugin validate`
+  warns about and `npm run validate` did not catch. The field was added to the
+  generator in `build-plugin.js`, not only to the checked-in JSON, so it survives
+  the next `npm run build:plugin`.
+- **The PT `/dw-refactor` searched for a section that did not exist.** It told the
+  agent to locate `Modo: refactor-audit (catalogo de code smells + deep-modules)`
+  while the heading in `dw-brainstorm` reads `catálogo`, accented. The lookup never
+  matched; the EN pair matches exactly and always worked. Surfaced by the
+  accentuation pass below.
+
+### Changed
+
+- **24 PT-BR scaffold files were written with no diacritics at all** ("Voce e a
+  entrada", "secao", "nao") while the other half of the scaffold was correctly
+  accented, making it impossible to tell a new mistake from old debt. All 24 are
+  now accented. Diacritics only, verified mechanically: both sides normalized
+  (Unicode NFKD, combining marks dropped) and compared byte for byte, so any
+  content change would have failed the check. Literal strings the commands search
+  for, code blocks, flags, paths, and English technical terms were left untouched.
+
 ## [2.0.0] — 2026-08-02
 
 First release after a full security audit of the compose recipes. Two options were
