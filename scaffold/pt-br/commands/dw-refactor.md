@@ -27,11 +27,12 @@ Voce e a entrada de auditoria de refactor do dev-workflow. Este comando restaura
 4. Siga essa secao exatamente, incluindo:
    - Fazer exatamente 3 perguntas de esclarecimento antes de iniciar a analise.
    - Usar a taxonomia de smells de Fowler.
-   - Carregar `dw-review-rigor` e `dw-simplification` quando disponiveis.
+   - Carregar `dw-review-rigor` e `dw-simplification` quando disponíveis.
    - Aplicar Chesterton's Fence e deep-modules antes de propor refactor.
+   - Carregar as seções avançadas de deep-modules (`Dependency categories decide seam tests` e `Design It Twice for interface findings`) apenas quando o finding sobrevivente for interface rasa, vazamento de interface ou seam no lugar errado.
    - Deduplicar findings e ordenar severidade P0-P3.
-   - Salvar a saida em `<target>/refactor-plan.md`.
-5. Se o target nao existir ou for amplo demais, use as perguntas de esclarecimento para estreitar antes do scan.
+   - Salvar a saída em `<target>/refactor-plan.md`.
+5. Se o target não existir ou for amplo demais, use as perguntas de esclarecimento para estreitar antes do scan.
 
 ## Fronteira de Seguranca
 

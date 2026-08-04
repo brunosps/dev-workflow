@@ -29,6 +29,7 @@ You are the dev-workflow refactor audit entrypoint. This command restores an exp
    - Using Fowler smell taxonomy.
    - Loading `dw-review-rigor` and `dw-simplification` when available.
    - Applying Chesterton's Fence and deep-modules analysis before proposing a refactor.
+   - Loading the advanced deep-modules sections (`Dependency categories decide seam tests` and `Design It Twice for interface findings`) only when the surviving finding is a shallow interface, interface leak, or seam in the wrong place.
    - De-duplicating findings and severity-ordering P0-P3.
    - Saving the output to `<target>/refactor-plan.md`.
 5. If the target does not exist or is too broad, use the clarification questions to narrow it before scanning.
