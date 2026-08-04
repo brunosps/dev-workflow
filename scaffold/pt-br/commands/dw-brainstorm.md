@@ -365,10 +365,12 @@ Quando esses sinais aparecem no auto-dispatch, **recomende** Grill em uma linha 
 
 ### A sessão (após autorização)
 
-1. **Construa a árvore de decisão primeiro.** Antes da primeira pergunta, inspecione os fatos do projeto —
-   PRDs/TechSpecs atuais, `.dw/rules/`, `.dw/intel/` (via `/dw-intel`), `.dw/constitution.md`, `.dw/domain/**` e
-   git recente — e monte uma árvore de decisão **ordenada por dependências** (nunca pergunte uma decisão
-   downstream antes do seu bloqueador).
+1. **Retome ou construa a árvore de decisão primeiro.** Antes da primeira pergunta, leia o one-pager ativo em
+   busca de um **Decision Map** existente. Se houver, retome pelo grafo `Depends on:`, valores de `State`,
+   **Frontier** explícita e `Decision Fog`; não re-pergunte nós já `resolved`. Se não houver mapa, inspecione os
+   fatos do projeto — PRDs/TechSpecs atuais, `.dw/rules/`, `.dw/intel/` (via `/dw-intel`), `.dw/constitution.md`,
+   `.dw/domain/**` e git recente — e monte uma árvore de decisão **ordenada por dependências** (nunca pergunte
+   uma decisão downstream antes do seu bloqueador).
 2. **Pergunte exatamente uma decisão não-resolvida por interação e espere.** Cada pergunta inclui: evidência
    quando disponível (com fonte), a resposta recomendada, uma rationale curta, e uma alternativa/trade-off
    significativa. Siga `dw-grilling` (`references/interview-loop.md`, `references/decision-tree.md`).
@@ -405,9 +407,10 @@ lê e linka `.dw/domain/**` e deve preservá-lo, nunca regenerá-lo.
 
 ### Handoff alinhado — o one-pager de ideia (schema `1.1`)
 
-Grill estende `.dw/spec/ideas/<slug>.md` para o schema `1.1`, adicionando: **Resolved Decisions** (cada uma com a
-resposta recomendada, a escolha do usuário e a alternativa rejeitada), **Evidence** (fatos descobertos com fontes),
-**Canonical Vocabulary** (links para `.dw/domain/**`), **Remaining Decisions** e **Alignment State**.
+Grill estende `.dw/spec/ideas/<slug>.md` para o schema `1.1`, adicionando: **Decision Map** (nós, `Depends on:`,
+`State`, **Frontier** explícita e `Decision Fog` para futuros nós ainda nebulosos), **Resolved Decisions** (cada
+uma com a resposta recomendada, a escolha do usuário e a alternativa rejeitada), **Evidence** (fatos descobertos
+com fontes), **Canonical Vocabulary** (links para `.dw/domain/**`), **Remaining Decisions** e **Alignment State**.
 
 Defina `status: aligned` **só quando todas** valem: cada branch de dependência resolvida, contradições
 glossário/código fechadas, nenhuma decisão bloqueante aberta, E o usuário **confirma explicitamente** o shared

@@ -69,7 +69,7 @@ Antes do Stage 1, verifique se há um one-pager de ideia em `.dw/spec/ideas/<slu
 - `schema_version: "1.1"`;
 - `status: aligned`;
 - `alignment.confirmed_by_user: true`;
-- toda branch de dependência resolvida (nenhum nó de decisão aberto);
+- o **Decision Map** tem toda branch de dependência resolvida (nenhum nó de decisão aberto e `Frontier: none`);
 - contradições glossário/código fechadas;
 - nenhuma entrada **bloqueante** resta em Remaining Decisions.
 Se QUALQUER check falha — ou o arquivo está malformado, internamente inconsistente, `draft` ou `paused` — o one-pager é **input, não handoff confiável**: leia para contexto, mas trate todas as suas decisões como **descobertas** e pergunte normalmente. Nunca suprima uma pergunta de produto só pela força do `status: aligned`; `alignment.confirmed_by_user: true` e uma árvore resolvida, não-bloqueante e sem contradições também são exigidos.</critical>

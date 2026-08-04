@@ -364,9 +364,12 @@ When these signals appear during auto-dispatch, **recommend** Grill in one line 
 
 ### The session (after authorization)
 
-1. **Build the decision tree first.** Before the first question, inspect project facts — current PRDs/TechSpecs,
-   `.dw/rules/`, `.dw/intel/` (via `/dw-intel`), `.dw/constitution.md`, `.dw/domain/**`, and recent git activity —
-   and build a decision tree **ordered by dependencies** (never ask a downstream decision before its blocker).
+1. **Resume or build the decision tree first.** Before the first question, read the active one-pager for an
+   existing **Decision Map**. If present, resume from its `Depends on:` graph, `State` values, explicit
+   **Frontier**, and `Decision Fog`; do not re-ask nodes already `resolved`. If no map exists, inspect project
+   facts — current PRDs/TechSpecs, `.dw/rules/`, `.dw/intel/` (via `/dw-intel`), `.dw/constitution.md`,
+   `.dw/domain/**`, and recent git activity — and build a decision tree **ordered by dependencies** (never ask a
+   downstream decision before its blocker).
 2. **Ask exactly one unresolved decision per interaction and wait.** Each question includes: evidence when
    available (with source), the recommended answer, a short rationale, and a meaningful alternative/trade-off.
    Follow `dw-grilling` (`references/interview-loop.md`, `references/decision-tree.md`).
@@ -403,9 +406,10 @@ reads and links `.dw/domain/**` and must preserve it, never regenerate it.
 
 ### Aligned handoff — the idea one-pager (schema `1.1`)
 
-Grill extends `.dw/spec/ideas/<slug>.md` to schema `1.1`, adding: **Resolved Decisions** (each with the recommended
-answer, the user's choice, and the alternative rejected), **Evidence** (facts discovered with sources),
-**Canonical Vocabulary** (links into `.dw/domain/**`), **Remaining Decisions**, and **Alignment State**.
+Grill extends `.dw/spec/ideas/<slug>.md` to schema `1.1`, adding: **Decision Map** (nodes, `Depends on:`, `State`,
+explicit **Frontier**, and `Decision Fog` for unclear future nodes), **Resolved Decisions** (each with the
+recommended answer, the user's choice, and the alternative rejected), **Evidence** (facts discovered with
+sources), **Canonical Vocabulary** (links into `.dw/domain/**`), **Remaining Decisions**, and **Alignment State**.
 
 Set `status: aligned` **only when all** of these hold: every dependency branch is resolved, glossary/code
 contradictions are closed, no blocking open decision remains, AND the user **explicitly confirms** shared

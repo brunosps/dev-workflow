@@ -93,6 +93,34 @@ Idealmente 2-4 stories. Se são mais de 5, provavelmente não é MVP.]
 
 _(schema 1.1 — preenchido por uma sessão de grill do `/dw-brainstorm`; consumido pelo `/dw-plan`, que NÃO re-pergunta decisões resolvidas. Deixe vazio para um one-pager sem grill.)_
 
+### Decision Map
+
+[Árvore durável do Grill. Registra apenas estrutura e estado de retomada; mantenha resultado da decisão,
+recomendação, alternativa e evidência em **Resolved Decisions** abaixo.]
+
+**Frontier:** [IDs de nós com `State: open-ready`, separados por vírgula, ou `none`]
+
+| ID | Nó de decisão | State | Depends on: | Frontier? | Notas |
+|----|---------------|-------|-------------|-----------|-------|
+| D1 | [decisão upstream] | resolved | none | no | [nota estrutural; resultado fica em Resolved Decisions] |
+| D2 | [decisão aberta que pode ser perguntada agora] | open-ready | D1 | yes | [por que está pronta] |
+| D3 | [decisão aberta ainda bloqueada] | open-blocked | D2 | no | [o que bloqueia] |
+
+`State` é a fonte da verdade. `Frontier?` e a linha `**Frontier:**` são derivados dele por
+legibilidade — se algum dia discordarem do `State`, o `State` vence e os derivados são reescritos.
+
+Valores permitidos de `State`:
+- `resolved` — o usuário resolveu o nó; detalhes ficam em **Resolved Decisions**.
+- `open-ready` — aberto e decidível agora; este nó está na **Frontier**.
+- `open-blocked` — aberto, mas aguardando um ou mais nós em `Depends on:`.
+
+#### Decision Fog
+
+[Áreas conhecidas não resolvidas que ainda não estão nítidas o suficiente para virar nós de decisão. Mantenha
+curto; cada item gradua para **Decision Map** quando virar uma decisão concreta.]
+
+- [área desconhecida] — [por que ainda não dá para formular como decisão]
+
 ### Resolved Decisions
 
 | Decisão | Recomendado | Escolhido | Alternativa rejeitada | Evidência |

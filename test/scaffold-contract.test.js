@@ -155,3 +155,22 @@ test('dw-triage is registered and documents local-first intake routing', () => {
     assert.match(outOfScope, /wontfix/);
   }
 });
+
+test('idea one-pager carries a resumable Grill Decision Map contract', () => {
+  for (const locale of ['en', 'pt-br']) {
+    const onePager = read(`scaffold/${locale}/templates/idea-onepager.md`);
+
+    for (const token of [
+      '### Decision Map',
+      '**Frontier:**',
+      'Depends on:',
+      '`resolved`',
+      'open-ready',
+      'open-blocked',
+      '#### Decision Fog',
+      'Resolved Decisions',
+    ]) {
+      assert.match(onePager, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    }
+  }
+});

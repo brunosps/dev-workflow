@@ -93,6 +93,34 @@ Ideally 2-4 stories. If it's more than 5, it's probably not MVP.]
 
 _(schema 1.1 — filled by a `/dw-brainstorm` grill session; consumed by `/dw-plan`, which does NOT re-ask resolved decisions. Leave empty for a non-grilled one-pager.)_
 
+### Decision Map
+
+[Durable Grill tree. This records structure and resume state only; keep the decision outcome, recommendation,
+alternative, and evidence in **Resolved Decisions** below.]
+
+**Frontier:** [comma-separated node IDs with `State: open-ready`, or `none`]
+
+| ID | Decision node | State | Depends on: | Frontier? | Notes |
+|----|---------------|-------|-------------|-----------|-------|
+| D1 | [upstream decision] | resolved | none | no | [structure note; outcome lives in Resolved Decisions] |
+| D2 | [open decision that can be asked next] | open-ready | D1 | yes | [why this is ready] |
+| D3 | [open decision still blocked] | open-blocked | D2 | no | [what blocks it] |
+
+`State` is the source of truth. `Frontier?` and the `**Frontier:**` line are derived from it for
+readability — if they ever disagree with `State`, `State` wins and the derived values are rewritten.
+
+Allowed `State` values:
+- `resolved` — the user settled the node; details live in **Resolved Decisions**.
+- `open-ready` — open and decidable now; this node is in the **Frontier**.
+- `open-blocked` — open but waiting on one or more `Depends on:` nodes.
+
+#### Decision Fog
+
+[Known unresolved areas that are not yet clear enough to phrase as decision nodes. Keep this short; each item
+graduates into **Decision Map** when it becomes a concrete decision.]
+
+- [unknown area] — [why it is not yet formulable as a decision]
+
 ### Resolved Decisions
 
 | Decision | Recommended | Chosen | Alternative rejected | Evidence |

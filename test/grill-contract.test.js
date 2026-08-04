@@ -72,6 +72,16 @@ test('grill mode builds a dependency-ordered decision tree first (EN + PT)', () 
   includes(assert, bPt, 'ordenada por dependências', 'PT brainstorm');
 });
 
+test('grill mode resumes from Decision Map before rebuilding (EN + PT)', () => {
+  includes(assert, bEn, 'read the active one-pager for an', 'EN brainstorm');
+  includes(assert, bEn, 'existing **Decision Map**', 'EN brainstorm');
+  includes(assert, bEn, 'explicit **Frontier**', 'EN brainstorm');
+  includes(assert, bPt, 'leia o one-pager ativo', 'PT brainstorm');
+  includes(assert, bPt, '**Frontier** explícita', 'PT brainstorm');
+  includes(assert, grilling, 'read it before reconstructing', 'dw-grilling');
+  includes(assert, grilling, 'Decision Fog', 'dw-grilling');
+});
+
 test('the old .dw/rules glossary-write discipline is gone from grill (EN + PT)', () => {
   excludes(assert, bEn, 'Update `.dw/rules/` inline', 'EN brainstorm');
   excludes(assert, bPt, 'Atualize `.dw/rules/` inline', 'PT brainstorm');

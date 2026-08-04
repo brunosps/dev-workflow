@@ -17,6 +17,9 @@ test('idea one-pager is at schema 1.1 with the alignment sections (EN + PT)', ()
     includes(assert, body, 'Resolved Decisions', label);
     includes(assert, body, 'Evidence', label);
     includes(assert, body, 'Canonical Vocabulary', label);
+    includes(assert, body, 'Decision Map', label);
+    includes(assert, body, 'Frontier', label);
+    includes(assert, body, 'Decision Fog', label);
     includes(assert, body, 'Remaining Decisions', label);
     includes(assert, body, 'Alignment State', label);
     includes(assert, body, 'confirmed_by_user', label);
@@ -28,6 +31,8 @@ test('/dw-plan consumes an aligned handoff and does not re-ask resolved decision
   includes(assert, pEn, 'Never re-ask a product decision the user already resolved during Grill', 'EN plan');
   includes(assert, pEn, 'status: aligned', 'EN plan');
   includes(assert, pEn, 'Resolved Decisions', 'EN plan');
+  includes(assert, pEn, 'Decision Map', 'EN plan');
+  includes(assert, pEn, 'Frontier: none', 'EN plan');
   includes(assert, pEn, 'coverage matrix', 'EN plan');
 });
 
@@ -36,6 +41,8 @@ test('/dw-plan consumes an aligned handoff and does not re-ask resolved decision
   includes(assert, pPt, 'Nunca re-pergunte uma decisão de produto que o usuário já resolveu no Grill', 'PT plan');
   includes(assert, pPt, 'status: aligned', 'PT plan');
   includes(assert, pPt, 'Resolved Decisions', 'PT plan');
+  includes(assert, pPt, 'Decision Map', 'PT plan');
+  includes(assert, pPt, 'Frontier: none', 'PT plan');
   includes(assert, pPt, 'coverage matrix', 'PT plan');
 });
 
