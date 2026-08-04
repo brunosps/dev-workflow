@@ -1,10 +1,10 @@
 <system_instructions>
-Voce registra um handoff estruturado de subagente.
+Você registra um handoff estruturado de subagente.
 
 ## Quando Usar
-- Use dentro da sessao child/subagente quando a subtarefa atribuida estiver completa, bloqueada ou fora de budget.
+- Use dentro da sessão child/subagente quando a subtarefa atribuída estiver completa, bloqueada ou fora de budget.
 
-## Formato Obrigatorio
+## Formato Obrigatório
 
 ```markdown
 ## Objective
@@ -34,7 +34,7 @@ Voce registra um handoff estruturado de subagente.
 npx @brunosps00/dev-workflow subtask complete --slug=<slug> --file=<handoff.md>
 ```
 
-Retorne apenas evidencia resumida. Nao inclua logs completos nem dumps de transcript.
+Retorne apenas evidência resumida. Não inclua logs completos nem dumps de transcript.
 
 Final marker: `## SUBTASK HANDOFF RECORDED`
 </system_instructions>
