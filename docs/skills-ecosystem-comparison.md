@@ -31,6 +31,7 @@ exercem bem.
 | Distribuição à-la-carte | só instalador de pipeline | plugin + skills.sh | plugin multi-plataforma | **Adotar** → `.claude-plugin/` gerado do registry |
 | Glossário/linguagem de domínio | `.dw/rules` + constitution + concerns | `CONTEXT.md` + `CONTEXT-MAP.md` (domain-modeling) | — | **Adotar** → Grill nativo (`dw-grilling` + `dw-domain-modeling`) + `.dw/domain/` |
 | Entrevista de alinhamento (grilling) | grill como modo de prosa | `grill-with-docs` + `grilling` (skills dedicadas) | — | **Adotar** → sessão stateful nativa com decision tree + gate |
+| Intake triage | `/dw-bugfix` tria bug vs feature depois que o pedido já entrou no fluxo de bugfix | `triage` como on-ramp issue-tracker-first, com labels como estado | — | **Adotar com adaptação forte** → `/dw-triage` local-first em `.dw/` |
 | Handoff entre sessões | `/dw-pause` + `.dw/STATE.md` | `/handoff` | — | Já coberto — skip |
 | Review avulso por ref | `/dw-review` fixo na base branch/PRD | fixed point validado antes da análise | — | **Adotar** → `/dw-review --since <ref>` |
 | Arquitetura/deep modules | checklist base em `dw-simplification` | categorias de dependência + Design It Twice | — | **Adotar parcialmente** → aprofundamento condicional em deep-modules |
@@ -202,6 +203,38 @@ deixar logs temporários sem prefixo removível. A estratégia de bugs não-repr
 coerente com isso: primeiro instrumenta para obter evidência/reprodução, depois corrige; guesses
 só entram pelo caminho explicitamente reconhecido e monitorado.
 
+### 10. `/dw-triage` — intake local-first antes do pipeline (de mattpocock)
+
+Adotada a técnica da skill `triage` de [`mattpocock/skills`](https://github.com/mattpocock/skills)
+(MIT): um on-ramp para trabalho que chega de fora, com categoria, estado, checagem de redundância,
+checagem de rejeições anteriores, checkpoint do dono, e roteamento para o próximo fluxo. A ideia
+central veio do upstream, onde `triage` move issues por uma máquina de estados baseada em papéis
+como `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human` e `wontfix`; o setup do
+upstream também registra que o issue tracker e as labels são a camada de estado compartilhada.
+
+No dev-workflow a adaptação é deliberadamente diferente: o substrato canônico é `.dw/` versionado,
+não labels/comentários de tracker. O novo comando escreve um registro por item em
+`.dw/triage/NNN-<slug>.md`, cria memória de rejeições em `.dw/out-of-scope/<concept>.md` apenas
+para conceitos rejeitados, e trata GitHub (`gh`) como enriquecimento opcional de leitura. O comando
+funciona 100% offline a partir de paste, arquivo local ou argumento explícito; se `gh` não existir,
+não houver autenticação ou o remote não for GitHub, ele pede texto/diff local e continua.
+
+Vocabulário adotado:
+
+- `ready-for-work` substitui `ready-for-agent`, porque no pipeline daqui a execução passa por
+  `/dw-bugfix` ou `/dw-plan prd` antes de chegar a `/dw-run`; "agent-ready" seria preciso demais
+  para o ponto errado do fluxo.
+- `needs-human` substitui `ready-for-human`, porque o estado não significa "pronto para uma pessoa
+  implementar", e sim "não delegável com segurança ainda" por decisão de design, acesso externo,
+  julgamento, ownership ou teste manual.
+
+Rejeitado: portar literalmente labels de GitHub como fonte da verdade, prometer Linear/Jira/GitLab
+sem ferramenta instalada, sincronizar automaticamente tracker ↔ `.dw/`, criar webhook/daemon,
+escrever comentários/labels/fechamentos remotos como efeito colateral, ou registrar
+"já implementado" em `.dw/out-of-scope/**`. Pedido já atendido vira `wontfix` no registro de
+triagem, apontando onde vive a implementação; out-of-scope fica reservado para rejeições reais com
+motivo durável.
+
 
 ## O que NÃO foi portado (e por quê)
 
@@ -240,6 +273,7 @@ só entram pelo caminho explicitamente reconhecido e monitorado.
 | Skill de grilling | `scaffold/skills/dw-grilling/SKILL.md` (+ references) | mattpocock (grilling / grill-with-docs) |
 | Skill de domain-modeling | `scaffold/skills/dw-domain-modeling/SKILL.md` (+ references) | mattpocock (domain-modeling) |
 | Modo grill nativo | `scaffold/{en,pt-br}/commands/dw-brainstorm.md` | — |
+| Comando de intake triage | `scaffold/{en,pt-br}/commands/dw-triage.md` + templates `triage-*` | mattpocock (`triage`) |
 | Loop test-first sob demanda | `scaffold/skills/dw-testing-discipline/references/tdd-loop.md` + `scaffold/{en,pt-br}/commands/dw-run.md` | mattpocock (TDD loop estrito) |
 | Loop red-capable de debug | `scaffold/skills/dw-debug-protocol/references/six-step-triage.md` + `scaffold/{en,pt-br}/commands/dw-bugfix.md` | mattpocock (feedback loop antes de teorizar) |
 | Artefatos de domínio | `.dw/domain/**` (criados lazy pelo grill autorizado) | — |
@@ -264,9 +298,9 @@ Ambos os repositórios de referência são MIT. As adoções preservam os crédi
   intensidade e statusline, na base de `dw-minimalism` e do `statusline.mjs`.
 - `mattpocock/skills` (MIT) — distinção user/model-invoked (`disable-model-invocation`),
   `git-guardrails-claude-code`, e as skills `grill-with-docs` / `grilling` / `domain-modeling` (com
-  `CONTEXT-FORMAT.md` + `ADR-FORMAT.md`), na base do controle de invocação, do hook git-guardrails e do Grill
-  nativo (`dw-grilling` + `dw-domain-modeling`). Comportamento reimplementado na nossa voz; nenhuma prosa upstream
-  copiada.
+  `CONTEXT-FORMAT.md` + `ADR-FORMAT.md`) / `triage`, na base do controle de invocação, do hook git-guardrails,
+  do Grill nativo (`dw-grilling` + `dw-domain-modeling`) e da borda `/dw-triage`. Comportamento reimplementado
+  na nossa voz; nenhuma prosa upstream copiada.
 
 A atribuição também consta no `SKILL.md` de `dw-minimalism`, no `README.md` (Acknowledgements)
 e nos cabeçalhos dos scripts de hook.

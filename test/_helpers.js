@@ -48,6 +48,22 @@ const FILES = {
     en: 'scaffold/en/commands/dw-bugfix.md',
     pt: 'scaffold/pt-br/commands/dw-bugfix.md',
   },
+  triage: {
+    en: 'scaffold/en/commands/dw-triage.md',
+    pt: 'scaffold/pt-br/commands/dw-triage.md',
+  },
+  triageRecordTemplate: {
+    en: 'scaffold/en/templates/triage-record-template.md',
+    pt: 'scaffold/pt-br/templates/triage-record-template.md',
+  },
+  triageNeedsInfoTemplate: {
+    en: 'scaffold/en/templates/triage-needs-info-template.md',
+    pt: 'scaffold/pt-br/templates/triage-needs-info-template.md',
+  },
+  triageOutOfScopeTemplate: {
+    en: 'scaffold/en/templates/triage-out-of-scope-template.md',
+    pt: 'scaffold/pt-br/templates/triage-out-of-scope-template.md',
+  },
   onepager: {
     en: 'scaffold/en/templates/idea-onepager.md',
     pt: 'scaffold/pt-br/templates/idea-onepager.md',
