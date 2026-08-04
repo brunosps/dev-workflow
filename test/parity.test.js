@@ -57,6 +57,20 @@ const PARITY = {
     '2.1.206',
     'xhigh',
   ],
+  run: [
+    'TDD',
+    'test first',
+    'red-green-refactor',
+    'references/tdd-loop.md',
+    'dw-simplification',
+  ],
+  bugfix: [
+    'red-capable',
+    'Loop command before fix',
+    'Loop command after fix',
+    'HITL',
+    'references/six-step-triage.md',
+  ],
   onepager: [
     'schema_version: "1.1"',
     'status: draft | paused | aligned',

@@ -120,6 +120,48 @@ Diferenças intencionais do `.dw/`:
 - ADRs roteados por `/dw-adr --scope=repo|prd`, gated no teste 3-critérios com aprovação explícita separada.
 - `/dw-analyze-project` lê e linka `.dw/domain/**` e **preserva** (nunca regenera nem sobrescreve).
 
+### 6. Loop test-first sob demanda em `dw-testing-discipline` (de mattpocock)
+
+Adotada a técnica operacional de loop TDD estrito do [`mattpocock/skills`](https://github.com/mattpocock/skills)
+sem copiar a skill upstream: `scaffold/skills/dw-testing-discipline/references/tdd-loop.md`
+define confirmar a seam pública com o usuário antes do primeiro teste, escrever **um** teste
+vermelho por slice, executar e observar o vermelho real, implementar o mínimo para verde,
+executar e observar o verde, e só então avançar para o próximo slice.
+
+O `/dw-run` ganhou um gatilho explícito nas versões EN/PT: só usa esse modo quando a task ou o
+usuário pede `TDD`, `test first` ou `red-green-refactor`. O default continua sendo a disciplina
+existente: placement doctrine, seis agent guardrails, anti-patterns, testes em camada adequada e
+sem teste de internals.
+
+Rejeitado: tornar TDD o modo padrão do executor, escrever baterias de testes antes da primeira
+implementação, tratar refactor como parte do ciclo red-green, afrouxar mocks para acelerar o
+loop, ou testar private helpers. Onde o padrão upstream é mais estreito que o nosso, prevalecem
+as seis regras centrais do `dw-testing-discipline`; o `tdd-loop` é um modo de operação dentro
+delas, não uma substituição.
+
+### 7. Loop red-capable em `dw-debug-protocol` (de mattpocock)
+
+Adotada a técnica de não teorizar antes de existir um loop de feedback red-capable, atribuída ao
+[`mattpocock/skills`](https://github.com/mattpocock/skills), dentro do passo "Reproduce" do
+six-step triage. `scaffold/skills/dw-debug-protocol/references/six-step-triage.md` agora define
+o contrato do loop: único, determinístico o bastante, rápido, executável pelo agente e comprovado
+vermelho agora. Também inclui repertório de loops (teste focado, `curl`, CLI, browser headless,
+trace replay, harness dedicado, fuzz/repeat, `git bisect`, teste diferencial) e template HITL
+para pedir credencial, hardware, fixture, trace ou ação manual quando o agente não consegue rodar
+o loop sozinho.
+
+O `/dw-bugfix` EN/PT agora exige que `fix-report.md` registre `Loop command before fix` e
+`Loop command after fix`, ou, quando não houver loop executável, as tentativas e o pedido explícito
+de artefato/acesso. A regra vale para bug não trivial e para qualquer caso em que a primeira
+tentativa de fix falhe; bug trivial com reprodução óbvia e fix cirúrgico não paga a checklist
+completa.
+
+Rejeitado: transformar todo bug de uma linha em papelada, substituir o six-step triage, seguir
+no escuro quando o loop depende de input humano, instrumentar várias variáveis de uma vez, ou
+deixar logs temporários sem prefixo removível. A estratégia de bugs não-reprodutíveis continua
+coerente com isso: primeiro instrumenta para obter evidência/reprodução, depois corrige; guesses
+só entram pelo caminho explicitamente reconhecido e monitorado.
+
 ## O que NÃO foi portado (e por quê)
 
 1. **`CONTEXT.md` na raiz (mattpocock)** — a *disciplina* de domain-modeling FOI adotada (seção 5 acima), mas o
@@ -156,6 +198,8 @@ Diferenças intencionais do `.dw/`:
 | Skill de grilling | `scaffold/skills/dw-grilling/SKILL.md` (+ references) | mattpocock (grilling / grill-with-docs) |
 | Skill de domain-modeling | `scaffold/skills/dw-domain-modeling/SKILL.md` (+ references) | mattpocock (domain-modeling) |
 | Modo grill nativo | `scaffold/{en,pt-br}/commands/dw-brainstorm.md` | — |
+| Loop test-first sob demanda | `scaffold/skills/dw-testing-discipline/references/tdd-loop.md` + `scaffold/{en,pt-br}/commands/dw-run.md` | mattpocock (TDD loop estrito) |
+| Loop red-capable de debug | `scaffold/skills/dw-debug-protocol/references/six-step-triage.md` + `scaffold/{en,pt-br}/commands/dw-bugfix.md` | mattpocock (feedback loop antes de teorizar) |
 | Artefatos de domínio | `.dw/domain/**` (criados lazy pelo grill autorizado) | — |
 | One-pager schema 1.1 | `scaffold/{en,pt-br}/templates/idea-onepager.md` | — |
 | Roteamento de ADR | `scaffold/{en,pt-br}/commands/dw-adr.md` (`--scope=repo\|prd`) | mattpocock (ADR-FORMAT) |

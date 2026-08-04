@@ -40,6 +40,14 @@ const FILES = {
     en: 'scaffold/en/commands/dw-claude-run.md',
     pt: 'scaffold/pt-br/commands/dw-claude-run.md',
   },
+  run: {
+    en: 'scaffold/en/commands/dw-run.md',
+    pt: 'scaffold/pt-br/commands/dw-run.md',
+  },
+  bugfix: {
+    en: 'scaffold/en/commands/dw-bugfix.md',
+    pt: 'scaffold/pt-br/commands/dw-bugfix.md',
+  },
   onepager: {
     en: 'scaffold/en/templates/idea-onepager.md',
     pt: 'scaffold/pt-br/templates/idea-onepager.md',
