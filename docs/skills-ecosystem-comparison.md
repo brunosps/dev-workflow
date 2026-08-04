@@ -32,7 +32,8 @@ exercem bem.
 | Glossário/linguagem de domínio | `.dw/rules` + constitution + concerns | `CONTEXT.md` + `CONTEXT-MAP.md` (domain-modeling) | — | **Adotar** → Grill nativo (`dw-grilling` + `dw-domain-modeling`) + `.dw/domain/` |
 | Entrevista de alinhamento (grilling) | grill como modo de prosa | `grill-with-docs` + `grilling` (skills dedicadas) | — | **Adotar** → sessão stateful nativa com decision tree + gate |
 | Handoff entre sessões | `/dw-pause` + `.dw/STATE.md` | `/handoff` | — | Já coberto — skip |
-| Arquitetura/deep modules | já portado em `dw-simplification` | `improve-codebase-architecture` | — | Já coberto — skip |
+| Review avulso por ref | `/dw-review` fixo na base branch/PRD | fixed point validado antes da análise | — | **Adotar** → `/dw-review --since <ref>` |
+| Arquitetura/deep modules | checklist base em `dw-simplification` | categorias de dependência + Design It Twice | — | **Adotar parcialmente** → aprofundamento condicional em deep-modules |
 | Versionamento multi-skill | pacote npm único | Changesets | Changesets | Não aplicável — skip |
 | Definição de comando | markdown + JSON registry | markdown | TOML | Preferência — skip |
 
@@ -120,6 +121,45 @@ Diferenças intencionais do `.dw/`:
 - ADRs roteados por `/dw-adr --scope=repo|prd`, gated no teste 3-critérios com aprovação explícita separada.
 - `/dw-analyze-project` lê e linka `.dw/domain/**` e **preserva** (nunca regenera nem sobrescreve).
 
+### 6. `/dw-review --since <ref>` — ponto fixo verificado antes do review (de mattpocock)
+
+Adaptação da técnica observada em `mattpocock/skills`: antes de analisar um diff avulso, exigir um ponto de
+comparação explícito e validá-lo. No dev-workflow isso virou flag opt-in no comando existente
+`/dw-review --since <ref>`:
+
+- valida o ref com `git rev-parse --verify --quiet <ref>^{commit}`;
+- monta o diff reproduzível com `git diff <ref>...HEAD`;
+- lista o range com `git log <ref>..HEAD --oneline`;
+- aborta com mensagem acionável quando o ref não resolve ou quando o diff está vazio;
+- registra o comando de diff efetivo nos relatórios de coverage, code review e consolidado.
+
+Foi adotado o **three-dot** para preservar a semântica de review de PR: revisar o que `HEAD` mudou desde o
+merge-base com o ref verificado, sem incluir mudanças que existam apenas no ref. O fluxo default de
+`/dw-review` contra a base branch não foi alterado.
+
+Rejeitado: criar comando separado para review avulso ou trocar o comportamento default de `dw-review`.
+
+### 7. Deep-modules avançado — categoria de dependência + Design It Twice (de mattpocock)
+
+Adaptação parcial de técnicas de arquitetura de `mattpocock/skills`, sem copiar a skill upstream e sem criar
+nova skill. O material foi incorporado ao arquivo existente
+`scaffold/skills/dw-simplification/references/deep-modules.md`:
+
+- categorias de dependência (`in-process`, `local-substitutable`, `remote owned`, `true external`) que guiam a
+  estratégia de teste da seam;
+- alinhamento explícito com `dw-testing-discipline`: mocks isolam fronteiras, sistemas reais validam antes do
+  merge, e qualquer conflito aparente é resolvido a favor de `dw-testing-discipline`;
+- loop local de **Design It Twice** para gerar 3+ interfaces radicalmente diferentes antes de fechar uma seam.
+
+`/dw-refactor` carrega esse aprofundamento apenas quando o finding sobrevivente é interface rasa, vazamento de
+interface ou seam no lugar errado. O council não foi usado como mecanismo default porque `dw-council` é mais caro
+e voltado a decisões de produto/arquitetura high-stakes com múltiplas prioridades; a comparação de alternativas de
+interface é um loop local e específico. Council segue disponível só quando a interface também muda comportamento de
+produto, fronteiras de ownership, postura de segurança ou decisão arquitetural difícil de reverter.
+
+Rejeitado: copiar a skill completa de arquitetura, criar skill nova, reescrever `deep-modules.md`, ou exigir o
+loop de alternativas para refactors simples sem finding de seam/interface.
+
 ## O que NÃO foi portado (e por quê)
 
 1. **`CONTEXT.md` na raiz (mattpocock)** — a *disciplina* de domain-modeling FOI adotada (seção 5 acima), mas o
@@ -127,8 +167,9 @@ Diferenças intencionais do `.dw/`:
    `.dw/rules/concerns.md` continuam sendo análise/princípios auto-gerados, separados do vocabulário curado.
 2. **`/handoff` (mattpocock)** — já coberto por `/dw-pause` + `.dw/STATE.md` (decisões,
    bloqueios, todos, open loops) e `/dw-resume`.
-3. **`improve-codebase-architecture` / deep modules (mattpocock)** — já portado para
-   `dw-simplification/references/deep-modules.md`.
+3. **`improve-codebase-architecture` completa (mattpocock)** — não foi copiada. O dev-workflow manteve
+   `dw-simplification/references/deep-modules.md` como fonte local e adotou apenas as técnicas aprovadas:
+   categorias de dependência, teste derivado da categoria e Design It Twice condicional.
 4. **Changesets (ambos)** — dev-workflow é um pacote npm único; versionamento multi-skill
    independente não se aplica.
 5. **Comandos em TOML (ponytail)** — a fonte da verdade do dev-workflow é markdown +

@@ -101,6 +101,23 @@ const PARITY = {
     '`codex`',
     '`claude`',
   ],
+  review: [
+    '--since <ref>',
+    '{{SINCE_REF}}',
+    'git rev-parse --verify --quiet <ref>^{commit}',
+    'git diff <ref>...HEAD',
+    'git log <ref>..HEAD --oneline',
+    'git diff --name-only <ref>...HEAD',
+    '<effective-base-or-ref>...HEAD',
+    'three-dot',
+  ],
+  refactor: [
+    'Dependency categories decide seam tests',
+    'Design It Twice for interface findings',
+    'dw-simplification',
+    'seam',
+    '<target>/refactor-plan.md',
+  ],
 };
 
 for (const [name, tokens] of Object.entries(PARITY)) {
