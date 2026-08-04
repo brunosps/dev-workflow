@@ -181,7 +181,7 @@ Ao final, sempre deixe o usuario em uma destas situacoes:
 - com perguntas melhores para decidir
 - com um proximo comando do workspace para seguir
 - com o one-pager em `.dw/spec/ideas/<slug>.md` (se modo **onepager** disparou)
-- com o relatório de research em `~/Documents/<Tópico>_Research_<data>/` (se modo **research** disparou)
+- com o relatório de research em `.dw/spec/<prd-slug>/research/<topic-slug>-<YYYYMMDD>/research.md` quando houver PRD ativa, `.dw/spec/ideas/<idea-slug>-research-<YYYYMMDD>/research.md` quando houver one-pager de ideia ativo, ou `.dw/spec/research/<topic-slug>-<YYYYMMDD>/research.md` para research avulso (se modo **research** disparou)
 - com o plano de refactor em `<target>/refactor-plan.md` (se modo **refactor-audit** disparou)
 - com entradas de glossário canônico em `.dw/domain/**` e um one-pager de ideia alinhado (se **grill** rodou com autorização)
 - com um protótipo throwaway rodável + template de verdict (se modo **prototype** disparou)
@@ -237,7 +237,7 @@ Skill complementar **`dw-source-grounding`**: **SEMPRE** — aplica protocolo De
 
 ### Output
 
-Salvo em `~/Documents/<Tópico>_Research_<YYYYMMDD>/`. Seções obrigatórias:
+Salve `research.md` dentro do repo: `.dw/spec/<prd-slug>/research/<topic-slug>-<YYYYMMDD>/research.md` quando houver PRD ativa, `.dw/spec/ideas/<idea-slug>-research-<YYYYMMDD>/research.md` quando houver one-pager de ideia ativo, ou `.dw/spec/research/<topic-slug>-<YYYYMMDD>/research.md` para research avulso. Seções obrigatórias:
 1. Sumário Executivo (200-400 palavras)
 2. Introdução (escopo, metodologia, premissas)
 3. Análise Principal (4-8 achados, 600-2000 palavras cada, todos citados)

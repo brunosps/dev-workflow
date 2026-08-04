@@ -181,7 +181,7 @@ At the end, always leave the user in one of these situations:
 - With better questions to decide
 - With a next workspace command to follow
 - With the one-pager at `.dw/spec/ideas/<slug>.md` (if **onepager** mode fired)
-- With the research report at `~/Documents/<Topic>_Research_<date>/` (if **research** mode fired)
+- With the research report at `.dw/spec/<prd-slug>/research/<topic-slug>-<YYYYMMDD>/research.md` when a PRD is active, `.dw/spec/ideas/<idea-slug>-research-<YYYYMMDD>/research.md` when an idea one-pager is active, or `.dw/spec/research/<topic-slug>-<YYYYMMDD>/research.md` for standalone research (if **research** mode fired)
 - With the refactor plan at `<target>/refactor-plan.md` (if **refactor-audit** mode fired)
 - With canonical glossary entries in `.dw/domain/**` and an aligned idea one-pager (if **grill** ran with authorization)
 - With a runnable throwaway prototype + verdict template (if **prototype** mode fired)
@@ -237,7 +237,7 @@ Complementary skill **`dw-source-grounding`**: **ALWAYS** — apply Detect → F
 
 ### Output
 
-Saved to `~/Documents/<Topic>_Research_<YYYYMMDD>/`. Mandatory sections:
+Save `research.md` inside the repo: `.dw/spec/<prd-slug>/research/<topic-slug>-<YYYYMMDD>/research.md` when a PRD is active, `.dw/spec/ideas/<idea-slug>-research-<YYYYMMDD>/research.md` when an idea one-pager is active, or `.dw/spec/research/<topic-slug>-<YYYYMMDD>/research.md` for standalone research. Mandatory sections:
 1. Executive Summary (200-400 words)
 2. Introduction (scope, methodology, assumptions)
 3. Main Analysis (4-8 findings, 600-2000 words each, all cited)
