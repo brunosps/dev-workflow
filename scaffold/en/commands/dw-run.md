@@ -34,6 +34,7 @@ When available under `./.agents/skills/`, these skills are invoked per task:
 - Instincts (lazy): at task start, also load any high-confidence instinct (`.dw/memory/instincts/`, confidence ≥0.7) whose `trigger` matches the task — learned project conventions promoted by `/dw-learn`. Match by trigger only; never bulk-load the set.
 - `dw-execute-phase`: provides `plan-checker` (6-dimension goal-backward verification before any code is touched in plan mode) and `executor` (atomic commit + deviation handling) agents.
 - `dw-testing-discipline`: applies the placement doctrine, 6 agent guardrails, and 25 anti-patterns when adding tests during the task.
+- `dw-testing-discipline` test-first mode: ONLY when the task text or user explicitly says `TDD`, `test first`, or `red-green-refactor`, execute that task through `references/tdd-loop.md` (confirm public seams with the user → write ONE red test → run and observe red → implement minimum green → run and observe green → next slice; refactor only after the loop via `dw-simplification`). This is not the default `/dw-run` mode.
 - `dw-ui-discipline`: when the task touches UI, the 4 grounding questions must be answered before any visual decision lands.
 - `dw-llm-eval`: when the task touches AI feature code paths, the reference dataset + oracle ladder rules apply.
 - `dw-minimalism`: **before writing new code** — climb the YAGNI decision ladder (need it? reuse? stdlib? native? installed dep? one line?) at the active intensity, then write the minimum. Hands new dependencies to `dw-search-first`.

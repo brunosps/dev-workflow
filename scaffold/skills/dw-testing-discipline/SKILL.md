@@ -34,6 +34,7 @@ Each rule has nuance read `references/core-rules.md` for the long version with e
 - Reviewing a PR diff under test paths.
 - Debugging a flaky test (or considering retry-as-fix — read `references/flaky-discipline.md` first).
 - Generating tests via an AI agent → invokes `references/agent-guardrails.md` automatically.
+- Explicit test-first requests ("TDD", "test first", "red-green-refactor") → use `references/tdd-loop.md` as an on-demand operating mode, not the default workflow.
 - Browser-based E2E with Playwright → recipes in `references/playwright-recipes.md`.
 - Verifying browser-side trust boundaries (auth, CSRF, headers) → `references/security-boundary.md`.
 - Picking which test workflow applies (UI / network / perf) → `references/three-workflow-patterns.md`.
@@ -61,6 +62,7 @@ Do not assume `npm test`. The package manager and the test runner are different 
 |------------|------|
 | Placing a new test (which layer?) | `references/core-rules.md` (Rule 2 deep-dive) |
 | Writing new tests | `references/patterns.md` |
+| Explicit test-first / TDD loop | `references/tdd-loop.md` |
 | Reviewing tests / spotting smells | `references/anti-patterns.md` |
 | Agent-generated tests | `references/agent-guardrails.md` + `references/anti-patterns.md` |
 | Flaky tests | `references/flaky-discipline.md` |
@@ -180,7 +182,7 @@ Any of these in a PR is enough to REJECT a verdict:
 ## Integration with dev-workflow commands
 
 - `/dw-plan tasks` applies the placement doctrine — each test-adding task names the invariant.
-- `/dw-run` runs the 6 agent guardrails when generating tests during implementation.
+- `/dw-run` runs the 6 agent guardrails when generating tests during implementation. When the task or user explicitly requests test-first work, `/dw-run` switches to `references/tdd-loop.md` for that task only.
 - `/dw-review --code-only` runs the anti-pattern checks on diff hunks under test paths.
 - `/dw-qa --fix` applies the flaky-discipline taxonomy in retest cycles.
 - `/dw-qa` (UI mode) references `playwright-recipes.md` for concrete recipes.
