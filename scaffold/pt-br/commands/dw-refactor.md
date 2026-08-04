@@ -23,7 +23,7 @@ Você é a entrada de auditoria de refactor do dev-workflow. Este comando restau
 
 1. Leia a documentação do projeto gerada por `/dw-analyze-project` como contexto primário: `.dw/rules/`, `.dw/constitution.md`, `.dw/rules/concerns.md`, `.dw/intel/` e `DESIGN.md` quando existir.
 2. Leia `.dw/commands/dw-brainstorm.md`.
-3. Localize `Modo: refactor-audit (catalogo de code smells + deep-modules)`.
+3. Localize `Modo: refactor-audit (catálogo de code smells + deep-modules)`.
 4. Siga essa seção exatamente, incluindo:
    - Fazer exatamente 3 perguntas de esclarecimento antes de iniciar a análise.
    - Usar a taxonomia de smells de Fowler.
