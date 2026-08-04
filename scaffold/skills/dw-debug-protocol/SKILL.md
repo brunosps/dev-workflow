@@ -32,6 +32,8 @@ See `references/stop-the-line.md` for when this rule bends.
 
 Without a deterministic reproduction, you cannot know whether your "fix" worked. The reproduction is the hypothesis test. Even a flaky bug needs a *reproducible-enough* test (e.g., "fails 8/10 runs") before fixing.
 
+For non-trivial bugs, or after a first fix fails, Step 1 must establish the red-capable feedback loop contract in `references/six-step-triage.md` before theorizing: one loop, deterministic enough, fast, agent-runnable, and observed red. If the loop needs human action, use the HITL template there instead of continuing blind.
+
 If you cannot reproduce: see `references/non-reproducible-strategy.md`. Don't fix on guess.
 
 ### 3. Find the root cause, not the nearest cause
