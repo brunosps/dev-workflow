@@ -4,6 +4,7 @@ const path = require('node:path');
 const test = require('node:test');
 
 const root = path.join(__dirname, '..');
+const { COMMANDS } = require('../lib/constants');
 
 function read(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), 'utf8');
@@ -113,5 +114,44 @@ test('deep-modules documents seam dependency categories and interface alternativ
     'Interface alternatives considered',
   ]) {
     assert.match(reference, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+});
+
+test('dw-triage is registered and documents local-first intake routing', () => {
+  for (const locale of ['en', 'pt-br']) {
+    const command = read(`scaffold/${locale}/commands/dw-triage.md`);
+    const record = read(`scaffold/${locale}/templates/triage-record-template.md`);
+    const needsInfo = read(`scaffold/${locale}/templates/triage-needs-info-template.md`);
+    const outOfScope = read(`scaffold/${locale}/templates/triage-out-of-scope-template.md`);
+    const entry = COMMANDS[locale].find((cmd) => cmd.name === 'dw-triage');
+
+    assert.ok(entry, `missing dw-triage command registry entry for ${locale}`);
+    assert.match(entry.description, /\.dw\/triage\//);
+
+    for (const token of [
+      '.dw/triage/NNN-<slug>.md',
+      '.dw/out-of-scope/<concept>.md',
+      'needs-triage',
+      'needs-info',
+      'ready-for-work',
+      'needs-human',
+      'wontfix',
+      '/dw-bugfix',
+      '/dw-plan prd',
+      '/dw-brainstorm --mode=grill',
+      'gh',
+      'already implemented',
+      'insufficient-detail',
+    ]) {
+      assert.match(command, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    }
+
+    assert.match(record, /type: triage-record/);
+    assert.match(record, /category: "bug \| enhancement"/);
+    assert.match(record, /state: "needs-triage \| needs-info \| ready-for-work \| needs-human \| wontfix"/);
+    assert.match(needsInfo, /needs-info/);
+    assert.match(needsInfo, /needs-triage/);
+    assert.match(outOfScope, /type: out-of-scope/);
+    assert.match(outOfScope, /wontfix/);
   }
 });
