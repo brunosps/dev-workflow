@@ -48,6 +48,14 @@ const FILES = {
     en: 'scaffold/en/commands/dw-open-design.md',
     pt: 'scaffold/pt-br/commands/dw-open-design.md',
   },
+  review: {
+    en: 'scaffold/en/commands/dw-review.md',
+    pt: 'scaffold/pt-br/commands/dw-review.md',
+  },
+  refactor: {
+    en: 'scaffold/en/commands/dw-refactor.md',
+    pt: 'scaffold/pt-br/commands/dw-refactor.md',
+  },
 };
 
 const SKILLS = {

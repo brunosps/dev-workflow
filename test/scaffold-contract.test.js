@@ -98,3 +98,20 @@ test('Mailpit is the maintained, pinned email capture default', () => {
   assert.match(recipe, /axllent\/mailpit:v1\.30/);
   assert.match(recipe, /MP_DATABASE: \/data\/mailpit\.db/);
 });
+
+test('deep-modules documents seam dependency categories and interface alternatives', () => {
+  const reference = read('scaffold/skills/dw-simplification/references/deep-modules.md');
+
+  for (const token of [
+    'Dependency categories decide seam tests',
+    'Design It Twice for interface findings',
+    'in-process',
+    'local-substitutable',
+    'remote owned',
+    'true external',
+    'dw-testing-discipline',
+    'Interface alternatives considered',
+  ]) {
+    assert.match(reference, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+});

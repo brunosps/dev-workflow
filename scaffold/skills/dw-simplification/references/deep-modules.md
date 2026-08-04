@@ -91,6 +91,56 @@ The combined verdict:
 
 A flat "this is too long, extract method" recommendation is shallow analysis. Combining Fowler + deep-modules surfaces when the smell is actually a feature.
 
+## Dependency categories decide seam tests
+
+When a finding is about a seam, classify the dependency that seam isolates before choosing the test strategy. The category drives the test plan; do not reflexively mock everything or run every dependency for every test.
+
+This follows `dw-testing-discipline`: tests should sit at the lowest layer that can expose the defect, mocks isolate boundaries, and real systems validate before merge. If this section appears to conflict with `dw-testing-discipline`, prefer `dw-testing-discipline`.
+
+| Category | What it means | Test strategy |
+|----------|---------------|---------------|
+| **In-process** | Same process and memory space: pure functions, formatters, policy objects, parser modules, local caches. | Prefer unit or characterization tests with real collaborators. Mocking here usually tests the mock or hides a shallow interface. |
+| **Local-substitutable** | Real dependency can run locally with equivalent behavior: database, queue, object store emulator, search index, containerized service. | Use integration tests against the real local substitute for the merge gate. Unit tests may fake it for branch coverage, but at least one path must prove the real wiring. |
+| **Remote owned** | A service the team/company owns across the network. | Use adapter unit tests for failure mapping, consumer/producer contract tests for the API shape, and staging/sandbox smoke checks for real network behavior before merge. |
+| **True external** | Third-party service the team does not control: payments, email, identity provider, vendor API. | Keep a narrow adapter seam. Unit-test mapping and error policy with fixtures/fakes; validate contracts against provider sandbox or recorded contract fixtures where available. Do not make routine CI depend on a third-party public site being reachable. |
+
+The output for a seam-related finding adds:
+
+```markdown
+**Dependency category:** <in-process | local-substitutable | remote owned | true external>
+**Seam test strategy:** <lowest layer that catches the defect + real-system gate, if applicable>
+```
+
+## Design It Twice for interface findings
+
+When the surviving finding is **shallow interface**, **interface leak**, or **seam in the wrong place**, do not accept the first interface that works. Generate at least three radically different public-interface proposals for the same module before recommending one.
+
+Each proposal must have a distinct constraint, for example:
+
+- **Caller-minimal:** expose the fewest concepts to the caller, even if implementation grows.
+- **Domain-language-first:** public methods use product/domain vocabulary and hide vendor or storage terms.
+- **Test-boundary-first:** interface places the seam at the dependency category boundary and makes the real-system gate practical.
+- **Migration-first:** supports incremental caller migration without a broad flag day.
+
+Compare each proposal on:
+
+- **Depth:** how much implementation complexity it hides per public concept exposed.
+- **Locality:** whether inputs and outputs are explicit, with no hidden globals or ambient state.
+- **Seam placement:** whether the boundary lands at the dependency category boundary, not halfway through a workflow.
+- **Test cost:** which tests prove behavior without relying on mocks that can drift.
+
+Use a local loop inside this analysis, not `dw-council`, by default. `dw-council` is for high-stakes product or architecture trade-offs with multiple stakeholder priorities; an interface-depth comparison is usually a scoped refactor design exercise. Escalate to `dw-council` only when the interface choice also changes product behavior, ownership boundaries, security posture, or a hard-to-reverse architecture decision.
+
+The output for an interface finding adds:
+
+```markdown
+**Interface alternatives considered:**
+1. <proposal + constraint + depth/locality/seam/test notes>
+2. <proposal + constraint + depth/locality/seam/test notes>
+3. <proposal + constraint + depth/locality/seam/test notes>
+**Recommended interface:** <choice and why>
+```
+
 ## Output for refactor-audit findings
 
 When the audit flags a module as a shallow-wrapper or god-module candidate, the finding entry adds a `Deep-modules: <verdict>` line:
