@@ -38,7 +38,7 @@
 
     When available in the project at `./.agents/skills/`, use these skills as contextual support without replacing this command:
 
-    - `dw-debug-protocol`: **ALWAYS** — runs the bug through the six-step triage (Reproduce → Localize → Reduce → Fix Root Cause → Guard → Verify End-to-End). Stop-the-line discipline; root-cause over symptom; regression test committed in the same atomic commit. Non-reproducible bugs follow the instrument-first sub-protocol — no guess fixes without explicit acknowledgement.
+    - `dw-debug-protocol`: **ALWAYS** — runs the bug through the six-step triage (Reproduce → Localize → Reduce → Fix Root Cause → Guard → Verify End-to-End). Stop-the-line discipline; root-cause over symptom; regression test committed in the same atomic commit. For non-trivial bugs, or after a first fix fails, Step 1 must establish a red-capable feedback loop before theorizing. Non-reproducible bugs follow the instrument-first sub-protocol — no guess fixes without explicit acknowledgement.
     - `dw-verify`: **ALWAYS** — in Direct mode, invoked before committing the fix. The VERIFICATION REPORT must show the original bug symptom no longer reproduces (not just that tests pass).
     - `vercel-react-best-practices`: use when the bug affects React/Next.js and there is suspicion of render, hydration, fetching, waterfall, bundle, or re-render issues
     - `dw-testing-discipline`: use when the fix requires a reproducible E2E/retest flow in a web app — `references/playwright-recipes.md` for recipes, core rules + 6 agent guardrails for any test the fix adds, flaky-discipline if the bug surfaces intermittently.
@@ -214,6 +214,7 @@
     - Stack traces
     - Recently modified files
     - If the bug is UI-related or depends on browser flow, supplement collection with `dw-testing-discipline` (playwright-recipes + three-workflow-patterns to pick the right verification mode)
+    - For non-trivial bugs, or when the first fix attempt failed, build the `dw-debug-protocol` red-capable feedback loop before proposing a cause: one loop command/artifact, deterministic enough, fast, agent-runnable, and observed red. If no agent-runnable loop is possible, record attempts and ask the user for the missing artifact/access with the HITL template from `references/six-step-triage.md`.
 
     ### 3. Clarification Questions (MANDATORY - EXACTLY 3)
 
@@ -384,7 +385,7 @@
     1. Discover the next `NNN` (see File Locations section).
     2. Create `.dw/bugfixes/NNN-<slug>/` if not yet created in step 5.0.
     3. Write `TASK.md` with the triage, clarifications, root cause, and the approved plan as executed (use `.dw/templates/bugfix-template.md` as the base structure).
-    4. Write `fix-report.md` with the verbatim `dw-verify` VERIFICATION REPORT plus the before/after reproduction trace.
+    4. Write `fix-report.md` with the verbatim `dw-verify` VERIFICATION REPORT plus the before/after reproduction trace. The report MUST include `Loop command before fix` and `Loop command after fix` (or the exact HITL blocker, attempts made, and artifact/access requested when no loop was possible).
     5. Write `SUMMARY.md` using `.dw/templates/bugfix-summary-template.md`. Fill in slug, date, status `Fixed`, severity, related_concerns (from step 1.5), Symptom (verbatim), Root Cause (one sentence), Resolution (2-4 bullets), Files Touched, Verification, Related, Followups.
     6. If the fix touched a concern listed in `.dw/rules/concerns.md`, append a line to that concern's row's `Last incident` column (or add a new row under Known Bug History) — preserve hand-written entries between `<!-- preserved:start -->` markers.
     7. Report paths of all three files in chat before the commit step.
@@ -494,6 +495,7 @@
     - [ ] **Maximum 5 affected files**
     - [ ] **No migrations**
     - [ ] **Test task included (correct project framework)**
+    - [ ] **Non-trivial bug loop recorded: command before fix + command after fix, or HITL blocker with attempts + requested artifact/access**
     - [ ] Awaiting approval before executing
     - [ ] **`.dw/bugfixes/NNN-<slug>/{TASK,fix-report,SUMMARY}.md` written after verify PASS**
 
