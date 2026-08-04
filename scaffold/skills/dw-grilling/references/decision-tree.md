@@ -3,7 +3,13 @@
 Grill is not a flat questionnaire. It is a walk down a **dependency-ordered decision tree**, so an upstream
 decision is never asked after the downstream decision it constrains.
 
-## Build the tree (before the first question)
+## Resume or build the tree (before the first question)
+
+Before rebuilding a tree, read the active one-pager/PRD for an existing `### Decision Map`. If present and
+well-formed, resume from it instead of deriving the same tree again. Load the node IDs, `Depends on:` fields,
+states, explicit **Frontier**, and `#### Decision Fog`; do not re-ask a node already marked `resolved`.
+
+If there is no durable map yet:
 
 1. **Gather open decisions.** Read the plan/PRD and the project's durable facts (`.dw/rules/`, `.dw/intel/` via
    `/dw-intel`, `.dw/constitution.md`, `.dw/domain/**`, current PRDs/TechSpecs, recent git activity). List every
@@ -16,14 +22,31 @@ decision is never asked after the downstream decision it constrains.
 4. **Topologically order.** Ask parents before children. Independent branches can be walked in any order, but
    within a branch always resolve the blocker first.
 
-Record the tree (nodes, dependencies, resolved/open) so the session — or a later `/dw-plan` handoff — can resume
-exactly where it stopped.
+Record the tree in the active artifact's `### Decision Map` so this session, a later Grill session, or a later
+`/dw-plan` handoff can resume exactly where it stopped.
+
+## Durable Decision Map contract
+
+- Keep one row per decision node with a stable ID (`D1`, `D2`, ...), a short node label, `State`, `Depends on:`,
+  `Frontier?`, and structural notes.
+- Use the same dependency field shape as task plans: `Depends on: none` or `Depends on: D1, D2`. This keeps
+  dependency parsing consistent across durable artifacts.
+- Allowed `State` values are `resolved`, `open-ready`, and `open-blocked`.
+- Maintain an explicit `**Frontier:**` line listing all `open-ready` node IDs, or `none`. The next session reads
+  this line directly; it must not need to manually recompute the graph to know what can be asked next.
+- Keep `#### Decision Fog` for known unresolved areas that are not yet crisp enough to phrase as a decision
+  node. Each item is one line and graduates into a real node once it becomes decidable.
+
+Do not duplicate the content of `### Resolved Decisions` in the map. The map records structure and resume state;
+`Resolved Decisions` records the recommended answer, user's choice, rejected alternative, and evidence.
 
 ## Walk the tree
 
 Resolve nodes in dependency order using the per-turn contract (`interview-loop.md`). After each answer, **re-walk
-the tree**: a resolved parent may add, remove, or reshape child nodes. New tension discovered mid-walk becomes a
-new node, inserted in dependency order — not asked immediately if a blocker is still open.
+the tree** and persist the updated map when writes are authorized: a resolved parent may add, remove, or reshape
+child nodes. New tension discovered mid-walk becomes a new node, inserted in dependency order — not asked
+immediately if a blocker is still open. If a newly discovered uncertainty is real but still too vague to phrase
+as a decision, add it to `Decision Fog` instead of pretending the tree is complete.
 
 ## The shared-understanding gate
 
@@ -44,8 +67,8 @@ terms, and the remaining (non-blocking) decisions with their owners.
 If the gate is not met — blocking decision open, contradiction unclosed, or the user not yet confirming — **do
 not** declare alignment. Persist a draft/paused state:
 
-- Keep the one-pager (or PRD) at its draft/paused status with the decision tree, resolved decisions, and the
-  remaining open nodes recorded (the caller performs the write, only if authorized).
+- Keep the one-pager (or PRD) at its draft/paused status with `### Decision Map`, resolved decisions, the
+  explicit Frontier, and remaining open nodes recorded (the caller performs the write, only if authorized).
 - Return `FINDINGS` with the open nodes as the Next Step, so the next turn resumes the same tree.
 
 ## Handoff to /dw-plan

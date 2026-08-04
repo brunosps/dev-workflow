@@ -36,17 +36,23 @@ vocabulary and the calling command for the idea one-pager / PRD.
    until every dependency branch is resolved, glossary/code contradictions are closed, no blocking decision
    remains, AND the user explicitly confirms. Otherwise persist a draft/paused state and stop.
 
-## Before the first question — build the decision tree
+## Before the first question — resume or build the decision tree
 
-Inspect project facts and open questions, then order them by dependency (never ask a downstream decision before
-its blocker is resolved):
+Inspect the active one-pager/PRD first. If it already has a `### Decision Map`, read it before reconstructing:
+load its nodes, `Depends on:` fields, states, explicit **Frontier**, and `#### Decision Fog`; do not re-ask a
+node already marked `resolved`. Continue from the Frontier when it exists. Only rebuild from scratch when no
+durable map exists or the map is malformed.
+
+When no resumable map exists, inspect project facts and open questions, then order them by dependency (never ask
+a downstream decision before its blocker is resolved):
 
 1. Read what already exists: `.dw/rules/`, `.dw/intel/` (via `/dw-intel` when present), `.dw/constitution.md`,
    `.dw/domain/**` (glossary / context-map), current PRDs/TechSpecs, recent git activity.
 2. Extract the open decisions the plan/PRD implies. Fold in vocabulary tension surfaced by `dw-domain-modeling`
    (fuzzy or overloaded terms are decisions too).
-3. Order them into a **dependency tree**: a node that constrains others comes first. Record it so a later turn
-   (or `/dw-plan`) can resume. Full method + the shared-understanding gate: `references/decision-tree.md`.
+3. Order them into a **dependency tree**: a node that constrains others comes first. Record it in `### Decision
+   Map` so a later turn (or `/dw-plan`) can resume. Full method + the shared-understanding gate:
+   `references/decision-tree.md`.
 
 ## The loop
 
@@ -59,6 +65,9 @@ For each unresolved node, in dependency order:
    `dw-domain-modeling`; the caller persists to the one-pager/PRD). ADR creation still needs a separate explicit
    approval — never auto-create one.
 5. **Re-walk** the tree: the answer may unlock or reshape downstream nodes.
+6. **Persist the map** after each resolved answer when writes are authorized: update node state, `Depends on:`,
+   explicit **Frontier**, and `Decision Fog` without duplicating the decision outcome already recorded in
+   **Resolved Decisions**.
 
 When the tree is exhausted and contradictions are closed, present the shared-understanding summary and ask the
 user to confirm. Only then is the session `aligned`.
@@ -90,8 +99,9 @@ what you *would* persist.
 - **Scope:** the artifact under grill (one-pager / PRD / TechSpec), the decision tree size, and how many nodes
   are resolved vs open.
 - **Evidence:** the facts discovered from repo/rules/intel/docs (with sources) that were used instead of asking.
-- **Artifacts:** decision tree, resolved decisions with the recommended answer and the user's choice, and any
-  authorized `.dw/domain/**` / one-pager / PRD updates (with paths).
+- **Artifacts:** Decision Map (nodes, `Depends on:`, state, Frontier, Decision Fog), resolved decisions with the
+  recommended answer and the user's choice, and any authorized `.dw/domain/**` / one-pager / PRD updates (with
+  paths).
 - **Decisions:** each resolved decision, the alternative rejected, and why.
 - **Risks:** open decisions, unclosed glossary/code contradictions, and any decision made without full evidence.
 - **Next Step:** either "user to confirm shared understanding" (with the remaining nodes) or "aligned — hand off

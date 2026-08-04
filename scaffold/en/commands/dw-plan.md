@@ -69,7 +69,7 @@ Before Stage 1, check for an idea one-pager at `.dw/spec/ideas/<slug>.md` and th
 - `schema_version: "1.1"`;
 - `status: aligned`;
 - `alignment.confirmed_by_user: true`;
-- every dependency branch is resolved (no open decision node);
+- the **Decision Map** has every dependency branch resolved (no open decision node and `Frontier: none`);
 - glossary/code contradictions are closed;
 - no **blocking** entry remains under Remaining Decisions.
 If ANY check fails — or the file is malformed, internally inconsistent, `draft`, or `paused` — the one-pager is **input, not a trusted handoff**: read it for context, but treat all its decisions as **uncovered** and ask them normally. Never suppress a product question on the strength of `status: aligned` alone; `alignment.confirmed_by_user: true` and a resolved, non-blocking, contradiction-free tree are required too.</critical>

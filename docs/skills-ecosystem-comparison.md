@@ -122,6 +122,19 @@ Diferenças intencionais do `.dw/`:
 - ADRs roteados por `/dw-adr --scope=repo|prd`, gated no teste 3-critérios com aprovação explícita separada.
 - `/dw-analyze-project` lê e linka `.dw/domain/**` e **preserva** (nunca regenera nem sobrescreve).
 
+### 5.1. Decision Map durável (de `wayfinder`, mattpocock)
+
+A skill [`skills/productivity/wayfinder`](https://github.com/mattpocock/skills/blob/main/skills/productivity/wayfinder/SKILL.md)
+inspirou o registro durável de progresso nebuloso: um mapa de decisões com dependências, fronteira explícita do
+que pode ser feito agora e uma zona de "fog" para o que se sabe que falta descobrir mas ainda não virou decisão
+formulável. No dev-workflow isso foi adotado dentro do one-pager do Grill, em `### Decision Map`, usando
+`Depends on:` + `State` + `Frontier` + `Decision Fog`.
+
+Foi deliberadamente rejeitado portar o issue tracker como substrato de persistência, transformar decisões em
+tickets/issues, claim por assignee e coordenação de sessões concorrentes. O contrato local continua
+single-owner/single-session e local-first, porque a lacuna corrigida é retomada durável entre sessões do Grill,
+não orquestração multi-agente.
+
 ### 6. `/dw-review --since <ref>` — ponto fixo verificado antes do review (de mattpocock)
 
 Adaptação da técnica observada em `mattpocock/skills`: antes de analisar um diff avulso, exigir um ponto de
