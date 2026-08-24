@@ -42,7 +42,7 @@ Exportable skills (no `.dw/` pipeline required): `dw-minimalism`, `dw-search-fir
 
 ## Commands
 
-dev-workflow v2.1.0 ships **39 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v2.1.0 ships **40 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
 ### Tier 1 — Gateway (4)
 
@@ -53,7 +53,7 @@ dev-workflow v2.1.0 ships **39 commands** organized into four tiers. Most users 
 | **`/dw-triage [item]`** | An external bug report, feature request, or PR. Checks whether it already exists and whether it was rejected before, verifies the claim, then routes to `/dw-bugfix`, `/dw-plan prd`, or `/dw-brainstorm --mode=grill`. Local-first in `.dw/triage/`; works with no network and no `gh`. |
 | **`/dw-help [keyword]`** | Discover commands. Pass a keyword for shortcuts; `--advanced` reveals internal commands. |
 
-### Tier 2 — Pipeline granular (10)
+### Tier 2 — Pipeline granular (11)
 
 Use these when you want step-by-step control instead of `/dw-autopilot`.
 
@@ -67,6 +67,7 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 | **`/dw-qa`** | Mode-aware QA. Auto-detects UI vs API. Flags: `--fix` (iterative QA + fix-retest loop), `--api`, `--ai` (AI eval against reference dataset), `--uat` (human-in-the-loop walkthrough), `--bugfix <slug>` (QA a bugfix). |
 | **`/dw-pause`** | Consolidate the current session's mental state into `.dw/STATE.md` (Decisions, Blockers, Todos, Deferred, Lessons, Open Loops). Used before long breaks or context-window compactions. |
 | **`/dw-resume`** | Read `.dw/STATE.md`, present a TLDR of where work left off, and suggest the next `dw-*` command. Never auto-executes. |
+| **`/dw-report [--every <N>m]`** | Timestamped progress loop while long work runs: what is done (with evidence), what is being done (with measurable progress), what is left — every 10 minutes by default, appended to `.dw/reports/YYYY-MM-DD.md`. Silent while blocked, final report + auto-disarm when the work ends. `now`, `status`, `stop`. Auto-armed by `/dw-run`, `/dw-autopilot`, and the CLI runners; `DW_REPORT_AUTO=off` opts out, `DW_REPORT_BELL` hooks a local sound. |
 | **`/dw-commit`** | Atomic Conventional Commits for pending changes. Applies `dw-git-discipline` (one intent per commit, lint+tests+build green before). |
 | **`/dw-generate-pr [target]`** | Push the branch, draft a PR body with summary + test plan, open the browser. Hard gates: dw-verify PASS + secure-audit. |
 
@@ -226,6 +227,7 @@ your-project/
 │   ├── spec/              # PRD directories — each contains tasks-validation.md
 │   ├── bugfixes/          # Persistent bugfix records: NNN-<slug>/{TASK.md, SUMMARY.md, fix-report.md} + review/, QA/
 │   ├── goals/             # Durable goal state used by /dw-goal and /dw-autopilot
+│   ├── reports/           # Progress-report loop (/dw-report): daily YYYY-MM-DD.md logs + .active.json, machine-local (gitignored)
 │   ├── secure-audit/      # Security Gate summaries and per-layer reports
 │   ├── subtasks/          # Local ephemeral subagent input packets and handoffs (pending/archive ignored by Git)
 │   └── STATE.md           # Session state: Decisions, Blockers, Todos, Open Loops, Deferred Ideas, Lessons, Preferences (managed by /dw-pause + /dw-resume)

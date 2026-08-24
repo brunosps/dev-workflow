@@ -143,6 +143,8 @@ Após aprovação:
 
 ### Etapa 8: Goal Durável de Execução
 
+Primeiro arme o loop de progresso: invoque `/dw-report` (contrato de auto-arme — idempotente, pulado quando `DW_REPORT_AUTO=off`). Ele reporta feito / fazendo / falta a cada 10 minutos ao longo do goal, do Security Gate, do commit e do PR, e se desarma sozinho com um report final no gate de PR.
+
 Quando `autopilot-state.json status=plan_complete`, invoque formalmente:
 
 ```text

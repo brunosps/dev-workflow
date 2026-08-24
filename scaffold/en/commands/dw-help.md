@@ -23,7 +23,7 @@ Use `/dw-autopilot "wish"` as the gateway for most feature work. The granular co
 | `/dw-bugfix "description"` | A bug or error report. Surgical fix or PRD route. |
 | `/dw-help [keyword]` | This screen. Pass a keyword for shortcuts. `--advanced` reveals internal commands. |
 
-## Tier 2 — Pipeline granular (10)
+## Tier 2 — Pipeline granular (11)
 
 | Command | What |
 |---------|------|
@@ -35,6 +35,7 @@ Use `/dw-autopilot "wish"` as the gateway for most feature work. The granular co
 | `/dw-qa` | Mode-aware QA (UI / API auto-detect). Flags: `--fix`, `--api`, `--ai`, `--uat`, `--bugfix <slug>`. |
 | `/dw-pause` | Save session state, decisions, blockers, todos, and open loops into `.dw/STATE.md`. |
 | `/dw-resume` | Read `.dw/STATE.md`, show a TLDR, and suggest the next `dw-*` command. |
+| `/dw-report [--every <N>m]` | Timestamped done / doing / remaining report every 10 minutes while long work runs; appended to `.dw/reports/`. `now`, `status`, `stop`. Auto-armed by `/dw-run`, `/dw-autopilot`, and the CLI runners. |
 | `/dw-commit` | Atomic Conventional Commits for pending work. |
 | `/dw-generate-pr [target]` | Push branch, draft PR body, open browser. |
 
@@ -103,6 +104,7 @@ Match the keyword and suggest:
 | `run`, `execute`, `implement` | `/dw-run` |
 | `goal`, `objective`, `long-running`, `resume autopilot` | `/dw-goal` or `/dw-autopilot` if `autopilot-state.json` exists |
 | `pause`, `save state`, `end session` | `/dw-pause` |
+| `report`, `progress`, `keep me posted`, `status every` | `/dw-report [--every <N>m]` |
 | `resume`, `continue`, `where did we stop` | `/dw-resume` |
 | `review`, `quality`, `audit code` | `/dw-review` |
 | `qa`, `test plan`, `e2e` | `/dw-qa` |

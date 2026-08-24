@@ -174,3 +174,48 @@ test('idea one-pager carries a resumable Grill Decision Map contract', () => {
     }
   }
 });
+
+test('dw-report is registered, documents the progress loop, and is auto-armed by long-running commands', () => {
+  for (const locale of ['en', 'pt-br']) {
+    const command = read(`scaffold/${locale}/commands/dw-report.md`);
+    const run = read(`scaffold/${locale}/commands/dw-run.md`);
+    const autopilot = read(`scaffold/${locale}/commands/dw-autopilot.md`);
+    const help = read(`scaffold/${locale}/commands/dw-help.md`);
+    const instructions = read(`scaffold/${locale}/agent-instructions.md`);
+    const entry = COMMANDS[locale].find((cmd) => cmd.name === 'dw-report');
+
+    assert.ok(entry, `missing dw-report command registry entry for ${locale}`);
+    assert.match(entry.description, /\.dw\/reports\/YYYY-MM-DD\.md/);
+    assert.match(entry.description, /--every <N>m/);
+    assert.ok(!entry.userInvoked, 'dw-report must stay model-invocable so the trigger map can fire it');
+
+    for (const token of [
+      '--every <N>m',
+      '/dw-report now',
+      '/dw-report status',
+      '/dw-report stop',
+      '.dw/reports/.active.json',
+      'DW_REPORT_AUTO',
+      'DW_REPORT_BELL',
+      'wakeup | background-bash',
+      '"working | blocked | finished"',
+      '📊 FINAL Report —',
+      '➕',
+    ]) {
+      assert.ok(command.includes(token), `${locale} dw-report missing ${JSON.stringify(token)}`);
+    }
+
+    // Auto-arm contract: the long-running commands arm the loop and respect the opt-out.
+    assert.ok(run.includes('/dw-report'), `${locale} dw-run must arm /dw-report`);
+    assert.ok(run.includes('DW_REPORT_AUTO=off'), `${locale} dw-run must honor DW_REPORT_AUTO=off`);
+    assert.ok(autopilot.includes('/dw-report'), `${locale} dw-autopilot must arm /dw-report`);
+    assert.ok(autopilot.includes('DW_REPORT_AUTO=off'), `${locale} dw-autopilot must honor DW_REPORT_AUTO=off`);
+    assert.ok(help.includes('/dw-report [--every <N>m]'), `${locale} dw-help must list /dw-report`);
+    assert.ok(instructions.includes('/dw-report [--every <N>m]'), `${locale} agent-instructions must trigger /dw-report`);
+  }
+
+  const cliRun = read('scaffold/skills/dw-cli-run/SKILL.md');
+  assert.ok(cliRun.includes('/dw-report'), 'dw-cli-run must arm /dw-report before a WRITE run');
+  assert.ok(cliRun.includes('DW_REPORT_AUTO=off'), 'dw-cli-run must honor DW_REPORT_AUTO=off');
+  assert.ok(cliRun.includes('armed_by: dw-cli-run'), 'dw-cli-run must record itself as armed_by');
+});

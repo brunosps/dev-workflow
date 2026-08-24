@@ -37,6 +37,7 @@ Before picking a command from the Trigger Map, gauge the change's actual scope. 
 | "Run this as a goal" / "durable goal" / "long-running objective" | `/dw-goal "<objective>"` |
 | "Continue where I left off" | `/dw-run --resume` |
 | "Pause work" / "End the session" / "Save where we are" | `/dw-pause` |
+| "Report every N minutes" / "Keep me posted while this runs" / "Give me status reports" | `/dw-report [--every <N>m]` |
 | "Resume" / "Where did we stop?" / "Pick up where we left off" | `/dw-resume` |
 | "QA this feature" / "Run the test plan" | `/dw-qa` |
 | "Fix the QA bugs" | `/dw-qa --fix` |

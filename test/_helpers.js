@@ -80,6 +80,10 @@ const FILES = {
     en: 'scaffold/en/commands/dw-refactor.md',
     pt: 'scaffold/pt-br/commands/dw-refactor.md',
   },
+  report: {
+    en: 'scaffold/en/commands/dw-report.md',
+    pt: 'scaffold/pt-br/commands/dw-report.md',
+  },
 };
 
 const SKILLS = {

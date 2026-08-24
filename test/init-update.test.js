@@ -77,3 +77,21 @@ test('repeated update preserves agent instruction tails with inline marker menti
     assert.equal(content.split('Keep this project-specific tail once.').length - 1, 1);
   }
 });
+
+test('init and update create .dw/reports/ with a machine-local .gitignore for the report loop', (t) => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-workflow-reports-'));
+  t.after(() => fs.rmSync(tempDir, { recursive: true, force: true }));
+
+  runCli(tempDir, 'init', '--lang=en', '--profile=core');
+  const gitignorePath = path.join(tempDir, '.dw', 'reports', '.gitignore');
+  assert.ok(fs.existsSync(gitignorePath), '.dw/reports/.gitignore missing after init');
+  const content = fs.readFileSync(gitignorePath, 'utf8');
+  assert.match(content, /^\?\?\?\?-\?\?-\?\?\.md$/m);
+  assert.match(content, /^\.active\.json$/m);
+
+  // A user customization survives update (writeFile with overwrite=false).
+  fs.writeFileSync(gitignorePath, content + 'custom.log\n', 'utf8');
+  runCli(tempDir, 'update', '--lang=en');
+  assert.ok(fs.readFileSync(gitignorePath, 'utf8').includes('custom.log'));
+  assert.ok(readManagedFiles(tempDir).includes(path.join('.dw', 'reports', '.gitignore')));
+});

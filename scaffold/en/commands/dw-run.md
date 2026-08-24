@@ -93,6 +93,7 @@ When available under `./.agents/skills/`, these skills are invoked per task:
 
 ### Behavior
 
+0. **Arm the progress loop:** invoke `/dw-report` (auto-arm contract — idempotent when `.dw/reports/.active.json` is already live; skipped when `DW_REPORT_AUTO=off`). It reports done / doing / remaining every 10 minutes while the waves run and disarms itself with a final report after the final Level 2 review.
 1. **Plan check (via `dw-execute-phase/plan-checker` agent):**
    - 6-dimension goal-backward verification: are these tasks actually going to deliver what the PRD promises?
    - If FAIL on any dimension, STOP and report to user before any code is touched.
@@ -133,7 +134,7 @@ When available under `./.agents/skills/`, these skills are invoked per task:
 
 1. Read `active-session.md` to determine which task/wave the session stopped at.
 2. Surface to user: "Resuming from wave N, task X.0. Previously completed: <list>. Continue?"
-3. On confirmation, resume from the next pending task with the same Mode 2 behavior.
+3. On confirmation, resume from the next pending task with the same Mode 2 behavior (including step 0 — arm `/dw-report`).
 
 If `active-session.md` doesn't exist but uncompleted tasks remain, treat as Mode 2 fresh start.
 

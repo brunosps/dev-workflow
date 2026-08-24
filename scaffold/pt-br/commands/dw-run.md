@@ -93,6 +93,7 @@ Quando disponíveis em `./.agents/skills/`, estas skills são invocadas por task
 
 ### Comportamento
 
+0. **Armar o loop de progresso:** invoque `/dw-report` (contrato de auto-arme — idempotente quando `.dw/reports/.active.json` já está vivo; pulado quando `DW_REPORT_AUTO=off`). Ele reporta feito / fazendo / falta a cada 10 minutos enquanto as waves rodam e se desarma sozinho com um report final após o Level 2 review final.
 1. **Plan check (via agente `dw-execute-phase/plan-checker`):**
    - Verificação goal-backward em 6 dimensões: essas tasks vão de fato entregar o que o PRD promete?
    - Se FAIL em qualquer dimensão, PARE e reporte ao usuário antes de qualquer código ser tocado.
@@ -133,7 +134,7 @@ Quando disponíveis em `./.agents/skills/`, estas skills são invocadas por task
 
 1. Ler `active-session.md` pra determinar onde a sessão parou.
 2. Surface ao usuário: "Resumindo da wave N, task X.0. Já completadas: <lista>. Continuar?"
-3. Em confirmação, resume da próxima task pendente com mesmo comportamento Modo 2.
+3. Em confirmação, resume da próxima task pendente com mesmo comportamento Modo 2 (incluindo o passo 0 — armar `/dw-report`).
 
 Se `active-session.md` não existe mas tasks não-completadas existem, trate como Modo 2 fresh start.
 

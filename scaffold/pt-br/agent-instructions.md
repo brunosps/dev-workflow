@@ -37,6 +37,7 @@ Antes de escolher um comando da Trigger Map, dimensione o escopo real da mudanç
 | "Roda isso como goal" / "objetivo durável" / "long-running objective" | `/dw-goal "<objetivo>"` |
 | "Continue de onde parei" | `/dw-run --resume` |
 | "Pausa o trabalho" / "Encerra a sessão" / "Salva onde paramos" | `/dw-pause` |
+| "Report de N em N minutos" / "Me mantém informado enquanto isso roda" / "Quero status periódico" | `/dw-report [--every <N>m]` |
 | "Retoma" / "Onde paramos?" / "Volta de onde parei" | `/dw-resume` |
 | "QA dessa feature" / "Roda o test plan" | `/dw-qa` |
 | "Corrige os bugs do QA" | `/dw-qa --fix` |

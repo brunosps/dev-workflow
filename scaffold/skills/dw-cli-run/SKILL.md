@@ -77,6 +77,11 @@ The main thread **orchestrates**; execution goes to one of these:
 > **Nesting:** the agent running the CLI **must not spawn further subagents** (nesting limit; Workflow nests only
 > 1 level). The gate is **another phase/agent** of the workflow — never a sub-spawn from inside the runner agent.
 
+## Progress loop (auto-arm)
+WRITE runs invoke `/dw-report` before dispatch (idempotent while `.dw/reports/.active.json` is live; skipped when
+`DW_REPORT_AUTO=off`; `armed_by: dw-cli-run`). Ticks read the stream for measurable progress (`grep -c
+'"type":"item.completed"'`, last `command_execution`); the gate verdict is `finished` → final report + auto-disarm.
+
 ## Protocol
 1. **Resolve target.** Worktree + prompt path (from the user or inferred). Derive a `<slug>` (the spec slug or
    worktree tag) — it keys the durable audit log and the session sidecar.

@@ -143,6 +143,8 @@ After approval:
 
 ### Step 8: Durable Execution Goal
 
+First arm the progress loop: invoke `/dw-report` (auto-arm contract — idempotent, skipped when `DW_REPORT_AUTO=off`). It reports done / doing / remaining every 10 minutes through the goal, the Security Gate, commit, and PR, and disarms itself with a final report at the PR gate.
+
 When `autopilot-state.json status=plan_complete`, formally invoke:
 
 ```text

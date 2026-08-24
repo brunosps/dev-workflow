@@ -21,7 +21,7 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 | `/dw-bugfix "descrição"` | Bug ou error report. Fix cirúrgico ou rota pra PRD. |
 | `/dw-help [palavra-chave]` | Esta tela. Passe palavra-chave pra atalhos. `--advanced` revela comandos internos. |
 
-## Tier 2 — Pipeline granular (10)
+## Tier 2 — Pipeline granular (11)
 
 | Comando | O que |
 |---------|-------|
@@ -33,6 +33,7 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 | `/dw-qa` | QA mode-aware (UI / API auto-detect). Flags: `--fix`, `--api`, `--ai`, `--uat`, `--bugfix <slug>`. |
 | `/dw-pause` | Salva estado da sessão, decisões, bloqueios, todos e open loops em `.dw/STATE.md`. |
 | `/dw-resume` | Lê `.dw/STATE.md`, mostra um TLDR e sugere o próximo comando `dw-*`. |
+| `/dw-report [--every <N>m]` | Report carimbado de feito / fazendo / falta a cada 10 minutos enquanto trabalho longo roda; anexado em `.dw/reports/`. `now`, `status`, `stop`. Auto-armado por `/dw-run`, `/dw-autopilot` e pelos runners de CLI. |
 | `/dw-commit` | Commits atômicos Conventional pra trabalho pendente. |
 | `/dw-generate-pr [target]` | Push branch, draft do PR body, abre browser. |
 
@@ -99,6 +100,7 @@ Auto-invocados por comandos primários mas disponíveis standalone.
 | `run`, `executa`, `implementa` | `/dw-run` |
 | `goal`, `objetivo`, `long-running`, `retomar autopilot` | `/dw-goal` ou `/dw-autopilot` se `autopilot-state.json` existir |
 | `pausa`, `salvar estado`, `encerrar sessão` | `/dw-pause` |
+| `report`, `progresso`, `me mantém informado`, `status periódico` | `/dw-report [--every <N>m]` |
 | `retomar`, `continuar`, `onde paramos` | `/dw-resume` |
 | `review`, `qualidade`, `audit code` | `/dw-review` |
 | `qa`, `test plan`, `e2e` | `/dw-qa` |
