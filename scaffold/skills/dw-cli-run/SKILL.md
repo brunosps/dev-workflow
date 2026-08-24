@@ -54,7 +54,8 @@ worktree, `AUTO_READONLY`, freely parallel, score the report without a re-run ga
 ## Pre-flight (fail early > run in the wrong place)
 1. `<cli> --version` answers (CLI + credentials present). Missing → `BLOCKED`.
 2. **Declare the mode** (WRITE or READ-ONLY) and pick the matching `AUTO`/`AUTO_READONLY` slot.
-3. WRITE only: `git worktree list` — confirm the target worktree and that it is **not** the main checkout.
+3. WRITE only: `git worktree list` — confirm the target worktree and that it is **not** the main checkout. Missing →
+   create it with `/dw-worktree create <slug>` (naming convention + install/build prep), never a bare `git worktree add`.
 4. A **prompt/spec** exists (what the CLI receives). Common conventions: `.dw/spec/<slug>/codex-prompt.md`
    (dev-workflow), `PROMPT.md`, `TASK.md`, or a path the owner names. **Read it** — it is the scope/fence/gate.
 
@@ -186,6 +187,9 @@ The stream ends with the adapter's `USAGE` block (token counts). Extract it from
 - **STOP — not merged.** The CLI implemented in the worktree; **run the gate** (tests/lint/build + review; if the
   project uses dev-workflow: `/dw-review` + `/dw-qa` + `/dw-secure-audit`) **before** any merge.
 - **Merge = the owner's explicit decision.** Never automatic here.
+- **End of life = the same turn as the merge (hard).** When the owner merges: `/dw-worktree merge <slug>` (ff-only from the
+  main checkout → remove → branch delete → prune) or, if merged by other means, `/dw-worktree clean --apply` in that
+  same turn. Never `git worktree remove --force`; KEEP verdicts (dirty/unmerged/in-use) are reported, not forced.
 - Flag **uncommitted** work or edits **outside the fence**.
 - **Stop/abort a running CLI:** use **`TaskStop <task_id>`** (if `run_in_background`/Workflow) OR
   **`git worktree remove --force <worktree>`** (pulls the rug — the CLI has nowhere to write and dies). Fallback:

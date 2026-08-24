@@ -84,6 +84,10 @@ const FILES = {
     en: 'scaffold/en/commands/dw-report.md',
     pt: 'scaffold/pt-br/commands/dw-report.md',
   },
+  worktree: {
+    en: 'scaffold/en/commands/dw-worktree.md',
+    pt: 'scaffold/pt-br/commands/dw-worktree.md',
+  },
 };
 
 const SKILLS = {

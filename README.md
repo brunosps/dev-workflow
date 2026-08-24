@@ -42,7 +42,7 @@ Exportable skills (no `.dw/` pipeline required): `dw-minimalism`, `dw-search-fir
 
 ## Commands
 
-dev-workflow v2.1.0 ships **40 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v2.1.0 ships **41 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
 ### Tier 1 — Gateway (4)
 
@@ -71,7 +71,7 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 | **`/dw-commit`** | Atomic Conventional Commits for pending changes. Applies `dw-git-discipline` (one intent per commit, lint+tests+build green before). |
 | **`/dw-generate-pr [target]`** | Push the branch, draft a PR body with summary + test plan, open the browser. Hard gates: dw-verify PASS + secure-audit. |
 
-### Tier 3 — Specialty (13)
+### Tier 3 — Specialty (14)
 
 | Command | What |
 |---------|------|
@@ -83,6 +83,7 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 | **`/dw-context-budget`** | Audits context overhead from commands, skills, agents, instruction files, and MCPs. |
 | **`/dw-harness-audit`** | Deterministic health scorecard for the dev-workflow install, agents, wrappers, MCPs, and gates. |
 | **`/dw-skill-health`** | Audits installed skills and agents for bloat, duplication, and missing references. |
+| **`/dw-worktree <list\|create\|clean\|merge>`** | Lifecycle of delegation worktrees (`../<project>-<slug>`): `create` runs install/build prep so a delegate never works blind; `list` gives every worktree a verdict (`REMOVABLE`, `KEEP:unmerged`, `KEEP:dirty`, `KEEP:in-use`); `clean` removes only proven-merged-and-clean ones (dry-run by default, `--apply` to execute); `merge` does the safe order from the main checkout (ff-only → remove → branch delete → prune). Never `--force`. Backed by `.dw/scripts/lib/worktree-gc.mjs`; auto-used by the CLI runners, `/dw-pause`, and `/dw-harness-audit`. |
 | **`/dw-learn`** | Synthesizes durable decisions (confidence-tagged), bugfixes, deviations, and git history into atomic confidence-weighted **instincts** you approve at `.dw/memory/instincts/`; can propose constitution principles. On-demand and human-in-the-loop — **no always-on observer**. |
 | **`/dw-new-project`** | Bootstrap a new project from an empty or docs-first directory while preserving existing documentation and prototypes. Stack interview includes Next.js + NestJS, Postgres, pg-boss, Mailpit, dev topology, and wraps official `create-*` tools before composing dev infrastructure, `.env`, scripts, CI, and `.dw/rules/`. |
 | **`/dw-dockerize`** | Reads existing project, detects stack + runtime deps, proposes Dockerfile + docker-compose for dev/prod with explicit trade-offs (Conservative/Balanced/Bold). |

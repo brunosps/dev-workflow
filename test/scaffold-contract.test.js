@@ -219,3 +219,43 @@ test('dw-report is registered, documents the progress loop, and is auto-armed by
   assert.ok(cliRun.includes('DW_REPORT_AUTO=off'), 'dw-cli-run must honor DW_REPORT_AUTO=off');
   assert.ok(cliRun.includes('armed_by: dw-cli-run'), 'dw-cli-run must record itself as armed_by');
 });
+
+test('dw-worktree is registered, ships its GC script, and is wired into runners, pause, audit, and guardrails', () => {
+  assert.ok(fs.existsSync(path.join(root, 'scaffold/scripts/lib/worktree-gc.mjs')), 'worktree-gc.mjs missing');
+  for (const locale of ['en', 'pt-br']) {
+    const command = read(`scaffold/${locale}/commands/dw-worktree.md`);
+    const pause = read(`scaffold/${locale}/commands/dw-pause.md`);
+    const audit = read(`scaffold/${locale}/commands/dw-harness-audit.md`);
+    const help = read(`scaffold/${locale}/commands/dw-help.md`);
+    const instructions = read(`scaffold/${locale}/agent-instructions.md`);
+    const entry = COMMANDS[locale].find((cmd) => cmd.name === 'dw-worktree');
+
+    assert.ok(entry, `missing dw-worktree command registry entry for ${locale}`);
+    assert.match(entry.description, /worktree-gc\.mjs/);
+    assert.match(entry.description, /--force/);
+
+    for (const token of ['REMOVABLE', 'KEEP:unmerged', 'KEEP:dirty', 'KEEP:in-use', '--ff-only', 'git worktree remove --force']) {
+      assert.ok(command.includes(token), `${locale} dw-worktree missing ${JSON.stringify(token)}`);
+    }
+    assert.ok(pause.includes('worktree-gc.mjs list'), `${locale} dw-pause must sweep worktrees`);
+    assert.ok(pause.includes('/dw-worktree clean --apply'), `${locale} dw-pause must close REMOVABLE loops`);
+    assert.ok(audit.includes('Worktree hygiene'), `${locale} dw-harness-audit must score worktree hygiene`);
+    assert.ok(audit.includes('worktree-gc.mjs list --strict'), `${locale} dw-harness-audit must run list --strict`);
+    assert.ok(help.includes('/dw-worktree'), `${locale} dw-help must list /dw-worktree`);
+    assert.ok(instructions.includes('/dw-worktree clean --apply'), `${locale} agent-instructions must trigger /dw-worktree`);
+
+    for (const runner of ['dw-codex-run', 'dw-claude-run', 'dw-copilot-run']) {
+      const adapter = read(`scaffold/${locale}/commands/${runner}.md`);
+      assert.ok(adapter.includes('/dw-worktree create <slug>'), `${locale} ${runner} must create via /dw-worktree`);
+      assert.ok(adapter.includes('/dw-worktree merge <slug>'), `${locale} ${runner} must remove via /dw-worktree merge`);
+    }
+  }
+
+  const cliRun = read('scaffold/skills/dw-cli-run/SKILL.md');
+  assert.ok(cliRun.includes('/dw-worktree create <slug>'), 'dw-cli-run pre-flight must create via /dw-worktree');
+  assert.ok(cliRun.includes('End of life = the same turn as the merge'), 'dw-cli-run must carry the end-of-life rule');
+  assert.ok(cliRun.includes('/dw-worktree merge <slug>'), 'dw-cli-run discipline must merge+remove via /dw-worktree');
+
+  const guardrails = read('scaffold/scripts/hooks/git-guardrails.mjs');
+  assert.match(guardrails, /worktree\\s\+remove/);
+});

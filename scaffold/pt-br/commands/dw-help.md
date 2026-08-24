@@ -37,7 +37,7 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 | `/dw-commit` | Commits atômicos Conventional pra trabalho pendente. |
 | `/dw-generate-pr [target]` | Push branch, draft do PR body, abre browser. |
 
-## Tier 3 — Especialidade (12)
+## Tier 3 — Especialidade (13)
 
 | Comando | O que |
 |---------|-------|
@@ -49,6 +49,7 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 | `/dw-context-budget` | Audita contexto de commands, skills, agentes, instrucoes e MCPs. |
 | `/dw-harness-audit` | Pontua saude da instalacao: wrappers, agentes, MCPs e gates. |
 | `/dw-skill-health` | Audita skills e agentes por bloat, duplicacao e referencias quebradas. |
+| `/dw-worktree <list\|create\|clean\|merge>` | Ciclo de vida de worktrees: cria preparada, lista com vereditos, limpa só o provadamente mergeado (dry-run default), merge ff-only + remoção no mesmo turno. Nunca `--force`. |
 | `/dw-new-project` | Bootstrap por entrevista (stack + infra + docker-compose + CI). |
 | `/dw-dockerize` | Detecta stack, propõe Dockerfile + docker-compose pra dev/prod. |
 | `/dw-install-azure-skills` | Opt-in: skills Azure + Microsoft Learn MCP. Seleção interativa de categorias. |
@@ -119,6 +120,7 @@ Auto-invocados por comandos primários mas disponíveis standalone.
 | `design.md`, `autoridade de design`, `mapa de concerns` | `/dw-analyze-project` (também listado como ação pós-update quando ausente) |
 | `subagent`, `subtask`, `handoff`, `delegate`, `delegar` | `/dw-subtask-start` ou `/dw-subtask-resume` |
 | `skills`, `skill health`, `bloat` | `/dw-skill-health` |
+| `worktree`, `worktrees`, `disco`, `mergear worktree`, `limpar worktrees` | `/dw-worktree list` / `create <slug>` / `clean --apply` / `merge <slug>` |
 | `analyze`, `rules`, `convenções` | `/dw-analyze-project` |
 | `constitution`, `princípios` | `/dw-analyze-project` (Step 8) |
 | `oportunidades de seguranca`, `ideias de hardening`, `melhorar seguranca` | `/dw-opportunities "security"` |

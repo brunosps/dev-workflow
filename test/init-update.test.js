@@ -89,6 +89,10 @@ test('init and update create .dw/reports/ with a machine-local .gitignore for th
   assert.match(content, /^\?\?\?\?-\?\?-\?\?\.md$/m);
   assert.match(content, /^\.active\.json$/m);
 
+  const cliRunIgnore = path.join(tempDir, '.dw', 'cli-run', '.gitignore');
+  assert.ok(fs.existsSync(cliRunIgnore), '.dw/cli-run/.gitignore missing after init');
+  assert.match(fs.readFileSync(cliRunIgnore, 'utf8'), /^\*$/m);
+
   // A user customization survives update (writeFile with overwrite=false).
   fs.writeFileSync(gitignorePath, content + 'custom.log\n', 'utf8');
   runCli(tempDir, 'update', '--lang=en');

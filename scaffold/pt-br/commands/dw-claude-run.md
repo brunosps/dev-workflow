@@ -39,7 +39,7 @@ o Claude recarrega a mesma conversa (raciocínio + arquivos já tocados). Fallba
 ## Variáveis de Input
 | Variável | Descrição | Exemplo |
 |----------|-----------|---------|
-| `<WORKTREE>` | git worktree dedicada (off main) | `~/code/vizzita-billing-s10` |
+| `<WORKTREE>` | git worktree dedicada (off main) — crie com `/dw-worktree create <slug>` (prep incluído); após o gate e o merge, remova no mesmo turno com `/dw-worktree merge <slug>` | `~/code/vizzita-billing-s10` |
 | `<PROMPT>` | caminho do prompt/spec preparado | `.dw/spec/prd-billing-integrador/codex-prompt.md` |
 | `<slug>` | chave da tarefa p/ arquivos de audit/sessão | `prd-billing-integrador` |
 | `<AUDIT>` | dir de auditoria durável FORA da worktree | `~/code/vizzita/.dw/cli-run` |

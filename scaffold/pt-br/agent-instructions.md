@@ -38,6 +38,7 @@ Antes de escolher um comando da Trigger Map, dimensione o escopo real da mudanç
 | "Continue de onde parei" | `/dw-run --resume` |
 | "Pausa o trabalho" / "Encerra a sessão" / "Salva onde paramos" | `/dw-pause` |
 | "Report de N em N minutos" / "Me mantém informado enquanto isso roda" / "Quero status periódico" | `/dw-report [--every <N>m]` |
+| "Cria uma worktree pra X" / "Limpa as worktrees" / "Mergeia a worktree X" / "Quantas worktrees sobraram?" | `/dw-worktree create <slug>` / `/dw-worktree clean --apply` / `/dw-worktree merge <slug>` / `/dw-worktree list` |
 | "Retoma" / "Onde paramos?" / "Volta de onde parei" | `/dw-resume` |
 | "QA dessa feature" / "Roda o test plan" | `/dw-qa` |
 | "Corrige os bugs do QA" | `/dw-qa --fix` |

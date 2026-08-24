@@ -23,6 +23,7 @@ export const DANGEROUS = [
   { re: /\bgit\s+reset\b[^\n|&;]*--hard\b/, why: 'hard reset discards uncommitted work and rewrites the branch' },
   { re: /\bgit\s+clean\b[^\n|&;]*-[a-z]*f/, why: 'git clean -f permanently deletes untracked files' },
   { re: /\bgit\s+branch\b[^\n|&;]*\s-D\b/, why: 'force-deletes a branch that may be unmerged' },
+  { re: /\bgit\s+worktree\s+remove\b[^\n|&;]*(--force\b|\s-f\b)/, why: 'force-removes a worktree that may hold uncommitted work — commit first or use /dw-worktree clean (never --force)' },
   { re: /\bgit\s+checkout\b[^\n|&;]*\s(--\s+\.|\.\s*$)/, why: 'discards all local changes in the working tree' },
   { re: /\bgit\s+restore\b[^\n|&;]*\s(--\s+)?\.(?=\s*(?:$|[|&;]))/, why: 'discards all local changes in the working tree' },
 ];

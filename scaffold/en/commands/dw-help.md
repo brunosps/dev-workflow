@@ -39,7 +39,7 @@ Use `/dw-autopilot "wish"` as the gateway for most feature work. The granular co
 | `/dw-commit` | Atomic Conventional Commits for pending work. |
 | `/dw-generate-pr [target]` | Push branch, draft PR body, open browser. |
 
-## Tier 3 — Specialty (12)
+## Tier 3 — Specialty (13)
 
 | Command | What |
 |---------|------|
@@ -51,6 +51,7 @@ Use `/dw-autopilot "wish"` as the gateway for most feature work. The granular co
 | `/dw-context-budget` | Audit context overhead from commands, skills, agents, instructions, and MCPs. |
 | `/dw-harness-audit` | Score dev-workflow install health: wrappers, agents, MCPs, gates. |
 | `/dw-skill-health` | Audit skills and agents for bloat, duplication, and missing references. |
+| `/dw-worktree <list\|create\|clean\|merge>` | Worktree lifecycle: create prepared, list with verdicts, clean only proven-merged (dry-run default), ff-only merge + remove in the same turn. Never `--force`. |
 | `/dw-new-project` | Interview-driven bootstrap (stack + infra + docker-compose + CI). |
 | `/dw-dockerize` | Detect stack, propose Dockerfile + docker-compose for dev/prod. |
 | `/dw-install-azure-skills` | Opt-in Azure skills + Microsoft Learn MCP setup. Interactive category selection. |
@@ -123,6 +124,7 @@ Match the keyword and suggest:
 | `design.md`, `design authority`, `concerns map` | `/dw-analyze-project` (also listed as a post-update action when missing) |
 | `subagent`, `subtask`, `handoff`, `delegate` | `/dw-subtask-start` or `/dw-subtask-resume` |
 | `skills`, `skill health`, `bloat` | `/dw-skill-health` |
+| `worktree`, `worktrees`, `disk`, `merge worktree`, `clean worktrees` | `/dw-worktree list` / `create <slug>` / `clean --apply` / `merge <slug>` |
 | `analyze`, `rules`, `conventions` | `/dw-analyze-project` |
 | `constitution`, `principles` | `/dw-analyze-project` (Step 8 generates the constitution) |
 | `security opportunities`, `hardening ideas`, `improve security` | `/dw-opportunities "security"` |

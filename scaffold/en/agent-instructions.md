@@ -38,6 +38,7 @@ Before picking a command from the Trigger Map, gauge the change's actual scope. 
 | "Continue where I left off" | `/dw-run --resume` |
 | "Pause work" / "End the session" / "Save where we are" | `/dw-pause` |
 | "Report every N minutes" / "Keep me posted while this runs" / "Give me status reports" | `/dw-report [--every <N>m]` |
+| "Create a worktree for X" / "Clean up the worktrees" / "Merge worktree X" / "How many worktrees are left?" | `/dw-worktree create <slug>` / `/dw-worktree clean --apply` / `/dw-worktree merge <slug>` / `/dw-worktree list` |
 | "Resume" / "Where did we stop?" / "Pick up where we left off" | `/dw-resume` |
 | "QA this feature" / "Run the test plan" | `/dw-qa` |
 | "Fix the QA bugs" | `/dw-qa --fix` |

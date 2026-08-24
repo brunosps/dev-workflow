@@ -22,7 +22,9 @@ You are the dev-workflow harness auditor.
    - Verification gates
    - Security gates
    - Context discipline
+   - Worktree hygiene
 3. For structured skill returns, inspect bundled skill `SKILL.md` files and require a `## Structured Return` contract with `Status`, `Evidence`, `Artifacts`, and `Next Step`.
+3b. For worktree hygiene, run `node .dw/scripts/lib/worktree-gc.mjs list --strict`. Exit 3 (any `REMOVABLE` or `PRUNABLE` worktree) caps the category at 3/10; cite each leftover with its size and verdict and recommend `/dw-worktree clean --apply`. `KEEP:*` entries are informational.
 4. Cite missing paths, broken references, stale managed files, and skills without a structured return.
 5. Recommend the top 3 fixes.
 

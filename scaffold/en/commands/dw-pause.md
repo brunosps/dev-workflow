@@ -29,6 +29,7 @@ You are a session-handoff agent. Your job is to consolidate the current session'
 Read the conversation context and identify, **without inventing**:
 
 - **Open loops**: tasks/work started but not finished (e.g. "PRD `prd-foo` is at TechSpec stage, awaiting user approval"; "Task 3 of `prd-bar` failing on lint")
+- **Leftover worktrees**: run `node .dw/scripts/lib/worktree-gc.mjs list`. Every `REMOVABLE` entry is an open loop to close **now** with `/dw-worktree clean --apply` — not something to record; `KEEP:*` entries go under Open Loops with their verdict and reason.
 - **Decisions made**: choices the user and agent agreed on during the session that affect future work
 - **Blockers encountered**: things that stopped forward motion (waiting on input, broken tooling, knowledge gap)
 - **Todos** mentioned in passing that don't yet have a PRD or task file

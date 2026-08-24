@@ -39,7 +39,7 @@ Because you pass `--session-id "$UUID"`, the id is **fixed and known** at dispat
 ## Input Variables
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `<WORKTREE>` | dedicated git worktree (off main) | `~/code/vizzita-billing-s10` |
+| `<WORKTREE>` | dedicated git worktree (off main) — create with `/dw-worktree create <slug>` (prep included); after the gate and merge, remove in the same turn with `/dw-worktree merge <slug>` | `~/code/vizzita-billing-s10` |
 | `<PROMPT>` | prepared prompt/spec path | `.dw/spec/prd-billing-integrador/codex-prompt.md` |
 | `<slug>` | task key for audit/session files | `prd-billing-integrador` |
 | `<AUDIT>` | durable audit dir OUTSIDE the worktree | `~/code/vizzita/.dw/cli-run` |

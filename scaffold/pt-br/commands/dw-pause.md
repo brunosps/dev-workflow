@@ -29,6 +29,7 @@ Você é um agent de session-handoff. Seu trabalho e consolidar o estado mental 
 Leia o contexto da conversa e identifique, **sem inventar**:
 
 - **Pontas soltas (Open Loops)**: tarefas/trabalho iniciados mas não finalizados (ex: "PRD `prd-foo` está no estágio TechSpec, aguardando aprovação"; "Task 3 do `prd-bar` falhando no lint")
+- **Worktrees sobrando**: rode `node .dw/scripts/lib/worktree-gc.mjs list`. Toda entrada `REMOVABLE` é um open loop pra fechar **agora** com `/dw-worktree clean --apply` — não algo pra registrar; entradas `KEEP:*` vão em Open Loops com veredito e motivo.
 - **Decisões tomadas**: escolhas acordadas entre usuário e agent durante a sessão que afetam trabalho futuro
 - **Bloqueios encontrados**: o que parou o avanço (esperando input, tooling quebrado, lacuna de conhecimento)
 - **Todos mencionados de passagem** que ainda não tem PRD ou task

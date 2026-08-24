@@ -50,6 +50,8 @@ test('git guardrails block destructive wholesale restore and git history operati
     'git clean -xdf',
     'git push --force',
     'git push origin --delete b',
+    'git worktree remove --force ../proj-slug',
+    'git worktree remove -f ../proj-slug',
   ]) {
     assertBlocked(command);
   }
@@ -58,6 +60,8 @@ test('git guardrails block destructive wholesale restore and git history operati
 test('git guardrails allow normal inspection, normal push, and file-specific restore via CLI hook', () => {
   for (const command of [
     'git push origin main',
+    'git worktree remove ../proj-slug',
+    'git worktree prune',
     'git status',
     'git restore src/index.js',
   ]) {
