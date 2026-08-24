@@ -10,6 +10,78 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > those versions were released, so they are summaries of what shipped, not
 > contemporaneous release notes. `git log` remains the authoritative record.
 
+## [2.2.0] — 2026-08-24
+
+Release driven by two operational failures observed on a real project, both of the
+same family: the pipeline was good at *starting* long work and silent about what
+happened next. Delegated runs gave no visibility until someone asked "any news?",
+and the worktrees those runs lived in were created by a hard rule and removed by
+nobody — 35 of them (33 already merged) were sitting on disk at 40 GB with the
+root filesystem at 95%. Both fixes are deterministic where prose had failed.
+
+### Added
+
+- **`/dw-report` — timestamped progress loop for long work.** Every 10 minutes
+  (`--every <N>m`) it emits a report with a real `date` timestamp saying what is
+  **done** (cumulative, new items marked `➕`, each with evidence: file, commit,
+  test count), what is **being done** (with a measurable figure — step counter,
+  files touched, running command and elapsed time — never a bare "in progress"),
+  and what is **left** (ordered, next milestone first, remaining gates included).
+  Reports go to the chat and are appended to `.dw/reports/YYYY-MM-DD.md`. The
+  cadence is the user's: it never stretches to "wait for the build"; a report
+  saying "nothing changed, ~4 min left" is the product while work runs. Silence is
+  reserved for the blocked/idle state (the transition to blocked reports once);
+  completion produces a final report immediately and disarms the loop. Vehicle is
+  the harness's native scheduled wake-up when available, a background `sleep`
+  timer otherwise, and never a system cron (which keeps firing for days after the
+  work ended). Auto-armed by `/dw-run`, `/dw-autopilot` (execution invocation), and
+  the `dw-cli-run` adapters; `DW_REPORT_AUTO=off` opts out and `DW_REPORT_BELL`
+  hooks a local sound or notification. `now`, `status`, `stop` modes.
+- **`/dw-worktree` — the lifecycle the runner adapters never had.** Backed by
+  `.dw/scripts/lib/worktree-gc.mjs` (Node, no dependencies), which resolves the
+  main checkout from anywhere in the repo. `list` gives every secondary worktree a
+  verdict — `REMOVABLE` (head is an ancestor of an integration branch, clean, no
+  process has its cwd inside, not locked), `KEEP:unmerged`, `KEEP:dirty`,
+  `KEEP:in-use`, `KEEP:locked`, `KEEP:recent`, `PRUNABLE` — with apparent size,
+  age, and dirty count; `--strict` exits 3 on leftovers. `clean` is a **dry-run by
+  default**; `--apply` removes only `REMOVABLE` entries, deletes their branches
+  (verified merged), and prunes. `create <slug>` enforces the `../<project>-<slug>`
+  convention and runs the install/build prep (lockfile-detected or
+  `.dw/config.json` `worktree.prep`) so a delegated agent never runs blind.
+  `merge <slug>` performs the safe order from the main checkout — ff-only merge →
+  remove → branch delete → prune — and aborts **before** the merge if the main
+  checkout is off the base branch or dirty, the worktree is dirty or in use, or
+  the merge is not a fast-forward. It never uses `--force` and never changes the
+  owner's active branch. Base resolution: `--base` → `DW_WORKTREE_BASE` →
+  `worktree.base` → `origin/HEAD` → `develop` → `main` → `master`.
+
+### Changed
+
+- **End of life is the same turn as the merge.** `dw-cli-run` pre-flight creates
+  missing worktrees through `/dw-worktree create`, and its Discipline section now
+  carries the hard rule: merged → `/dw-worktree merge` (or `clean --apply`) in
+  that same turn. The three adapters point their `<WORKTREE>` input at the same
+  commands. `/dw-pause` sweeps worktrees and treats every `REMOVABLE` entry as an
+  open loop to close now rather than record; `/dw-harness-audit` gained a
+  *Worktree hygiene* category scored from `list --strict`.
+- **git guardrails** (`scaffold/scripts/hooks/git-guardrails.mjs`) also block
+  `git worktree remove --force` / `-f`; plain `remove` and `prune` stay allowed.
+- `/dw-run` (all-tasks and `--resume`) and `/dw-autopilot` Step 8 arm the progress
+  loop before dispatching; `dw-help`, the agent-instructions trigger map, and the
+  README register both commands (41 commands, Tier 2 = 11, Tier 3 = 14).
+- `dw-cli-run` `context_limit` raised 19000 → 20500 to hold the two new sections.
+
+### Fixed
+
+- `init`/`update` now create `.dw/cli-run/.gitignore` (`*`, `!.gitignore`). The
+  adapters' durable audit logs, session sidecars, and last-message captures were
+  being committed and then checked out into every worktree (219 tracked files on
+  the project that motivated this release). Existing projects untrack them with
+  `git rm -r --cached .dw/cli-run`.
+- `init`/`update` create `.dw/reports/.gitignore` so the daily report logs and the
+  loop's `.active.json` stay machine-local while other reports (e.g.
+  `context-budget.md`) remain tracked.
+
 ## [2.1.0] — 2026-08-04
 
 Release driven by a skill-by-skill analysis of [mattpocock/skills](https://github.com/mattpocock/skills),
