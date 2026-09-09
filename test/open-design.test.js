@@ -16,9 +16,9 @@ test('dw-open-design command is registered for EN and PT-BR as user-invoked', ()
     const entry = COMMANDS[lang].find((command) => command.name === 'dw-open-design');
     assert.ok(entry, `${lang} registry entry missing`);
     assert.equal(entry.userInvoked, true);
-    includes(assert, entry.description, 'od CLI', `${lang} description`);
-    includes(assert, entry.description, '--agent', `${lang} description`);
-    includes(assert, entry.description, '--refactor', `${lang} description`);
+    assert.ok(entry.description.length <= 250, `${lang} description budget`);
+    includes(assert, read(`scaffold/${lang}/commands/dw-open-design.md`), '--agent', `${lang} protocol`);
+    includes(assert, read(`scaffold/${lang}/commands/dw-open-design.md`), '--refactor', `${lang} protocol`);
   }
 });
 

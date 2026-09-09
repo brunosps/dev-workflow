@@ -9,7 +9,7 @@
       "trigger": "API QA, endpoint testing, HTTP recipe generation",
       "expected_output": "A selected API testing recipe and evidence path for the active stack.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "invocation": "explicit",
       "exportable": true,
       "bundled": true
@@ -22,7 +22,7 @@
       "trigger": "Docker Compose service selection or local infrastructure setup",
       "expected_output": "A selected service recipe and composition guidance.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "invocation": "explicit",
       "exportable": true,
       "bundled": true
@@ -32,10 +32,10 @@
       "kind": "protocol",
       "tier": "core",
       "owner": "dw-codex-run,dw-claude-run,dw-copilot-run",
-      "trigger": "Fire an AI CLI (Codex/Claude/Copilot) in a dedicated git worktree to implement a prepared prompt; resumable per-task session; STOP for the gate",
-      "expected_output": "Audit-logged run with a 0-10 dual evaluation, a resumable session-id sidecar, and a STOP-for-gate Structured Return.",
+      "trigger": "Execute an approved task through a supported external CLI adapter",
+      "expected_output": "Reviewed task handoff with durable session, acceptance evidence and next task or blocker.",
       "load_policy": "lazy-references",
-      "context_limit": 20500,
+      "context_limit": 8000,
       "bundled": true
     },
     {
@@ -46,7 +46,7 @@
       "trigger": "Codebase indexing or codebase intelligence query",
       "expected_output": ".dw/intel index files or a cited answer from the index.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "bundled": true
     },
     {
@@ -57,7 +57,7 @@
       "trigger": "Council mode or high-impact architectural debate",
       "expected_output": "Advisor positions, tension synthesis, and decision recommendation.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "bundled": true
     },
     {
@@ -68,7 +68,7 @@
       "trigger": "Native Grill domain vocabulary: challenge fuzzy/overloaded terms, cross-check against code, persist a canonical glossary to .dw/domain",
       "expected_output": "Canonical terms with discouraged synonyms persisted lazily to .dw/domain (single or multi-context), or fuzzy-term findings.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "exportable": false,
       "bundled": true
     },
@@ -80,7 +80,7 @@
       "trigger": "Native Grill decision-tree interview: sharpen a plan/PRD to shared understanding, exactly one decision per turn with a recommended answer",
       "expected_output": "A dependency-ordered decision tree, resolved decisions with recommendations, and an explicit shared-understanding gate.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "exportable": false,
       "bundled": true
     },
@@ -92,7 +92,7 @@
       "trigger": "Bugfix, QA fix loop, or non-reproducible failure",
       "expected_output": "Six-step triage, root cause, guard, and verification path.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "bundled": true
     },
     {
@@ -103,7 +103,7 @@
       "trigger": "Task execution, plan-checking, waves, checkpoint recovery",
       "expected_output": "Plan-check verdict, wave execution report, or checkpoint summary.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "bundled": true
     },
     {
@@ -114,7 +114,7 @@
       "trigger": "Commit creation, branch hygiene, PR generation",
       "expected_output": "Atomic commit plan and git hygiene checks.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "bundled": true
     },
     {
@@ -125,7 +125,7 @@
       "trigger": "Production critical bug, outage, incident, SEV workflow",
       "expected_output": "Incident triage, communication, resolution, and postmortem artifacts.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "bundled": true
     },
     {
@@ -136,7 +136,7 @@
       "trigger": "AI, LLM, RAG, classifier, agent, or tool-use feature",
       "expected_output": "Eval strategy, oracle choice, dataset requirements, and result checks.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "bundled": true
     },
     {
@@ -147,7 +147,7 @@
       "trigger": "Task execution memory, checkpointing, compaction",
       "expected_output": "Updated workflow memory and task-local memory guidance.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "bundled": true
     },
     {
@@ -171,7 +171,7 @@
       "trigger": "Code review, implementation review, or review consolidation",
       "expected_output": "Deduplicated findings ordered by defensible severity.",
       "load_policy": "always-small",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "bundled": true
     },
     {
@@ -205,7 +205,7 @@
       "trigger": "Refactor analysis, code smells, complexity, or behavior-preserving simplification",
       "expected_output": "Simplification target, risk, behavior-preserving checks, and recommendation.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "exportable": true,
       "bundled": true
     },
@@ -217,7 +217,7 @@
       "trigger": "Library/framework/API decision, technical research, dependency audit",
       "expected_output": "Cited source-grounded decision with version and retrieval date.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "bundled": true
     },
     {
@@ -228,7 +228,7 @@
       "trigger": "Writing, reviewing, or debugging tests",
       "expected_output": "Test placement, invariant, anti-pattern checks, and verification guidance.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "bundled": true
     },
     {
@@ -239,7 +239,7 @@
       "trigger": "UI design, redesign, visual QA, accessibility, or frontend polish",
       "expected_output": "Grounding answers, state matrix, accessibility checks, and visual risks.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "bundled": true
     },
     {
@@ -250,7 +250,7 @@
       "trigger": "Completion claim, commit, PR generation, or fixed bug status",
       "expected_output": "Fresh verification report with cited command evidence.",
       "load_policy": "always-small",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "exportable": true,
       "bundled": true
     },
@@ -288,7 +288,7 @@
       "trigger": "Security review, sensitive code, OWASP checks, auth/payment/input surfaces",
       "expected_output": "High-confidence security findings or explicit pass.",
       "load_policy": "lazy-references",
-      "context_limit": 14000,
+      "context_limit": 8000,
       "exportable": true,
       "bundled": true
     },
@@ -300,7 +300,7 @@
       "trigger": "React/Next.js performance, hydration, data fetching, bundle or render issues",
       "expected_output": "Selected performance rule references and metric-driven recommendations.",
       "load_policy": "lazy-references",
-      "context_limit": 12000,
+      "context_limit": 8000,
       "invocation": "explicit",
       "exportable": true,
       "bundled": true

@@ -1,6 +1,6 @@
 ---
 name: dw-domain-modeling
-description: "Internal domain-vocabulary protocol for the native Grill flow. Loaded by /dw-brainstorm (grill mode) and referenced by /dw-analyze-project to keep canonical vocabulary: challenge fuzzy or overloaded terms, propose precise canonical names, stress-test with concrete edge-case scenarios, cross-check terms against the code, and persist resolved terms safely and lazily into .dw/domain (glossary for a single context, context-map plus per-context files for many). Rare ADR policy. Pipeline-internal, never exported, never implements code."
+description: Internal domain-vocabulary protocol for the native Grill flow.
 allowed-tools:
   - Read
   - Grep

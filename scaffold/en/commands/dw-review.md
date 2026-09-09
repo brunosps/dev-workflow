@@ -173,10 +173,11 @@ If MISSING > 0, the verdict suggests revisiting `/dw-plan tasks` to scope or `/d
    - Cyclomatic / cognitive complexity (with `dw-simplification` thresholds).
    - DRY violations (only when impact is meaningful — not premature deduplication).
    - Code smells (Fowler taxonomy).
+   - For frontend data flow, dependency or quality-tooling changes, read `dw-ui-discipline/references/frontend-engineering.md` and the module's quality baseline/TechSpec. Inspect API generation/validation, import boundaries, duplicated business behavior, unreachable code and newly widened ignores. Execute adopted checks under `dw-verify`; an absent optional tool is a proposal, not an automatic rejection. Investigate mutation survivors when analysis is in scope; do not approve from a score alone. Report changes to CI enforcement separately from local test results.
 
 5. **Test execution:**
-   - Run the project's test command.
-   - Verify coverage targets per TechSpec (80% services, 70% controllers).
+   - Use `dw-verify` to inspect valid test evidence; run missing or invalidated required checks.
+   - Verify the approved testing strategy and project-required thresholds; no universal coverage target.
 
 6. **Apply `dw-review-rigor`:**
    - De-duplicate findings.
@@ -184,7 +185,7 @@ If MISSING > 0, the verdict suggests revisiting `/dw-plan tasks` to scope or `/d
    - Verify intent before flagging (the linter already catches some — those don't repeat).
 
 7. **Final verification (`dw-verify`):**
-   - Run dw-verify to produce a VERIFICATION REPORT (test + lint + build all GREEN).
+   - Use dw-verify to produce a VERIFICATION REPORT for applicable required checks, reusing equivalent evidence.
    - Without PASS, verdict cannot be APPROVED.
 
 8. **Security Gate (`dw-secure-audit` for TS/Python/C#/Rust):**

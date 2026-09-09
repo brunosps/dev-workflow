@@ -88,10 +88,10 @@ The discipline: no merge without a green E2E (or equivalent real-system check) f
 
 **What it means:**
 - **Coverage** tells you what lines executed. Useful as a NEGATIVE signal — 30% coverage means lots of dark code. Useless as a positive signal — 95% coverage with weak assertions is decorative.
-- **Mutation score** introduces small bugs (mutations) and measures whether tests catch them. A high mutation score means tests actually probe behavior, not just execute lines.
+- **Mutation analysis** introduces small code changes and observes whether tests detect them. Inspect survivors and selected scope: a high score alone does not establish meaningful behavior coverage, and equivalent mutants may survive correct tests. Use `mutation-testing.md` for a scoped investigation.
 - Neither should be a number you optimize for. They're diagnostics.
 
-**Anti-pattern:** "We need 90% coverage to merge." Coverage as a gate produces tests written to pass the gate, not to find bugs.
+**Anti-pattern:** inventing a universal coverage or mutation threshold and treating it as proof of correctness. Follow existing project-required gates; propose policy changes explicitly when warranted.
 
 **Healthier framing:** "What lines in the touched diff are NOT covered? Why?" Sometimes the answer is "we don't care, it's logging." Sometimes it's "actually that's a critical branch — add a test."
 
@@ -122,7 +122,7 @@ A healthy test:
 2. Sits at the lowest layer that can prove that behavior (Rule 2).
 3. When red, sends you to read production code (Rule 3).
 4. Has a sibling exercising real systems somewhere in the pipeline (Rule 4).
-5. Survives a mutation in the code it claims to cover (Rule 5).
+5. Detects meaningful defects in the behavior it claims to cover; mutation analysis can probe this when justified (Rule 5).
 6. Has zero footprint in production code (Rule 6).
 
 Any test failing ≥2 of these is technical debt accumulating. `/dw-review --code-only` flags them.

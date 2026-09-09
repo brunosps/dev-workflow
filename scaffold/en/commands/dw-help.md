@@ -19,7 +19,7 @@ Use `/dw-autopilot "wish"` as the gateway for most feature work. The granular co
 
 | Command | When |
 |---------|------|
-| `/dw-autopilot "wish"` | Default entry point in two invocations. First run plans and stops; second run resumes through `/dw-goal`, Security Gate, commit, and PR. |
+| `/dw-autopilot "wish"` | Plan and approve execution assignments, then continue through implementation, review and validation. |
 | `/dw-bugfix "description"` | A bug or error report. Surgical fix or PRD route. |
 | `/dw-help [keyword]` | This screen. Pass a keyword for shortcuts. `--advanced` reveals internal commands. |
 
@@ -145,7 +145,7 @@ If no keyword matches, show the default surface and a note: "Keyword `<word>` no
 ## FAQ
 
 **Q: I'm not sure where to start with a new feature.**
-- Use `/dw-autopilot "what you want"`. First invocation runs PRD → TechSpec → Tasks and stops; second invocation resumes through `/dw-goal`, Security Gate, commit, and PR.
+- Use `/dw-autopilot "what you want"`; approve the task/executor matrix and continue to validated delivery. Publication follows existing authorization.
 
 **Q: Do I have to use `/dw-autopilot`?**
 - No. The granular pipeline (`/dw-brainstorm` → `/dw-plan` → `/dw-goal` or `/dw-run`/`/dw-qa`/`/dw-review` → `/dw-secure-audit` → `/dw-commit` → `/dw-generate-pr`) gives you control at each step.

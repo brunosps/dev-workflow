@@ -344,6 +344,8 @@ Document the traced flows with file paths at each step. This reveals the actual 
 
 ### Step 5: Detect Anti-patterns
 
+For a frontend module, read `dw-ui-discipline/references/frontend-engineering.md` from the installed skills location. Use `.dw/templates/frontend-quality-template.md` to include observed controls, gaps and adoption proposals in that module's `.dw/rules/<module>.md`. Inspect actual scripts/configuration and CI; record unexecuted checks explicitly. Preserve existing policy and distinguish it from recommendations. This documentation-only command does not install tools, change source/configuration or enable new CI gates.
+
 Look for common issues:
 
 | Anti-pattern | Detection method | Severity |

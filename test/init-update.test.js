@@ -27,6 +27,50 @@ function readManagedFiles(projectRoot) {
   return state.managed_files;
 }
 
+test('legacy updates refresh managed candidates without rewriting owner routing, plans or overrides', (t) => {
+  const sourceRoot = path.join(__dirname, '..');
+  const defaults = fs.readFileSync(path.join(sourceRoot, 'scaffold/config/routing.json'), 'utf8');
+  for (const lang of ['en', 'pt-br']) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dw-legacy-upgrade-'));
+    t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+    const write = (file, content) => {
+      fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
+      fs.writeFileSync(path.join(dir, file), content);
+    };
+    const preserved = {
+      '.dw/config/routing.json': '{"schema_version":"1.0","tiers":{"standard":{"codex":{"model":"owner-model","effort":"low"}}}}\n',
+      '.dw/spec/prd-existing/execution-plan.json': '{"schema_version":"1.0","approved":true,"tasks":[{"id":"1","depends_on":[]}]}\n',
+      '.dw/spec/prd-existing/execution-state.json': '{"completed":["1"],"session":"owner-session"}\n',
+      '.dw/goals/existing/goal.json': '{"status":"active"}\n',
+      '.dw/STATE.md': '# Active owner task\n',
+      '.dw/rules/project.md': '# Existing project policy\n',
+      '.dw/templates/overrides/task-template.md': '# Owner task template\n',
+    };
+    for (const [file, content] of Object.entries(preserved)) write(file, content);
+    write('.dw/install-state.json', JSON.stringify({ version: '2.2.0', lang, profile: 'core', modules: ['core'] }));
+    write('.dw/commands/dw-run.md', 'Old managed execution instructions\n');
+    for (let pass = 0; pass < 2; pass++) {
+      // The managed reference must refresh even if an older copy already exists.
+      if (pass) write('.dw/config/routing-defaults.json', '{"outdated":true}\n');
+      runCli(dir, 'update', `--lang=${lang}`);
+      for (const [file, content] of Object.entries(preserved)) {
+        assert.equal(fs.readFileSync(path.join(dir, file), 'utf8'), content, `${lang}: changed ${file}`);
+      }
+      assert.equal(fs.readFileSync(path.join(dir, '.dw/config/routing-defaults.json'), 'utf8'), defaults);
+      assert.equal(fs.readFileSync(path.join(dir, '.dw/templates/task-template.md'), 'utf8'), preserved['.dw/templates/overrides/task-template.md']);
+      for (const file of ['commands/dw-run.md', 'commands/dw-update.md', 'references/execution-contract.md', 'templates/frontend-quality-template.md']) {
+        assert.equal(fs.readFileSync(path.join(dir, '.dw', file), 'utf8'), fs.readFileSync(path.join(sourceRoot, 'scaffold', lang, file), 'utf8'));
+      }
+      const state = JSON.parse(fs.readFileSync(path.join(dir, '.dw/install-state.json'), 'utf8'));
+      assert.equal(state.version, require('../package.json').version);
+      assert.ok(state.managed_files.includes(path.join('.dw', 'config', 'routing-defaults.json')));
+      const result = spawnSync(process.execPath, [path.join(dir, '.dw/scripts/lib/workflow-contract.mjs'), 'resolve', path.join(dir, '.dw/spec/prd-existing/execution-plan.json'), '1', 'local,codex'], { encoding: 'utf8' });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(JSON.parse(result.stdout).tool, 'local');
+    }
+  }
+});
+
 test('managed files are sorted deterministically while removing duplicates', () => {
   const projectRoot = path.join(os.tmpdir(), 'dev-workflow-managed-files');
   const first = path.join(projectRoot, 'z-last.md');

@@ -1,6 +1,6 @@
-# Atomic commits — one commit per task, no exceptions
+# Scoped atomic commits
 
-Every task in a phase commits exactly once. This drives traceability (a task's diff is `git show <sha>`), revert safety (`git revert <sha>` undoes one task without affecting others), and PR clarity (`/dw-generate-pr` builds a clean changelog from the per-task commits).
+Formal tasks use atomic commits, with approved subtask milestones and final bookkeeping where specified. This drives traceability (a task's diff is `git show <sha>`), revert safety (`git revert <sha>` undoes one task without affecting others), and PR clarity (`/dw-generate-pr` builds a clean changelog from the per-task commits).
 
 ## Commit message format
 
@@ -80,17 +80,7 @@ Closes FR-7.2 (partial — full close on tasks.md completion).
 
 ## Verification before commit
 
-The executor MUST run, in order:
-
-1. **Linter** — project's lint command (`pnpm lint`, `ruff check`, `dotnet format --verify-no-changes`, `cargo clippy`).
-2. **Tests** — at minimum the tests touched by this task. Full suite if practical.
-3. **Build** — typecheck/compile (`pnpm tsc --noEmit`, `mypy`, `dotnet build`, `cargo check`).
-
-All three must pass. If any fails:
-- If the failure is in a test the task added → fix and retry (1 retry, then deviation)
-- If the failure is in unrelated code → deviation Rule 2 (ambiguity: does this task own the regression?)
-
-The executor does NOT commit unverified code. Period.
+Use `dw-verify`: complete applicable project-required checks and acceptance criteria. Reuse evidence only for equivalent inputs, environment and scope. After failure diagnose and fix in scope, rerun affected checks, and complete invalidated required gates. Do not invent lint/build scripts or repeat checks solely because a commit is next.
 
 ## Edit vs Write
 
@@ -102,13 +92,13 @@ When implementing the task:
 | Changing 1-30 lines | Replacing a file completely |
 | You have line context (the file is in your context) | The file is small and a Write is cleaner than 5 Edits |
 
-Never use `cat <<'EOF' > file` heredocs from Bash to create files. Always use Write tool.
+Use available file-editing tools safely; preserve content outside the task scope.
 
 ## Multi-file tasks
 
 If a task touches 5+ files, that's still one commit. Stage all files (`git add <list>`) then `git commit`. The body's `Files added:` / `Files modified:` lists must include every file.
 
-If a task should logically be split into separate commits (e.g., "create schema then wire it"), that's a sign the planner under-decomposed. The executor flags as Rule 2 deviation, not silently split.
+Use approved subtask commit milestones when specified. Propose only material changes to the intended task boundaries.
 
 ## Commit signing
 
@@ -121,7 +111,7 @@ If `git config commit.gpgsign true` is set, signing is on by default — let it 
 - OS junk (`.DS_Store`, `Thumbs.db`)
 - Unrelated changes accidentally in the working tree (executor should `git status` before adding to confirm only the task's files)
 
-If unrelated changes are present, deviation Rule 2: pause and ask — the executor doesn't know if those are user's WIP or expected from a prior task.
+Preserve unrelated changes and stage only scoped files. Ask only when they conflict with the task or ownership cannot be determined; unrelated WIP alone is not a blocker.
 
 ## Deviation entry format (referenced from commits)
 
@@ -142,6 +132,6 @@ If unrelated changes are present, deviation Rule 2: pause and ask — the execut
 
 The plan-checker reads `deviations.md` from the previous run when re-verifying after revision — patterns of recurring Rule 1 deviations indicate the planner is missing a project convention that should be in `.dw/rules/`.
 
-## Final phase commit (handled by `/dw-commit`, not executor)
+## Final bookkeeping
 
-After all per-task commits, `/dw-generate-pr` (NOT the executor) reads them and builds the PR body. The executor never makes a "wrap-up" commit. If the phase needs a final commit (e.g., updating CHANGELOG.md), that should be the LAST task in `tasks.md` — atomic like every other.
+Record task status with the implementation, then store the resulting SHA in tasks.md/run-log. Include leftover bookkeeping in the next scoped commit or a final metadata commit through `/dw-commit`. Do not amend automatically, create empty commits, or change version/CHANGELOG without maintainer authorization. PR generation uses these commits; it is a separately authorized action.

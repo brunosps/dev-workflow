@@ -1,6 +1,6 @@
 ---
 type: tasks-index
-schema_version: "1.0"
+schema_version: "1.1"
 status: draft
 ---
 
@@ -34,10 +34,13 @@ feat/prd-[nome-funcionalidade]
 - [ ] 2.0 Título da Tarefa Principal        Depends on: 1.0
 - [ ] 3.0 Título da Tarefa Principal        Depends on: 1.0, 2.0
 
+## Plano de execução
+
+Proponha desenvolvimento local ou cruzado por task na quebra. Resuma complexidade/justificativa, ferramenta, modelo/esforço, agentes, dependências e verificação. Salve escolhas validadas e fallbacks aprovados em `execution-plan.json`; use `.dw/references/execution-contract.md`. Registre aprovação da mesma matriz antes de executar.
+
 ## Workflow
 
-Cada task segue o fluxo:
-1. `/dw-run [N]_task.md` - Implementa a task
-2. Testes unitários incluídos na implementação
-3. Commit ao final da task (sem push)
-4. Próxima task ou `/dw-generate-pr [branch-alvo]` quando todas concluídas
+1. `/dw-run` consome escolhas aprovadas em ordem de dependências.
+2. Cada task implementa, verifica e commita mudanças no escopo; o parent revisa handoffs externos e encaminha correções.
+3. Continue implementação aprovada até review final e QA aplicável. Pedido somente de planejamento termina no plano.
+4. Prepare entrega validada; integre/envie/publique só dentro da autorização existente.

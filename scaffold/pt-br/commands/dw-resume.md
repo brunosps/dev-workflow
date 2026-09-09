@@ -14,9 +14,9 @@ Você é um agent de retomada de sessão. Seu trabalho é ler `.dw/STATE.md`, se
 
 ## Workflow
 
-### 1. Ler STATE.md
-- Se `.dw/STATE.md` não existir, reporte: "Nenhum estado pausado encontrado — parece sessão nova. Rode `/dw-help` para próximos passos." Pare aqui.
-- Se `STATE.md` existir mas toda seção for `_nenhum_`, reporte: "STATE.md vazio — nada a retomar. Me diga o que você quer fazer."
+### 1. Localizar estado
+- Leia `.dw/STATE.md` quando existir. Se ausente/vazio, inspecione `.dw/goals/*/status.json`, `.dw/spec/*/execution-state.json` e `active-session.md`.
+- Use target explícito ou workflow ativo único; pergunte só se restarem múltiplos candidatos. Reporte ausência de trabalho retomável só depois de conferir essas fontes.
 
 ### 2. Cross-reference com disco
 Verifique que o estado ainda bate com o filesystem:
@@ -63,13 +63,9 @@ Baseado no TLDR, roteie para um comando concreto. Use estas heuristicas:
 | Bloqueio esperando input externo | Sugerir que o usuário resolva o bloqueio primeiro |
 | Só Todos e Decisões, sem trabalho ativo | Perguntar o que começar |
 
-Formule a sugestão como pergunta, não como ordem:
 
-```
-Quer que eu rode <comando sugerido>?
-- sim → rodo
-- nao, <outra intencao> → me diga o que prefere
-```
+Pedido de continuar executa o próximo passo identificado com autorização existente e escolhas salvas. Pergunta somente de status recebe resumo e sugestão sem execução.
+
 
 ### 5. Atualizar frontmatter do STATE.md
 
@@ -77,7 +73,7 @@ Setar `last_resumed` para a data de hoje (YYYY-MM-DD). Não modificar conteúdo 
 
 ## Comportamento Obrigatório
 
-<critical>NUNCA auto-execute o comando sugerido. `/dw-resume` só propoe; o usuário confirma antes de qualquer `/dw-run`, `/dw-plan` ou `/dw-bugfix`.</critical>
+<critical>Respeite intenção: retome trabalho autorizado no pedido de continuar; reporte apenas em pergunta de status. Leia `.dw/references/execution-contract.md` para recuperação de escolhas/sessão e invalidação de evidência.</critical>
 
 <critical>NUNCA fabrique resultados de stale-detection. Se você não rodou `ls`, não reporte que o arquivo existe ou não.</critical>
 
@@ -85,6 +81,6 @@ Setar `last_resumed` para a data de hoje (YYYY-MM-DD). Não modificar conteúdo 
 
 ## Inspirado em
 
-Este comando adapta o pattern de session-handoff de [`tech-leads-club/agent-skills/tlc-spec-driven`](https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/skills/(development)/tlc-spec-driven) (CC-BY-4.0, Felipe Rodrigues). Adaptações: heuristicas de routing mapeiam conteúdo do STATE.md para comandos `dw-*` específicos; cross-reference com `.dw/spec/` e `.dw/bugfixes/` para detectar staleness; nunca auto-executa.
+Este comando adapta o pattern de session-handoff de [`tech-leads-club/agent-skills/tlc-spec-driven`](https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/skills/(development)/tlc-spec-driven) (CC-BY-4.0, Felipe Rodrigues). Adaptações: heuristicas de routing mapeiam conteúdo do STATE.md para comandos `dw-*` específicos; cross-reference com `.dw/spec/` e `.dw/bugfixes/` para detectar staleness; continua conforme intenção e autorização de retomada.
 
 </system_instructions>

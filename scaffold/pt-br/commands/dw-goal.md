@@ -4,7 +4,7 @@ Você é o orquestrador de objetivos duráveis do dev-workflow. Este comando ent
 ## Quando Usar
 - Use quando um fluxo é maior que um turno normal, mas tem fim claro.
 - Use depois de `/dw-plan` quando implementação, review, QA e review pós-QA devem rodar como um loop durável.
-- Use a partir do `/dw-autopilot` depois que a primeira invocação completou PRD → TechSpec → Tasks.
+- Use a partir do `/dw-autopilot` depois que o plano PRD → TechSpec → Tasks foi aprovado.
 - NÃO use para backlog solto, listas de tarefas sem relação ou brainstorming exploratório.
 
 ## Posição no Pipeline
@@ -28,7 +28,7 @@ Você é o orquestrador de objetivos duráveis do dev-workflow. Este comando ent
 A documentação oficial do Codex trata `/goal` como recurso experimental para objetivo durável em trabalho longo com condição de parada verificável. No Codex CLI ele requer `features.goals`; pode ser definido com `/goal <objective>`, inspecionado com `/goal`, e controlado com `/goal pause`, `/goal resume` ou `/goal clear`.
 
 Quando rodar em Codex:
-- Se existir ferramenta nativa de goal, crie/atualize o goal com um objetivo curto apontando para `.dw/goals/<slug>/goal.md`.
+- Use ferramenta nativa de goal somente quando explicitamente solicitada e permitida pelo contrato real da ferramenta; workflow portátil não implica autorização nativa.
 - Se o slash command interativo `/goal` estiver disponível e `features.goals` estiver habilitado, use `/goal <objective>` com objetivo abaixo de 4.000 caracteres.
 - Se goals nativos estiverem indisponíveis, continue com o loop portável em `.dw/goals/`. Não bloqueie.
 
@@ -101,12 +101,12 @@ Checkpoints:
 | `review-before-qa` | `/dw-review <prd-path>` | `<prd-path>/QA/review-consolidated.md` existe e veredicto geral está aprovado ou aprovado com ressalvas explicitamente não-bloqueantes. |
 | `qa` | `/dw-qa <prd-path>` | Artefatos obrigatórios de QA existem. |
 | `qa-fix` | `/dw-qa --fix <prd-path>` quando `bugs.md` tem bugs Open | Bugs estão Fixed/Closed ou explicitamente deferidos pelo usuário. |
-| `review-after-qa` | `/dw-review <prd-path>` | Review consolidado existe após fixes de QA e está aprovado ou aprovado com ressalvas explicitamente não-bloqueantes. |
+| `review-after-qa` | `/dw-review <prd-path>` quando edições/achados de QA invalidarem review | Review atual aprovado ou com ressalvas explicitamente não bloqueantes; QA sem mudanças reutiliza review válido. |
 
 O goal só está completo quando:
 - Todos os checkpoints acima estão completos ou explicitamente pulados com motivo documentado.
 - Nenhum bug Open de QA permanece, exceto se o usuário aceitou deferir explicitamente.
-- O `/dw-review` final rodou depois do último fix de QA.
+- O `/dw-review` completo final cobre a implementação atual. Repita após edições ou achados novos de QA; reutilize quando QA não invalidar nada.
 - `status.json` tem `"status": "complete"`.
 
 ## Regras de Execução
@@ -123,7 +123,7 @@ O goal só está completo quando:
 
 - `status`: leia `status.json` e as últimas 10 entradas de `progress.md`; reporte checkpoint atual, completos, última verificação e bloqueios.
 - `pause`: defina `status: "paused"` e anexe o motivo.
-- `resume`: defina `status: "active"` e continue de `current_checkpoint`; não repita checkpoints completos salvo se artefatos estiverem faltando.
+- `resume`: defina `status: "active"` e continue de `current_checkpoint`; não repita checkpoints completos salvo artefatos ausentes ou evidência invalidada.
 - `clear`: se completo/cancelado/substituido, marque `status: "cancelled"` ou arquive conforme convencao do projeto. Não delete evidências por padrão.
 
 ## Anti-patterns
@@ -132,5 +132,11 @@ O goal só está completo quando:
 - Não use `/dw-goal` para burlar `/dw-plan`; goals executam um plano definido, não inventam escopo.
 - Não marque checkpoint completo sem verificar artefatos.
 - Não use `/goal` nativo do Codex como único estado; `.dw/goals/` permanece o contrato cross-agent.
+
+## Estado de execução aprovado
+
+Leia `.dw/references/execution-contract.md`. Consuma escolhas aprovadas por task e preserve `execution-state.json` nos checkpoints. Retorno de runner volta ao parent para review, correções e próximas tasks. Não repita review completo final do `/dw-run` quando já cobrir a implementação inalterada: valide evidência e registre checkpoint reutilizado. QA condicional/inaplicável exige motivo registrado, não artefatos inventados. Conclua verificando aceitação/evidência antes de marcar status complete; o campo status não prova conclusão.
+
+Retomada preserva checkpoints concluídos salvo evidência inválida ou artefatos ausentes. Separe entrega de autorização para merge/push/publicação. Preserve trabalho parcial em bloqueio/pausa e nunca troque executor silenciosamente.
 
 </system_instructions>

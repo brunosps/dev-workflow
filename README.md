@@ -42,13 +42,13 @@ Exportable skills (no `.dw/` pipeline required): `dw-minimalism`, `dw-search-fir
 
 ## Commands
 
-dev-workflow v2.2.0 ships **41 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v2.3.0 ships **41 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
 ### Tier 1 — Gateway (4)
 
 | Command | When |
 |---------|------|
-| **`/dw-autopilot "wish"`** | Default entry point in two invocations. First run completes PRD → TechSpec → Tasks and stops. Second run resumes from state, executes `/dw-goal --from-autopilot <slug>` for Run → Review → QA/Fix → Review, then Security Gate → Commit → PR. |
+| **`/dw-autopilot "wish"`** | Plan and approve task execution assignments, then continue through implementation, review and validation. Cross-tool workers return to the parent; merge/push/publication follow existing authorization. |
 | **`/dw-bugfix "description"`** | A bug report or pasted error. Triages bug-vs-feature-vs-scope, surgical fix or routes to a PRD. |
 | **`/dw-triage [item]`** | An external bug report, feature request, or PR. Checks whether it already exists and whether it was rejected before, verifies the claim, then routes to `/dw-bugfix`, `/dw-plan prd`, or `/dw-brainstorm --mode=grill`. Local-first in `.dw/triage/`; works with no network and no `gh`. |
 | **`/dw-help [keyword]`** | Discover commands. Pass a keyword for shortcuts; `--advanced` reveals internal commands. |
@@ -112,8 +112,8 @@ These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help 
 ## Workflow
 
 ```
-/dw-autopilot "wish"  ------>  First invocation: PRD → TechSpec → Tasks → STOP
-/dw-autopilot          ------>  Second invocation: /dw-goal → Security Gate → Commit → PR
+/dw-autopilot "wish"  ------>  PRD → TechSpec → Tasks + execution assignments → approval
+                             → /dw-goal → Security Gate → validated delivery → authorized publication
     --- OR step-by-step ---
 
 /dw-opportunities --> /dw-brainstorm --> /dw-plan --> .dw/spec/prd-{name}/{prd,techspec,tasks}.md
@@ -315,6 +315,8 @@ These are not slash commands — they are primitives other commands call to enfo
 
 ## Dependencies
 
+Frontend engineering guidance is loaded when planning or reviewing frontend data flow, dependencies or quality tooling. `/dw-analyze-project` documents the module's existing controls and gaps; `/dw-plan` carries accepted changes into tasks; `/dw-review` and `/dw-qa` use applicable evidence. The localized `frontend-quality-template.md` distinguishes required checks, advisory diagnostics and deferred proposals. API contracts, architecture checks and scoped mutation analysis complement the visual UI skill. Tool installation and CI policy changes remain scoped to the consumer project's task.
+
 Installed via `npx @brunosps00/dev-workflow install-deps`:
 
 | Dependency | Purpose | Link |
@@ -442,3 +444,9 @@ Skill description format ("pushy" trigger phrases ≤200 chars, "Use when X. Tri
 ## License
 
 MIT
+
+### Task execution across tools
+
+During `/dw-plan tasks`, review the proposed complexity, local/cross-tool executor, model, effort and agents for each task. Claude can delegate to `/dw-codex-run`, and Codex to `/dw-claude-run`. Approval carries through implementation, review and corrections; the parent continues after each worker handoff. A planning-only request still ends with the plan.
+
+Existing task documents remain compatible and default to local execution. Updates preserve your `.dw/config/routing.json`; new model candidates are proposals to verify against your account, not silent upgrades. See [workflow modernization](docs/model-workflow-modernization.md) for the execution contract, evidence reuse and validation limits.

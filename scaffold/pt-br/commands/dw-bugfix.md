@@ -247,51 +247,25 @@
     | Pergunta | Se SIM |
     |----------|--------|
     | Precisa de migration/alteração de schema? | Redirecionar para PRD |
-    | Afeta mais de 5 arquivos? | Redirecionar para PRD |
+    | Escopo de arquivos maior? | Reavalie organização e risco real; sem parada automática |
     | Requer novo endpoint? | Redirecionar para PRD |
     | Muda contrato de API existente? | Redirecionar para PRD |
     | Afeta múltiplos projetos? | Redirecionar para PRD |
-    | Estimativa > 2 horas de implementação? | Redirecionar para PRD |
+    | Estimativa maior de implementação? | Reorganize/checkpoint dentro do escopo aprovado |
 
-    ### 5.0. Safety Valve (OBRIGATÓRIO antes do passo 5)
+    ### 5.0. Safety Valve (antes da implementação)
 
-    <critical>
-    ANTES de desenhar a lista numerada do passo 5, esboce inline os passos que pretende escrever.
-    Se esse esboço revelar **mais de 5 tasks numeradas distintas**, OU **qualquer dependência cross-file que obrigue ordem específica de execução**, OU **uma task que requeira rodar migration / refactor / novo endpoint / alteração de contrato de API**, então o escopo do bugfix foi SUBESTIMADO e você DEVE escalar.
-    </critical>
+    Inspecione o fix proposto por mudanças materiais de escopo ou arquitetura. Quantidade de tasks/arquivos, dependências de ordem e estimativas maiores sinalizam organização, não bloqueio automático. Refactor necessário para corrigir comportamento aprovado pode permanecer no escopo. Contrato novo de produto, migration sensível ou decisão arquitetural pendente exige proposta concreta antes de implementar trabalho dependente.
 
-    **Por que isso existe:** a triagem do passo 0 pega problemas de escopo a partir da descrição do sintoma. O checkpoint 4.1 pega depois da análise de causa raiz. Esta válvula pega o caso que sobra — quando o fix em si, uma vez listado, revela mais complexidade do que triagem e RCA previram. NÃO existe flag de bypass. Escalar é o desfecho correto.
+    Quando precisar de plano estruturado, preserve `.dw/bugfixes/NNN-<slug>/TASK.md`, crie `.dw/spec/prd-bugfix-<slug>/prd.md` pelo template de bugfix e registre referência em `escalated.md`. Continue por `/dw-plan` ou `/dw-autopilot --from-prd prd-bugfix-<slug>` conforme intenção existente. A quebra propõe executor/modelo/agentes; após aprovação continue na mesma invocação. Não peça autorização novamente para organizar fix já autorizado. Pedido somente de análise termina no relatório.
 
-    **Procedimento de escalação:**
-
-    1. Aloque `NNN` para `.dw/bugfixes/NNN-<slug>/`. Escreva `TASK.md` com a triagem, clarificações, causa raiz e plano que seria executado.
-    2. Crie `.dw/spec/prd-bugfix-<slug>/` e escreva `prd.md` lá (use `.dw/templates/bugfix-template.md`). Este é o path que `/dw-plan` espera.
-    3. Escreva `.dw/bugfixes/NNN-<slug>/escalated.md` com: `Escalated to /dw-plan on <YYYY-MM-DD> — reason: <qual critério da válvula disparou> → see .dw/spec/prd-bugfix-<slug>/`.
-    4. Reporte ao usuário:
-
-    ```
-    ## Escopo maior que bugfix
-
-    Listando o fix produziu [N] tasks / [deps cross-file] / [tipo de mudança proibida].
-    Pelo safety valve, isso não é mais um bugfix cirúrgico.
-
-    Índice do bugfix preservado em `.dw/bugfixes/NNN-<slug>/{TASK.md, escalated.md}`.
-    PRD criado em `.dw/spec/prd-bugfix-<slug>/prd.md`.
-
-    Próximo — escolha um:
-      - Cadeia manual: `/dw-plan techspec prd-bugfix-<slug>` → `/dw-plan tasks prd-bugfix-<slug>` → `/dw-run` → `/dw-qa` → `/dw-review` → `/dw-commit` → `/dw-generate-pr`.
-      - Entregar pro autopilot: `/dw-autopilot --from-prd prd-bugfix-<slug>` — roda a fase de planejamento a partir do PRD existente, para depois de Tasks, e uma invocacao posterior retoma via `/dw-goal`.
-    ```
-
-    5. Pare este comando. Não avance para o passo 5. O usuário (ou autopilot) invoca `/dw-plan` ou `/dw-autopilot --from-prd` em seguida.
-
-    **Se a válvula NÃO disparar:** Continue para o passo 5.
+    Sem nova decisão material nem necessidade de plano estruturado, continue no passo 5.
 
     ### 5. Propor Tarefas Numeradas (Obrigatório)
 
     <critical>
     Liste TODAS as tarefas necessárias, numeradas sequencialmente.
-    Aguarde aprovação antes de executar.
+    Use aprovação existente do mesmo escopo; pergunte só decisões materiais novas antes de executar.
     </critical>
 
     **Formato:**
@@ -364,8 +338,8 @@
 
     Opção B (entregar pro autopilot):
     1. Rode: `/dw-autopilot --from-prd prd-bugfix-<slug>`
-    2. Autopilot roda aprovacao do PRD, TechSpec e Tasks, depois para com `status: plan_complete`.
-    3. Uma invocacao posterior do autopilot retoma via `/dw-goal --from-autopilot prd-bugfix-<slug>` para Run, Review completo, QA/Fix e Review completo pos-QA antes de commit/PR.
+    2. Autopilot roda aprovacao do PRD, TechSpec e Tasks, registra `status: plan_complete` e continua após aprovação das tasks/escolhas de execução.
+    3. A mesma invocação do autopilot retoma via `/dw-goal --from-autopilot prd-bugfix-<slug>` para Run, Review completo, QA/Fix e Review completo pos-QA antes de commit/PR.
 
     O índice do bugfix continua queryable via `/dw-intel "bugfix history in <module>"`. Downstream `/dw-review --bugfix <slug>` e `/dw-qa --bugfix <slug>` ainda apontam para `.dw/bugfixes/NNN-<slug>/` quando quiser uma revisão focada apenas no patch cirúrgico final.
     ```

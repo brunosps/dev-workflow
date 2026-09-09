@@ -10,6 +10,52 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > those versions were released, so they are summaries of what shipped, not
 > contemporaneous release notes. `git log` remains the authoritative record.
 
+## [2.3.0] — 2026-09-09
+
+### Added
+
+- Task execution contracts with per-task tool, model, effort, agent and fallback
+  choices, dependency validation and persistent execution state. Schema 1.0 plans
+  remain supported with local execution defaults.
+- Instruction size and routed-reference validation in `npm run validate`, with
+  regression tests for missing resources and byte/discovery budget violations.
+- Frontend engineering guidance and EN/PT-BR quality baseline templates integrated
+  into project analysis, planning, review and QA. Controls cover API contracts,
+  types, import boundaries, code reachability, duplication and gradual CI adoption.
+- Scoped mutation-testing guidance that investigates behavioral gaps and cache
+  validity without introducing a universal score threshold.
+- Managed `routing-defaults.json` for comparing current model candidates while
+  preserving owner routing. Upgrade checks cover legacy plans and template overrides.
+
+### Changed
+
+- Approved implementation plans continue through execution, correction and
+  validation without a mandatory second invocation. Publication remains subject
+  to the user's authorization.
+- Claude, Codex and Copilot runner instructions use approved task assignments,
+  explicit session identity and parent review. New-install model routing defaults
+  are updated; existing owner configuration is preserved.
+- Installed root instructions are approximately 62% smaller. Detailed command
+  routing and conditional skill procedures move into references loaded as needed.
+- Verification reuses inspectable passing evidence only while command, inputs,
+  environment and scope remain equivalent. Required project checks still apply.
+- Planning and testing guidance favors behavior and risk over fixed task/file
+  quotas, blanket parallelism, universal coverage targets and score-only approval.
+
+### Fixed
+
+- Resume guidance preserves partial work and avoids blind latest-session recovery
+  or destructive retries. Dependent tasks retain a coherent worktree history.
+- Removed contradictory mutation-testing guidance and aligned EN/PT-BR review,
+  goal and resume behavior with the continuous execution contract.
+- Humanizer's upstream version is preserved under supported skill metadata.
+- `/dw-update` reads installed versions from `.dw/install-state.json` instead of
+  resolving an npm package that may only exist in the `npx` execution environment.
+
+Validation: 129 tests pass; registry, instruction and plugin checks pass.
+Install/update and package checks include the new resources. External provider
+dispatches and frontend analysis tools were not exercised against live projects.
+
 ## [2.2.0] — 2026-08-24
 
 Release driven by two operational failures observed on a real project, both of the

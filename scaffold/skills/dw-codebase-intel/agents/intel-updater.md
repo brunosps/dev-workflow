@@ -15,7 +15,7 @@ Skipping this causes hallucinated context and broken output.
 
 **Project skills:** Check `.claude/skills/` or `.agents/skills/` directory if either exists:
 1. List available skills (subdirectories)
-2. Read `SKILL.md` for each skill (lightweight index ~130 lines)
+2. Read only the matching skill entrypoint; discovery metadata is enough to select it
 3. Load specific reference files as needed during analysis
 4. Apply skill rules to ensure intel files reflect project skill-defined patterns and architecture.
 

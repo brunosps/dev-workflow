@@ -1,173 +1,51 @@
 ---
 name: dw-verify
-description: Demands fresh verification evidence before any success claim or commit. No PASS report, no claim — no exceptions.
+description: Validate completion, commit or PR claims against acceptance criteria and applicable project checks, reusing evidence only while its inputs remain valid.
 allowed-tools:
-  - Bash
   - Read
+  - Bash
   - Grep
+  - Glob
 ---
 
-# dw-verify — Verification Before Completion
+# Verification grounded in evidence
 
-## Overview
+A claim must match observed evidence. Inspect output and acceptance criteria; do not infer success from code edits, confidence, a worker's self-score, or a green build alone.
 
-Claiming work is complete without verification is dishonesty, not efficiency.
+## Select checks
 
-**Core principle:** Evidence before claims, always.
+Follow required project gates from applicable instructions, package scripts and CI. Use focused tests while implementing or correcting defects, then complete the project's required delivery checks. Run lint/build only when applicable or required; do not invent absent scripts or demand zero pre-existing warnings when the project does not.
 
-**Violating the letter of this rule is violating the spirit of this rule.**
+For frontend changes, consult the module's documented quality baseline or TechSpec: distinguish required checks from advisory diagnostics and deferred proposals. Check generation drift, typechecking, architecture and test evidence where applicable. Tool presence, a high score or an empty analysis scope is not a passing result. A local hook does not prove CI enforcement or branch protection.
 
-## The Iron Law
+For behavior changes, verify relevant acceptance criteria and meaningful failure cases. For a small prose/config edit, use an appropriate inspection or validator; lack of a test runner alone does not block that claim. Report limits honestly. New tests should detect a plausible defect, not mirror implementation or language behavior. Explicit TDD requests retain their red/green contract.
 
-```
-NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
-```
+## Evidence validity
 
-If the verification command has not been run in the current message, the result cannot be claimed.
+For every check record command, exit code, output/log path, time, revision and relevant diff/input fingerprint, environment fingerprint and scope covered. Include relevant untracked/generated files, dependencies/lockfiles, tool configuration, runtime and external fixtures. The fingerprint must represent actual inputs; a timestamp or HEAD alone is insufficient when the worktree is dirty.
 
-## The Gate Function
+Reuse a passing record when command, inputs, environment and claim scope remain equivalent and its output can be inspected. A new message, review stage or bookkeeping-only commit does not by itself invalidate checks. Unknown fingerprints/environment, changed inputs, new findings or broader claims require appropriate fresh checks. If uncertain which inputs matter, rerun the required check instead of inventing validity.
 
-```
-BEFORE claiming any status or expressing satisfaction:
+The installed helper `.dw/scripts/lib/workflow-contract.mjs` exports `reusableEvidence(record, current)` for comparing known fingerprints and scopes; callers still gather the actual evidence. Store records in execution-state.json for planned tasks, or the existing verification/QA report for standalone work.
 
-1. IDENTIFY: What command proves this claim?
-2. RUN: Execute the FULL command (fresh, complete)
-3. READ: Full output, check exit code, count failures
-4. VERIFY: Does output confirm the claim?
-   - If NO: State actual status with evidence
-   - If YES: State claim WITH evidence
-5. ONLY THEN: Make the claim
+## Failures and delivery
 
-Skip any step = lying, not verifying
-```
+Read failures and diagnose production behavior before changing tests. Correct failures caused by the requested change; rerun affected checks, then any invalidated required delivery gates. Do not weaken assertions, hide blocking findings, or claim a skipped check passed. Unrelated failures are reported with attribution and handled under project policy.
 
-## Scope of Verification
+Before commit/PR, inspect the scoped diff and acceptance criteria and confirm all applicable required checks have valid passing evidence. Reuse a verified worker/CI result under the same validity rules; independently inspect the delivery, not blindly trust a summary. Security and constitution gates remain in force. A passing pipeline does not itself authorize commit, merge or publication.
 
-Match the verification scope to the claim scope.
+## Verification report
 
-- **Narrow claim** (e.g., "this test passes"): run the specific test.
-- **Broad claim** (e.g., "task complete", "ready to commit"): run the full verification pipeline — formatting, linting, all tests, and build. If the project defines a single gate command (e.g., `npm test`, `make verify`, `pnpm check`), run that.
+Record a compact VERIFICATION REPORT with Claim, Command, Executed, Revision/inputs, Environment, Scope, Exit code, Output summary/log, Warnings, Errors and Verdict (`PASS`, `FAIL`, or `NOT_APPLICABLE`). Say which evidence was reused and why. The user-facing response may summarize these records with links; full logs need not be pasted into every message.
 
-A narrow verification does not support a broad claim. Running one test alone does not justify "task complete." The verification scope must be equal to or broader than the claim scope.
-
-**If in doubt, run the full pipeline.** Over-verification wastes minutes. Under-verification wastes hours.
-
-**Passing pipeline ≠ meeting requirements.** A green build proves the code compiles, lints, and passes existing tests. It does not prove the implementation matches the PRD. For "task complete" or "requirements met" claims, also verify deliverables against the task's acceptance criteria and the PRD — line by line, not by assumption.
-
-## Common Failures
-
-| Claim                 | Requires                         | Not Sufficient                  |
-| --------------------- | -------------------------------- | ------------------------------- |
-| Tests pass            | Test command output: 0 failures  | Previous run, "should pass"     |
-| Linter clean          | Linter output: 0 errors          | Partial check, extrapolation    |
-| Build succeeds        | Build command: exit 0            | Linter passing, logs look good  |
-| Bug fixed             | Test original symptom: passes    | Code changed, assumed fixed     |
-| Regression test works | Red-green cycle verified         | Test passes once                |
-| Task complete         | Acceptance criteria cross-check  | Tests passing                   |
-| Requirements met      | Line-by-line PRD checklist       | Tests passing                   |
-
-## Red Flags
-
-If you catch yourself using any of these, STOP and run verification:
-
-- "should", "probably", "seems to", "I'm confident"
-- Expressing satisfaction before verification
-- About to commit, push, or open a PR without verification
-- Trusting another agent's success report
-- Relying on partial verification
-- "Just this once"
-
-## Rationalization Prevention
-
-| Excuse                                  | Reality                |
-| --------------------------------------- | ---------------------- |
-| "Should work now"                       | Run the verification   |
-| "I'm confident"                         | Confidence ≠ evidence  |
-| "Just this once"                        | No exceptions          |
-| "Linter passed"                         | Linter ≠ compiler      |
-| "Agent said success"                    | Verify independently   |
-| "I'm tired"                             | Exhaustion ≠ excuse    |
-| "Partial check is enough"               | Partial proves nothing |
-| "Different words so rule doesn't apply" | Spirit over letter     |
-
-## When To Apply
-
-Apply this skill before:
-
-- any success or completion claim
-- any expression of satisfaction with the implementation state
-- any commit or PR creation
-- any handoff that implies correctness
-- moving to the next task based on completion
-
-## Pre-Commit and Pre-PR Gate
-
-Commits and PRs are permanent artifacts. They require the highest verification standard.
-
-**Before `git commit`:**
-1. Run the full verification pipeline. Not a subset. The full pipeline.
-2. Confirm zero errors, zero warnings, zero test failures in the output.
-3. Produce a Verification Report (template below) with verdict PASS.
-4. Only then run `git commit`.
-
-**Before creating a PR:**
-1. All of the above, plus:
-2. Verify the diff matches the intended changes (`git diff` review).
-3. Confirm no unrelated files are staged.
-
-If the full pipeline has not passed in this session after the last code change, the commit or PR must not proceed.
-
-## Verification Report Template
-
-Verification is not complete until the agent **cites actual command output** in their response. "I ran it and it passed" is not evidence. If the verification output is not shown, the verification did not happen.
-
-Every verification must be reported using this structure. Do not deviate.
-
-```
-VERIFICATION REPORT
--------------------
-Claim: [What is being claimed — e.g., "tests pass", "build succeeds", "task complete"]
-Command: [Exact command run — e.g., `npm test`, `pnpm verify`]
-Executed: [Timestamp or "just now, after all changes"]
-Exit code: [0 or non-zero]
-Output summary: [Key lines from output — pass count, error count, build result]
-Warnings: [Any warnings, or "none"]
-Errors: [Any errors, or "none"]
-Verdict: PASS or FAIL
-```
-
-If the verdict is FAIL, do not use completion language. State what failed and what remains.
-
-If the verdict is PASS, the claim may proceed — but only the specific claim supported by the evidence.
-
-## When Verification Fails
-
-Verification failure is information, not a dead end. Protocol:
-
-1. **Read the failure.** Identify the exact error. Quote the relevant output lines.
-2. **Diagnose the root cause.** Read the error. Trace it to the source. If multiple things failed, address them one at a time, starting with the first failure.
-3. **Fix the root cause.** Apply the minimal change that addresses the actual error. No workarounds, no suppressions, no skipped checks.
-4. **Re-verify from scratch.** Run the full verification command again. Do not assume the fix worked. Do not run only the previously-failing subset.
-5. **Report with evidence.** Use the Verification Report Template. If it passes, the claim may proceed. If it fails again, return to step 1.
-
-**Never:**
-- Claim partial success ("3 of 4 checks pass, close enough")
-- Skip re-verification after a fix
-- Blame the tooling without evidence of a false positive
-- Move on while verification is still failing
-
-## Project-Specific Verification Commands
-
-Discover the project gate before claiming success. Prefer documented gates in `.dw/rules/`, then package scripts such as `verify`, `check`, `ci`, or `test`, then Makefile/just/pyproject equivalents. If no verification command exists, state that explicitly in the Verification Report and avoid completion language.
-
-Load `references/verification-discovery-and-attribution.md` for the discovery checklist and attribution notes, or `references/pre-check-and-status.md` for the cheap diff-hygiene grep and the compact polling status line.
+Read `references/verification-discovery-and-attribution.md` when project gate discovery or attribution is needed. Read `references/pre-check-and-status.md` only for diff-hygiene checks or polling format.
 
 ## Structured Return
 
-- **Status:** `PASS` fresh gates prove the claim, `FINDINGS` fail/incomplete, `BLOCKED` no valid gate, `NOT_APPLICABLE` no claim.
-- **Scope:** claim, files, gates, environment.
-- **Evidence:** commands, exit codes, output, timestamps.
-- **Artifacts:** report, logs, screenshots, CI link.
-- **Decisions:** selected gate and skipped-gate reason.
-- **Risks:** stale output, partial runs, unverified generated files.
-- **Next Step:** rerun, fix, add gate, or name blocker.
+- **Status:** `PASS` valid evidence supports the claim; `FINDINGS` failed/incomplete checks; `BLOCKED` a required check cannot run; `NOT_APPLICABLE` no verification claim.
+- **Scope:** claim, relevant files/inputs, checks and environment.
+- **Evidence:** commands, exit codes, inspectable logs, fingerprints and acceptance criteria.
+- **Artifacts:** verification report, task state, screenshots or CI link.
+- **Decisions:** selected checks, evidence reused and reasons for inapplicable checks.
+- **Risks:** unknown environment, stale inputs, missing checks or uncovered behavior.
+- **Next Step:** fix, required check, or validated handoff.

@@ -317,3 +317,27 @@ Ambos os repositórios de referência são MIT. As adoções preservam os crédi
 
 A atribuição também consta no `SKILL.md` de `dw-minimalism`, no `README.md` (Acknowledgements)
 e nos cabeçalhos dos scripts de hook.
+
+## Modernization for current models (2026-09-09)
+
+Sources: Eric Provencher's [article](https://x.com/pvncher/status/2095991462416490862) (direct X access unavailable during analysis; a third-party translation supplied initial context), official [OpenAI model guidance](https://developers.openai.com/api/docs/guides/latest-model), [skill authoring](https://learn.chatgpt.com/docs/build-skills), and [Claude model configuration](https://code.claude.com/docs/en/model-config). Current Codex candidates were checked against official [Luna](https://developers.openai.com/api/docs/models/gpt-5.6-luna), [Sol](https://developers.openai.com/api/docs/models/gpt-5.6-sol), and Astra model guidance. Model documentation does not establish account access.
+
+Adopted: short precise discovery descriptions, conditional references, explicit completion criteria, task-level executor/model/agent choices, persistent authorization and proportional verification with reusable evidence. These are independently written workflow adaptations, not copied article text or source code; no article license is assumed.
+
+Revised earlier imported patterns: retain GSD's outcome/dependency checks and scoped commits (MIT), but remove fixed task/file quotas, mandatory parallelism and synthetic scheduling dependencies. Retain tech-leads-club's scoped retrieval and durable handoff ideas (CC-BY-4.0, Felipe Rodrigues), but replace the four-size numeric routing matrix, universal token thresholds and unconditional anti-co-loading prohibitions. Retain Compozy-inspired evidence/verification discovery with its attribution, while replacing per-message full reruns. Existing attribution remains in the relevant skills/references.
+
+Rejected: treating worktree isolation as permission sandboxing; blind resume-latest recovery; destructive retry resets; score-only approval; automatic escalation to maximum effort; a fixed model hierarchy embedded in each adapter. Humanizer's upstream version is preserved under supported `metadata.version` rather than an unsupported top-level frontmatter key.
+
+See [model-workflow-modernization.md](model-workflow-modernization.md) for interfaces, compatibility, measurements and evaluation limitations.
+
+## Frontend engineering controls (2026-09-09)
+
+Source: Yuri Mikhin, Evil Martians, [10 anti-AI slop moves for frontend projects going faster than humans can review](https://evilmartians.com/chronicles/ten-anti-ai-slop-moves-for-frontend-projects-going-faster-than-humans-can-review), September 1, 2026. Read directly; technical tool behavior was checked against primary documentation linked in `dw-ui-discipline/references/frontend-engineering.md` and `dw-testing-discipline/references/mutation-testing.md`.
+
+Adopted: explicit frontend control baselines, gradual enforcement, checks for the checks, and concrete evidence beyond visual quality. Existing planning, review and QA commands consume these decisions without a new command or mandatory skill bundle.
+
+Adapted/rejected: no universal React/TypeScript dependency set, folder topology, mutation-score threshold or weekly campaign. Existing project gates remain binding. Use Knip's documented production view before proposing a bespoke reachability walker; validate any actual detector with invalid and legitimate fixtures. Existing CI already runs this repository's applicable checks, so its workflow remains unchanged.
+
+Licensing: independently written instructions and tests; no article prose, snippets, rule implementations or tools were copied or vendored. No reuse license is assumed for the article. Referenced tools retain their own licensing and require separate compatibility review if a consumer adopts them. Existing attribution in modified skills remains intact.
+
+See [frontend-engineering-controls.md](frontend-engineering-controls.md) for file integration, validation and limitations.

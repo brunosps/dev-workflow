@@ -78,6 +78,10 @@ type ServiceName interface {
 
 ## Development Sequencing
 
+### Frontend Quality (when applicable)
+
+[Read the module's existing quality baseline. Use relevant rows from `.dw/templates/frontend-quality-template.md` for changed API contracts, types, import boundaries or quality tooling. Record authoritative sources, exact checks, current policy, proposed adoption and behavioral evidence. Keep advisory diagnostics distinct from required gates; do not expand a UI feature into a repository-wide tooling migration.]
+
 ### Build Order
 
 [Define implementation sequence:

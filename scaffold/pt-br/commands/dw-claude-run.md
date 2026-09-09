@@ -1,52 +1,35 @@
 <system_instructions>
-Você é o **adapter runner do Claude**. Você dispara `claude -p` (headless) dentro de uma **git worktree dedicada**
-para implementar um prompt/spec já preparado, captura a execução inteira num log de auditoria durável, mantem uma
-**sessão resumivel por tarefa**, da nota 0–10 a entrega, escala em caso de falha e **PARA para o gate**.
+# Claude runner
 
-<critical>Carregue e siga a skill `dw-cli-run` — ela tem o protocolo completo agnóstico de CLI (regra dura da worktree, pre-flight, escolha do veiculo, dupla avaliação 0–10, escalonamento gradual, telemetria, disciplina de kill/detecção, Structured Return). Este arquivo só fornece a **tabela de adapter do Claude**; substitua-a naquele protocolo.</critical>
-<critical>NUNCA rode no checkout principal do repo — só worktree dedicada off main. ABORTE (`BLOCKED`) caso contrário.</critical>
-<critical>NUNCA mergeie nem de push. Merge e decisão do dono, depois do gate.</critical>
+Use `dw-cli-run` para o protocolo compartilhado. Consuma a escolha aprovada da task e retorne ao parent para review, correções e continuidade. Invocação standalone aceita prompt preparado explicitamente sem exigir PRD. WRITE exige worktree secundário dedicado; READ-ONLY segue as regras de leitura efetiva da skill. O worker nunca faz merge ou push.
 
-## Tabela de adapter do Claude (substituir na `dw-cli-run`)
+Execute exemplos com cwd definido como `<WORKTREE>` pelo lançador. Substitua argumentos com segurança, preferencialmente como array de argumentos de subprocesso. Placeholders de permissões representam o perfil já aprovado, não flags de bypass. Preserve permissões efetivas na retomada; comandos inicial e resume podem aceitar flags diferentes. Confira ambos os helps antes do dispatch.
 
-| Slot | Valor Claude |
+## Claude adapter table
+
+| Slot | Value |
 |---|---|
-| `DISPATCH` | `UUID=$(cat /proc/sys/kernel/random/uuid); cd <WORKTREE> && claude -p --session-id "$UUID" --model <MODEL> --effort <EFFORT> --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <PROMPT>)" </dev/null > <AUDIT>/<slug>.log 2>&1` |
-| `STREAM` | `--output-format stream-json --include-partial-messages --verbose` (`--verbose` e **obrigatório** com `stream-json` no modo `-p`) |
-| `MODEL` | `--model <MODEL>` — `opus` · `sonnet` · `haiku` · `fable`, ou um id completo (`claude-opus-5`) |
-| `EFFORT` | `--effort <EFFORT>` — `low` · `medium` · `high` · `xhigh` · `max` |
-| `AUTO` | `--dangerously-skip-permissions` (auto-aprovação headless para dispatch **WRITE**; justificável porque a worktree é isolada) |
-| `AUTO_READONLY` | `--permission-mode plan` (opcionalmente `--allowedTools <lista>`). Nunca combine com `AUTO`. |
-| `NO_MCP` | `--strict-mcp-config` sem nenhum `--mcp-config` → sobe zero MCP servers |
-| `RESUME <id>` | `cd <WORKTREE> && claude --resume "$UUID" -p --effort <EFFORT> --output-format stream-json --include-partial-messages --verbose --dangerously-skip-permissions "$(cat <FOLLOWUP_PROMPT>)" </dev/null >> <AUDIT>/<slug>.log 2>&1` |
-| `RESUME_LAST` | `claude -c -p …` (continua a conversa mais recente nesta cwd) |
-| `SESSION_ID` | **FIXADO por você** — você passa `--session-id "$UUID"` na 1a run, então o id é conhecido de antemão. Gere-o (`cat /proc/sys/kernel/random/uuid` ou `uuidgen`) e grave em `<AUDIT>/<slug>.session` ANTES/no dispatch. Sem scraping do stream — o Claude é o caso fácil. |
-| `DONE_SIGNAL` | a mensagem final `{"type":"result"}` no stream (traz `subtype`, `usage`, `total_cost_usd`, `num_turns`) |
-| `USAGE` | o `usage` da mensagem `result` → `input_tokens` / `cache_read_input_tokens` / `cache_creation_input_tokens` / `output_tokens`, + `total_cost_usd`. Extrair: `grep -oE '"usage":\{[^}]*\}' <AUDIT>/<slug>.log \| tail -1` |
+| `DISPATCH` | `claude -p --session-id "<SESSION_ID>" --model "<MODEL>" --effort "<EFFORT>" <PERMISSIONS> --output-format stream-json --include-partial-messages --verbose < "<PROMPT>" > "<AUDIT>/<slug>.log" 2>&1` |
+| `STREAM` | `--output-format stream-json --verbose` |
+| `MODEL` | `--model "<MODEL>"` |
+| `EFFORT` | `--effort "<EFFORT>"` |
+| `AUTO` | <PERMISSIONS> — perfil não interativo aprovado; preserve configuração existente |
+| `AUTO_READONLY` | `--permission-mode plan --tools "Read,Grep,Glob" --strict-mcp-config` |
+| `NO_MCP` | Selecione capacidades necessárias se suportado; caso contrário preserve configuração |
+| `RESUME <id>` | `claude --resume "<SESSION_ID>" -p --model "<MODEL>" --effort "<EFFORT>" <RESUME_PERMISSIONS> --output-format stream-json --include-partial-messages --verbose < "<FOLLOWUP_PROMPT>" >> "<AUDIT>/<slug>.log" 2>&1` |
+| `SESSION_ID` | UUID gerado antes do dispatch (`node -e "console.log(require('node:crypto').randomUUID())"`) → `<AUDIT>/<slug>.session` |
+| `DONE_SIGNAL` | `result` com seu subtype |
+| `USAGE` | `result.usage` e o valor reportado de `total_cost_usd` |
 
-**Modelo + effort:** `--model` escolhe o tier (`opus` · `sonnet` · `haiku`, ou um id completo). `--effort` escolhe
-o budget de raciocínio: `low` · `medium` · `high` · `xhigh` · `max` (suportado pelo Claude CLI ≥ 2.1.206). Escale
-conforme a `dw-cli-run`: suba `--effort` primeiro (low→medium→high→xhigh→max), depois suba `--model` um tier e
-resete o effort. Comece um notch abaixo do teto.
+Crie/reutilize por `/dw-worktree create <slug>`; após integração autorizada, `/dw-worktree merge <slug>` conduz merge e limpeza segura. Workers retornam ao parent e nunca integram por conta própria.
 
-## Resume de sessão (o coração)
-Como você passa `--session-id "$UUID"`, o id e **fixo e conhecido** no dispatch — grave-o em
-`<AUDIT>/<slug>.session` (durável, fora da worktree → sobrevive ao `git worktree remove`). Pra voltar com o
-**mesmo contexto**, leia o id e re-rode `RESUME <id>` (`claude --resume "$UUID" -p …`) com o prompt de follow-up —
-o Claude recarrega a mesma conversa (raciocínio + arquivos já tocados). Fallback se o sidecar sumiu:
-`claude -c -p …` da mesma worktree.
+## Seleção de modelo e retomada
 
-## Variáveis de Input
-| Variável | Descrição | Exemplo |
-|----------|-----------|---------|
-| `<WORKTREE>` | git worktree dedicada (off main) — crie com `/dw-worktree create <slug>` (prep incluído); após o gate e o merge, remova no mesmo turno com `/dw-worktree merge <slug>` | `~/code/vizzita-billing-s10` |
-| `<PROMPT>` | caminho do prompt/spec preparado | `.dw/spec/prd-billing-integrador/codex-prompt.md` |
-| `<slug>` | chave da tarefa p/ arquivos de audit/sessão | `prd-billing-integrador` |
-| `<AUDIT>` | dir de auditoria durável FORA da worktree | `~/code/vizzita/.dw/cli-run` |
-| `<MODEL>` | tier do Claude ou id completo do modelo | `opus` / `sonnet` / `haiku` |
-| `<EFFORT>` | budget de raciocínio (Claude CLI ≥ 2.1.206) | `low` / `medium` / `high` / `xhigh` / `max` |
+Resolva modelo/esforço concretos na quebra de tasks usando `.dw/config/routing.json`, metadados atuais do provedor e ferramenta instalada. Não fixe lista de modelos do mais forte ao mais leve neste adapter. Esforços dependem de modelo/versão; low, medium, high, xhigh e max são candidatos apenas quando suportados. Sem escalada obrigatória ao máximo.
 
-Retorne pelo **Structured Return** da `dw-cli-run` (Status/Score/Scope/Evidence/Artifacts/Decisions/Risks/
-Telemetria/Next Step), incluindo o `session-id` fixo (UUID), o caminho do sidecar, e o comando `RESUME` exato pra
-continuar.
+Registre task, provedor, worktree, escolha aprovada, ID de sessão e audit antes do handoff. Sem sidecar, recupere sessão exata da task pelo log; nunca continue às cegas a sessão mais recente do cwd. Sem provar identidade, inicie nova sessão a partir do estado salvo e diff real, preservando trabalho parcial. Sessões não são portáveis entre CLIs.
+
+Retorne Structured Return do `dw-cli-run` com evidências e comando de retomada suportado exato. O parent continua o plano aprovado; merge/push/publicação exigem autorização aplicável.
+
+Inspeção de capacidades: Claude Code 2.1.265.
 </system_instructions>

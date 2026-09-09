@@ -74,19 +74,8 @@ Render as:
 
 ## Phase 2: Tensions and Rebuttals
 
-Read the openings and identify 2-4 **genuine tensions** (Side A, Side B, meaningful stakes — not cosmetic disagreements).
+For phase 2: tensions and rebuttals, read `references/phase-2-tensions-and-rebuttals-detail.md`. Load only when this part of the task applies.
 
-For each tension, re-dispatch the two opposing advisors (can be parallel within a tension, sequential across tensions) with this prompt:
-
-```
-Steel-man [opponent]'s position in 1-2 sentences, then deliver your rebuttal
-in 1 paragraph. State whether you concede, partially concede, or hold firm,
-and why. Reference your priorities from agents/<your-id>.md.
-```
-
-Record as:
-
-```markdown
 ## Core Tensions
 
 | Tension | Side A (Advisor) | Side B (Advisor) | Facilitator Note |
@@ -159,11 +148,7 @@ Record as:
 
 ## Integration With Other dw-* Commands
 
-- **`/dw-brainstorm --council`** (opt-in): invokes the council after the normal brainstorm to stress-test the top 2-3 options before recommending
-- **`/dw-plan techspec --council`** (opt-in): invokes the council on the primary architectural decision of the techspec before finalizing
-- **Standalone** `/dw-council "<dilemma>"` (if registered as a command — currently this is a bundled skill invoked by the two above; it can be promoted to a command in a future release if direct usage becomes common)
-
-The `--council` flag is **additive**: omitting it produces the normal brainstorm/techspec flow. Including it adds a debate section to the output.
+For integration with other dw-* commands, read `references/integration-with-other-dw-commands-detail.md`. Load only when this part of the task applies.
 
 ## Inspired by
 

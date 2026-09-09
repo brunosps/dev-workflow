@@ -1,6 +1,6 @@
 ---
 name: dw-git-discipline
-description: Use when committing or opening a PR. Atomic commits (one intent), Conventional Commits, trunk-based pattern, branch hygiene. Triggers before /dw-commit, /dw-generate-pr, or any git operation.
+description: Use when committing or opening a PR. Atomic commits (one intent), Conventional Commits, trunk-based pattern, branch hygiene. Use for /dw-commit or /dw-generate-pr, not ordinary Git inspection.
 allowed-tools:
   - Read
   - Bash
@@ -54,7 +54,7 @@ See `references/branch-hygiene.md` for naming conventions and rebase-vs-merge gu
 When wired into `/dw-commit`, every commit must:
 
 1. Have a single logical intent (one feature, one fix, one refactor — not mixed).
-2. Pass lint + tests + build BEFORE the commit is created.
+2. Have valid evidence for applicable project-required checks before commit, using `dw-verify`; reuse equivalent evidence without repeating checks solely for a new stage.
 3. Use Conventional Commits format with correct type/scope.
 4. Have a body that explains WHY for non-trivial changes.
 5. NOT skip pre-commit hooks (`--no-verify` is forbidden unless user explicitly authorizes).

@@ -44,6 +44,8 @@ Quando disponíveis em `./.agents/skills/`, use como suporte:
 
 ## Agent Dispatch
 
+Use estes papéis só quando delegação delimitada ajudar a task; podem ser realizados localmente. Não dispare todos os agentes nem sobrescreva modelos herdados automaticamente.
+
 Quando agentes do projeto estiverem instalados, use:
 
 - `dw-code-explorer` antes de TechSpec e Tasks para rastrear fluxos existentes e padroes reutilizaveis.
@@ -92,7 +94,7 @@ Para cada estágio: monte a matriz, marque cada dimensão `coberta` (fato descob
 
 ## Inteligência do Codebase
 
-<critical>Se `.dw/intel/` existir, consulte via `/dw-intel` antes de cada estágio. OBRIGATÓRIO no estágio TechSpec.</critical>
+Consulte `.dw/intel/` quando ajudar a localizar padrões atuais; inspecione código relevante e confira atualização do índice. Reutilize evidências entre estágios.
 - Estágio PRD: `/dw-intel "features existentes no domínio <tópico>"` para evitar duplicação.
 - Estágio TechSpec: `/dw-intel "padrões arquiteturais, convenções de API, decisões técnicas"` para alinhar com a forma existente do projeto.
 - Estágio Tasks: `/dw-intel "padrões de teste, build pipeline, deployment cadence"` para dimensionamento acurado.
@@ -141,8 +143,9 @@ Roda em modo padrão (após aprovação do PRD) OU `plan techspec` OU `plan --fr
 5. **Constitution gate.** Cada decisão arquitetural lista `Respects: P-NNN` ou `Deviates: P-NNN — justification: <slug ADR ou racional>`. Desvios de princípios `severity: high/critical` sem ADR → PARE.
 6. **API design discipline.** Ao definir endpoints, consulte `dw-codebase-intel/references/api-design-discipline.md` (Hyrum's Law, error semantics, versionamento).
 7. **Seções de UI** (quando feature tem UI): as 4 grounding questions do `dw-ui-discipline` precisam estar respondidas no techspec; state matrix + scene sentence obrigatórios.
+   - Para fluxo de dados, dependências ou ferramentas de frontend, leia `dw-ui-discipline/references/frontend-engineering.md` no local das skills instaladas. Reutilize a baseline de qualidade do módulo; acrescente apenas decisões afetadas de `.dw/templates/frontend-quality-template.md`. Separe checks obrigatórios existentes de controles consultivos/propostos. Inclua a configuração aceita e sua validação na decomposição de tarefas e matriz de execução.
 8. **Seção Branch name:** `feat/prd-<feature-slug>`.
-9. **Seção Testing strategy:** tests-per-method, mock setup, coverage targets (80% services, 70% controllers), E2E flows explícitos.
+9. **Seção Testing strategy:** cobertura de comportamentos/riscos, menores camadas eficazes, suítes existentes, mocks justificados e E2E aplicáveis. Valem limites exigidos pelo projeto; sem percentual universal.
 10. **Output:** `.dw/spec/prd-<feature-slug>/techspec.md` (mesmo dir do PRD).
 
 ### Opcional: flag `--council`
@@ -162,7 +165,7 @@ Roda em modo padrão (após aprovação do TechSpec) OU `plan tasks`.
 ### Comportamento obrigatório
 
 1. **Instrução de branch:** inclua criação de `feat/prd-<feature-slug>` no resumo de tasks.
-2. **Decompor** PRD + TechSpec em tasks. Target ~6 tasks por feature. **NUNCA exceder 2 FRs por task.**
+2. **Decompor** PRD + TechSpec em tasks. Use fatias coerentes e verificáveis independentemente; preserve cobertura de requisitos sem cota fixa de tasks ou FRs.
 3. **Cobertura end-to-end:** todo fluxo user-facing tem subtasks backend + frontend + UI funcional quando aplicável.
 4. **Test placement (`dw-testing-discipline`):** toda subtask que adiciona teste nomeia seu invariant per placement doctrine. Owning layer especificado.
 5. **Constitution alignment:** toda task lista `Constitution: respects P-NNN` ou `Constitution: deviates P-NNN — ADR planejado: <slug>` ou `Constitution: n/a — motivo: <one-liner>`.
@@ -172,20 +175,24 @@ Roda em modo padrão (após aprovação do TechSpec) OU `plan tasks`.
    - Summary: `.dw/spec/prd-<feature-slug>/tasks.md`
    - Per-task: `.dw/spec/prd-<feature-slug>/<N>_task.md`
 
-### Final Consistency Check (auto-invocado antes da aprovação)
+### Matriz de execução de tasks
+
+No Estágio 3 leia `.dw/references/execution-contract.md`. Proponha desenvolvimento local ou cruzado por task, escolhendo modelo, esforço e agentes instalados conforme complexidade e risco reais. Use templates schema 1.1 e `execution-plan.json`, valide com `node .dw/scripts/lib/workflow-contract.mjs validate <plan.json>` e confira IDs/dependências contra tasks.md. Apresente escolhas justificadas para aprovação; nunca troque de provedor silenciosamente ao executar. Planos legados schema 1.0 continuam válidos e executam localmente por padrão.
+
+## Final Consistency Check (auto-invocado antes da aprovação)
 
 Roda check em 5 dimensões, escreve `.dw/spec/prd-<feature-slug>/tasks-validation.md`:
 
 1. **Cobertura FR:** todo FR numerado mapeia para ≥1 task.
 2. **Grounding de task:** toda task referencia ≥1 FR.
-3. **Cobertura de teste:** todo FR user-facing tem ≥1 task que adiciona teste.
+3. **Cobertura de teste:** todo FR user-facing tem verificação significativa, reutilizando testes existentes quando suficientes.
 4. **Grafo de dependência:** ordem topológica válida, sem ciclos.
 5. **Constitution alignment:** toda task tem linha de alignment (só se `.dw/constitution.md` existir).
 
-Qualquer FAIL → PARE. Mostre a tabela no chat. Três opções: auto-fix (regenerar tasks afetadas), edit manual, override explícito com motivo.
+Corrija falhas internas de consistência e reexecute o check. Pergunte só decisões materiais ausentes ou override explícito com motivo; não peça permissão para corrigir o rascunho.
 
 ### Checkpoint
-Apresente resumo de tasks.md + lista per-task. Usuário aprova pra liberar `/dw-run`.
+Apresente tasks.md e matriz de execução (local/cruzada, modelo, esforço, agentes e fallbacks aprovados). A aprovação autoriza essas escolhas. Em pedido de implementação continue por `/dw-run` ou `/dw-goal` chamador; pedido somente de plano termina no plano aprovado.
 
 ## Resumo de Arquivos de Output
 

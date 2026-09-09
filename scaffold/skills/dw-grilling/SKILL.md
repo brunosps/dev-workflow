@@ -1,6 +1,6 @@
 ---
 name: dw-grilling
-description: "Internal decision-tree interview protocol for the native Grill flow. Loaded by /dw-brainstorm (grill mode) and /dw-plan to stress-test a plan or PRD to shared understanding: build a dependency-ordered decision tree, ask exactly ONE unresolved decision per turn with a recommended answer plus rationale and a real alternative, discover facts from the repo/docs instead of asking, leave decisions to the user, and gate alignment on explicit confirmation. Pipeline-internal, never exported, never implements code."
+description: Internal decision-tree interview protocol for the native Grill flow.
 allowed-tools:
   - Read
   - Grep

@@ -1,6 +1,6 @@
 ---
 name: dw-minimalism
-description: Pre-generation YAGNI gate. Before writing new code, infra, or abstractions, climb the decision ladder (need it? reuse? stdlib? native? installed dep? one line?) at the active lite/full/ultra intensity. Triggers from /dw-run, /dw-plan, /dw-review and any "add X / build Y" intent.
+description: Evaluate a proposed abstraction, module or dependency for unnecessary complexity during planning or a focused over-engineering review.
 allowed-tools:
   - Read
   - Grep
@@ -11,8 +11,7 @@ allowed-tools:
 # dw-minimalism — Write the Least Code That Solves the Problem
 
 The cheapest code to maintain is the code you never wrote. This skill runs a
-**pre-generation gate**: before producing a new function, file, dependency, or
-abstraction, justify it against a decision ladder. It is the missing rung
+**pre-generation gate**: when evaluating a proposed abstraction or module, assess its necessity against the task requirements. It is the missing rung
 between `dw-search-first` (which evaluates *external dependencies*) and
 `dw-simplification` (which cleans up code *after* it exists).
 
@@ -21,9 +20,9 @@ between `dw-search-first` (which evaluates *external dependencies*) and
 Read this skill when:
 
 - `/dw-plan` is about to specify new modules/services — pressure-test scope before tasks are written.
-- `/dw-run` is about to implement — climb the ladder before the first line of new code.
+- A task proposes an abstraction or module whose necessity is unclear.
 - `/dw-review` flags over-engineering (speculative generality, premature abstraction, unused options).
-- The user (or a task) says "add X", "build Y", "create a helper/wrapper/abstraction for Z".
+- The user asks to assess whether a helper, wrapper, abstraction or dependency is necessary.
 
 Do NOT use to:
 

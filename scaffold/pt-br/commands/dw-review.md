@@ -173,10 +173,11 @@ Se FALTANDO > 0, o veredicto sugere revisitar `/dw-plan tasks` pra escopar ou `/
    - Complexidade ciclomática / cognitiva (com thresholds `dw-simplification`).
    - Violações DRY (apenas com impacto significativo — não dedup prematuro).
    - Code smells (taxonomia Fowler).
+   - Para mudanças em fluxo de dados, dependências ou ferramentas de qualidade do frontend, leia `dw-ui-discipline/references/frontend-engineering.md` e a baseline de qualidade/TechSpec do módulo. Inspecione geração/validação de API, limites de imports, regras de negócio duplicadas, código inalcançável e novas exclusões abrangentes. Execute checks adotados via `dw-verify`; ferramenta opcional ausente é proposta, não reprovação automática. Investigue mutantes sobreviventes quando a análise estiver no escopo; não aprove apenas por score. Relate mudanças na obrigatoriedade do CI separadamente dos resultados locais.
 
 5. **Execução de testes:**
-   - Rodar comando de teste do projeto.
-   - Verificar coverage targets do TechSpec (80% services, 70% controllers).
+   - Use `dw-verify` para inspecionar evidência válida; rode checks exigidos ausentes/invalidados.
+   - Verificar estratégia aprovada e limites exigidos pelo projeto; sem percentual universal de cobertura.
 
 6. **Aplicar `dw-review-rigor`:**
    - De-duplicar findings.
@@ -184,7 +185,7 @@ Se FALTANDO > 0, o veredicto sugere revisitar `/dw-plan tasks` pra escopar ou `/
    - Verificar intent antes de flagar (linter já pega alguns — não repete).
 
 7. **Verificação final (`dw-verify`):**
-   - Rodar dw-verify pra produzir VERIFICATION REPORT (test + lint + build GREEN).
+   - Use dw-verify para produzir VERIFICATION REPORT dos checks obrigatórios aplicáveis, reutilizando evidência equivalente.
    - Sem PASS, verdict não pode ser APROVADO.
 
 8. **Security Gate (`dw-secure-audit` para TS/Python/C#/Rust):**

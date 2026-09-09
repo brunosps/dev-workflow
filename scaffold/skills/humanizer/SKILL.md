@@ -1,6 +1,7 @@
 ---
 name: humanizer
-version: 2.2.0
+metadata:
+  version: "2.2.0"
 description: Use when editing AI-generated text. Detects 24 'signs of AI writing' (em-dashes, rule-of-three, AI vocab, vague attributions). Triggers on docs, READMEs, blog posts, captions, marketing copy.
 allowed-tools:
   - Read

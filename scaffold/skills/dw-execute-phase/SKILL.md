@@ -26,7 +26,7 @@ Read this skill when:
 
 - `/dw-execute-phase` is invoked to run a batch of tasks in parallel waves.
 - `/dw-plan-checker` is invoked to verify a `tasks.md` file will achieve its PRD goal before execution.
-- `/dw-run` is invoked (it spawns the executor agent for each wave).
+- `/dw-run` needs dependency or plan verification for approved tasks.
 - `/dw-autopilot` enters the execution stage (it gates on plan-checker before invoking the executor).
 
 Do NOT use when:
@@ -34,6 +34,8 @@ Do NOT use when:
 - A single one-off change is being made (use `/dw-run` directly — no waves needed).
 - The user is exploring/brainstorming, not executing (use `/dw-brainstorm`).
 - The plan hasn't been created yet (use `/dw-plan tasks` first).
+
+Read `.dw/references/execution-contract.md` for approved tool/model/agent assignments and durable state. Agent profiles below are available protocols, not mandatory additional dispatches.
 
 ## Agents
 
@@ -44,40 +46,27 @@ Do NOT use when:
 
 ## How the Two Agents Compose
 
-The expected flow:
-
-1. `/dw-plan tasks` produces `.dw/spec/prd-<slug>/tasks.md` from PRD + TechSpec.
-2. **Plan-checker GATE** — `/dw-plan-checker .dw/spec/prd-<slug>/` spawns the plan-checker agent. The agent reads PRD/TechSpec/tasks.md and verifies tasks WILL achieve the goal. Returns one of: `PASS` (proceed), `REVISE` (issues found, planner re-runs), `BLOCK` (fundamental gap, abort).
-3. `/dw-execute-phase` spawns the executor agent ONLY if plan-checker returned `PASS`. The executor runs tasks in waves, commits atomically, handles deviations.
-4. `/dw-qa` runs after all waves complete to validate the implementation against PRD.
-
-`/dw-autopilot` orchestrates this entire flow with hard gates between stages.
+For how the two agents compose, read `references/how-the-two-agents-compose-detail.md`. Load only when this part of the task applies.
 
 ## Wave Concept
 
 Tasks in `tasks.md` are grouped into **waves** by their `Depends on:` frontmatter:
 
-- Wave 1: tasks with no dependencies → run in parallel
+- Wave 1: tasks with no dependencies → ready to run
 - Wave 2: tasks that depend on Wave 1 → run after Wave 1 commits land
 - Wave N: ...
 
-Within a wave, tasks run in parallel via subagent dispatch. Across waves, sequential.
+Within a wave, concurrency is optional and follows approved assignments. One writer per worktree, at most 3 workers; dependent tasks share the execution branch sequentially.
 
 The executor calculates waves automatically by topologically sorting task dependencies. See `references/wave-coordination.md`.
 
 ## Deviation Rules (during execution)
 
-Mid-task, the executor may discover the plan is incomplete or contradicted by reality. Three rules:
-
-1. **Auto-add missing critical functionality** — if a task says "create endpoint" but no validation is specified and the project's CLAUDE.md/rules require it, add the validation as part of the same task. Note in the task's commit message.
-2. **Surface ambiguity, don't guess** — if the plan says "use the existing service" and 3 services match, STOP, write a deviation entry to `.dw/spec/prd-<slug>/deviations.md`, and ask the user.
-3. **Block on architectural conflicts** — if the task as planned would violate a locked decision in CONTEXT.md / project rules, abort the task and surface the conflict for re-planning.
-
-Detail in `references/atomic-commits.md` (deviation entry format) and `references/plan-verification.md` (what plan-checker should catch BEFORE execution to prevent deviations).
+For deviation rules (during execution), read `references/deviation-rules-during-execution-detail.md`. Load only when this part of the task applies.
 
 ## Atomic Commit Protocol
 
-Every task ends with exactly one git commit:
+Formal tasks use scoped atomic commits, with approved subtask milestones when specified:
 
 ```
 feat(<scope>): <task title> (#<task-id>)
@@ -98,16 +87,7 @@ The commit message format is consistent across waves so `/dw-generate-pr` can bu
 
 ## De-Sloppify Pass (optional cleanup task)
 
-LLM implementers are thorough but leave slop — tests of framework/language behavior, defensive checks the type system already enforces, leftover `console.log`, over-handled impossible states. Constraining the implementer with "don't over-engineer" degrades its output unpredictably; a **separate cleanup pass in a fresh context** works better. Two focused agents beat one constrained agent.
-
-To request one, a task in `tasks.md` may carry `Cleanup After: <N>` in its frontmatter. The executor runs it as its own task (own commit) right after task N's wave lands, scoped to task N's diff:
-
-- Remove tests that assert language/framework behavior rather than business logic.
-- Remove type checks and guards the type system or a prior validation already guarantees.
-- Remove `console.log`/debug prints and commented-out code.
-- Keep every business-logic test and every real error path — when unsure, keep it.
-
-The cleanup task commits as `refactor(<scope>): de-slop <task N title>` and must leave the gate green (lint + tests + build) — it never changes behavior. Opt-in: no `Cleanup After:` means no cleanup task runs.
+For de-sloppify pass (optional cleanup task), read `references/de-sloppify-pass-optional-cleanup-task-detail.md`. Load only when this part of the task applies.
 
 ## Checkpoint Protocol
 
@@ -137,11 +117,11 @@ If the executor exhausts its context budget mid-phase OR the user signals stop:
 
 ## Rules
 
-- **No execution without plan-checker PASS.** `/dw-execute-phase` and `/dw-run` must call plan-checker first; if it returns REVISE or BLOCK, abort.
-- **One commit per task, no exceptions.** Even trivial tasks commit. This drives traceability and revert safety.
+- **No execution without plan-checker PASS.** `/dw-execute-phase` and `/dw-run` must call plan-checker first; repair internal REVISE findings; BLOCK only when a material decision or invalid dependency remains.
+- **Scoped atomic commits for formal tasks.** Follow approved subtask milestones when specified; direct small edits do not invoke this protocol. This drives traceability and revert safety.
 - **Deviations are recorded, not silenced.** Every adjustment beyond the plan goes in `deviations.md` with reason.
 - **Checkpoint > timeout.** When context budget is low, checkpoint cleanly rather than running tasks half-way.
-- **Wave order is topological, not user-defined.** The executor computes wave boundaries from `Depends on:` fields; users can't override.
+- **Wave order is topological, not user-defined.** The executor computes wave boundaries from `Depends on:` fields; concurrency limits queue ready tasks without inventing dependencies.
 
 ## Inspired by
 

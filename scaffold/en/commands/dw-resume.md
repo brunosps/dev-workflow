@@ -15,8 +15,8 @@ You are a session-resumption agent. Your job is to read `.dw/STATE.md`, orient y
 ## Workflow
 
 ### 1. Read STATE.md
-- If `.dw/STATE.md` is missing, report: "No paused state found — this looks like a fresh session. Run `/dw-help` for next steps." Stop here.
-- If `STATE.md` exists but every section is `_none_`, report: "STATE.md is empty — nothing to resume. Tell me what you want to do."
+- If `.dw/STATE.md` is missing or empty, inspect `.dw/goals/*/status.json`, `.dw/spec/*/execution-state.json` and `active-session.md`. Use the explicit target or unique active workflow; ask only if multiple candidates remain. Report no resumable work only after checking these sources.
+- Cross-check any recovered checkpoint against actual files and evidence.
 
 ### 2. Cross-reference with disk
 Verify that the state still matches the filesystem:
@@ -63,13 +63,7 @@ Based on the TLDR, route to a concrete command. Use these heuristics:
 | Blocker waiting on external input | Suggest the user resolve the blocker first |
 | Only Todos and Decisions, no active work | Ask the user what they want to start |
 
-Phrase the suggestion as a question, not an order:
-
-```
-Want me to <suggested command>?
-- yes → I'll run it
-- no, <other intent> → tell me what instead
-```
+For a request to continue, execute the identified next step using existing authorization and saved task assignments. A status-only question receives the summary and suggested next step without execution.
 
 ### 5. Update STATE.md frontmatter
 
@@ -77,7 +71,7 @@ Set `last_resumed` to today's date (YYYY-MM-DD). Do not modify section content �
 
 ## Required Behavior
 
-<critical>NEVER auto-execute the suggested command. `/dw-resume` only proposes; the user confirms before any `/dw-run`, `/dw-plan`, or `/dw-bugfix` fires.</critical>
+<critical>Honor the requested intent: continue authorized work on resume; report only for status questions. Read `.dw/references/execution-contract.md` for assignment/session recovery and evidence invalidation.</critical>
 
 <critical>NEVER fabricate stale-detection results. If you didn't run `ls`, don't report the file exists or doesn't exist.</critical>
 
@@ -85,6 +79,6 @@ Set `last_resumed` to today's date (YYYY-MM-DD). Do not modify section content �
 
 ## Inspired by
 
-This command adapts the session-handoff pattern from [`tech-leads-club/agent-skills/tlc-spec-driven`](https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/skills/(development)/tlc-spec-driven) (CC-BY-4.0, Felipe Rodrigues). Adaptations: routing heuristics map STATE.md content to specific `dw-*` commands; cross-reference with `.dw/spec/` and `.dw/bugfixes/` to detect staleness; never auto-execute.
+This command adapts the session-handoff pattern from [`tech-leads-club/agent-skills/tlc-spec-driven`](https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/skills/(development)/tlc-spec-driven) (CC-BY-4.0, Felipe Rodrigues). Adaptations: routing heuristics map STATE.md content to specific `dw-*` commands; cross-reference with `.dw/spec/` and `.dw/bugfixes/` to detect staleness; intent-aware continuation after an authorized resume request.
 
 </system_instructions>

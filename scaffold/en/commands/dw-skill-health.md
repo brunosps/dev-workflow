@@ -24,7 +24,14 @@ You are the dev-workflow skill and agent health auditor.
 
 `SKILL.md` should be a short router/protocol. Long rules, examples, palettes, recipes, services, and assets must stay in references/assets/rules/recipes and be loaded lazily.
 
+## Discovery and context budgets
+
+Check managed instructions ≤6000 bytes, skill entrypoints ≤8000 bytes and descriptions ≤250 characters. In package source run `npm run validate`; in consumers inspect installed files. Distinguish discovery metadata from on-demand bodies. Flag unconditional reference loading and broad overlapping triggers, not every platform copy as duplicate live context. Check routed reference paths and preserve attribution/Structured Return when compacting. Model candidates may be stale: propose updates to routing.json after verifying availability; never overwrite owner choices silently.
+
 ## Output
+
+When `.dw/config/routing-defaults.json` exists, compare its current candidates with the owner's `.dw/config/routing.json`. Report relevant differences and validate proposed models/capabilities before adoption. Different values can be intentional; do not treat them as failed migration or overwrite them automatically. Approved task assignments take precedence over either candidate file.
+
 Return a concise health report with a structured-return section. Do not delete files.
 
 Include:

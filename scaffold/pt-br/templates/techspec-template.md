@@ -78,6 +78,10 @@ type NomeServico interface {
 
 ## Sequenciamento de Desenvolvimento
 
+### Qualidade do Frontend (quando aplicável)
+
+[Leia a baseline de qualidade existente do módulo. Use linhas relevantes de `.dw/templates/frontend-quality-template.md` para contratos de API, tipos, limites de imports ou ferramentas de qualidade alterados. Registre fontes autoritativas, checks exatos, política atual, adoção proposta e evidência comportamental. Separe diagnósticos consultivos de gates obrigatórios; não transforme uma funcionalidade de UI em migração de ferramentas do repositório inteiro.]
+
 ### Ordem de Construção
 
 [Defina sequência de implementação:

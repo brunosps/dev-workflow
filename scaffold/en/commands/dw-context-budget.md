@@ -7,23 +7,15 @@ You are the context budget auditor for dev-workflow.
 - Use during `/dw-analyze-project` follow-up when the harness looks bloated.
 
 ## Process
-1. Count approximate tokens for `CLAUDE.md`, `AGENTS.md`, `.dw/commands/*.md`, `.agents/skills/*/SKILL.md`, `.agents/agents/*.md`, `.claude/agents/*.md`, `.opencode/agent/*.md`, `.github/agents/*.agent.md`, `.dw/subtasks/pending/*/HANDOFF.md`, and `.claude/settings.json`.
-2. Estimate prose tokens as `words * 1.3`; estimate JSON/tool schemas as `chars / 4`.
-3. Flag:
-   - command files over 20KB,
-   - skill `SKILL.md` files over 12KB,
-   - agent files over 8KB,
-   - missing agent `output_budget_words` in `.dw/agent-registry.json` or scaffold registry,
-   - pending handoffs averaging over 1200 words,
-   - Copilot agents above 30k chars,
-   - more than 10 MCP servers,
-   - duplicate agent/skill names across platform folders,
-   - Claude/OpenCode agent files with provider-incompatible tool or permission fields.
-4. Recommend the top 5 savings with concrete paths.
+1. Separate three categories: permanent instructions for the active host; discovery metadata (skill/command names and descriptions); and on-demand command bodies, skill bodies, references and handoffs. Disk inventory is not simultaneous context consumption. Count only the active host's surfaces; platform copies alone are not duplicated live context.
+2. Label prose estimates (`words * 1.3`, schema `chars / 4`) as estimates, not measured tokens. Report each category separately and observed loads only when telemetry exists.
+3. Check project budgets: installed managed instruction block ≤6000 bytes per locale; skill entrypoints ≤8000 bytes; descriptions ≤250 characters. Commands over 20KB and agent files over 8KB are review signals, not evidence they were loaded. Review overlapping triggers, unconditional reference loads, broken links and incompatible provider metadata.
+4. In this repository `npm run validate` enforces entrypoint/description budgets and routed references through `lib/instruction-health.js`. In a consumer project inspect installed files; do not require the package source to exist there.
+5. Report the top concrete savings. Audit `.dw/config/routing.json` candidates against current provider information, noting stale choices without overwriting owner configuration.
 
 ## Part B — Runtime spend (actual token cost)
 
-Static overhead (above) is what the harness *loads*; this part is what sessions actually *cost*. Report from `.dw/metrics/costs.jsonl` (appended by the `session-cost` SessionEnd hook — one row per session with per-model token usage + estimated USD):
+The inventory above estimates potential context; this part reports observed session usage. Report from `.dw/metrics/costs.jsonl` (appended by the `session-cost` SessionEnd hook — one row per session with per-model token usage + estimated USD):
 
 1. Read `.dw/metrics/costs.jsonl` if present. If absent, note "no runtime cost data yet (hook disabled or no session has ended)" and skip this part — never fail.
 2. Dedupe by `session_id` (latest row per session wins).

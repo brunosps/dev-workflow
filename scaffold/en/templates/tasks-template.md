@@ -1,6 +1,6 @@
 ---
 type: tasks-index
-schema_version: "1.0"
+schema_version: "1.1"
 status: draft
 ---
 
@@ -34,10 +34,13 @@ feat/prd-[feature-name]
 - [ ] 2.0 Main Task Title        Depends on: 1.0
 - [ ] 3.0 Main Task Title        Depends on: 1.0, 2.0
 
+## Execution plan
+
+Propose local or cross-tool development per task during breakdown. Summarize complexity/rationale, tool, model/effort, agents, dependencies and verification. Store validated assignments and approved fallbacks in `execution-plan.json`; use `.dw/references/execution-contract.md`. Record approval of the same matrix before execution.
+
 ## Workflow
 
-Each task follows this flow:
-1. `/execute-task [N]_task.md` - Implements the task
-2. Unit tests included in the implementation
-3. Commit at the end of each task (no push)
-4. Next task or `/dw-generate-pr [target-branch]` when all tasks are completed
+1. `/dw-run` consumes the approved assignments in dependency order.
+2. Each task implements, verifies and commits scoped changes; the parent reviews external-worker handoffs and routes corrections.
+3. Continue approved implementation through final review and applicable QA. A planning-only request ends at the plan.
+4. Prepare the validated delivery; integrate/push/publish only within existing authorization.

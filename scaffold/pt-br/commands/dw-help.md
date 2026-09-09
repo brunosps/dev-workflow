@@ -17,7 +17,7 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 
 | Comando | Quando |
 |---------|--------|
-| `/dw-autopilot "desejo"` | Entry point padrão em duas invocações. Primeira roda plan e para; segunda retoma via `/dw-goal`, Security Gate, commit e PR. |
+| `/dw-autopilot "ideia"` | Planeja e aprova escolhas de execução, depois continua por implementação, review e validação. |
 | `/dw-bugfix "descrição"` | Bug ou error report. Fix cirúrgico ou rota pra PRD. |
 | `/dw-help [palavra-chave]` | Esta tela. Passe palavra-chave pra atalhos. `--advanced` revela comandos internos. |
 
@@ -141,7 +141,7 @@ Sem match: surface padrão + nota.
 ## FAQ
 
 **P: Onde começo com uma nova feature?**
-- `/dw-autopilot "o que voce quer"`. Primeira invocacao roda PRD → TechSpec → Tasks e para; segunda invocacao retoma via `/dw-goal`, Security Gate, commit e PR.
+- Use `/dw-autopilot "o que você quer"`; aprove a matriz de tasks/executores e continue até entrega validada. Publicação segue autorização existente.
 
 **P: Tenho que usar `/dw-autopilot`?**
 - Não. Pipeline granular dá controle a cada step, com `/dw-goal` quando quiser executar run/review/QA/review como objetivo duravel, seguido por `/dw-secure-audit`, `/dw-commit` e `/dw-generate-pr`.

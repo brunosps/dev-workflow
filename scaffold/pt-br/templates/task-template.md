@@ -1,72 +1,52 @@
 ---
 type: task
-schema_version: "1.0"
+schema_version: "1.1"
 status: pending
 ---
 
 # Tarefa X.0: [Título da Tarefa Principal]
 
-<critical>Ler os arquivos de prd.md e techspec.md desta pasta, se você não ler esses arquivos sua tarefa será invalidada</critical>
+Leia as seções relevantes do PRD/TechSpec e as restrições da task; use os links abaixo.
 
 ## Visão Geral
 
 [Breve descrição da tarefa]
 
-**Requisitos Funcionais cobertos**: RF-X.Y, RF-X.Z (máximo 2 por task)
+**Requisitos Funcionais cobertos**: RF-X.Y, RF-X.Z
 Depends on: none
 
 <requirements>
 [Lista de requisitos obrigatórios]
 </requirements>
 
-## Subtarefas
+## Escolha de execução
 
-### Implementação
-- [ ] X.1 [Descrição da subtarefa]
-- [ ] X.2 [Descrição da subtarefa]
+Espelhe a entrada aprovada desta task em `execution-plan.json` (veja `.dw/references/execution-contract.md`).
 
-### Testes Unitários (Obrigatório para Backend)
-- [ ] X.3 Criar testes para [service/use-case]
-- [ ] X.4 Criar testes para [controller/adapter]
+| Complexidade + justificativa | Ferramenta | Modelo / esforço | Agentes | Fallbacks aprovados |
+|---|---|---|---|---|
+| standard — [motivo] | local | inherit / inherit | nenhum | nenhum |
 
-## Testes Unitários
+## Implementação
 
-### Casos a Testar
+- [ ] [Comportamento a entregar]
+- [ ] [Verificações relevantes e critérios de aceitação]
 
-| Método | Casos |
-|--------|-------|
-| `[método1]` | Happy path, edge case, erro |
-| `[método2]` | Happy path, not found |
+## Verificação e critérios de sucesso
 
-### Mocks Necessários
-- `[repositório/service]` - mockado via mock function
+| Comportamento / risco | Suíte existente ou novo teste | Comando / evidência observável |
+|---|---|---|
+| [Resultado exigido] | [Menor camada eficaz; teste novo só se necessário] | [Comando do projeto ou inspeção] |
 
-## Detalhes de Implementação
+Use a estratégia de testes do projeto. Defina mocks só em fronteiras justificadas; não imponha percentuais de cobertura nem teste novo para toda edição. Inclua falhas relevantes quando aplicável.
 
-[Seções relevantes da spec técnica - referencie a techspec.md ao invés de duplicar conteúdo]
+## Arquivos e decisões relevantes
 
-## Critérios de Sucesso
+[Caminhos de código e seções relevantes do TechSpec/ADR; não duplique documentos inteiros.]
 
-- [Resultados mensuráveis]
-- [Requisitos de qualidade]
-- **Testes unitários passando**
-- **Cobertura mínima 80%** em services/use-cases
+## Commit ao concluir
 
-## Arquivos Relevantes
-- [Arquivos relevantes desta tarefa]
-- [Arquivo].spec.ts - Testes unitários
-
-## Commit ao Final
-
-Ao completar esta task, fazer commit:
-```bash
-git add .
-git commit -m "feat([modulo]): [descrição]
-
-- [item 1]
-- [item 2]
-- Add unit tests"
-```
+Use o protocolo de commit atômico com escopo do `/dw-run`. Faça stage apenas dos arquivos desta task, preserve IDs de requisitos, registre o SHA resultante em tasks.md/run-log e inclua os registros finais antes da entrega. Não implica push nem merge.
 
 ## Related ADRs
 

@@ -1,259 +1,36 @@
 <system_instructions>
-You are the full pipeline orchestrator. This command receives a user's wish and drives the PRD-to-PR workflow in two invocations:
+# Continuous implementation orchestrator
 
-1. **Planning invocation:** research/brainstorm when needed, PRD, TechSpec, Tasks, then STOP.
-2. **Execution invocation:** resume from `autopilot-state.json`, run `/dw-goal --from-autopilot <prd-slug>`, then commit and PR gate.
+`/dw-autopilot "<wish>"` plans and carries approved work through implementation and validation. `/dw-autopilot --from-prd <slug>` starts from `.dw/spec/<slug>/prd.md`; missing PRD blocks with its path. `/dw-autopilot` without a wish resumes saved state. Do not impose a second invocation after task approval. A user request only to plan or an active platform Plan mode still ends at the planning artifact.
 
-<critical>The first invocation MUST stop after the planning artifacts are complete. Do not run implementation, QA, review, commit, or PR in the first invocation.</critical>
-<critical>The second invocation MUST resume from the saved state and delegate Run → Review → QA/Fix → Review to `/dw-goal --from-autopilot <prd-slug>`.</critical>
-<critical>Each step that invokes a `/dw-*` command MUST follow the complete instructions from `.dw/commands/`. Read and execute the full command, not a summarized version.</critical>
+## Planning
 
-## When to Use
-- Use when you want to go from an idea to a PR with minimal manual intervention but a hard planning stop.
-- Use for complete features that require planning, execution, quality gates, and PR readiness.
-- Do NOT use for small, well-scoped one-off tasks; use `/dw-run` with an existing plan.
-- Do NOT use for surgical bug fixes; use `/dw-bugfix`.
-- Do NOT use when the user wants manual control between every phase; use individual commands.
+1. Inspect relevant source/rules and existing decisions. Use `.dw/intel/` when useful; research only unknown technologies/domains/integrations. Brainstorm only unresolved choices, not a mandatory three-option interview.
+2. Invoke `/dw-plan` or its relevant stages to produce PRD, TechSpec, tasks and tasks-validation.md. Reuse answered decisions and aligned handoffs. Ask material uncovered questions with the available interview tool; do not re-ask discovered facts.
+3. At task breakdown present local/cross-tool development, concrete model/effort and relevant agents by task complexity. Follow `.dw/references/execution-contract.md`, write/validate execution-plan.json, and obtain approval of the same task/assignment matrix. Existing stage approvals remain honored; do not repeat them.
+4. Save `autopilot-state.json` with `status: plan_complete`, `current_step: goal`, planning artifacts, approved assignments path and `next_command: /dw-goal --from-autopilot <slug>`. In an implementation request continue immediately to execution. In a planning-only request report the plan and preserve this resume point.
 
-## Pipeline Position
-**Predecessor:** user wish | **Successor:** `/dw-goal`, `/dw-commit`, `/dw-generate-pr`
+## Execution and delivery
 
-## Complementary Skills / Commands
+Arm `/dw-report` once (idempotent, skipped when `DW_REPORT_AUTO=off`). Invoke `/dw-goal --from-autopilot <slug>` to own `/dw-run` → full `/dw-review` → applicable `/dw-qa` → `/dw-qa --fix` for Open bugs → post-QA review when edits or new findings invalidate the prior review. Do not substitute coverage-only review for the full review. External runners return to the parent for corrections and continuation; they do not end the goal.
 
-| Skill or command | Trigger |
-|------------------|---------|
-| `dw-memory` | ALWAYS — preserve decisions across planning, goal execution, QA, review, and PR. |
-| `dw-verify` | ALWAYS — invoked by gates and downstream commands before approval/commit/PR claims. |
-| `/dw-goal` | ALWAYS on the second invocation — durable execution-quality objective. |
+Use `dw-memory` for durable decisions and `dw-verify` for valid evidence. Security Gate remains mandatory where applicable: `/dw-secure-audit` produces `.dw/secure-audit/audit-summary.md`; missing/invalid evidence is regenerated and blocking findings are fixed. SECRET findings always block (no ADR escape). Reuse a valid scan instead of repeating it solely at another checkpoint.
 
-## Input Variables
+The goal completes only with acceptance criteria met, required review/QA artifacts and valid checks, and no unresolved blocking finding. For escalated `prd-bugfix-*`, find the originating `.dw/bugfixes/*/escalated.md`, produce missing SUMMARY.md from evidence, and close the index.
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `{{WISH}}` | Description of what the user wants to build in default mode. | `"push notification preferences"` |
-| `{{PRD_SLUG}}` | Existing PRD slug when `--from-prd` is used. | `prd-bugfix-stripe-webhook-retry` |
-| `{{MODE}}` | Optional invocation flag. | `--from-prd <slug>` |
+Inspect scoped task commits and remaining bookkeeping; `/dw-commit` handles an authorized final commit when needed. Do not create empty commits or demand an extra commit for already committed work. Prepare the validated branch/worktree and delivery summary. Merge, push and PR publication proceed only within existing authorization. If final authorization is absent, present the concrete result and request only that action; do not re-ask permission already granted.
 
-## Invocation Modes
+## Durable state
 
-| Invocation | Behavior |
-|------------|----------|
-| `/dw-autopilot "<wish>"` | Planning invocation from scratch. Runs Codebase Intelligence → optional Research → Brainstorm → PRD → TechSpec → Tasks, writes state, then stops. |
-| `/dw-autopilot --from-prd <slug>` | Planning invocation from an existing PRD. Starts at PRD approval, then TechSpec → Tasks, writes state, then stops. |
-| `/dw-autopilot` on a PRD with `autopilot-state.json status=plan_complete` | Execution invocation. Runs `/dw-goal --from-autopilot <slug>`, then commit and PR gate. |
+Preserve `autopilot-state.json` fields: mode, wish, prd_path, from_prd_slug, current_step, completed_steps, skipped_steps, skip_reasons, gates_passed, step_artifacts, goal_slug, next_command, started_at, last_updated. Add `execution_plan` and `execution_state` paths. Record evidence, not merely file existence, before marking a step complete.
 
-## Required Pause Points
+| status | Resume action |
+|---|---|
+| missing / planning | Continue only unfinished planning; preserve resolved decisions. |
+| plan_complete | Execute approved plan through `/dw-goal --from-autopilot <slug>` when implementation is requested. |
+| goal_active | `/dw-goal resume` using saved task/executor state. |
+| goal_complete | Prepare delivery and remaining authorized commit/publication actions. |
+| completed | Report validated delivery and links/branch; publication may still be pending authorization. |
 
-Autopilot pauses at:
-
-1. **PRD approval** before TechSpec.
-2. **Tasks approval** before marking planning complete.
-3. **Mandatory planning stop** after Tasks are approved and state is saved.
-4. **PR gate** after the execution goal and commit complete.
-
-Between these points, execute automatically while still respecting blocking questions required by the underlying command.
-
-## Session Resumption
-
-If this command is re-invoked on the same PRD:
-
-<critical>Read `.dw/spec/<prd-slug>/autopilot-state.json` first. If `status` is `plan_complete`, do not repeat planning. Start the execution invocation by formally invoking `/dw-goal --from-autopilot <prd-slug>`.</critical>
-
-State meanings:
-
-| Status | Action |
-|--------|--------|
-| missing state | Start normal planning invocation. |
-| `planning` | Resume from `current_step`, respecting completed/skipped steps. |
-| `plan_complete` | Start execution invocation via `/dw-goal --from-autopilot <prd-slug>`. |
-| `goal_active` | Continue `/dw-goal resume` or `/dw-goal --from-autopilot <prd-slug>` according to `.dw/goals/autopilot-<prd-slug>/status.json`. |
-| `goal_complete` | Continue to commit and PR gate. |
-| `completed` | Report already completed and show PR/commit summary if available. |
-
-## Planning Invocation
-
-### Step 0: Resolve Invocation Mode
-
-1. If `--from-prd <slug>` is present:
-   - Resolve to `.dw/spec/<slug>/`.
-   - Verify `prd.md` exists; otherwise STOP with: `--from-prd target .dw/spec/<slug>/prd.md not found. Run /dw-plan prd or fix the slug.`
-   - Create or update `autopilot-state.json` with `mode: "from-prd"`, `status: "planning"`, `skipped_steps: [1,2,3,4]`, and `skip_reasons["1-4"] = "from-prd-mode"`.
-   - Jump to PRD approval using the existing PRD.
-2. Otherwise:
-   - Create or update `autopilot-state.json` with `mode: "autopilot"`, `status: "planning"`, original wish, and `current_step: 1`.
-
-### Step 1: Codebase Intelligence
-
-<critical>If `.dw/intel/` exists, query it via `/dw-intel` before planning. Fall back to `.dw/rules/` and direct grep if absent.</critical>
-
-- Identify tech stack, existing patterns, related features, and project constraints.
-- If `.dw/intel/` is absent, suggest `/dw-intel --build` for richer future context, but continue with `.dw/rules/` and direct inspection.
-
-### Step 2: Research (Conditional)
-
-Run `/dw-brainstorm --research` when the feature involves new technology, unknown domain, external APIs, regulation, or high-impact architecture. Otherwise skip and record the reason in `skip_reasons`.
-
-### Step 3: Brainstorm (Interactive)
-
-Run `/dw-brainstorm` with accumulated context. Present three directions and wait for the user to choose one before continuing.
-
-### Step 4: PRD
-
-Run `/dw-plan prd` using brainstorm/research findings.
-
-<critical>The PRD stage must use the structured interview tool when available. If unavailable, ask the required questions in chat and record the fallback. The user must answer; do not infer answers.</critical>
-
-After `prd.md` exists, present PRD summary and wait for explicit approval. If the user requests edits, update and re-present.
-
-### Step 5: TechSpec
-
-Run `/dw-plan techspec` from the approved PRD.
-
-<critical>The TechSpec stage must use the structured interview tool when available. If unavailable, ask the required questions in chat and record the fallback. The user must answer; do not infer answers.</critical>
-
-After `techspec.md` exists, present TechSpec summary and wait for explicit approval.
-
-### Step 6: Tasks
-
-Run `/dw-plan tasks` from PRD + TechSpec. Verify:
-- `tasks.md` exists.
-- per-task files exist.
-- `tasks-validation.md` exists and passes or has an explicit user override.
-
-### Step 7: Tasks Approval and Mandatory Stop
-
-Present task summary, dependencies, and total effort. Wait for explicit approval.
-
-After approval:
-
-1. Save `.dw/spec/<prd-slug>/autopilot-state.json` with:
-
-```json
-{
-  "status": "plan_complete",
-  "current_step": "goal",
-  "next_command": "/dw-goal --from-autopilot <prd-slug>"
-}
-```
-
-2. Include `completed_steps` for all completed planning steps and `step_artifacts` for `prd.md`, `techspec.md`, `tasks.md`, per-task files, and `tasks-validation.md`.
-3. STOP and tell the user the planning phase is complete. Do not run implementation in this invocation.
-
-## Execution Invocation
-
-### Step 8: Durable Execution Goal
-
-First arm the progress loop: invoke `/dw-report` (auto-arm contract — idempotent, skipped when `DW_REPORT_AUTO=off`). It reports done / doing / remaining every 10 minutes through the goal, the Security Gate, commit, and PR, and disarms itself with a final report at the PR gate.
-
-When `autopilot-state.json status=plan_complete`, formally invoke:
-
-```text
-/dw-goal --from-autopilot <prd-slug>
-```
-
-The goal owns this sequence:
-
-1. `/dw-run <prd-path>`
-2. `/dw-review <prd-path>` (full review: coverage, quality, conventions, constitution, verify)
-3. `/dw-qa <prd-path>`
-4. `/dw-qa --fix <prd-path>` if QA found Open bugs
-5. `/dw-review <prd-path>` again after QA/fixes
-6. **Security Gate** — the post-QA `/dw-review` (step 5) triggers `/dw-secure-audit`, producing a fresh `.dw/secure-audit/audit-summary.md`. This step **ensures** that verdict is APPROVED: if it is missing/stale/REJECTED, run `/dw-secure-audit <prd-path>` standalone, then loop back to `/dw-bugfix` per finding and re-check. SECRET findings always block (no ADR escape). Do not force a second full scan when a fresh APPROVED summary already exists.
-
-<critical>Do not substitute `/dw-review --coverage-only` for the goal reviews. The autopilot quality goal requires full `/dw-review` before QA and after QA fixes.</critical>
-
-After `/dw-goal` completes, verify `.dw/goals/autopilot-<prd-slug>/status.json` has `status: "complete"`, then set `autopilot-state.json status: "goal_complete"`.
-
-### Step 9: Bugfix Loop Close (Conditional)
-
-If `mode == "from-prd"` and the PRD slug matches `prd-bugfix-*`, close the bugfix index before commit:
-- Find `.dw/bugfixes/*/escalated.md` that references the PRD slug.
-- If `SUMMARY.md` is missing, write it from available PRD, TechSpec, QA, and diff evidence using `.dw/templates/bugfix-summary-template.md`.
-- Never fabricate verification evidence.
-- Record artifacts in `autopilot-state.json`.
-
-### Step 10: Pre-Commit Audit
-
-Before `/dw-commit`, verify:
-- `.dw/goals/autopilot-<prd-slug>/status.json` is complete.
-- `<prd-path>/QA/review-consolidated.md` exists from the final post-QA review.
-- `<prd-path>/QA/qa-report.md` and `<prd-path>/QA/bugs.md` exist.
-- **Security Gate passed:** `.dw/secure-audit/audit-summary.md` exists, is fresh (post-last-edit), and status is APPROVED. If missing/stale/REJECTED → STOP (do not commit).
-- `autopilot-state.json` records planning artifacts and the completed goal.
-
-If anything is missing, STOP and re-run the missing formal command. Do not commit partial work.
-
-### Step 11: Commit
-
-Run `/dw-commit` automatically. Do not wait for approval after the goal is complete.
-
-### Step 12: Pull Request Gate
-
-Ask: **"Commits completed. Do you want to generate the Pull Request?"**
-
-- YES: run `/dw-generate-pr`.
-- NO: report that commits are ready and PR can be generated later.
-
-Mark `autopilot-state.json status: "completed"` after commit, and include PR link if generated.
-
-## State Persistence
-
-`autopilot-state.json` must include:
-
-```json
-{
-  "mode": "autopilot",
-  "status": "planning",
-  "wish": "original user description",
-  "prd_path": ".dw/spec/prd-name",
-  "from_prd_slug": null,
-  "current_step": 1,
-  "completed_steps": [],
-  "skipped_steps": [],
-  "skip_reasons": {},
-  "gates_passed": [],
-  "step_artifacts": {},
-  "goal_slug": null,
-  "next_command": null,
-  "started_at": "2026-05-20T00:00:00Z",
-  "last_updated": "2026-05-20T00:00:00Z"
-}
-```
-
-Update state after each completed or skipped step. A step is complete only after required artifacts exist.
-
-## Progress Format
-
-Report progress after each step:
-
-```text
-=== AUTOPILOT =====================================
-  OK [1] Codebase Intelligence
-  OK [2] Research (skipped — known domain)
-  OK [3] Brainstorm
-  OK [4] PRD
-  OK [5] TechSpec
-  OK [6] Tasks
-  STOP [PLAN COMPLETE] Next: /dw-goal --from-autopilot prd-name
-===================================================
-```
-
-During execution invocation:
-
-```text
-=== AUTOPILOT =====================================
-  OK [PLAN] Already complete
-  RUN [GOAL] /dw-goal --from-autopilot prd-name
-  NEXT [COMMIT] after goal status=complete
-===================================================
-```
-
-## Anti-patterns
-
-- Do not continue into implementation during the first invocation.
-- Do not skip `/dw-goal` during the second invocation.
-- Do not replace full `/dw-review` with a narrower review in the execution goal.
-- Do not mark state complete from manual validation alone.
-- Do not re-run planning when `status=plan_complete`; resume the goal.
-
+Update state after each checkpoint. Report current task, evidence and remaining work compactly. Preserve checkpoints on user pause or actual blocker; fix recoverable in-scope failures and continue.
 </system_instructions>

@@ -87,7 +87,7 @@ Create `MEMORY.md` and `<N>_memory.md` on first use with the template below. Nev
 
 ## Workflow
 
-### 1. Load before editing code
+### 1. Load relevant task memory on start or resume
 - Read `MEMORY.md` and the current task's `<N>_memory.md` **before** any code change.
 - Treat these as mandatory context for the run, not optional notes.
 - If the caller marks either file for compaction, apply the Compaction Rules (below) before continuing.
@@ -116,34 +116,7 @@ Create `MEMORY.md` and `<N>_memory.md` on first use with the template below. Nev
 
 ## Promotion Decision Test
 
-Before promoting an item from `<N>_memory.md` to `MEMORY.md`, ask:
-
-1. Will another task need this to avoid a mistake or rediscovery?
-2. Is this fact durable across multiple runs, not just the current execution?
-3. Is this information NOT already obvious from the PRD, TechSpec, task files, or the repository itself?
-
-All three must be "yes" to promote. If any is "no", the item stays in task memory.
-
-### Confidence signal
-
-Tag each durable decision with a confidence in `[0.3–0.9]` plus the tasks that confirmed it — `… — [confidence: 0.7; seen in tasks 1,3,5]`:
-
-- Confirmed in **≥2 of the last 3 tasks** with no contradiction → **≥0.7** (trust it; safe to act on without re-deriving).
-- Confirmed once, or inferred but not yet reused → **0.3–0.5** (tentative; gather more signal before relying).
-- Contradicted by a later task or the repo → lower it or drop the decision (see Error Handling).
-
-Confidence makes cross-task learning explicit and is the signal `/dw-learn` reads to promote high-confidence decisions into durable instincts, constitution principles, or rules.
-
-### Belongs in shared memory
-- A discovered constraint affecting multiple tasks ("the Stripe API rate-limits to 100 req/s — batch operations must respect this")
-- A cross-cutting architectural decision made during implementation ("chose React Server Components for data fetching across the whole feature")
-- An open risk future tasks must account for ("migration depends on schema v3 which is not yet deployed to staging")
-
-### Stays in task memory
-- Files touched during this task's implementation
-- Debugging steps taken to resolve a task-specific error
-- The current task's objective and acceptance criteria snapshot
-- A workaround applied only to the current task's scope
+For promotion decision test, read `references/promotion-decision-test-detail.md`. Load only when this part of the task applies.
 
 ## Compaction Rules
 
@@ -157,26 +130,7 @@ When flagged for compaction, apply inline:
 
 ## Context Budget
 
-Memory is part of a broader **context budget** the agent must respect during execution. A blown budget degrades reasoning before any output is produced — the model starts missing requirements, drops constraints, and reverts to averaged-over-training answers. Full guidance: [`references/context-budget.md`](references/context-budget.md).
-
-**Targets:**
-
-- **Total active context:** under **40k tokens** (rough working budget across PRD + TechSpec + tasks + MEMORY.md + per-task memory + open files).
-- **Reserve:** at least **120k tokens** of headroom for actual reasoning, tool output, and the model's response stream.
-- **Hard ceiling per memory file:** `MEMORY.md` ≤ 6KB; `<N>_memory.md` ≤ 3KB. Past those, compact instead of growing.
-
-**Anti-co-load rules** (apply on every load):
-
-1. Never load two PRD specs in the same context. If switching PRDs, drop the previous PRD's spec/techspec/tasks references from the active set.
-2. Never load multiple archived `.dw/bugfixes/` SUMMARY.md files together — load only what's needed for the active fix or query.
-3. Never load `.dw/intel/files.json` and `.dw/intel/deps.json` simultaneously when answering a single question — pick the primary per query shape (see `dw-codebase-intel/references/query-patterns.md`).
-4. Never load a design proposal AND the prior design's full text — if comparing, summarize the prior into 5-10 lines.
-
-**Monitoring signal:**
-
-If the agent finds itself reading large files repeatedly or summarizing the same fact across multiple turns, that's a budget signal. Compact memory and explicitly drop unrelated loaded context before proceeding. Note this in `MEMORY.md` under Handoff Notes so the next task starts lean.
-
-This budget is doctrine, not a hard gate. No command currently rejects work for exceeding 40k. The discipline lives here because future sessions read this skill first.
+For context budget, read `references/context-budget.md`. Load only when this part of the task applies.
 
 ## Error Handling
 
@@ -199,7 +153,7 @@ Ported from Compozy's `cy-workflow-memory` skill (`/tmp/compozy/.agents/skills/c
 
 - Paths are `.dw/spec/<prd-slug>/` instead of `.compozy/tasks/<name>/`.
 - Task-local file is `<N>_memory.md` next to `<N>_task.md` (mirrors the existing dev-workflow task layout).
-- Inline Compaction Rules (Compozy keeps them in `references/memory-guidelines.md`); the budget discipline was extracted to `references/context-budget.md` because it's about model behavior, not file management.
+- Inline Compaction Rules (Compozy keeps them in its upstream memory-guidelines reference); the budget discipline was extracted to `references/context-budget.md` because it's about model behavior, not file management.
 
 Credit: Compozy project (https://github.com/compozy/compozy).
 

@@ -4,7 +4,7 @@ You are the dev-workflow durable goal orchestrator. This command gives every sup
 ## When to Use
 - Use when a workflow is larger than one normal turn but has a clear finish line.
 - Use after `/dw-plan` when implementation, review, QA, and post-QA review should run as one durable loop.
-- Use from `/dw-autopilot` after the first invocation has completed PRD → TechSpec → Tasks.
+- Use from `/dw-autopilot` after the approved PRD → TechSpec → Tasks plan is ready.
 - Do NOT use for loose backlogs, unrelated task lists, or exploratory brainstorming.
 
 ## Position in Pipeline
@@ -28,7 +28,7 @@ You are the dev-workflow durable goal orchestrator. This command gives every sup
 Official Codex guidance treats `/goal` as an experimental durable objective for long-running work with a verifiable stopping condition. In Codex CLI it requires `features.goals`; it can be set with `/goal <objective>`, inspected with `/goal`, and controlled with `/goal pause`, `/goal resume`, or `/goal clear`.
 
 When running in Codex:
-- If a native goal tool is available, create/update it with a short objective pointing to `.dw/goals/<slug>/goal.md`.
+- Use native goal tools only when explicitly requested and permitted by their actual tool contract; never infer native-goal authorization from a portable workflow alone.
 - If the interactive `/goal` slash command is available and `features.goals` is enabled, use `/goal <objective>` with an objective under 4,000 characters.
 - If native goals are unavailable, continue with the portable `.dw/goals/` loop. Do not block.
 
@@ -101,12 +101,12 @@ Checkpoints:
 | `review-before-qa` | `/dw-review <prd-path>` | `<prd-path>/QA/review-consolidated.md` exists and overall verdict is approved or approved with explicit non-blocking caveats. |
 | `qa` | `/dw-qa <prd-path>` | Required QA artifacts exist. |
 | `qa-fix` | `/dw-qa --fix <prd-path>` when `bugs.md` has Open bugs | Bugs are Fixed/Closed or explicitly deferred by user. |
-| `review-after-qa` | `/dw-review <prd-path>` | Consolidated review exists after QA fixes and is approved or approved with explicit non-blocking caveats. |
+| `review-after-qa` | `/dw-review <prd-path>` when QA edits/findings invalidate review | Current consolidated review is approved or approved with explicit non-blocking caveats; unchanged QA reuses valid review. |
 
 The goal is complete only when:
 - All checkpoints above are complete or explicitly skipped with a documented reason.
 - No Open QA bug remains unless the user explicitly accepted deferral.
-- The final `/dw-review` ran after the last QA fix.
+- The final full `/dw-review` covers the current implementation. Repeat after QA edits or new findings; reuse when QA invalidated nothing.
 - `status.json` has `"status": "complete"`.
 
 ## Execution Rules
@@ -123,7 +123,7 @@ The goal is complete only when:
 
 - `status`: read `status.json` and last 10 entries of `progress.md`; report current checkpoint, completed checkpoints, last verification, and blockers.
 - `pause`: set `status: "paused"` and append why.
-- `resume`: set `status: "active"` and continue from `current_checkpoint`; do not repeat completed checkpoints unless artifacts are missing.
+- `resume`: set `status: "active"` and continue from `current_checkpoint`; do not repeat completed checkpoints unless artifacts are missing or evidence was invalidated.
 - `clear`: if complete/cancelled/replaced, mark `status: "cancelled"` or archive according to project convention. Do not delete evidence by default.
 
 ## Anti-patterns
@@ -132,5 +132,11 @@ The goal is complete only when:
 - Do not use `/dw-goal` to bypass `/dw-plan`; goals execute a defined plan, they do not invent scope.
 - Do not mark a checkpoint complete without checking artifacts.
 - Do not use native Codex `/goal` as the only state; `.dw/goals/` remains the cross-agent contract.
+
+## Approved execution state
+
+Read `.dw/references/execution-contract.md`. Consume approved task assignments and preserve `execution-state.json` through checkpoints. A runner return goes back to the parent for review, corrections and next tasks. Do not repeat `/dw-run`'s final full review when it already covers the unchanged implementation: validate its evidence and record the checkpoint as reused. Conditional/inapplicable QA needs a recorded reason, not invented artifacts. Complete the goal by verifying acceptance and evidence first, then set status complete; the status field itself does not prove completion.
+
+Resume preserves completed checkpoints unless evidence is invalid or artifacts are missing. Separate delivery from merge/push/publication authorization. Keep partial work on block/pause and never silently change a task's executor.
 
 </system_instructions>

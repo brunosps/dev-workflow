@@ -38,7 +38,7 @@ Keep only the 3 most recent snapshots (remove older ones) to avoid buildup.
 Before updating, capture the installed version so you can report the delta:
 
 ```bash
-node -e "try { console.log(require('@brunosps00/dev-workflow/package.json').version) } catch(e) { console.log('not-cached-locally') }" 2>/dev/null
+node -e 'try { const s = JSON.parse(require("node:fs").readFileSync(".dw/install-state.json", "utf8")); console.log(s.version || "unknown"); } catch { console.log("unknown"); }'
 ```
 
 ### 2. Detect Language of Installed Commands (Required)
@@ -71,7 +71,7 @@ Rules:
 
 ### 3. Run the Update (Required)
 
-<critical>Use `npx -y @brunosps00/dev-workflow@latest` to FORCE fetching the latest version from npm (bypass local cache). Pass `--lang=<DETECTED_LANG>` to skip the interactive prompt.</critical>
+<critical>Use `npx -y @brunosps00/dev-workflow@latest` to select the version tagged `latest` on npm. Pass `--lang=<DETECTED_LANG>` to skip the interactive prompt.</critical>
 
 ```bash
 npx -y @brunosps00/dev-workflow@latest update --lang=$DETECTED_LANG
@@ -90,8 +90,22 @@ If the update fails (network error, permission, package unavailable): report the
 ### 4. Capture New Version
 
 ```bash
-node -e "console.log(require('@brunosps00/dev-workflow/package.json').version)" 2>/dev/null
+node -e 'const s = JSON.parse(require("node:fs").readFileSync(".dw/install-state.json", "utf8")); if (s.package !== "@brunosps00/dev-workflow" || !s.version) process.exit(1); console.log(s.version);'
 ```
+
+### Upgrade compatibility checks
+
+Read the refreshed `.dw/commands/dw-update.md` after the CLI completes. Use `.dw/install-state.json` and the CLI's `Installed version` output for the version delta: an `npx` package need not be resolvable from the consumer's `node_modules`. A missing or invalid new install state is a failed verification; do not claim the update succeeded.
+
+For an upgrade from before 2.3.0 (or an unknown legacy version):
+
+- Verify `.dw/references/execution-contract.md`, `.dw/scripts/lib/workflow-contract.mjs` and `.dw/templates/frontend-quality-template.md` were delivered. Managed commands, skills, wrappers and instruction blocks refresh through normal `update`; no `--force` is needed.
+- Compare `.dw/config/routing.json` with the newly managed `.dw/config/routing-defaults.json` during `/dw-skill-health`. Keep active owner choices and approved assignments. Propose specific model/effort changes after checking capabilities; updating scaffold files alone does not authorize changing providers.
+- Preserve `.dw/spec/`, `.dw/goals/`, `.dw/STATE.md`, execution/session state, rules and `.dw/templates/overrides/`. Schema 1.0 plans remain valid and local by default. For an active `execution-plan.json`, run `node .dw/scripts/lib/workflow-contract.mjs validate <plan-path>`; report invalid plans without rewriting approvals or resetting progress. New task plans use schema 1.1.
+- Inspect task template overrides for old schemas/routing rules and report any differences that shadow the new managed templates; do not replace owner overrides automatically.
+- If frontend quality documentation is relevant and missing, have `/dw-analyze-project` add the baseline to the existing module rules, scoped to that documentation. Preserve existing gates; propose tooling separately. Skip this action for `update files only`.
+
+Do not force-convert active work or globally regenerate product documentation to adopt the release. Record compatibility findings and retain session reload as the final step.
 
 ### 5. Report Result
 
@@ -156,7 +170,7 @@ E.g.: `npx -y @brunosps00/dev-workflow@0.4.5 update --lang=en`
 ## Notes
 
 - `npx -y` skips the "OK to install" prompt when the package is not cached
-- `@latest` bypasses the npx cache and pulls the `latest` tag from the registry
+- `@latest` selects the registry tag; verify the installed result rather than assuming a local package lookup identifies the executed CLI
 - `--lang=...` skips the interactive language prompt; the value comes from the auto-detection in step 2
 - This command does NOT update the user project's Node dependencies — only the dev-workflow scaffold
 

@@ -16,9 +16,9 @@ const cliProtocol = cli + '\n' + read('scaffold/skills/dw-cli-run/references/dis
 
 test('Claude adapter DISPATCH + RESUME accept an <EFFORT> slot (EN + PT)', () => {
   for (const [label, body] of [['EN claude-run', cEn], ['PT claude-run', cPt]]) {
-    includes(assert, body, '--model <MODEL> --effort <EFFORT>', label); // DISPATCH
-    includes(assert, body, 'claude --resume "$UUID" -p --effort <EFFORT>', label); // RESUME
-    includes(assert, body, '2.1.206', label);
+    includes(assert, body, '--model "<MODEL>" --effort "<EFFORT>"', label); // DISPATCH
+    includes(assert, body, 'claude --resume "<SESSION_ID>" -p --model "<MODEL>" --effort "<EFFORT>"', label); // RESUME
+    includes(assert, body, '<RESUME_PERMISSIONS>', label);
     includes(assert, body, 'xhigh', label);
   }
 });
@@ -37,10 +37,10 @@ test('the full effort ladder is documented (EN + PT)', () => {
   }
 });
 
-test('dw-cli-run acceptance score is provider-neutral (parent re-gate, not Claude)', () => {
+test('dw-cli-run acceptance uses independent evidence rather than self-score', () => {
   includes(assert, cliProtocol, 'the parent re-gates', 'dw-cli-run protocol');
   includes(assert, cliProtocol, 'Parent re-gate (independent)', 'dw-cli-run protocol');
-  includes(assert, cliProtocol, "score that counts for acceptance is the parent's", 'dw-cli-run protocol');
+  includes(assert, cliProtocol, "A numeric score is optional diagnostic information, never an acceptance gate", 'dw-cli-run protocol');
 });
 
 test('dw-cli-run no longer hard-codes "Claude re-gates" / "Claude\'s score"', () => {

@@ -310,6 +310,8 @@ Documentar os fluxos rastreados com caminhos de arquivo em cada etapa.
 
 ### Passo 5: Detectar Antipatterns (Obrigatório)
 
+Para um módulo frontend, leia `dw-ui-discipline/references/frontend-engineering.md` no local das skills instaladas. Use `.dw/templates/frontend-quality-template.md` para incluir controles observados, lacunas e propostas de adoção no `.dw/rules/<module>.md` do módulo. Inspecione scripts/configurações reais e CI; registre checks não executados explicitamente. Preserve a política existente e separe-a das recomendações. Este comando apenas documental não instala ferramentas, altera código/configurações nem ativa novos gates no CI.
+
 Verificar a presença de:
 
 | Antipattern | Como Detectar |

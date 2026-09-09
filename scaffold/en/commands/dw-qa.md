@@ -81,6 +81,8 @@ When available under `./.agents/skills/`, these are invoked operationally:
 
 ### Behavior — UI mode
 
+Read the affected module's quality baseline/TechSpec. Reuse valid required-check evidence through `dw-verify`; keep browser behavior, contract validation and diagnostic reports distinct. When critical logic or weak assertions warrant mutation analysis, read `dw-testing-discipline/references/mutation-testing.md`. Do not introduce a score threshold or install a new suite for unrelated UI edits. Record unavailable/not-run diagnostics and investigated findings in `qa-report.md`.
+
 1. **Pre-flight**: confirm the project dev server can run. Confirm `.dw/spec/<prd>/` has the PRD + TechSpec + tasks.
 2. **Map FRs to test plan**: for each FR, identify the user-facing flow that exercises it.
 3. **Drive Playwright MCP** (if unavailable or blocked — common on WSL — fall back to the WSL-resilient local capture `node .dw/scripts/lib/capture-screenshots.mjs`, which picks the browser via `.dw/scripts/lib/resolve-browser.mjs`; see the "Browser on WSL" section of `dw-testing-discipline/references/playwright-recipes.md`):

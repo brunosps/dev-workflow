@@ -1,180 +1,33 @@
 <system_instructions>
-You are the task execution orchestrator. Two modes: execute ONE specific task, or execute ALL pending tasks in dependency order. Both modes apply the same task-level guarantees (atomic commit per task, mandatory tests, verify before commit, deviation handling).
+# Execute approved tasks
 
-## When to Use
-- Use `run` after `/dw-plan` has produced `tasks.md` + per-task files and the tasks are approved.
-- Use to execute a single targeted task during incremental development.
-- Do NOT use for bug fixes — `/dw-bugfix` handles those.
-- Do NOT use without an approved tasks breakdown — tasks files MUST exist.
+Use `/dw-run` for all pending tasks, `/dw-run <task-id>` for one, and `/dw-run --resume` to continue. Inputs are the task ID and active `.dw/spec/<prd>/` directory. Tasks and dependencies must exist and be approved. For investigation without a plan use `/dw-bugfix`.
 
-## Pipeline Position
-**Predecessor:** `/dw-plan` (with tasks approved) | **Successor:** `/dw-review` then `/dw-commit` + `/dw-generate-pr`
+## Assignment and preparation
 
-## Modes
+Read `.dw/references/execution-contract.md` and the relevant task file. Consume `execution-plan.json` when present; validate it with `node .dw/scripts/lib/workflow-contract.mjs validate <plan.json>`. Cross-check IDs/dependencies against tasks.md. Legacy schema 1.0 tasks without assignments execute locally. Never infer cross-tool authorization from installed CLIs alone.
 
-| Invocation | Behavior |
-|------------|----------|
-| `/dw-run` | **Default.** Executes ALL pending tasks from `tasks.md` in dependency order. Wave-based parallel dispatch for independent tasks. Atomic commit per task. After all complete, runs Level 2 review (PRD compliance). |
-| `/dw-run <task-id>` | Executes ONE specific task by ID (e.g., `1.0`, `2.3`). Includes Level 1 validation. Atomic commit on success. |
-| `/dw-run --resume` | Resumes an interrupted multi-task plan from where it stopped. Reads `.dw/spec/<prd>/active-session.md` if present; otherwise continues from first pending task. |
+Respect applicable constitution decisions and the task's requirement IDs (`FR-N.M` / `RF-N.M`). Missing constitution uses non-blocking defaults. Inspect relevant source and project rules; query `.dw/intel/` only when useful and check freshness. Do not require a full repository map before every task.
 
-## Inputs
+Load skills by need: `dw-verify` for evidence, `dw-memory` for relevant durable decisions/checkpoints, `dw-testing-discipline` when designing tests, `dw-ui-discipline` for UI, `dw-llm-eval` for AI behavior, `dw-execute-phase` for dependency/plan checks. Use `dw-search-first` for new dependencies and `dw-minimalism` for a concrete abstraction/scope decision, not before each new function. Use `dw-simplification` for an explicitly scoped cleanup after verification. For explicitly requested TDD/test first/red-green-refactor, use `dw-testing-discipline/references/tdd-loop.md` for that task.
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `{{TASK_ID}}` | Specific task identifier (optional — defaults to all pending) | `1.0`, `2.3`, `5.1` |
-| `{{PRD_PATH}}` | Path to PRD directory containing tasks (optional — auto-detect from active branch) | `.dw/spec/prd-invoice-export` |
+## Execution loop
 
-## Complementary Skills
+1. Arm `/dw-report` once (idempotent, skipped when `DW_REPORT_AUTO=off`). Validate task coverage, dependency graph and acceptance checks using `dw-execute-phase`; repair internal inconsistencies before execution, ask only for missing material decisions.
+2. Choose the next task whose dependencies are complete on the execution branch. Independent tasks may run concurrently only with approved agents/worktrees and a defined integration path. One writer per worktree; coupled tasks stay sequential.
+3. Use the approved task executor/model/effort/agents. Local assignments execute in the current workflow. Cross-tool assignments invoke `/dw-codex-run`, `/dw-claude-run`, or `/dw-copilot-run` with the prepared task packet. The parent owns the objective throughout.
+4. Implement acceptance criteria with project patterns, tests from the approved strategy and necessary failure handling. When a worker returns, independently inspect diff and criteria; inspect/reuse valid evidence or run affected checks through `dw-verify`. Fix in-scope failures automatically, using the same external session when applicable.
+5. Commit only scoped task changes after valid verification; retain atomic commits and requirement IDs. Include task status in the commit, then record its SHA in the `Commit` column of tasks.md and run-log.md. Commit remaining bookkeeping in the next task or final metadata commit; never `git add .` across unrelated changes.
+6. Update `execution-state.json`, `active-session.md` and run-log.md with completed tasks, assignments, branch/worktree, exact sessions, verification and next step. Continue remaining approved tasks; `--checkpoint` explicitly requests a pause between waves.
+7. After all tasks, run `/dw-review` for requirement coverage and code quality. Correct in-scope findings automatically; user decisions are needed only for scope changes or deferrals. Full implementation workflows continue to applicable `/dw-qa` and fixes under `/dw-goal` or the invoking orchestrator. A single-task request ends after that task's validated handoff.
 
-When available under `./.agents/skills/`, these skills are invoked per task:
+## Resume and blockers
 
-- `dw-verify`: **ALWAYS** — before each task's commit, produces a Verification Report (test + lint + build all GREEN). Without PASS, no commit. The Iron Law of verification.
-- `dw-memory`: **ALWAYS** — reads workflow memory at task start; updates at task end with the promotion test (lessons that apply to next task get promoted to shared MEMORY.md).
-- Instincts (lazy): at task start, also load any high-confidence instinct (`.dw/memory/instincts/`, confidence ≥0.7) whose `trigger` matches the task — learned project conventions promoted by `/dw-learn`. Match by trigger only; never bulk-load the set.
-- `dw-execute-phase`: provides `plan-checker` (6-dimension goal-backward verification before any code is touched in plan mode) and `executor` (atomic commit + deviation handling) agents.
-- `dw-testing-discipline`: applies the placement doctrine, 6 agent guardrails, and 25 anti-patterns when adding tests during the task.
-- `dw-testing-discipline` test-first mode: ONLY when the task text or user explicitly says `TDD`, `test first`, or `red-green-refactor`, execute that task through `references/tdd-loop.md` (confirm public seams with the user → write ONE red test → run and observe red → implement minimum green → run and observe green → next slice; refactor only after the loop via `dw-simplification`). This is not the default `/dw-run` mode.
-- `dw-ui-discipline`: when the task touches UI, the 4 grounding questions must be answered before any visual decision lands.
-- `dw-llm-eval`: when the task touches AI feature code paths, the reference dataset + oracle ladder rules apply.
-- `dw-minimalism`: **before writing new code** — climb the YAGNI decision ladder (need it? reuse? stdlib? native? installed dep? one line?) at the active intensity, then write the minimum. Hands new dependencies to `dw-search-first`.
-- `vercel-react-best-practices`: when the task touches React/Next.js performance.
+A resume request already authorizes continuation. Inspect saved state and actual worktree rather than asking “continue?” again. Keep completed tasks and approved assignments; validate dependencies and prior evidence. Recover missing session IDs only from task-specific logs with identity checks; otherwise reconstruct a new session in the same worktree without discarding changes. See execution-contract for cross-provider limitations.
 
-## Constitution Gate
+Missing dependency: finish its pending approved task first; ask only if it is outside the plan. Verification failure: diagnose, fix and rerun invalidated checks. Missing test framework: discover the configured runner before asking. Increased complexity: record a deviation and split/reorder within approved scope. New product behavior, architectural conflict or unapproved dependency: propose the material change and wait only on dependent work. Preserve checkpoints at a real impasse or user pause.
 
-<critical>BEFORE executing any task, check `.dw/constitution.md`. If MISSING, auto-install defaults via the v0.11 pattern. If PRESENT, the task's `Constitution Alignment` line (set during `/dw-plan` Stage 3) is consulted as the task executes — code must respect the claimed principles.</critical>
+## Completion report
 
-## Codebase Intelligence
-
-<critical>If `.dw/intel/` exists, query it via `/dw-intel` before implementation to align with existing patterns.</critical>
-- Per-task: `/dw-intel "patterns for <task topic>"` to surface relevant conventions.
-
-## Mode 1: ONE task (`run <task-id>`)
-
-### Prerequisites
-- `tasks.md` + per-task files exist in `.dw/spec/<prd>/`.
-- The target task's dependencies are completed (check `task.md` "Depends on" section).
-
-### Behavior
-
-1. **Read the task file:** `.dw/spec/<prd>/<task-id>_task.md`. Understand inputs, FRs covered, acceptance criteria, subtasks.
-2. **Plan implementation:**
-   - List files to create/modify.
-   - Identify test additions per subtask.
-   - Confirm dependencies (if missing, STOP and surface).
-3. **Implement:**
-   - Follow project patterns from `.dw/rules/` and `.dw/intel/`.
-   - Apply complementary skills (UI gate, test discipline, etc.).
-   - Mandatory unit tests for backend/services per testspec.
-   - Match the testing framework specified in `.dw/rules/`.
-4. **Validate (Level 1):**
-   - Run the project's test command.
-   - Check acceptance criteria from the task file.
-   - Run `dw-verify` to produce the Verification Report (test + lint + build GREEN).
-   - For interactive frontend, also validate real behavior via `dw-testing-discipline` Playwright recipes if regression risk is meaningful.
-5. **Commit:**
-   - Atomic commit message: `feat(<scope>): <task title> (#<task-id>)`.
-   - Reference the FRs covered.
-   - One task = one commit (unless the task explicitly has subtask milestones that earn separate commits).
-6. **Update tasks.md:** set this task's `Status` to `Done` and write the short SHA (`git rev-parse --short HEAD`) into its `Commit` column. This is the only record linking a task to its diff — do not skip it.
-7. **Report:** what was done, what tests were added, what was validated.
-
-### STOP CONDITIONS
-- Dependencies not satisfied → ask user how to proceed.
-- Verification Report FAIL → do not commit; report what's broken.
-- Task scope creep detected mid-implementation → STOP and ask user to scope.
-
-## Mode 2: ALL pending tasks (default `run`)
-
-### Prerequisites
-- `tasks.md` + per-task files exist with declared dependencies.
-- `tasks-validation.md` shows PASS (or explicit override).
-- The branch is created: `feat/prd-<feature-slug>`.
-
-### Behavior
-
-0. **Arm the progress loop:** invoke `/dw-report` (auto-arm contract — idempotent when `.dw/reports/.active.json` is already live; skipped when `DW_REPORT_AUTO=off`). It reports done / doing / remaining every 10 minutes while the waves run and disarms itself with a final report after the final Level 2 review.
-1. **Plan check (via `dw-execute-phase/plan-checker` agent):**
-   - 6-dimension goal-backward verification: are these tasks actually going to deliver what the PRD promises?
-   - If FAIL on any dimension, STOP and report to user before any code is touched.
-2. **Build dependency graph:**
-   - Topological sort of tasks.
-   - Identify independent tasks that can run in parallel waves.
-3. **Wave-based parallel dispatch (via `dw-execute-phase/executor` agent):**
-   - Each wave contains tasks with no inter-dependencies.
-   - Execute waves serially; within a wave, tasks dispatch in parallel.
-   - Per-task: same Level 1 flow as Mode 1 (implement → validate → atomic commit).
-4. **Deviation handling:**
-   - If a task encounters scope creep, STOP that task, surface to user.
-   - If a task fails verification, the wave halts. No subsequent waves run until resolved.
-5. **Checkpoint between waves:**
-   - Print wave summary: tasks completed, commits, any deviations.
-   - Continue automatically unless `--checkpoint` was passed (then wait for user OK).
-6. **Final Level 2 review:**
-   - After all tasks complete, automatically invoke `/dw-review` (the merged review command — runs both PRD compliance check and code quality review).
-   - Present consolidated review report.
-   - Interactive corrections cycle: review surfaces gaps → user decides to fix, defer, or accept.
-
-### Output
-
-```
-.dw/spec/<prd>/
-├── active-session.md      # written at checkpoint; consumed by --resume
-├── run-log.md             # per-wave execution log with commit SHAs
-└── review-consolidated.md # final L2+L3 review (from /dw-review)
-```
-
-## Mode 3: Resume (`run --resume`)
-
-### Prerequisites
-- Previous `run` (Mode 2) was interrupted.
-- `active-session.md` exists in the current PRD's `.dw/spec/<prd>/` directory.
-
-### Behavior
-
-1. Read `active-session.md` to determine which task/wave the session stopped at.
-2. Surface to user: "Resuming from wave N, task X.0. Previously completed: <list>. Continue?"
-3. On confirmation, resume from the next pending task with the same Mode 2 behavior (including step 0 — arm `/dw-report`).
-
-If `active-session.md` doesn't exist but uncompleted tasks remain, treat as Mode 2 fresh start.
-
-## Across all modes: deviation handling
-
-When implementation cannot proceed as planned:
-
-| Deviation | Action |
-|-----------|--------|
-| Task requires new dependency not in TechSpec | STOP. Suggest `/dw-plan techspec --update` to revise. |
-| Acceptance criterion is ambiguous | STOP. Ask user for clarification. |
-| Test framework decision missing | STOP. Use `dw-testing-discipline` placement doctrine to propose; ask for sign-off. |
-| Pattern from `.dw/rules/` doesn't fit cleanly | STOP. Surface the friction; propose either an ADR-justified deviation or a rules update. |
-| Hidden complexity emerges (task estimated 2h, looks like 8h) | STOP. Surface; either split the task via `/dw-plan tasks --update` or accept the delay with note. |
-
-## Reporting
-
-After every run (Mode 1, 2, or 3 completion), print:
-
-- Tasks completed with commit SHAs.
-- Files touched count.
-- Tests added (unit + E2E if applicable).
-- Verification Report verdict per task.
-- For Mode 2: final consolidated review status.
-- For Mode 2: any deviations encountered and how they were resolved.
-
-## Anti-patterns
-
-- Skipping `dw-verify` to "save time before commit" — produces commits that don't build.
-- Running tasks without dependency satisfaction — produces commits that won't work in isolation.
-- Letting wave-based parallel run without watching for deviations — silent scope creep compounds.
-- Committing multiple tasks in one commit — breaks bisect, breaks revert granularity.
-- Skipping the final Level 2 review in Mode 2 — ships features that don't fully match the PRD.
-
-## Final Guidelines
-
-- Atomic commits are non-negotiable. One task = one commit (or one subtask-bundle if explicit).
-- Tests are mandatory per the testing strategy section of the TechSpec.
-- Verification Report PASS is the gate, not the goal — never weaken assertions to make tests pass.
-- Deviation surfacing is a feature, not a bug. Stop and ask. The user prefers an interruption to a wrong implementation.
-- For multi-day plans, `--resume` is your friend. Don't restart from zero.
-
+Return completed task IDs and commit SHAs, affected files, valid checks, unresolved findings and next step. `/dw-review` writes `<prd-path>/QA/review-consolidated.md`. Durable state and logs remain in the spec directory; worker audit/session files stay outside disposable worktrees. A passed gate proves its scope only; never weaken assertions or hide a blocking finding. Merge, push and publication require applicable authorization.
 </system_instructions>

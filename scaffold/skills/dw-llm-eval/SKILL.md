@@ -26,19 +26,7 @@ If the feature is fully deterministic (no LLM in the loop), use `dw-testing-disc
 
 ## The oracle ladder
 
-Five rungs, climb from CHEAPEST/STRICTEST to MOST EXPENSIVE/SUBJECTIVE. Always start at the bottom; only climb when the lower rung can't cover the case.
-
-| Rung | What it checks | Cost | When to use |
-|------|----------------|------|-------------|
-| 1. **Exact match** | `output === expected` | ~free | Structured outputs (function calls, JSON with stable shape, classifications) |
-| 2. **Schema validation** | Output matches JSON schema / type contract | ~free | Output shape matters; specific values vary |
-| 3. **Outcome state** | Side effect produced the expected change (DB row, file written, tool called) | cheap | Agents, tool-use, RAG with concrete answers |
-| 4. **LLM-as-judge** | A different model grades the output against a rubric | medium ($$$) | Subjective quality (helpfulness, tone, faithfulness) where no rule can decide |
-| 5. **Human review** | Domain expert scores | expensive | Calibration of rung 4; high-stakes outputs; edge cases |
-
-**Rule:** never reach for rung 4 before checking if rungs 1-3 can cover the case. Every rung up costs an order of magnitude more (latency, money, calibration effort) — and adds entropy.
-
-See `references/oracle-ladder.md` for examples per rung and the climbing decision tree.
+For the oracle ladder, read `references/the-oracle-ladder-detail.md`. Load only when this part of the task applies.
 
 ## LLM-as-judge discipline (when rung 4 is needed)
 
@@ -68,14 +56,7 @@ See `references/reference-dataset.md` for case-design principles, sampling from 
 
 ## Consistency (run-to-run stability)
 
-The oracle ladder measures whether an output is *correct*; it does not measure whether the feature is *stable*. Because LLMs are non-deterministic, a case that passes once may fail the next run. Measure it:
-
-- Re-run each case **N times** (default 3) against the same code + model + prompt.
-- Record `pass_rate` (e.g. `2/3`) and `consistency` (fraction agreeing with the majority verdict) per case in `runs/<YYYY-MM-DD>.jsonl`.
-- A case with pass_rate strictly between `1/N` and `(N-1)/N` is **flaky** — a signal, not a pass. A 2/3 pass hides a one-in-three production failure; investigate before shipping.
-- Sample at the **temperature the feature uses in production** — consistency measured at temp 0 lies about a temp-0.7 feature.
-
-Deterministic rungs (1–3) are usually stable; consistency matters most for rung 4 (LLM-as-judge) and agent trajectories. Record the run count `N` in the run log so later comparisons are apples-to-apples.
+For consistency (run-to-run stability), read `references/consistency-run-to-run-stability-detail.md`. Load only when this part of the task applies.
 
 ## RAG evaluation
 
@@ -91,27 +72,7 @@ Precision alone misses hallucination. Faithfulness alone misses retrieval failur
 
 ## Agent / tool-use evaluation
 
-Two questions distinguish good agent eval from bad:
-
-### Question 1: outcome or trajectory?
-
-| Approach | What it checks | Failure mode |
-|----------|---------------|--------------|
-| **Outcome-only** | Did the agent achieve the goal? Was the final state correct? | Misses "ghost actions" — agent did the right thing for the wrong reasons |
-| **Trajectory** | Did the agent take the expected sequence of steps / tool calls? | Punishes legitimate creativity — agent solved it via a different valid path |
-
-**Recommendation:** outcome-only with side-effect assertion as default. Trajectory match for cases where the path matters (e.g., "must call `get-user` before `update-user`").
-
-### Question 2: which trajectory match mode?
-
-When trajectory matching IS the right call, four modes are available:
-
-- **Strict** — same tool calls, same order, same arguments. Use when both sequence and parameters are part of the contract.
-- **Unordered** — same tool calls, any order. Use when concurrent calls are valid.
-- **Subset** — actual trajectory contains a subset of reference calls. Use to enforce "don't exceed expected tool use" (frugality / cost).
-- **Superset** — actual contains all reference calls plus possibly more. Use when specific tools are mandatory but extras are acceptable.
-
-See `references/agent-eval.md` for examples and the decision tree.
+For agent / tool-use evaluation, read `references/agent-tool-use-evaluation-detail.md`. Load only when this part of the task applies.
 
 ## Required reading by context
 
@@ -125,20 +86,11 @@ See `references/agent-eval.md` for examples and the decision tree.
 
 ## Anti-patterns (will block in `/dw-review --code-only`)
 
-- **LLM-as-judge without calibration evidence.** PR adds LLM-as-judge but the calibration Spearman score is missing or < 0.80. REJECTED.
-- **Same-model judge.** Judge model is the same as the system under test. REJECTED unless explicitly documented (and even then, results are suspect).
-- **Single-rung eval.** Feature ships with only LLM-as-judge; no rung 1-3 grounding. REJECTED — the cheap rungs catch the loud failures.
-- **Synthetic-only dataset.** No traceable production-failure source for any case. REJECTED — confirm at least 20% of cases come from real user inputs.
-- **"Looks good to me" QA.** No reference dataset, no metric, no rubric — just sampling output and calling it good. REJECTED.
-- **Coverage as metric.** Quoting "we tested 50 prompts" without saying what was measured. The number is meaningless without the metric.
-- **Single-run eval on a non-deterministic feature.** Each case run once at production temperature; a lucky pass reported as a pass. REJECTED — report `pass_rate` over N runs (see Consistency).
+For anti-patterns (will block in `/dw-review --code-only`), read `references/anti-patterns-will-block-in-dw-review-code-only-detail.md`. Load only when this part of the task applies.
 
 ## Integration with dev-workflow commands
 
-- `/dw-plan tasks`: when the PRD has an AI feature requirement, an eval-plan subtask is mandatory. The task references this skill's oracle ladder.
-- `/dw-review --code-only`: AI feature PRs require a reference dataset + ≥2 oracle rungs (lower rungs FIRST). The constitution gate also applies — if the project has principles about AI feature reliability, they're enforced here.
-- `/dw-qa --ai`: new mode (when this skill is bundled) — runs the reference dataset against the current implementation, logs to `QA/logs/ai/<feature>-<date>.jsonl`, computes precision@k / faithfulness / outcome accuracy per the feature type.
-- `/dw-bugfix` when the bug is an AI failure mode (hallucination, tool misuse, classification error): adds the failing case to the reference dataset BEFORE fixing — the case is now a regression test forever.
+For integration with dev-workflow commands, read `references/integration-with-dev-workflow-commands-detail.md`. Load only when this part of the task applies.
 
 ## When the discipline bends
 

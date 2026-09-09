@@ -13,11 +13,11 @@ You are an assistant specialized in creating well-documented Pull Requests. Your
 
 | Skill | Trigger |
 |-------|---------|
-| `dw-verify` | **ALWAYS** — invoked before `git push`. Without a VERIFICATION REPORT PASS in the current session AFTER the last code edit, the PR **CANNOT** be created. |
+| `dw-verify` | **ALWAYS** — invoked before `git push`. Without a VERIFICATION REPORT PASS valid for the current inputs, environment and scope, the PR **CANNOT** be created. |
 | `dw-git-discipline` | **ALWAYS** — validates branch naming (`<type>/<scope>` kebab-case), atomic-commit history (each commit single-intent, conventional message), branch lifetime (flag if >7 days old), and PR scope (suggest split if diff > ~400 lines). PR description follows summary + test plan structure, not a `git log` dump. |
 | `/dw-secure-audit` | **ALWAYS for TS/Python/C#/Rust projects** — a fresh `.dw/secure-audit/audit-summary.md` with status ≠ REJECTED is required for supported-language projects. |
 
-<critical>Hard gate 1 (verify): if the current session has no VERIFICATION REPORT PASS from `dw-verify` produced AFTER the last edit/commit, STOP and invoke `dw-verify` before proceeding. A PR is a permanent artifact — it demands the highest verification standard.</critical>
+<critical>Hard gate 1 (verify): use `dw-verify` to confirm valid passing evidence for current inputs, environment and scope before push/PR. Reuse equivalent evidence; run missing or invalidated required checks. No new-session or bookkeeping-only-commit reset.</critical>
 
 <critical>Hard gate 2 (security): for TS/Python/C#/Rust projects, if `.dw/secure-audit/audit-summary.md` is missing, stale (predates the last edit), OR has REJECTED status, STOP and invoke `/dw-secure-audit` before proceeding. SECRET findings and HIGH/CRITICAL vulnerabilities CANNOT reach the PR. For other languages (Go, Java, etc.), this gate is skipped with a note.</critical>
 

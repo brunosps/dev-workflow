@@ -7,7 +7,7 @@ dev-workflow does not hardcode a verification command. Discover it from the proj
 3. Check for `Makefile`/`make verify`, `pyproject.toml`/`just verify`, etc.
 4. If none is explicit, run the documented test + lint + build sequence.
 
-If no verification command exists for the project, state that explicitly in the Verification Report and avoid completion language.
+If no automated command applies, document the appropriate inspection and its limits. A missing required check blocks its claim; a prose-only task does not require an invented test runner.
 
 ## Integration With Other dev-workflow Commands
 
@@ -18,7 +18,7 @@ This skill is invoked transparently from:
 - `/dw-qa --fix` — before marking a bug as resolved in `QA/bugs.md`
 - `/dw-bugfix` — before claiming the bug is fixed (original symptom no longer reproduces)
 - `/dw-review --code-only` — before emitting an APPROVED verdict
-- `/dw-generate-pr` — blocks PR creation if the session has no passing VERIFICATION REPORT post-last-edit
+- `/dw-generate-pr` — requires valid passing evidence for the current inputs, environment and scope
 
 Callers should mention this skill in their "Skills Complementares" section so the user sees the dependency.
 

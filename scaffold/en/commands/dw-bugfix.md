@@ -264,11 +264,11 @@
     | Question | If YES -> |
     |----------|-----------|
     | Needs migration/schema change? | Redirect to PRD |
-    | Affects more than 5 files? | Redirect to PRD |
+    | Broader file scope? | Reassess organization and actual risk; no automatic stop |
     | Requires new endpoint? | Redirect to PRD |
     | Changes existing API contract? | Redirect to PRD |
     | Affects multiple projects? | Redirect to PRD |
-    | Estimate > 2 hours of implementation? | Redirect to PRD |
+    | Larger implementation estimate? | Reorganize/checkpoint within approved scope |
 
     **If excessive scope detected:**
     ```
@@ -300,45 +300,19 @@
     - With `--analysis`: Go to step 6
     - Without `--analysis`: Continue to step 5
 
-    ### 5.0. Safety Valve (MANDATORY before step 5)
+    ### 5.0. Safety Valve (before implementation)
 
-    <critical>
-    BEFORE drafting the numbered task list in step 5, sketch the inline steps you intend to write.
-    If that sketch reveals **more than 5 distinct numbered tasks**, OR **any cross-file dependency that means tasks must be executed in a specific order**, OR **a task that requires running database migration / refactor / new endpoint / API contract change**, then the bugfix scope was UNDERESTIMATED and you MUST escalate.
-    </critical>
+    Inspect the proposed fix for material scope or architecture changes. Task count, file count, ordering dependencies and larger estimates are signals to organize work, not automatic blockers. Refactoring required to fix approved behavior can remain in scope. A new product contract, sensitive migration or unresolved architecture decision needs a concrete proposal before dependent implementation.
 
-    **Why this exists:** the triage at step 0 catches scope problems from the symptom description. The checkpoint at 4.1 catches them after root cause analysis. This valve catches the remaining case — when the fix itself, once laid out, reveals more complexity than triage and root cause analysis predicted. There is NO bypass flag. Escalation is the correct outcome.
+    When a structured plan is needed, preserve `.dw/bugfixes/NNN-<slug>/TASK.md`, create `.dw/spec/prd-bugfix-<slug>/prd.md` using the bugfix template, and record the cross-reference in `escalated.md`. Continue through `/dw-plan` or `/dw-autopilot --from-prd prd-bugfix-<slug>` according to existing user intent. The task breakdown proposes executor/model/agents; after approval continue in the same invocation. Do not re-ask permission to organize an already authorized fix. An analysis-only request still ends with its report.
 
-    **Escalation procedure:**
-
-    1. Allocate `NNN` for `.dw/bugfixes/NNN-<slug>/`. Write `TASK.md` with the triage, clarifications, root cause, and the would-be plan.
-    2. Create `.dw/spec/prd-bugfix-<slug>/` and write `prd.md` there (use `.dw/templates/bugfix-template.md`). This is the path `/dw-plan` expects.
-    3. Write `.dw/bugfixes/NNN-<slug>/escalated.md` with: `Escalated to /dw-plan on <YYYY-MM-DD> — reason: <which valve criterion tripped> → see .dw/spec/prd-bugfix-<slug>/`.
-    4. Report to the user:
-
-    ```
-    ## Scope larger than a bugfix
-
-    Listing the fix produced [N] tasks / [cross-file deps] / [forbidden change type].
-    Per the safety valve, this is no longer a surgical bugfix.
-
-    Bugfix index preserved at `.dw/bugfixes/NNN-<slug>/{TASK.md, escalated.md}`.
-    PRD created at `.dw/spec/prd-bugfix-<slug>/prd.md`.
-
-    Next — pick one:
-      - Manual chain: `/dw-plan techspec prd-bugfix-<slug>` → `/dw-plan tasks prd-bugfix-<slug>` → `/dw-run` → `/dw-qa` → `/dw-review` → `/dw-commit` → `/dw-generate-pr`.
-      - Hand off to autopilot: `/dw-autopilot --from-prd prd-bugfix-<slug>` — runs the planning phase from the existing PRD, stops after Tasks, then a later autopilot invocation resumes through `/dw-goal`.
-    ```
-
-    5. Stop this command. Do not proceed to step 5. The user (or autopilot) invokes `/dw-plan` or `/dw-autopilot --from-prd` next.
-
-    **If the valve does NOT trip:** Continue to step 5.
+    If no material new decision or structured plan is needed, continue to step 5.
 
     ### 5. Propose Numbered Tasks (Required)
 
     <critical>
     List ALL necessary tasks, numbered sequentially.
-    Wait for approval before executing.
+    Use existing approval for the same task scope; ask only for new material decisions before executing.
     </critical>
 
     **Format:**
@@ -425,8 +399,8 @@
 
     Option B (hand off to autopilot):
     1. Run: `/dw-autopilot --from-prd prd-bugfix-<slug>`
-    2. Autopilot runs PRD approval, TechSpec, and Tasks, then stops with `status: plan_complete`.
-    3. A later autopilot invocation resumes via `/dw-goal --from-autopilot prd-bugfix-<slug>` for Run, full Review, QA/Fix, and post-QA full Review before commit/PR.
+    2. Autopilot runs PRD approval, TechSpec, and Tasks, records `status: plan_complete` and continues after task/execution approval.
+    3. The same invocation continues via `/dw-goal --from-autopilot prd-bugfix-<slug>` for Run, full Review, QA/Fix, and post-QA full Review before commit/PR.
 
     The bugfix index entry stays queryable via `/dw-intel "bugfix history in <module>"`. Downstream `/dw-review --bugfix <slug>` and `/dw-qa --bugfix <slug>` still target `.dw/bugfixes/NNN-<slug>/` when you want a focused review of just the eventual surgical patch.
     ```

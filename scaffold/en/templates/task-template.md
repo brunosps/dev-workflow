@@ -1,72 +1,52 @@
 ---
 type: task
-schema_version: "1.0"
+schema_version: "1.1"
 status: pending
 ---
 
 # Task X.0: [Main Task Title]
 
-<critical>Read the prd.md and techspec.md files in this folder. If you don't read these files your task will be invalidated.</critical>
+Read the relevant PRD/TechSpec sections and task constraints; use the links below.
 
 ## Overview
 
 [Brief task description]
 
-**Functional Requirements covered**: FR-X.Y, FR-X.Z (maximum 2 per task)
+**Functional Requirements covered**: FR-X.Y, FR-X.Z
 Depends on: none
 
 <requirements>
 [List of mandatory requirements]
 </requirements>
 
-## Subtasks
+## Execution assignment
 
-### Implementation
-- [ ] X.1 [Subtask description]
-- [ ] X.2 [Subtask description]
+Mirror this task's approved entry in `execution-plan.json` (see `.dw/references/execution-contract.md`).
 
-### Unit Tests (Mandatory for Backend)
-- [ ] X.3 Create tests for [service/use-case]
-- [ ] X.4 Create tests for [controller/adapter]
+| Complexity + rationale | Tool | Model / effort | Agents | Approved fallbacks |
+|---|---|---|---|---|
+| standard — [reason] | local | inherit / inherit | none | none |
 
-## Unit Tests
+## Implementation
 
-### Test Cases
+- [ ] [Behavior to deliver]
+- [ ] [Relevant verification and acceptance checks]
 
-| Method | Cases |
-|--------|-------|
-| `[method1]` | Happy path, edge case, error |
-| `[method2]` | Happy path, not found |
+## Verification and success criteria
 
-### Required Mocks
-- `[repository/service]` - mocked via mock function
+| Behavior / risk | Existing suite or new test | Command / observable evidence |
+|---|---|---|
+| [Required outcome] | [Lowest effective layer; new test only if needed] | [Project command or inspection] |
 
-## Implementation Details
+Use the project's test strategy. Define mocks only at justified boundaries; do not impose coverage percentages or a new test for every edit. Include important failure cases where applicable.
 
-[Relevant sections from the tech spec - reference techspec.md instead of duplicating content]
+## Relevant files and decisions
 
-## Success Criteria
+[Source paths and relevant TechSpec/ADR sections; do not duplicate entire documents.]
 
-- [Measurable outcomes]
-- [Quality requirements]
-- **Unit tests passing**
-- **Minimum 80% coverage** on services/use-cases
+## Commit on completion
 
-## Relevant Files
-- [Files relevant to this task]
-- [File].spec.ts - Unit tests
-
-## Commit on Completion
-
-When completing this task, commit:
-```bash
-git add .
-git commit -m "feat([module]): [description]
-
-- [item 1]
-- [item 2]
-- Add unit tests"
-```
+Use the scoped atomic commit protocol in `/dw-run`. Stage only this task's files, retain requirement IDs, record the resulting SHA in tasks.md/run-log, and include final bookkeeping before delivery. No push or merge is implied.
 
 ## Related ADRs
 

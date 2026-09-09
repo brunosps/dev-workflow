@@ -192,20 +192,11 @@ No merge to main without a real-system path going green. Mocks are speed, real i
 
 **Anti-pattern:** 100% mocked test suite. "It all passes locally" → first user request fails because the mock didn't match the real API shape.
 
-## 11. Mutation score over coverage percentage
+## 11. Mutation analysis investigates specific behavioral gaps
 
-**Pattern:**
+Use `mutation-testing.md` when critical behavior or weak assertions justify the cost. Inspect survivors individually: they may expose missing tests, equivalent behavior or analysis limits. Strengthen assertions against the intended contract and verify both the deliberate defect and unmodified behavior. Choose scope and cadence from project risk; do not install a tool in every project or introduce a score target.
 
-Set up mutation testing (Stryker for JS/TS, mutmut for Python, etc.) ONCE per project. Run weekly on critical modules.
-
-```bash
-npx stryker run
-# Output: 87 mutants, 78 killed, 9 survived → mutation score 89.6%
-```
-
-A surviving mutant means: this code path runs in tests, but the tests don't actually assert anything that breaks when the code changes. Investigate each.
-
-**Anti-pattern:** 95% line coverage with assertions like `expect(result).toBeTruthy()` — every line ran, but mutations all survive. The suite is decorative.
+**Anti-pattern:** increasing coverage or killing mutants while assertions still repeat the implementation or only confirm mock setup.
 
 ## 12. Page Object Model is a tool, not a religion
 

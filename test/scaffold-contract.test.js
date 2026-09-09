@@ -126,7 +126,7 @@ test('dw-triage is registered and documents local-first intake routing', () => {
     const entry = COMMANDS[locale].find((cmd) => cmd.name === 'dw-triage');
 
     assert.ok(entry, `missing dw-triage command registry entry for ${locale}`);
-    assert.match(entry.description, /\.dw\/triage\//);
+    assert.match(command, /\.dw\/triage\//);
 
     for (const token of [
       '.dw/triage/NNN-<slug>.md',
@@ -181,12 +181,12 @@ test('dw-report is registered, documents the progress loop, and is auto-armed by
     const run = read(`scaffold/${locale}/commands/dw-run.md`);
     const autopilot = read(`scaffold/${locale}/commands/dw-autopilot.md`);
     const help = read(`scaffold/${locale}/commands/dw-help.md`);
-    const instructions = read(`scaffold/${locale}/agent-instructions.md`);
+    const instructions = read(`scaffold/${locale}/agent-instructions.md`) + read(`scaffold/${locale}/references/command-routing.md`);
     const entry = COMMANDS[locale].find((cmd) => cmd.name === 'dw-report');
 
     assert.ok(entry, `missing dw-report command registry entry for ${locale}`);
-    assert.match(entry.description, /\.dw\/reports\/YYYY-MM-DD\.md/);
-    assert.match(entry.description, /--every <N>m/);
+    assert.match(command, /\.dw\/reports\/YYYY-MM-DD\.md/);
+    assert.match(command, /--every <N>m/);
     assert.ok(!entry.userInvoked, 'dw-report must stay model-invocable so the trigger map can fire it');
 
     for (const token of [
@@ -227,12 +227,12 @@ test('dw-worktree is registered, ships its GC script, and is wired into runners,
     const pause = read(`scaffold/${locale}/commands/dw-pause.md`);
     const audit = read(`scaffold/${locale}/commands/dw-harness-audit.md`);
     const help = read(`scaffold/${locale}/commands/dw-help.md`);
-    const instructions = read(`scaffold/${locale}/agent-instructions.md`);
+    const instructions = read(`scaffold/${locale}/agent-instructions.md`) + read(`scaffold/${locale}/references/command-routing.md`);
     const entry = COMMANDS[locale].find((cmd) => cmd.name === 'dw-worktree');
 
     assert.ok(entry, `missing dw-worktree command registry entry for ${locale}`);
-    assert.match(entry.description, /worktree-gc\.mjs/);
-    assert.match(entry.description, /--force/);
+    assert.match(command, /worktree-gc\.mjs/);
+    assert.match(command, /--force/);
 
     for (const token of ['REMOVABLE', 'KEEP:unmerged', 'KEEP:dirty', 'KEEP:in-use', '--ff-only', 'git worktree remove --force']) {
       assert.ok(command.includes(token), `${locale} dw-worktree missing ${JSON.stringify(token)}`);
@@ -253,7 +253,7 @@ test('dw-worktree is registered, ships its GC script, and is wired into runners,
 
   const cliRun = read('scaffold/skills/dw-cli-run/SKILL.md');
   assert.ok(cliRun.includes('/dw-worktree create <slug>'), 'dw-cli-run pre-flight must create via /dw-worktree');
-  assert.ok(cliRun.includes('End of life = the same turn as the merge'), 'dw-cli-run must carry the end-of-life rule');
+  assert.match(cliRun, /authorized merge and cleanup in the same turn/, 'runner cleanup follows authorized integration');
   assert.ok(cliRun.includes('/dw-worktree merge <slug>'), 'dw-cli-run discipline must merge+remove via /dw-worktree');
 
   const guardrails = read('scaffold/scripts/hooks/git-guardrails.mjs');

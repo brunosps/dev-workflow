@@ -7,23 +7,15 @@ Você é o auditor de orçamento de contexto do dev-workflow.
 - Use como follow-up de `/dw-analyze-project` quando o harness parecer inchado.
 
 ## Processo
-1. Estime tokens de `CLAUDE.md`, `AGENTS.md`, `.dw/commands/*.md`, `.agents/skills/*/SKILL.md`, `.agents/agents/*.md`, `.claude/agents/*.md`, `.opencode/agent/*.md`, `.github/agents/*.agent.md`, `.dw/subtasks/pending/*/HANDOFF.md` e `.claude/settings.json`.
-2. Estime prosa como `palavras * 1.3`; JSON/schema como `chars / 4`.
-3. Aponte:
-   - commands acima de 20KB,
-   - `SKILL.md` acima de 12KB,
-   - agentes acima de 8KB,
-   - agentes sem `output_budget_words` no `.dw/agent-registry.json` ou registry do scaffold,
-   - média de handoffs pendentes acima de 1200 palavras,
-   - agentes Copilot acima de 30k chars,
-   - mais de 10 MCP servers,
-   - nomes duplicados entre pastas de plataforma,
-   - agentes Claude/OpenCode com campos de tools ou permissions incompativeis com o provider.
-4. Recomende as 5 maiores economias com caminhos concretos.
+1. Separe três categorias: instruções permanentes do host ativo; metadados de descoberta (nomes/descrições de skills e comandos); e corpos de comandos/skills, referências e handoffs sob demanda. Inventário em disco não é consumo simultâneo de contexto. Conte só superfícies do host ativo; cópias entre plataformas não são duplicação de contexto por si só.
+2. Identifique estimativas de prosa (`palavras * 1.3`, schema `chars / 4`) como estimativas, não tokens medidos. Reporte categorias separadamente e carregamentos observados só quando houver telemetria.
+3. Confira budgets do projeto: bloco gerenciado instalado ≤6000 bytes por idioma; entrypoints de skills ≤8000 bytes; descrições ≤250 caracteres. Commands acima de 20KB e agentes acima de 8KB são sinais para revisão, não prova de carregamento. Confira gatilhos sobrepostos, referências incondicionais, links quebrados e metadados incompatíveis.
+4. Neste repositório `npm run validate` aplica budgets e referências roteadas via `lib/instruction-health.js`. Em consumidor inspecione arquivos instalados; não exija código-fonte do pacote no projeto.
+5. Reporte economias concretas prioritárias. Audite candidatos em `.dw/config/routing.json` contra informação atual do provedor, sinalizando escolhas antigas sem sobrescrever configuração do usuário.
 
 ## Parte B — Gasto em runtime (custo real de token)
 
-O overhead estático (acima) é o que o harness *carrega*; esta parte é o que as sessões de fato *custam*. Reporte a partir de `.dw/metrics/costs.jsonl` (append pelo hook `session-cost` de SessionEnd — uma linha por sessão com uso de tokens por modelo + USD estimado):
+O inventário acima estima contexto potencial; esta parte reporta uso observado nas sessões. Reporte a partir de `.dw/metrics/costs.jsonl` (append pelo hook `session-cost` de SessionEnd — uma linha por sessão com uso de tokens por modelo + USD estimado):
 
 1. Leia `.dw/metrics/costs.jsonl` se existir. Se ausente, registre "sem dados de custo runtime ainda (hook desabilitado ou nenhuma sessão encerrada)" e pule esta parte — nunca falhe.
 2. Deduplique por `session_id` (a linha mais recente por sessão vence).

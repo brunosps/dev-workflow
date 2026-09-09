@@ -1,32 +1,51 @@
 {
-  "_note": "Dispatch routing for the CLI runners (/dw-claude-run, /dw-codex-run) via the dw-cli-run skill. Maps a task's Conventional-Commit type to a tier, and a tier to a concrete model + effort per brand. Seeded once on init and NEVER overwritten on update — model availability differs per account, so this file is yours to edit. Verify the model ids against `claude --help` / `codex --help` before trusting them; the shipped values are conservative defaults, not a guarantee that your account has access.",
+  "_note": "Model candidates for planning task execution by complexity. Preserve approved task assignments. Seeded on init and never overwritten on update. Verify provider/account availability and CLI capabilities before approval; model documentation is not proof of account access.",
   "schema_version": "1.0",
-
   "brands": {
-    "claude": { "detect": "claude --version" },
-    "codex": { "detect": "codex --version" }
+    "claude": {
+      "detect": "claude --version"
+    },
+    "codex": {
+      "detect": "codex --version"
+    }
   },
-
   "tiers": {
     "light": {
       "_use": "mechanical, low-ambiguity work; the answer is obvious and the diff is small",
-      "claude": { "model": "haiku", "effort": "low" },
-      "codex": { "model": "gpt-5.4-mini", "effort": "low" }
+      "claude": {
+        "model": "haiku",
+        "effort": "low"
+      },
+      "codex": {
+        "model": "gpt-5.6-luna",
+        "effort": "low"
+      }
     },
     "standard": {
       "_use": "normal feature and fix work",
-      "claude": { "model": "sonnet", "effort": "medium" },
-      "codex": { "model": "gpt-5.3-codex", "effort": "medium" }
+      "claude": {
+        "model": "sonnet",
+        "effort": "medium"
+      },
+      "codex": {
+        "model": "gpt-5.6-sol",
+        "effort": "medium"
+      }
     },
     "heavy": {
       "_use": "architectural, security-sensitive, or wide-blast-radius work",
-      "claude": { "model": "opus", "effort": "high" },
-      "codex": { "model": "gpt-5.5", "effort": "high" }
+      "claude": {
+        "model": "opus",
+        "effort": "high"
+      },
+      "codex": {
+        "model": "gpt-6-astra",
+        "effort": "high"
+      }
     }
   },
-
   "by_commit_type": {
-    "_note": "The task's type is already declared in tasks.md and in the atomic commit subject — no new inference needed.",
+    "_note": "Legacy fallback hint only. Approved task complexity/assignment takes precedence.",
     "chore": "light",
     "docs": "light",
     "style": "light",
@@ -38,23 +57,42 @@
     "refactor": "standard",
     "perf": "heavy"
   },
-
   "escalate_on_surface": {
     "_note": "If the task's fence touches any of these, override the type-derived tier upward. Match against file paths and the task title.",
     "tier": "heavy",
-    "patterns": ["auth", "session", "token", "credential", "migration", "payment", "billing", "invoice", "tenant", "crypto", "permission"]
+    "patterns": [
+      "auth",
+      "session",
+      "token",
+      "credential",
+      "migration",
+      "payment",
+      "billing",
+      "invoice",
+      "tenant",
+      "crypto",
+      "permission"
+    ]
   },
-
   "validation": {
-    "_note": "The worker never signs off on its own exam. Cross-brand is the default because a second vendor fails differently.",
-    "cross_brand": "preferred",
-    "degrade": "When only one brand is installed, validate in a SEPARATE dispatch at a different tier — never reuse the executing session.",
-    "acceptance_score": 9
+    "cross_brand": "when-planned",
+    "degrade": "Use approved independent review assignments; do not switch providers or tiers silently.",
+    "acceptance": "Required checks and task acceptance criteria pass; no blocking findings. Scores are diagnostic only."
   },
-
   "defaults": {
-    "_note": "Applied to every dispatch unless the prompt names a capability that needs otherwise.",
-    "no_mcp": true,
+    "_note": "Preserve effective permissions and user configuration; enable only approved capabilities where selective configuration is supported.",
+    "no_mcp": false,
     "read_only_skips_worktree": true
+  },
+  "sources": {
+    "checked_at": "2026-09-09",
+    "codex": [
+      "https://developers.openai.com/api/docs/models/gpt-5.6-luna",
+      "https://developers.openai.com/api/docs/models/gpt-5.6-sol",
+      "https://developers.openai.com/api/docs/guides/latest-model"
+    ],
+    "claude": [
+      "https://code.claude.com/docs/en/model-config"
+    ]
   }
 }

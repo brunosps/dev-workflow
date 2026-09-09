@@ -59,8 +59,8 @@ const PARITY = {
     'PRESERVE',
   ],
   claudeRun: [
-    '--effort <EFFORT>',
-    '2.1.206',
+    '--effort "<EFFORT>"',
+    '<RESUME_PERMISSIONS>',
     'xhigh',
   ],
   run: [

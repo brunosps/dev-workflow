@@ -1,85 +1,27 @@
-# Dispatch tuning — trim the cold start, bind the routing table
+# Dispatch diagnostics and tuning
 
-Read this when a dispatch feels disproportionately expensive for the size of the task, or when wiring
-`.dw/config/routing.json` for the first time. The protocol in `SKILL.md` works without it.
+Read when configuring a provider, diagnosing a failed dispatch, or proposing an approved escalation.
 
-## Cold-start cost
+## Configuration
 
-A spawned CLI does not share the parent session's prompt cache and boots every configured MCP server before doing
-any work. On a small task that startup can cost more than the task itself. This is the one real advantage an
-in-session subagent keeps over a spawned CLI — so trim the spawn until the gap stops mattering.
+Inspect CLI version/help for supported flags. Model identifiers and effort support depend on the selected model, provider, account and CLI; help alone is not an availability check. Use project routing candidates and current official provider documentation to propose concrete assignments at task breakdown. Do not silently overwrite `.dw/config/routing.json` during updates.
 
-| | Claude | Codex |
-|---|---|---|
-| No MCP servers | `--strict-mcp-config` (with no `--mcp-config`) | `-c mcp_servers='{}'` |
-| Drop all user config | — | `--ignore-user-config` (blunt: also drops model defaults, so `MODEL` + `EFFORT` become mandatory) |
-| Restrict tools | `--tools ""` disables all; `--allowedTools <list>` for a subset | `--sandbox read-only` |
+For legacy plans, `by_commit_type` may suggest a tier; sensitive surfaces and actual complexity take precedence. An approved task assignment wins over routing defaults. Agent profiles keep `model: inherit`; dispatch overrides belong in the task plan.
 
-**Default:** pass the MCP kill switch on every dispatch whose prompt does not name an MCP capability. If the
-prompt needs docs lookup (`context7`) or browser automation (`playwright`), keep them and say so in the dispatch
-rationale.
+## Permissions and MCP
 
-Verified against `claude` 2.1.220 and `codex-cli` 0.144.4. Re-check with `claude --help` / `codex exec --help`
-after a CLI upgrade — these flags are not covered by either project's stability guarantees.
+Use the approved permission profile for WRITE and enforced read-only controls for READ-ONLY. Preserve the same boundary on resume. Do not use bypass flags as a response to a generic network/test failure. Identify the failing operation and request only missing access if existing authorization does not cover it.
 
-## Binding `.dw/config/routing.json`
+Load MCP capabilities needed by the task, retaining user configuration. Claude supports `--strict-mcp-config` with an explicit config for selected servers. On Codex, a TOML override such as `mcp_servers='{}'` must not be assumed to remove inherited entries: confirm effective configuration before claiming zero servers. If no selective mechanism is available, retain configuration and report the overhead. Do not drop user rules/auth/config wholesale for a faster start.
 
-Resolution order for a dispatch:
+## Review and escalation
 
-1. Read the task's Conventional-Commit type (already in `tasks.md` and in the atomic commit subject).
-2. `by_commit_type[<type>]` → tier name.
-3. If the fence or the task title matches any `escalate_on_surface.patterns`, override the tier upward.
-4. `tiers[<tier>][<brand>]` → concrete `MODEL` + `EFFORT`.
-5. Substitute into the adapter's `MODEL`/`EFFORT` slots.
+Parent re-gate (independent) checks the actual implementation and acceptance criteria. It can reuse matching verification evidence after checking command, inputs, environment, scope and output. It need not buy another provider invocation solely to repeat passing commands. Where a specialized independent reviewer adds value, use the approved agent assignment.
 
-If the file is absent, or the task has no declared type, fall back to the sizing heuristic in `SKILL.md` step 2.
+Fix ordinary defects with the current executor. Escalate model/effort only when the diagnosis identifies a capability limit and the alternative is in the approved plan. Preserve the same session when supported; otherwise reconstruct from durable state in the same worktree. Never discard partial edits. Provider errors, missing credentials, resource limits and permission failures do not automatically justify a stronger model.
 
-`routing.json` is seeded once on init and never reconciled on update, because model availability differs per
-account. Treat the shipped model ids as defaults to verify, not as a guarantee of access — a dispatch that fails
-with an unknown-model error is a routing-table edit, not a protocol bug.
+Stop when the task is accepted or a concrete blocker prevents further progress; a 0–10 self-score neither proves quality nor authorizes endless retries. Report exhausted approved alternatives and preserve the branch for the owner.
 
-## Dual evaluation in full
+## Process handling
 
-The CLI auto-gates cheaply (close to the work); the parent/orchestrator audits independently and compares the
-scores, which is what catches an inflated self-score. The parent is the dispatching session — possibly Claude
-itself; the re-gate is provider-neutral.
-
-1. **Worker auto-gate (loop, MAX effort).** The prompt MUST instruct: after implementing, **run the SAME gate**
-   and give a **self-score 0–10**; **fix and re-run while the self-score <9 or the gate isn't green**, at max
-   effort. Stop at self-score ≥9 + green gate (or report `blockers`). The final report carries the self-score plus
-   a per-criterion breakdown.
-2. **Parent re-gate (independent).** When the worker declares pass, the parent **re-runs the SAME gate** (fan-out,
-   prefer Workflow → `/workflows`) and gives its **own 0–10**, without trusting the self-score. Prefer a different
-   brand for this step when both are installed — a second vendor fails differently, which is the whole point of
-   the second layer. With one brand installed, re-gate in a separate dispatch at a different tier.
-3. **Compare + decide.** Parent ≥9 and small gap → **PASS** (ready for the owner's merge decision). Parent <9 OR a
-   large gap (worker overestimated) → re-execute: hand the gaps back via **session resume** at max effort and
-   repeat 1→2→3 until it converges. **The score that counts for acceptance is the parent's**; the self-score is
-   signal plus an inflation detector. Always record both scores and the gap in the Structured Return.
-
-## The escalation ladder in full
-
-If the score is low, the gate failed, or the CLI didn't finish, re-run the SAME task one notch up — gradual, no
-giving up on the first stumble, no jumping to the top.
-
-- **Ladder (one at a time):** first **effort** `low`→`medium`→`high`→`xhigh`(→`max` on Claude; the adapter names
-  the levels it supports); once exhausted, bump the **model** one tier and reset effort to `high`. Re-run and
-  **re-score**.
-- **Continue vs restart:** coherent partial edits → **resume the session** (keeps its context and the files it
-  already touched). Broken or dirty worktree → **reset first**
-  (`git -C <worktree> reset --hard && git clean -fd`) and run fresh at the higher notch. Don't stack error on
-  error.
-- **Stop:** at **score ≥9** (ready for the owner's gate), OR when **exhausted** (strongest model at max effort
-  still below the bar) → `BLOCKED` with evidence. Announce each notch; with autonomy, escalate to the ceiling
-  yourself rather than asking at every step.
-
-## Reading escalation as a routing signal
-
-A task that routinely needs two or more notches above what the table assigned is telling you the table is wrong
-for that commit type. Report which
-entry mis-sized it in the Structured Return, so the next edit to `routing.json` is grounded in a real run rather
-than a guess.
-
-The reverse also matters and is easier to miss: a tier that never escalates may be over-provisioned. If `feat`
-work consistently lands at score ≥9 on the first try, try the tier below it before assuming the current one is
-load-bearing.
+Capture the actual process handle/PID on launch. Use its completion/exit status plus the provider's terminal event and final report. Cancel only that task's process through the host handle; do not infer task identity from a broad process-name match. Keep audit logs outside worktrees so authorized cleanup cannot erase evidence.

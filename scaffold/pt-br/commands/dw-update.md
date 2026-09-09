@@ -39,7 +39,7 @@ Manter apenas os 3 snapshots mais recentes (remover os mais antigos) para evitar
 Antes de atualizar, capture a versão instalada para poder reportar o delta:
 
 ```bash
-node -e "try { console.log(require('@brunosps00/dev-workflow/package.json').version) } catch(e) { console.log('not-cached-locally') }" 2>/dev/null
+node -e 'try { const s = JSON.parse(require("node:fs").readFileSync(".dw/install-state.json", "utf8")); console.log(s.version || "unknown"); } catch { console.log("unknown"); }'
 ```
 
 ### 2. Detectar Idioma dos Comandos Instalados (Obrigatório)
@@ -72,7 +72,7 @@ Regras:
 
 ### 3. Executar o Update (Obrigatório)
 
-<critical>Use `npx -y @brunosps00/dev-workflow@latest` para FORÇAR a busca da versão mais recente no npm (ignora cache local). Passe `--lang=<DETECTED_LANG>` para evitar prompt interativo.</critical>
+<critical>Use `npx -y @brunosps00/dev-workflow@latest` para selecionar a versão marcada como `latest` no npm. Passe `--lang=<DETECTED_LANG>` para evitar prompt interativo.</critical>
 
 ```bash
 npx -y @brunosps00/dev-workflow@latest update --lang=$DETECTED_LANG
@@ -91,8 +91,22 @@ Se o update falhar (erro de rede, permissão, pacote indisponível): reporte o e
 ### 4. Capturar Nova Versão
 
 ```bash
-node -e "console.log(require('@brunosps00/dev-workflow/package.json').version)" 2>/dev/null
+node -e 'const s = JSON.parse(require("node:fs").readFileSync(".dw/install-state.json", "utf8")); if (s.package !== "@brunosps00/dev-workflow" || !s.version) process.exit(1); console.log(s.version);'
 ```
+
+### Checks de compatibilidade do upgrade
+
+Leia o `.dw/commands/dw-update.md` atualizado após o CLI terminar. Use `.dw/install-state.json` e o output `Installed version` do CLI para a diferença de versões: um pacote executado por `npx` não precisa ser resolvível pelo `node_modules` do consumidor. Estado novo ausente ou inválido é falha de verificação; não declare sucesso do update.
+
+Em um upgrade de versão anterior à 2.3.0 (ou versão legada desconhecida):
+
+- Verifique a entrega de `.dw/references/execution-contract.md`, `.dw/scripts/lib/workflow-contract.mjs` e `.dw/templates/frontend-quality-template.md`. Comandos, skills, wrappers e blocos de instruções gerenciados são atualizados pelo `update` normal; não é necessário `--force`.
+- Compare `.dw/config/routing.json` com o novo `.dw/config/routing-defaults.json` gerenciado durante `/dw-skill-health`. Mantenha escolhas ativas do proprietário e atribuições aprovadas. Proponha mudanças específicas de modelo/esforço após verificar capacidades; atualizar arquivos do scaffold não autoriza trocar provedores.
+- Preserve `.dw/spec/`, `.dw/goals/`, `.dw/STATE.md`, estado de execução/sessão, rules e `.dw/templates/overrides/`. Planos schema 1.0 continuam válidos e locais por padrão. Para um `execution-plan.json` ativo, rode `node .dw/scripts/lib/workflow-contract.mjs validate <plan-path>`; relate planos inválidos sem reescrever aprovações ou zerar progresso. Novos planos de tarefas usam schema 1.1.
+- Inspecione overrides de templates de tarefas por schemas/regras de roteamento antigos e relate diferenças que sobreponham os novos templates gerenciados; não substitua overrides do proprietário automaticamente.
+- Se documentação de qualidade frontend for relevante e estiver ausente, faça `/dw-analyze-project` adicionar a baseline às rules existentes do módulo, com escopo nessa documentação. Preserve gates existentes; proponha ferramentas separadamente. Pule essa ação em `só atualize os arquivos`.
+
+Não converta trabalho ativo à força nem regenere globalmente documentação de produto para adotar a versão. Registre findings de compatibilidade e mantenha o reload da sessão como passo final.
 
 ### 5. Reportar Resultado
 
@@ -157,7 +171,7 @@ Ex.: `npx -y @brunosps00/dev-workflow@0.4.5 update --lang=pt-br`
 ## Observações
 
 - `npx -y` evita o prompt "OK to install" quando o pacote não está em cache
-- `@latest` ignora o cache do npx e busca a tag `latest` do registry
+- `@latest` seleciona a tag do registry; verifique o resultado instalado em vez de presumir que uma consulta ao pacote local identifica o CLI executado
 - `--lang=...` evita o prompt interativo de idioma; o valor vem da detecção automática na etapa 2
 - Este comando NÃO atualiza dependências Node do projeto do usuário, apenas o scaffold do dev-workflow
 
