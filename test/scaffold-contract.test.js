@@ -181,7 +181,10 @@ test('dw-report is registered, documents the progress loop, and is auto-armed by
     const run = read(`scaffold/${locale}/commands/dw-run.md`);
     const autopilot = read(`scaffold/${locale}/commands/dw-autopilot.md`);
     const help = read(`scaffold/${locale}/commands/dw-help.md`);
-    const instructions = read(`scaffold/${locale}/agent-instructions.md`) + read(`scaffold/${locale}/references/command-routing.md`);
+    // The routing surface is split: the managed block carries the common paths and
+    // command-routing.md carries the full Trigger Map. A trigger may live in either,
+    // so search both — and say so when it is missing, instead of blaming one file.
+    const routing = read(`scaffold/${locale}/agent-instructions.md`) + read(`scaffold/${locale}/references/command-routing.md`);
     const entry = COMMANDS[locale].find((cmd) => cmd.name === 'dw-report');
 
     assert.ok(entry, `missing dw-report command registry entry for ${locale}`);
@@ -211,7 +214,7 @@ test('dw-report is registered, documents the progress loop, and is auto-armed by
     assert.ok(autopilot.includes('/dw-report'), `${locale} dw-autopilot must arm /dw-report`);
     assert.ok(autopilot.includes('DW_REPORT_AUTO=off'), `${locale} dw-autopilot must honor DW_REPORT_AUTO=off`);
     assert.ok(help.includes('/dw-report [--every <N>m]'), `${locale} dw-help must list /dw-report`);
-    assert.ok(instructions.includes('/dw-report [--every <N>m]'), `${locale} agent-instructions must trigger /dw-report`);
+    assert.ok(routing.includes('/dw-report [--every <N>m]'), `${locale} routing surface (agent-instructions.md + references/command-routing.md) must trigger /dw-report`);
   }
 
   const cliRun = read('scaffold/skills/dw-cli-run/SKILL.md');
@@ -227,7 +230,10 @@ test('dw-worktree is registered, ships its GC script, and is wired into runners,
     const pause = read(`scaffold/${locale}/commands/dw-pause.md`);
     const audit = read(`scaffold/${locale}/commands/dw-harness-audit.md`);
     const help = read(`scaffold/${locale}/commands/dw-help.md`);
-    const instructions = read(`scaffold/${locale}/agent-instructions.md`) + read(`scaffold/${locale}/references/command-routing.md`);
+    // The routing surface is split: the managed block carries the common paths and
+    // command-routing.md carries the full Trigger Map. A trigger may live in either,
+    // so search both — and say so when it is missing, instead of blaming one file.
+    const routing = read(`scaffold/${locale}/agent-instructions.md`) + read(`scaffold/${locale}/references/command-routing.md`);
     const entry = COMMANDS[locale].find((cmd) => cmd.name === 'dw-worktree');
 
     assert.ok(entry, `missing dw-worktree command registry entry for ${locale}`);
@@ -242,7 +248,7 @@ test('dw-worktree is registered, ships its GC script, and is wired into runners,
     assert.ok(audit.includes('Worktree hygiene'), `${locale} dw-harness-audit must score worktree hygiene`);
     assert.ok(audit.includes('worktree-gc.mjs list --strict'), `${locale} dw-harness-audit must run list --strict`);
     assert.ok(help.includes('/dw-worktree'), `${locale} dw-help must list /dw-worktree`);
-    assert.ok(instructions.includes('/dw-worktree clean --apply'), `${locale} agent-instructions must trigger /dw-worktree`);
+    assert.ok(routing.includes('/dw-worktree clean --apply'), `${locale} routing surface (agent-instructions.md + references/command-routing.md) must trigger /dw-worktree`);
 
     for (const runner of ['dw-codex-run', 'dw-claude-run', 'dw-copilot-run']) {
       const adapter = read(`scaffold/${locale}/commands/${runner}.md`);

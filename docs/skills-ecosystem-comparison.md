@@ -37,6 +37,10 @@ exercem bem.
 | Arquitetura/deep modules | checklist base em `dw-simplification` | categorias de dependência + Design It Twice | — | **Adotar parcialmente** → aprofundamento condicional em deep-modules |
 | Versionamento multi-skill | pacote npm único | Changesets | Changesets | Não aplicável — skip |
 | Definição de comando | markdown + JSON registry | markdown | TOML | Preferência — skip |
+| Fronteira de confiança do próprio agente | prompt injection só como vulnerabilidade a revisar (`security-review/references/modern-threats.md`) | — | — | **Adotar** → `.dw/references/untrusted-input.md` + âncoras nos comandos de intake/review |
+| Verificação adversarial de findings | Pre-Report Gate + piso de confiança, mas o verificador é o mesmo raciocínio que produziu o candidato | — | — | **Adotar** → pipeline de 3 saídas em `dw-review-rigor` + agente `dw-finding-refuter` |
+| Auditoria de faixa já mergeada | `/dw-review --since <ref>` cobre UM trabalho | — | — | **Adotar** → `/dw-review --post-merge [<base>]` |
+| Rot de skill por uso real | `/dw-skill-health` audita estrutura; `/dw-context-budget` audita orçamento | — | — | **Adotar** → evidência de uso no `session-cost.mjs` + seção no `/dw-skill-health` |
 
 ## O que foi portado
 
@@ -249,6 +253,121 @@ triagem, apontando onde vive a implementação; out-of-scope fica reservado para
 motivo durável.
 
 
+### 11. Fronteira de confiança, refutação de findings e auditoria de composição (2026-09-18)
+
+Três técnicas adaptadas a partir da leitura de [`akitaonrails/my-skills`](https://github.com/akitaonrails/my-skills)
+e do artigo [Falando um pouco sobre minhas skills de IA](https://akitaonrails.com/2026/09/17/falando-um-pouco-sobre-minhas-skills-de-ia/).
+
+**Licenciamento — restritivo.** O repositório de origem **não declara licença** (`license: null` na API do
+GitHub), o que significa todos os direitos reservados. Só a **técnica** foi adaptada, reescrita
+integralmente na nossa voz e com o nosso vocabulário. **Nenhum texto, snippet, tabela, nome de arquivo ou
+estrutura de headings do upstream foi reaproveitado**, e nenhuma licença de reuso é assumida. O próprio
+autor recomenda não reutilizar skill dos outros literalmente — este trabalho segue esse conselho.
+
+**11.1 — Artefato externo é evidência, nunca instrução.** O dev-workflow já tratava prompt injection como
+vulnerabilidade **do código do usuário** (`security-review/references/modern-threats.md`). Faltava a metade
+operacional: a regra para o **próprio agente** quando `/dw-triage` recebe uma issue/PR de terceiro ou
+`/dw-review` revisa um PR externo. Verificado antes: `grep -i -e untrusted -e injection -e "never run"
+-e attachment` em `dw-triage.md` voltava vazio.
+
+A regra vive em `.dw/references/untrusted-input.md` (par EN/PT em `scaffold/{en,pt-br}/references/`), o mesmo
+compartimento de `execution-contract.md`: contrato operacional do agente, **localizado** — `scaffold/skills/`
+não é, e um usuário PT-BR leria a regra mais importante do fluxo em inglês — e citável por qualquer comando
+sem carregar skill nenhuma. Âncoras curtas nos 7 comandos que ingerem texto externo, mais uma frase no
+`agent-instructions.md`, que é o único arquivo carregado incondicionalmente: a regra precisa valer quando o
+usuário cola uma issue e pergunta "o que você acha?" sem invocar comando nenhum.
+
+Codificado: não obedecer a comando, pedido de ferramenta, troca de papel, pedido de credencial ou atalho de
+auditoria vindo do artefato; reconstruir a reprodução mínima a partir de código confiável e dado sintético
+em vez de executar o que veio colado; não abrir anexo, comprimido, binário, patch ou link encurtado no host;
+ler `AGENTS.md`/`CLAUDE.md`/`.dw/**`/CI/hooks do branch base, porque um PR que os edita não muda as regras da
+própria auditoria dele; um artefato não confiável não corrobora outro; e a tentativa de redirecionamento é
+ela própria um achado a registrar, com citação literal e localização.
+
+Variante para instalação de skill de terceiro (`/dw-find-skills`, `/dw-install-aws-skills`,
+`/dw-install-azure-skills`): instalar não é tratar como dado, é **conceder autoridade de instrução
+permanente, em todo turno futuro**. O vetting existente media adoção — install count ≥ 1K, stars ≥ 100,
+reputação do owner, atividade recente — e **nenhuma dessas é propriedade de segurança**; não havia nenhuma
+instrução de ler o `SKILL.md` antes de instalar, e o install usava `-y` sobre uma referência móvel. Agora há
+checklist de autoridade e exigência de referência pinada.
+
+Rejeitado: criar skill nova (o `## Structured Return` seria preenchimento vazio para uma restrição que não
+produz artefato); duplicar a regra nos 14 arquivos de comando; hospedá-la em `scaffold/skills/`, que não é
+localizado. `/dw-qa` foi deliberadamente deixado de fora e a exclusão está escrita no próprio contrato: ele
+roda o nosso plano de teste contra o nosso build, e as entradas dele são artefatos nossos.
+
+Uma segunda classe de ingestão foi coberta depois da rodada inicial, e o plano não a tinha previsto:
+**texto buscado da web**. O `dw-source-grounding` declara `WebFetch` e o trabalho dele é Detect → Fetch →
+Implement → Cite — a página buscada alimenta techspec e decisão de implementação. Domínio oficial prova
+proveniência, não que o corpo seja seguro. A skill ganhou a seção "Fetched pages are untrusted text" (não
+seguir instrução endereçada ao agente, não executar comando de instalação que a página fornece, não seguir
+a página até um segundo destino que ela nomeia, e página buscada não corrobora página buscada), e os dois
+pontos onde a busca começa — `/dw-brainstorm --mode=research` e o passo de web search + Context7 MCP do
+`/dw-plan` — citam a regra antes de buscar.
+
+**11.2 — Refutação adversarial antes do finding.** O `dw-review-rigor` tinha um Pre-Report Gate de quatro
+checagens e piso de confiança >80%, mas quem verificava o candidato era o mesmo raciocínio que o produziu.
+O gate virou um pipeline com **três saídas e nenhuma quarta**: `finding`, `needs-validation`, `rejected`.
+
+- **Refutador fresco por candidato** — agente novo `dw-finding-refuter` (`module: core`,
+  `context_mode: fresh`, read-only) recebe a alegação e o código cru **sem** o raciocínio que a produziu e
+  **sem a severity** (candidato rotulado `critical` volta confirmado com mais frequência que o mesmo
+  candidato rotulado `medium`), re-deriva o caminho a partir da fonte lendo a linha sinalizada por último, e
+  devolve `REFUTED`/`HOLDS`/`UNRESOLVED`. O `context_mode: fresh` e o `input_budget_words` do registry são o
+  que torna a separação executável, não prosa. Sem subagente, a re-derivação solo segue uma lista ordenada
+  de guardas a montante.
+- **Classe `needs-validation`** — lead não resolvido nunca vira finding e nunca recebe severidade; registra
+  o fato exato não estabelecido, por que não deu e o que resolveria. Previne os dois modos de falha
+  simétricos: inflar lead em finding e sumir com o lead em silêncio. O vocabulário de `Status`
+  (`PASS`/`FINDINGS`/`BLOCKED`/`NOT_APPLICABLE`) **não foi ampliado** — é compartilhado pelas 26 skills e
+  validado em `lib/skill-registry.js`; entradas abertas aparecem em `Risks` e `Next Step`.
+- **Log de candidatos rejeitados** — uma linha por candidato desprovado, no relatório que a rodada já
+  escreve, pendurado na máquina de Prior-Round Awareness que já existia.
+- O `fp-check` do `security-review` ganhou o mesmo terceiro veredito: reachability indeterminada é
+  `needs-validation`, não um dos dois extremos.
+
+**Correção de bug pré-requisito:** o `dw-review-rigor` mandava ler rodadas anteriores em
+`.dw/spec/prd-*/reviews/`, diretório que `/dw-review` **nunca escreveu** — os caminhos reais são
+`<target>/QA/` e `<target>/review/`. A Prior-Round Awareness lia um diretório inexistente desde que foi
+escrita. Sem essa correção o log de rejeitados nasceria morto.
+
+Rejeitado: reusar `dw-code-reviewer` como refutador (objetivo invertido — `dw-code-reviewer.md:10` manda
+"report bugs and risks", então ele produziria achados novos em vez de refutar, inflando o relatório justo na
+etapa que deveria enxugá-lo); criar arquivo novo para o log de rejeitados; criar um quinto `Status`.
+
+**11.3 — Auditoria de composição pós-merge.** `/dw-review --post-merge [<base>]` audita o estado combinado
+de N PRs já mergeados: congelamento da fronteira (BASE_SHA e HEAD_SHA fixos, nunca o símbolo `HEAD`),
+inventário de proveniência por merge de primeiro pai, as sete classes de interação cruzada (pontes de
+invariante, deriva de helper/política, composição de defaults, ordem e ciclo de vida, recurso compartilhado,
+composição de schema/API/dados, **mascaramento de teste**), o checklist de defeitos só-de-composição
+(incluindo identidade de caminho e semântica por SO, que um gate de plataforma única não enxerga), o ledger
+de documentação montado do **diff** com alvo em descrição desatualizada, e a recomendação de semver com os
+dois perigos de changelog — entrada presa em seção já lançada (o merge resolve **limpo**, sem conflito) e
+resto de resolução diff3 (`|||||||`).
+
+Virou **modo do `/dw-review`**, não comando novo, pelo mesmo argumento da seção 6: mesmo input (range git
+verificado), mesma máquina de preflight, mesma disciplina de findings. O peso foi para
+`dw-review-rigor/references/composition-audit.md` (orçamento zero). O Level 2 não roda — não há PRD único
+numa faixa de N PRs; a proveniência substitui. `dw-verify` roda **uma vez** no HEAD congelado, que é o
+ponto: cada PR foi verificado sozinho, a composição nunca foi.
+
+**11.4 — Rot de skill por evidência de uso.** Princípio adotado: skill encostada é dívida — regra obsoleta
+continua executando e ferramenta parada ainda compete por atenção do modelo. O `session-cost.mjs` **já lia e
+já fazia `JSON.parse` de cada linha do transcript**, então contar nomes de skill é uma segunda passada sobre
+dados que já estavam na mão: zero I/O novo, zero configuração nova, e grava dentro do `costs.jsonl` que já
+tem `.gitignore` (um arquivo novo não entraria no ignore de nenhuma instalação existente).
+
+O escopo da varredura é deliberadamente estreito — só turnos `assistant`, só blocos `tool_use`, só o `input`
+do bloco. Varrer o texto cru contaria um `tool_result` que devolveu o *conteúdo* de um SKILL.md e um prompt
+que apenas menciona um nome, reportando como disparada uma skill que nunca rodou. `test/session-cost.test.js`
+fixa exatamente esse falso positivo.
+
+O discriminador de honestidade é estrutural: **presença da chave `skills`**. Ausente = linha anterior à
+instrumentação, não conta para a janela; `{}` = sessão observada com zero disparos, conta. Isso segue o
+precedente do `/dw-context-budget` e torna a janela auditável. O que o sinal prova é **carregamento, não
+obediência**. Rejeitado: qualquer coleta de transcript além dessa contagem. A regra "janela declarada, nunca
+afirmação absoluta" e a separação "sem telemetria" ≠ "sem disparo" são nossas, não da fonte.
+
 ## O que NÃO foi portado (e por quê)
 
 1. **`CONTEXT.md` na raiz (mattpocock)** — a *disciplina* de domain-modeling FOI adotada (seção 5 acima), mas o
@@ -266,6 +385,11 @@ motivo durável.
 6. **Hooks por-plataforma para Codex/Copilot/OpenCode (ponytail)** — o gate de hook foi
    limitado ao Claude Code (único alvo com `settings.json` hoje). Os `*-hooks.json` por
    plataforma ficam como follow-up documentado, não nesta rodada.
+7. **O passo de release (akitaonrails)** — a skill `release` dele (derivar versão do changelog, CI verde no
+   SHA exato, tag anotada, nunca reescrever tag publicada) NÃO foi portada, e nenhum `/dw-release` foi
+   criado. Decisão explícita do dono: o pipeline do dev-workflow termina no PR. A recomendação de semver
+   do `--post-merge` é uma linha de relatório, e `test/post-merge-audit.test.js` transforma isso em gate —
+   os comandos não podem conter `git tag`, `npm publish`, `npm version` nem `git push --tags`.
 
 ## Mapeamento de arquivos
 
@@ -292,6 +416,13 @@ motivo durável.
 | Artefatos de domínio | `.dw/domain/**` (criados lazy pelo grill autorizado) | — |
 | One-pager schema 1.1 | `scaffold/{en,pt-br}/templates/idea-onepager.md` | — |
 | Roteamento de ADR | `scaffold/{en,pt-br}/commands/dw-adr.md` (`--scope=repo\|prd`) | mattpocock (ADR-FORMAT) |
+| Contrato de entrada não confiável | `scaffold/{en,pt-br}/references/untrusted-input.md` + âncoras em `dw-triage`, `dw-review`, `dw-bugfix`, `dw-secure-audit`, `dw-find-skills`, `dw-install-*-skills` e `agent-instructions.md` | akitaonrails/my-skills (técnica; repo sem licença) |
+| Fronteira para texto buscado | `scaffold/skills/dw-source-grounding/SKILL.md` + âncoras em `dw-brainstorm` e `dw-plan` (EN/PT) | akitaonrails/my-skills (técnica; repo sem licença) |
+| Pipeline de candidato + refutação | `scaffold/skills/dw-review-rigor/SKILL.md` + `references/refutation-pass.md` | akitaonrails/my-skills (técnica; repo sem licença) |
+| Agente refutador | `scaffold/agents/core/dw-finding-refuter.md` + `scaffold/agent-registry.json` | — |
+| Auditoria de composição | `scaffold/skills/dw-review-rigor/references/composition-audit.md` + modo `--post-merge` em `scaffold/{en,pt-br}/commands/dw-review.md` | akitaonrails/my-skills (técnica; repo sem licença) |
+| Sinal de uso de skill | `scaffold/scripts/hooks/session-cost.mjs` (campo `skills` em `.dw/metrics/costs.jsonl`) | — |
+| Evidência de uso no audit | `scaffold/{en,pt-br}/commands/dw-skill-health.md` | akitaonrails/my-skills (princípio "skill encostada é dívida") |
 
 ## Segurança do update
 
@@ -314,6 +445,12 @@ Ambos os repositórios de referência são MIT. As adoções preservam os crédi
   `CONTEXT-FORMAT.md` + `ADR-FORMAT.md`) / `triage`, na base do controle de invocação, do hook git-guardrails,
   do Grill nativo (`dw-grilling` + `dw-domain-modeling`) e da borda `/dw-triage`. Comportamento reimplementado
   na nossa voz; nenhuma prosa upstream copiada.
+
+- `akitaonrails/my-skills` — **sem licença declarada (all rights reserved)**. Apenas a técnica foi
+  adaptada, reescrita na nossa voz e no nosso vocabulário (`needs-validation`, candidate pipeline,
+  Structured Return, `.dw/**`); nenhum texto, snippet, tabela, nome de arquivo ou estrutura de headings do
+  upstream foi reaproveitado, e nenhuma licença de reuso é assumida. A frase de abertura desta seção
+  ("ambos os repositórios de referência são MIT") vale para os dois primeiros, não para este.
 
 A atribuição também consta no `SKILL.md` de `dw-minimalism`, no `README.md` (Acknowledgements)
 e nos cabeçalhos dos scripts de hook.
