@@ -66,11 +66,28 @@ No dev-workflow as skills bundled vivem em `.agents/skills/` e são lidas por pa
 são os **wrappers de comando**. Logo, `disable-model-invocation` se aplica corretamente aos
 wrappers de comando:
 
-- Comandos hidden/internal — os runners (`dw-claude-run`, `dw-codex-run`, `dw-copilot-run`) e
-  a mecânica de subtask (`dw-subtask-start/complete/resume`) — recebem `userInvoked: true` em
-  `lib/constants.js`. O `PLATFORMS.claude.wrapperTemplate` emite `disable-model-invocation: true`
-  no frontmatter, então o modelo nunca auto-dispara (por exemplo) um runner que cria worktree;
-  o usuário continua invocando com `/<comando>`.
+- O mecanismo existe e continua no código: `userInvoked: true` em `lib/constants.js` faz o
+  `PLATFORMS.claude.wrapperTemplate` emitir `disable-model-invocation: true` no frontmatter, e o modelo
+  deixa de auto-disparar aquele comando. Um consumidor pode usá-lo nos comandos dele.
+
+  **Mas nenhum comando bundled usa mais.** A lista foi de seis para zero, em etapas: `dw-codex-run`
+  (commit `9b66e71`), depois `dw-open-design`, `dw-claude-run`, `dw-copilot-run` e os três
+  `dw-subtask-*`. O motivo foi o mesmo em todos: a trava obrigava o usuário a redigitar o comando
+  mesmo depois de já ter autorizado o despacho na mesma conversa — o parent montava o pacote de
+  serviço e parava, sem poder executar o que fora autorizado.
+
+  **A lição sobre o padrão importado.** `disable-model-invocation` serve para o que *nunca* deve
+  disparar sozinho. Não serve como substituto de gate de autorização: onde já existe aprovação
+  explícita a montante — a atribuição cross-tool aprovada em `/dw-plan tasks`, o dono pedindo o
+  design run, o parent que acabou de delegar — a trava não acrescenta segurança, só transfere
+  atrito para o usuário. Adotamos o mecanismo, usamos em produção e o recuamos até zero; foi a
+  prática que mostrou onde ele cabia, e a resposta foi "em nenhum comando nosso".
+
+  Os gates reais seguem de pé e são outros: worktree dedicado, nunca o checkout principal, nunca
+  merge, avaliação dupla 0-10 e STOP no gate para os runners; aprovação do dono no `/dw-plan tasks`.
+  `test/scaffold-contract.test.js` trava o estado atual — re-travar um comando bundled é decisão de
+  produto e tem de ser justificada ali e aqui, no mesmo commit.
+
 - O registry ganhou o campo `invocation: model|explicit` (documental para as skills bundled e
   insumo do manifest à-la-carte). Recipe/asset packs (`api-testing-recipes`,
   `docker-compose-recipes`, `remotion-best-practices`, `vercel-react-best-practices`,

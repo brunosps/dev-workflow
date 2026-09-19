@@ -11,11 +11,15 @@ const { read, exists, FILES, includes } = require('./_helpers');
 const { COMMANDS } = require('../lib/constants');
 const openDesign = require('../lib/install-open-design');
 
-test('dw-open-design command is registered for EN and PT-BR as user-invoked', () => {
+test('dw-open-design is registered for EN and PT-BR and stays model-invocable', () => {
   for (const lang of ['en', 'pt-br']) {
     const entry = COMMANDS[lang].find((command) => command.name === 'dw-open-design');
     assert.ok(entry, `${lang} registry entry missing`);
-    assert.equal(entry.userInvoked, true);
+    // Same reasoning as dw-codex-run in 9b66e71: the lock forced the user to retype
+    // the command even after authorizing the dispatch in the same conversation, so
+    // the parent assembled the brief and then stopped. The gates that matter here are
+    // the explicit `--agent` choice and the dual >=9 visual gate, not the wrapper flag.
+    assert.ok(!entry.userInvoked, `${lang}: dw-open-design must stay model-invocable`);
     assert.ok(entry.description.length <= 250, `${lang} description budget`);
     includes(assert, read(`scaffold/${lang}/commands/dw-open-design.md`), '--agent', `${lang} protocol`);
     includes(assert, read(`scaffold/${lang}/commands/dw-open-design.md`), '--refactor', `${lang} protocol`);

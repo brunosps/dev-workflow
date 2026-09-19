@@ -265,3 +265,34 @@ test('dw-worktree is registered, ships its GC script, and is wired into runners,
   const guardrails = read('scaffold/scripts/hooks/git-guardrails.mjs');
   assert.match(guardrails, /worktree\\s\+remove/);
 });
+
+// `userInvoked` renders `disable-model-invocation: true` into the Claude wrapper.
+// The mechanism still exists for a consumer's own command, but NO bundled command
+// uses it any more: the lock is not an authorization gate, and every place it was
+// applied already had explicit approval upstream (`/dw-plan tasks` cross-tool
+// assignment, the owner asking for the design run). On top of that approval it only
+// made the user retype a command they had already authorized. Re-locking a bundled
+// command is a product decision — make it here, deliberately, and update
+// docs/skills-ecosystem-comparison.md in the same change.
+test('no bundled command carries the invocation lock', () => {
+  for (const locale of ['en', 'pt-br']) {
+    const locked = COMMANDS[locale].filter((cmd) => cmd.userInvoked).map((cmd) => cmd.name);
+    assert.deepEqual(
+      locked,
+      [],
+      `${locale}: ${locked.join(', ')} carries userInvoked. If that is intended, say why here and in the comparison doc.`
+    );
+  }
+});
+
+test('the comparison doc does not claim a bundled command is user-invoked', () => {
+  const doc = read('docs/skills-ecosystem-comparison.md');
+  for (const locale of ['en']) {
+    for (const cmd of COMMANDS[locale]) {
+      assert.ok(
+        !new RegExp(`\`${cmd.name}\`[^.]{0,200}recebem \`userInvoked: true\``).test(doc),
+        `docs must not list ${cmd.name} as user-invoked — no bundled command is`
+      );
+    }
+  }
+});
