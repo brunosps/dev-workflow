@@ -14,23 +14,31 @@ A set of rules the caller applies while producing a review report. This skill do
 
 ## When Invoked
 
-By `/dw-review --code-only`, `/dw-review --coverage-only`, `/dw-refactor`, and `/dw-brainstorm --mode=refactor-audit`. The caller has already identified a scope (files, a PR, a codebase area). This skill governs how findings are selected, deduplicated, ordered, and phrased.
+By `/dw-review --code-only` (all five rules plus the full candidate pipeline), `/dw-review --coverage-only` (de-dup and severity-ordering on PRD-vs-code gaps), `/dw-refactor` and `/dw-brainstorm --mode=refactor-audit` (rules 1, 2, 4, 5; rule 3 adapts, so a smell with a justifying ADR becomes a `low` finding at most). The caller has already identified a scope — files, a PR, a codebase area — and this skill governs how findings are selected, deduplicated, ordered, and phrased.
 
 ## Required Inputs
 
 - The scope the caller is reviewing (file paths, directories, or PR diff).
-- Optional: prior review reports in `.dw/spec/prd-*/reviews/` — so this round only surfaces NEW findings.
+- Optional: prior review reports for the same target, so this round surfaces only NEW findings. See Prior-Round Awareness.
 
-## Pre-Report Gate
+## Candidate Pipeline
 
-Before writing ANY finding, clear four checks — if any is "no"/"unsure", downgrade or drop it (an unactionable finding is noise):
+Nothing you notice is a finding yet. Everything enters as a **candidate** and leaves through exactly one of three exits: `finding`, `needs-validation`, or `rejected`. There is no fourth — a candidate that quietly disappears is a defect of the review, not a tidy report.
+
+**Stage 1 — Gate.** Clear four checks; any "no" or "unsure" means this is not ready to be a finding:
 
 1. **Location** — exact file and line?
 2. **Failure mode** — a concrete input/state and the bad outcome it produces?
 3. **Context** — read the surrounding code (callers, imports, tests), not just the flagged line?
 4. **Severity** — defensible against Rule 2's definitions? (a missing JSDoc is never HIGH)
 
-Report only findings you are **>80% confident** are real. A style preference no rule backs is not a finding. See `references/false-positives.md` for patterns LLM reviewers habitually mis-flag.
+See `references/false-positives.md` for patterns LLM reviewers habitually mis-flag.
+
+**Stage 2 — Refutation.** The reasoning that produced a candidate cannot also be its check; it anchors every reading that follows. Each candidate clearing Stage 1 faces a deliberate attempt to disprove it. With subagents, dispatch `dw-finding-refuter` with the claim and the raw code, never the reasoning behind it, one candidate per dispatch. Otherwise re-derive the path from source, working to show the outcome cannot happen. Packet contract, upstream guards and both output formats: `references/refutation-pass.md`.
+
+**Stage 3 — Disposition.** Holds on evidence the refutation found for itself → `finding`, with a severity. Blocked upstream, input unreachable, or behavior intended → `rejected`, one line at the end of the report naming what disproved it. Cannot be established either way → `needs-validation`, which never receives a severity and records what is missing and what would settle it.
+
+Report only findings you are **>80% confident** are real *after* Stage 2. Three needs-validation entries and one finding is a more honest round than four findings.
 
 ## The Five Rules
 
@@ -38,11 +46,12 @@ For the five rules, read `references/the-five-rules-detail.md`. Load only when t
 
 ## Prior-Round Awareness
 
-If the PRD directory has prior review reports:
+Prior reports live in `<target>/QA/` (PRD target) or `<target>/review/` (bugfix target). Read them and extract three lists — known findings (titles + file/line signatures), open `needs-validation` entries, rejected candidates — then:
 
-1. Read them and extract the list of known findings (their titles + file/line signatures).
-2. The current round surfaces **only NEW findings**. Do not re-flag items already tracked as pending, resolved, or accepted in earlier rounds.
-3. If a prior finding was resolved incorrectly, open it as a NEW finding with "Regression of <prior ref>" in the body.
+1. Surface **only NEW findings**. Do not re-flag items already tracked as pending, resolved, or accepted.
+2. Re-check every open `needs-validation` entry. Resolve it into a finding or a rejection when this round has the missing evidence; otherwise carry it forward unchanged. Carrying it forward is a valid outcome — dropping it is not.
+3. Do not re-raise a rejected candidate unless the code changed in a way that defeats the recorded refutation. Name what changed.
+4. If a prior finding was resolved incorrectly, open it as a NEW finding with "Regression of <prior ref>" in the body.
 
 ## Finding Format
 
@@ -62,14 +71,13 @@ Evidence: <relevant code snippet, test output, or reference>
 
 The caller emits:
 
-1. **Merge/ship recommendation** — one of:
-   - `Needs fixes before merge` (if any critical or high exist), with blocking findings named.
-   - `Safe to merge with follow-ups` (only medium/low).
-   - `Clean — ready to merge` (no findings).
+1. **Merge/ship recommendation** — `Needs fixes before merge` when any critical or high exists, naming the blockers; `Safe to merge with follow-ups` for medium/low only; `Clean — ready to merge` for none.
 2. **Counts** — critical / high / medium / low.
 3. **Findings** — ordered by severity, each in the format above.
-4. **Well-implemented aspects** — short bulleted list, calibrates tone.
-5. **Self-score** — rate the report on the five axes in `references/self-eval-rubric.md`; any axis below top cites the gap, then fix (<30s) or flag.
+4. **Needs Validation** — open questions carried by this round, without severities.
+5. **Rejected Candidates** — one line per refuted candidate, with what disproved it.
+6. **Well-implemented aspects** — short bulleted list, calibrates tone.
+7. **Self-score** — rate the report on the five axes in `references/self-eval-rubric.md`; any axis below top cites the gap, then fix (<30s) or flag.
 
 ## Critical Rules
 
@@ -78,33 +86,19 @@ The caller emits:
 - Do not flag patterns that have a clear adjacent justification or ADR.
 - Do not write N identical findings for one root cause — de-duplicate.
 - Do not mix severities — order is critical → high → medium → low.
-
-## Integration With Other dev-workflow Commands
-
-- `/dw-review --code-only` — applies all five rules to its Level-3 review output; uses prior reports in `.dw/spec/*/reviews/` to dedupe across rounds.
-- `/dw-review --coverage-only` — applies de-dup + severity-ordering when listing gaps between PRD requirements and code.
-- `/dw-refactor` — applies rules 1, 2, 4, 5 when cataloging code smells (rule 3 adapts: a "smell" with a justifying ADR becomes a `low` finding at most).
-
-Callers should mention this skill in their "Skills Complementares" section.
+- Do not assign a severity to anything that did not survive Stage 2.
+- Do not delete a candidate — route it to findings, needs-validation, or rejected.
 
 ## Inspired by
 
-Ported from Compozy's `cy-review-round` skill (`/tmp/compozy/.agents/skills/cy-review-round/SKILL.md`). Adapted for dev-workflow:
-
-- No `reviews-NNN/` directory convention — dev-workflow reviews already persist in `.dw/spec/*/reviews/` per command's existing contract.
-- The five rules are extracted here so three different dev-workflow review commands can share the discipline without duplicating it.
-- No issue-file frontmatter (Compozy uses it to interoperate with its remediation engine; dev-workflow's remediation is manual or via `/dw-qa --fix`).
-
-Credit: Compozy project (https://github.com/compozy/compozy).
+The five rules are ported from Compozy's `cy-review-round` (credit: [Compozy](https://github.com/compozy/compozy), MIT) and extracted here so three review commands share one discipline; adapted to persist reviews in `<target>/QA/` or `<target>/review/` with no issue-file frontmatter. The candidate pipeline, `needs-validation` and the rejected-candidate log are independently reimplemented from the technique in `akitaonrails/my-skills` — that repository declares no license and no upstream text was reused.
 
 ## Structured Return
 
-When invoked directly or by a harness, return or merge this block:
-
-- **Status:** `PASS` when no defensible findings remain, `FINDINGS` when review findings exist, `BLOCKED` when diff/context is insufficient, `NOT_APPLICABLE` when no review is in scope.
+- **Status:** `PASS` when no defensible findings remain (open `needs-validation` entries do not block it, but each must be listed), `FINDINGS` when review findings exist, `BLOCKED` when diff/context is insufficient, `NOT_APPLICABLE` when no review is in scope.
 - **Scope:** diff range, files reviewed, prior rounds, and review mode.
-- **Evidence:** file/line references, behavior impact, and prior-round disposition.
+- **Evidence:** file/line references, behavior impact, the refutation each finding survived, prior-round disposition.
 - **Artifacts:** review report, inline findings, or consolidation notes.
-- **Decisions:** finding severity/order, duplicate suppression, and false-positive rejection.
-- **Risks:** missing tests, unreviewed generated files, stale base branch, or non-defensible claims.
-- **Next Step:** exact fix, verification, or approval/block marker.
+- **Decisions:** severity and order, duplicate suppression, and every refuted candidate with what disproved it.
+- **Risks:** missing tests, unreviewed generated files, stale base branch, non-defensible claims, open `needs-validation` entries.
+- **Next Step:** exact fix, verification, what would resolve each `needs-validation` entry, or the approval/block marker.

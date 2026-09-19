@@ -51,7 +51,9 @@ finding blocks the gate (the **fp-check** step):
    (see the table below) / framework-mitigated?
 3. **Verdict:** If both hold → keep as blocking at its tier. If provably unreachable or
    trusted-input → **downgrade to advisory** and write the one-line justification in the findings file.
-   Never silently drop a tool finding — log every downgrade so the pattern stays auditable.
+   If reachability cannot be established either way → **`needs-validation`**, with no severity: record
+   the exact missing fact and what would settle it. Never silently drop a tool finding, and never let an
+   undecided one drift into either verdict — log it so the pattern stays auditable.
 
 Exception: **secrets do not get an fp-check downgrade** — a real-looking credential is removed and
 rotated, not argued away (only committed `.gitleaks.toml` allowlist entries for known fixtures apply).

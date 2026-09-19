@@ -66,6 +66,22 @@
       "avoid_when": ["implementation is still moving", "no files or diff are provided", "style-only preference review"]
     },
     {
+      "name": "dw-finding-refuter",
+      "module": "core",
+      "mode": "read-only",
+      "description": "Try to disprove one proposed review finding from the code alone and report whether it survives.",
+      "context_mode": "fresh",
+      "tool_policy": "read-only",
+      "max_turns": 6,
+      "input_budget_words": 600,
+      "output_budget_words": 500,
+      "parallel_safe": true,
+      "handoff_required": true,
+      "skill_policy": "lazy",
+      "recommended_for": ["candidate finding with a cited file and line", "high or critical candidate before it is reported", "candidate a prior round already rejected"],
+      "avoid_when": ["no concrete claim yet", "linter-level or style claim", "surrounding code has not been read"]
+    },
+    {
       "name": "dw-test-author",
       "module": "core",
       "mode": "write",
@@ -262,7 +278,7 @@
     "dw-plan": ["dw-code-explorer", "dw-planner"],
     "dw-run": ["dw-build-fixer", "dw-test-author"],
     "dw-bugfix": ["dw-code-explorer", "dw-build-fixer", "dw-test-author", "dw-silent-failure-hunter"],
-    "dw-review": ["dw-code-reviewer", "dw-security-reviewer", "dw-silent-failure-hunter"],
+    "dw-review": ["dw-code-reviewer", "dw-security-reviewer", "dw-silent-failure-hunter", "dw-finding-refuter"],
     "dw-qa": ["dw-qa-runner", "dw-test-author"],
     "dw-intel": ["dw-code-explorer"],
     "dw-subtask-start": ["dw-code-explorer", "dw-planner", "dw-build-fixer", "dw-test-author"],

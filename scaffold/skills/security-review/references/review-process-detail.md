@@ -82,3 +82,21 @@ For each potential finding, confirm:
 Skip theoretical issues. Report only what you've confirmed is exploitable after research.
 
 ---
+
+## Adversarial verification of a candidate
+
+The fp-check is this skill's instance of a general rule: the reasoning that produced a finding cannot be
+the reasoning that confirms it. Once a trace reaches a conclusion, re-reading it feels like verification
+and is not.
+
+When subagents are available, run the fp-check as a fresh refuter rather than as self-review. Hand over the
+claim and the raw code — the flagged sink, the file, the entry points that reach it — and withhold how the
+finding was reached and what severity you were going to give it. A finding handed over as `critical` comes
+back confirmed more often than the identical finding handed over as `medium`, and that difference is the
+anchor, not the evidence. `dw-review-rigor/references/refutation-pass.md` carries the packet contract and
+the ordered list of upstream guards to check; `dw-finding-refuter` is the agent.
+
+The third verdict matters most here. A reachability question that cannot be settled is
+`needs-validation` — it carries no severity, and it records the missing fact plus what would settle it.
+Inflating it into a blocking finding and quietly dropping it are the two failures this class exists to
+prevent, and a security gate is exactly where both are tempting.
