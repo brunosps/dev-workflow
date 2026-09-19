@@ -31,6 +31,7 @@ Aplique primeiro as regras de roteamento da raiz. Consulte este catálogo soment
 | "Revisa meu PR" / "Checa qualidade" / "Tá pronto pra subir?" | `/dw-review` |
 | "Só checagem de cobertura PRD" | `/dw-review --coverage-only` |
 | "Só code review qualidade" | `/dw-review --code-only` |
+| "Audita o que mergeamos desde a última tag" / "Esses PRs se quebraram entre si?" | `/dw-review --post-merge [<base>]` |
 | "Hora de commitar" / mudanças validadas e prontas | `/dw-commit` |
 | "Abre um PR" / "Sobe isso" | `/dw-generate-pr` |
 | "Sugere ideias novas" / "O que devemos construir agora?" / "Encontra oportunidades" / "Ideias de roadmap" | `/dw-opportunities` |

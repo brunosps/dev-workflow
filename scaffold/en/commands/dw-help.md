@@ -31,7 +31,7 @@ Use `/dw-autopilot "wish"` as the gateway for most feature work. The granular co
 | `/dw-brainstorm "idea"` | Refine a concrete idea before PRD. Flags: `--onepager`, `--council`, `--research`. |
 | `/dw-plan "feature"` | PRD → TechSpec → Tasks sequentially with checkpoints. Stages: `prd`, `techspec`, `tasks`. |
 | `/dw-run [task-id]` | Execute all pending tasks or a single one. Flag `--resume`. |
-| `/dw-review` | Level 2 (PRD coverage) + Level 3 (code quality/security). Flags: `--coverage-only`, `--code-only`, `--bugfix <slug>`. |
+| `/dw-review` | Level 2 (PRD coverage) + Level 3 (code quality/security). Flags: `--coverage-only`, `--code-only`, `--bugfix <slug>`, `--since <ref>` (ad-hoc review from a verified point), `--post-merge [<base>]` (composition audit of an already-merged range). |
 | `/dw-qa` | Mode-aware QA (UI / API auto-detect). Flags: `--fix`, `--api`, `--ai`, `--uat`, `--bugfix <slug>`. |
 | `/dw-pause` | Save session state, decisions, blockers, todos, and open loops into `.dw/STATE.md`. |
 | `/dw-resume` | Read `.dw/STATE.md`, show a TLDR, and suggest the next `dw-*` command. |

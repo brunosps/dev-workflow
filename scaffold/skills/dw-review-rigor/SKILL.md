@@ -44,6 +44,8 @@ Report only findings you are **>80% confident** are real *after* Stage 2. Three 
 
 For the five rules, read `references/the-five-rules-detail.md`. Load only when this part of the task applies.
 
+When the scope is an already-merged range (`/dw-review --post-merge`), also read `references/composition-audit.md`: the seven cross-interaction classes, the composition-only defect checklist, the documentation ledger and the semver recommendation.
+
 ## Prior-Round Awareness
 
 Prior reports live in `<target>/QA/` (PRD target) or `<target>/review/` (bugfix target). Read them and extract three lists — known findings (titles + file/line signatures), open `needs-validation` entries, rejected candidates — then:

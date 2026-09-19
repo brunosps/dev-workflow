@@ -29,7 +29,7 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 | `/dw-brainstorm "ideia"` | Refina uma ideia concreta antes do PRD. Flags: `--onepager`, `--council`, `--research`. |
 | `/dw-plan "feature"` | PRD → TechSpec → Tasks sequencial com checkpoints. Stages: `prd`, `techspec`, `tasks`. |
 | `/dw-run [task-id]` | Executa todas tasks pendentes ou uma específica. Flag `--resume`. |
-| `/dw-review` | Level 2 (cobertura PRD) + Level 3 (qualidade/segurança). Flags: `--coverage-only`, `--code-only`, `--bugfix <slug>`. |
+| `/dw-review` | Level 2 (cobertura PRD) + Level 3 (qualidade/segurança). Flags: `--coverage-only`, `--code-only`, `--bugfix <slug>`, `--since <ref>` (review avulso de um ponto verificado), `--post-merge [<base>]` (auditoria de composição de uma faixa já mergeada). |
 | `/dw-qa` | QA mode-aware (UI / API auto-detect). Flags: `--fix`, `--api`, `--ai`, `--uat`, `--bugfix <slug>`. |
 | `/dw-pause` | Salva estado da sessão, decisões, bloqueios, todos e open loops em `.dw/STATE.md`. |
 | `/dw-resume` | Lê `.dw/STATE.md`, mostra um TLDR e sugere o próximo comando `dw-*`. |

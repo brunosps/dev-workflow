@@ -88,6 +88,26 @@ const FILES = {
     en: 'scaffold/en/commands/dw-worktree.md',
     pt: 'scaffold/pt-br/commands/dw-worktree.md',
   },
+  untrustedInput: {
+    en: 'scaffold/en/references/untrusted-input.md',
+    pt: 'scaffold/pt-br/references/untrusted-input.md',
+  },
+  agentInstructions: {
+    en: 'scaffold/en/agent-instructions.md',
+    pt: 'scaffold/pt-br/agent-instructions.md',
+  },
+  skillHealth: {
+    en: 'scaffold/en/commands/dw-skill-health.md',
+    pt: 'scaffold/pt-br/commands/dw-skill-health.md',
+  },
+  secureAudit: {
+    en: 'scaffold/en/commands/dw-secure-audit.md',
+    pt: 'scaffold/pt-br/commands/dw-secure-audit.md',
+  },
+  findSkills: {
+    en: 'scaffold/en/commands/dw-find-skills.md',
+    pt: 'scaffold/pt-br/commands/dw-find-skills.md',
+  },
 };
 
 const SKILLS = {

@@ -71,6 +71,7 @@ const PARITY = {
     'dw-simplification',
   ],
   bugfix: [
+    '.dw/references/untrusted-input.md',
     'red-capable',
     'Loop command before fix',
     'Loop command after fix',
@@ -78,6 +79,7 @@ const PARITY = {
     'references/six-step-triage.md',
   ],
   triage: [
+    '.dw/references/untrusted-input.md',
     '.dw/triage/NNN-<slug>.md',
     '.dw/out-of-scope/<concept>.md',
     'needs-triage',
@@ -97,6 +99,7 @@ const PARITY = {
     'insufficient-detail',
   ],
   triageRecordTemplate: [
+    'untrusted',
     'type: triage-record',
     'schema_version: "1.0"',
     'category: "bug | enhancement"',
@@ -170,9 +173,44 @@ const PARITY = {
     '`codex`',
     '`claude`',
   ],
+  untrustedInput: [
+    '`AGENTS.md`',
+    '`CLAUDE.md`',
+    '`.dw/**`',
+    '`.env`',
+    '`SKILL.md`',
+    '`/dw-qa`',
+  ],
+  agentInstructions: [
+    '.dw/references/untrusted-input.md',
+  ],
+  skillHealth: [
+    '.dw/metrics/costs.jsonl',
+    '`skills`',
+    'invocation: explicit',
+    'session-cost',
+  ],
+  secureAudit: [
+    '.dw/references/untrusted-input.md',
+    'needs-validation',
+  ],
+  findSkills: [
+    '.dw/references/untrusted-input.md',
+  ],
   review: [
     '--since <ref>',
     '{{SINCE_REF}}',
+    '--post-merge',
+    '{{BASE_SHA}}',
+    '{{HEAD_SHA}}',
+    "git log --first-parent --format='%H %P %s'",
+    '.dw/reviews/post-merge/',
+    'last-audit.json',
+    'references/composition-audit.md',
+    'needs-validation',
+    'dw-finding-refuter',
+    '|||||||',
+    '.dw/references/untrusted-input.md',
     'git rev-parse --verify --quiet <ref>^{commit}',
     'git diff <ref>...HEAD',
     'git log <ref>..HEAD --oneline',

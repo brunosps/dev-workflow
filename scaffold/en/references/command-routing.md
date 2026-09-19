@@ -31,6 +31,7 @@ Use the installed root routing rules first. Consult this catalog only to locate 
 | "Review my PR" / "Check code quality" / "Is this ready to ship?" | `/dw-review` |
 | "Just the PRD coverage check" | `/dw-review --coverage-only` |
 | "Just the code quality review" | `/dw-review --code-only` |
+| "Audit what we merged since the last tag" / "Did these PRs break each other?" | `/dw-review --post-merge [<base>]` |
 | "Time to commit" / changes are validated and ready | `/dw-commit` |
 | "Open a PR" / "Ship this" | `/dw-generate-pr` |
 | "Suggest new ideas" / "What should we build next?" / "Find opportunities" / "Roadmap ideas" | `/dw-opportunities` |
