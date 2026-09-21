@@ -22,7 +22,7 @@ Inspect scoped task commits and remaining bookkeeping; `/dw-commit` handles an a
 
 ## Durable state
 
-Preserve `autopilot-state.json` fields: mode, wish, prd_path, from_prd_slug, current_step, completed_steps, skipped_steps, skip_reasons, gates_passed, step_artifacts, goal_slug, next_command, started_at, last_updated. Add `execution_plan` and `execution_state` paths. Record evidence, not merely file existence, before marking a step complete.
+State file: `.dw/autopilot-state.json` — one per project, next to `.dw/STATE.md`, tracked like it (a resume point describes project work, not machine-local artifacts). Preserve its fields: mode, wish, prd_path, from_prd_slug, current_step, completed_steps, skipped_steps, skip_reasons, gates_passed, step_artifacts, goal_slug, next_command, started_at, last_updated. Add `execution_plan` and `execution_state` paths. Record evidence, not merely file existence, before marking a step complete.
 
 | status | Resume action |
 |---|---|

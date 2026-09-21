@@ -26,7 +26,19 @@ export const DANGEROUS = [
   { re: /\bgit\s+worktree\s+remove\b[^\n|&;]*(--force\b|\s-f\b)/, why: 'force-removes a worktree that may hold uncommitted work — commit first or use /dw-worktree clean (never --force)' },
   { re: /\bgit\s+checkout\b[^\n|&;]*\s(--\s+\.|\.\s*$)/, why: 'discards all local changes in the working tree' },
   { re: /\bgit\s+restore\b[^\n|&;]*\s(--\s+)?\.(?=\s*(?:$|[|&;]))/, why: 'discards all local changes in the working tree' },
+  { re: /\bgit\s+filter-branch\b/, why: 'filter-branch rewrites every commit it touches' },
+  { re: /\bgit\s+reflog\s+expire\b/, why: 'expiring the reflog destroys the recovery net for everything above' },
+  { re: /\bgit\s+gc\b[^\n|&;]*--prune\b/, why: 'pruning unreachable objects makes a bad reset or rebase unrecoverable' },
+  { re: /\bgit\s+stash\s+(drop|clear)\b/, why: 'drops stashed work that has no other copy' },
+  { re: /\bgit\s+branch\b[^\n|&;]*\s-M\b/, why: 'force-renames over an existing branch, discarding it' },
+  { re: /\bgit\s+update-ref\b[^\n|&;]*\s-d\b/, why: 'deletes a ref directly, bypassing every branch-level guard' },
 ];
+
+// Deliberately NOT here: `git rebase` and `git commit --amend`. Both are routine on
+// unpushed local work, and the command line cannot tell pushed from unpushed — blocking
+// them would produce false denials often enough to train people into disabling the hook,
+// which costs more than the two cases it would catch. `.dw/references/invariants.md`
+// carries the rule for the pushed case, where the hook cannot decide it.
 
 function readStdin() {
   return new Promise((resolve) => {

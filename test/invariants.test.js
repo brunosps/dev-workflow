@@ -95,8 +95,11 @@ test('the floor is honest about where the hook does not reach', () => {
     // git-guardrails.mjs fails open in four places and only covers Bash under Claude Code.
     // A floor that implies the hook enforces it would be claiming a guarantee we do not have.
     assert.match(floor, /git-guardrails\.mjs/, `${locale} must name the partial implementation`);
-    for (const uncovered of ['filter-branch', 'reflog expire', 'commit --amend']) {
-      assert.ok(floor.includes(uncovered), `${locale} must name ${uncovered} as beyond the hook`);
+    assert.match(floor, /fails open|falha aberto/, `${locale} must say the hook fails open`);
+    // These two are deliberately outside the hook — routine on unpushed work, and the
+    // command line cannot tell. The floor is where they are covered.
+    for (const uncovered of ['rebase', 'commit --amend']) {
+      assert.ok(floor.includes(uncovered), `${locale} must name ${uncovered} as covered only here`);
     }
   }
 });

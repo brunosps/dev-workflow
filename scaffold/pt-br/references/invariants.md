@@ -50,9 +50,13 @@ funcionando. Um agente que não consegue destruir trabalho não pode ser convenc
 **Como isso é verificado:** em parte pelo `.dw/scripts/hooks/git-guardrails.mjs`, um hook `PreToolUse` que
 nega esses padrões no Bash. O hook é **uma implementação, não a fonte da regra**, e tem dois limites
 conhecidos: só cobre Bash no Claude Code, e **falha aberto** — erro de parse ou exceção em runtime deixa o
-comando passar. Então a regra obriga mesmo onde o hook não roda, e cobre operações que o hook não casa por
-padrão hoje: `rebase` sobre branch já pushada, `filter-branch`, `reflog expire`, `gc --prune`, `stash drop` /
-`stash clear`, `branch -M`, `update-ref -d` e `commit --amend` em commit já pushado.
+comando passar. Então a regra obriga mesmo onde o hook não roda.
+
+Duas operações ficam de fora do hook de propósito e vivem só aqui: `rebase` e `commit --amend`. As duas são
+rotina em trabalho não pushado, e uma linha de comando não distingue pushado de não pushado. Negá-las
+produziria falsas negativas com frequência suficiente para treinar as pessoas a desligar o hook — o que
+custa mais que os casos que pegaria. Em branch ou commit já **pushado** elas são reescrita de história, e
+esta regra as cobre.
 
 ## I-2 — Segredo se rotaciona, não se justifica
 

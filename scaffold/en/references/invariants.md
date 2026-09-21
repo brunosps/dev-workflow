@@ -51,10 +51,12 @@ it is the boundary working. An agent that cannot destroy work cannot be talked i
 **How this is enforced:** partly by `.dw/scripts/hooks/git-guardrails.mjs`, a `PreToolUse` hook that denies
 these patterns on Bash. The hook is **one implementation, not the source of the rule**, and it has two
 known limits: it only covers Bash under Claude Code, and it **fails open** — a parse error or a runtime
-fault allows the command through. So the rule binds even where the hook does not run, and it covers
-operations the hook does not pattern-match today: `rebase` onto a pushed branch, `filter-branch`,
-`reflog expire`, `gc --prune`, `stash drop` / `stash clear`, `branch -M`, `update-ref -d`, and
-`commit --amend` on a pushed commit.
+fault allows the command through. So the rule binds even where the hook does not run.
+
+Two operations are deliberately left out of the hook and live only here: `rebase` and `commit --amend`.
+Both are routine on unpushed work, and a command line cannot tell pushed from unpushed. Denying them would
+produce false denials often enough to train people into disabling the hook, which costs more than the cases
+it would catch. On a **pushed** branch or commit they are history rewriting, and this rule covers them.
 
 ## I-2 — Secrets are rotated, never justified
 

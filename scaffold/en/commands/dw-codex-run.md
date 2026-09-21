@@ -10,6 +10,7 @@ Run the examples with cwd set to `<WORKTREE>` by the process launcher. Substitut
 | Slot | Value |
 |---|---|
 | `DISPATCH` | `codex exec -m "<MODEL>" -c 'model_reasoning_effort="<EFFORT>"' <PERMISSIONS> --json -o "<AUDIT>/<slug>.last.md" - < "<PROMPT>" > "<AUDIT>/<slug>.log" 2>&1` |
+| `AUDIT` | `.dw/cli-run` — durable audit logs, session sidecars and last-message captures. Outside the worktree on purpose: authorized cleanup must not erase the evidence. Created by `init`, machine-local (gitignored). |
 | `STREAM` | `--json` |
 | `MODEL` | `-m "<MODEL>"` |
 | `EFFORT` | `-c 'model_reasoning_effort="<EFFORT>"'` |

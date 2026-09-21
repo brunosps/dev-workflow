@@ -57,6 +57,40 @@ test('git guardrails block destructive wholesale restore and git history operati
   }
 });
 
+test('git guardrails block the history and recovery-net operations too', () => {
+  for (const command of [
+    'git filter-branch --tree-filter "rm -f secret" HEAD',
+    'git reflog expire --expire=now --all',
+    'git gc --prune=now',
+    'git stash drop',
+    'git stash clear',
+    'git branch -M main',
+    'git update-ref -d refs/heads/feature',
+  ]) {
+    assertBlocked(command);
+  }
+});
+
+// rebase and commit --amend are routine on unpushed work, and a command line cannot
+// tell pushed from unpushed. Denying them would produce false denials often enough to
+// train people into disabling the hook — which costs more than the cases it would catch.
+// `.dw/references/invariants.md` carries the rule for the pushed case in prose.
+test('git guardrails do not block operations that are routine on unpushed work', () => {
+  for (const command of [
+    'git rebase main',
+    'git rebase -i HEAD~3',
+    'git commit --amend --no-edit',
+    'git stash',
+    'git stash list',
+    'git stash pop',
+    'git gc',
+    'git branch -m old-name new-name',
+    'git update-ref refs/heads/feature HEAD',
+  ]) {
+    assert.equal(runHook(command), '', `${command} must not be denied`);
+  }
+});
+
 test('git guardrails allow normal inspection, normal push, and file-specific restore via CLI hook', () => {
   for (const command of [
     'git push origin main',

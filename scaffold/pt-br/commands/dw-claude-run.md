@@ -10,6 +10,7 @@ Execute exemplos com cwd definido como `<WORKTREE>` pelo lançador. Substitua ar
 | Slot | Value |
 |---|---|
 | `DISPATCH` | `claude -p --session-id "<SESSION_ID>" --model "<MODEL>" --effort "<EFFORT>" <PERMISSIONS> --output-format stream-json --include-partial-messages --verbose < "<PROMPT>" > "<AUDIT>/<slug>.log" 2>&1` |
+| `AUDIT` | `.dw/cli-run` — logs de auditoria duráveis, sidecars de sessão e capturas da última mensagem. Fora do worktree de propósito: limpeza autorizada não pode apagar a evidência. Criado pelo `init`, machine-local (gitignorado). |
 | `STREAM` | `--output-format stream-json --verbose` |
 | `MODEL` | `--model "<MODEL>"` |
 | `EFFORT` | `--effort "<EFFORT>"` |

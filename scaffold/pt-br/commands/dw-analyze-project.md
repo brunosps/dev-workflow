@@ -705,7 +705,7 @@ Três opções:
 
 1. Localizar `templates/constitution-template.md` (projeto-local em `.dw/templates/constitution-template.md`, com fallback para scaffold bundled).
 2. Copiar para `.dw/constitution.md` literalmente. Setar frontmatter `mode: defaults`.
-3. Imprimir: "Constituição defaults instalada em `.dw/constitution.md`. Todos os 10 princípios começam em `severity: info` — reportam mas não bloqueiam. Edite o arquivo para customizar, depois promova severities para `high`/`critical` quando confiar."
+3. Imprimir: "Constituição defaults instalada em `.dw/constitution.md`. Nove dos onze princípios começam em `severity: info` — reportam mas não bloqueiam. Os dois de segurança (P-010 segredos, P-011 SAST) já vêm em `high` e bloqueiam PR sem ADR; o P-010 não aceita ADR de todo jeito. Edite o arquivo para customizar, depois promova os demais quando confiar."
 
 **Opção C — Pular:**
 

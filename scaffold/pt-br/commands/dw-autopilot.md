@@ -22,7 +22,7 @@ Inspecione commits com escopo e bookkeeping restante; `/dw-commit` faz commit fi
 
 ## Estado durável
 
-Preserve campos de `autopilot-state.json`: mode, wish, prd_path, from_prd_slug, current_step, completed_steps, skipped_steps, skip_reasons, gates_passed, step_artifacts, goal_slug, next_command, started_at, last_updated. Acrescente caminhos `execution_plan` e `execution_state`. Registre evidência, não só existência de arquivo, antes de concluir etapa.
+Arquivo de estado: `.dw/autopilot-state.json` — um por projeto, ao lado do `.dw/STATE.md`, versionado como ele (um ponto de retomada descreve trabalho do projeto, não artefato machine-local). Preserve os campos: mode, wish, prd_path, from_prd_slug, current_step, completed_steps, skipped_steps, skip_reasons, gates_passed, step_artifacts, goal_slug, next_command, started_at, last_updated. Acrescente caminhos `execution_plan` e `execution_state`. Registre evidência, não só existência de arquivo, antes de concluir etapa.
 
 | status | Ação de retomada |
 |---|---|

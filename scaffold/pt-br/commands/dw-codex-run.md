@@ -10,6 +10,7 @@ Execute exemplos com cwd definido como `<WORKTREE>` pelo lançador. Substitua ar
 | Slot | Value |
 |---|---|
 | `DISPATCH` | `codex exec -m "<MODEL>" -c 'model_reasoning_effort="<EFFORT>"' <PERMISSIONS> --json -o "<AUDIT>/<slug>.last.md" - < "<PROMPT>" > "<AUDIT>/<slug>.log" 2>&1` |
+| `AUDIT` | `.dw/cli-run` — logs de auditoria duráveis, sidecars de sessão e capturas da última mensagem. Fora do worktree de propósito: limpeza autorizada não pode apagar a evidência. Criado pelo `init`, machine-local (gitignorado). |
 | `STREAM` | `--json` |
 | `MODEL` | `-m "<MODEL>"` |
 | `EFFORT` | `-c 'model_reasoning_effort="<EFFORT>"'` |

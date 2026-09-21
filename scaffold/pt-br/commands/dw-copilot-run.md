@@ -10,6 +10,7 @@ Execute exemplos com cwd definido como `<WORKTREE>` pelo lançador. Substitua ar
 | Slot | Value |
 |---|---|
 | `DISPATCH` | `copilot -p "<PROMPT_TEXT>" --model "<MODEL>" <PERMISSIONS> --output-format json > "<AUDIT>/<slug>.log" 2>&1` |
+| `AUDIT` | `.dw/cli-run` — logs de auditoria duráveis, sidecars de sessão e capturas da última mensagem. Fora do worktree de propósito: limpeza autorizada não pode apagar a evidência. Criado pelo `init`, machine-local (gitignorado). |
 | `STREAM` | `--output-format json` (confira a CLI instalada) |
 | `MODEL` | `--model "<MODEL>"` |
 | `EFFORT` | Use `default` quando não houver flag de esforço; nunca invente uma flag |

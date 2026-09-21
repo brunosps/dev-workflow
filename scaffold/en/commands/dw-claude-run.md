@@ -10,6 +10,7 @@ Run the examples with cwd set to `<WORKTREE>` by the process launcher. Substitut
 | Slot | Value |
 |---|---|
 | `DISPATCH` | `claude -p --session-id "<SESSION_ID>" --model "<MODEL>" --effort "<EFFORT>" <PERMISSIONS> --output-format stream-json --include-partial-messages --verbose < "<PROMPT>" > "<AUDIT>/<slug>.log" 2>&1` |
+| `AUDIT` | `.dw/cli-run` — durable audit logs, session sidecars and last-message captures. Outside the worktree on purpose: authorized cleanup must not erase the evidence. Created by `init`, machine-local (gitignored). |
 | `STREAM` | `--output-format stream-json --verbose` |
 | `MODEL` | `--model "<MODEL>"` |
 | `EFFORT` | `--effort "<EFFORT>"` |
