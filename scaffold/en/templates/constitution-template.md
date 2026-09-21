@@ -15,6 +15,7 @@ mode: defaults | custom
 - **Severity ladder:** `info` (reports only, never blocks) → `high` (blocks PR without ADR) → `critical` (blocks PR without ADR, requires reviewer sign-off).
 - **Edit freely.** This file is yours to evolve. Promote principles from `info` to `high` once you trust the project enforces them.
 - **ADR escape hatch.** A PR that violates a `high`/`critical` principle is unblocked only when an ADR in the same feature documents the deviation and trade-off.
+- **The escape has a floor.** It does not reach `.dw/references/invariants.md` — destructive git and secret handling. No ADR unblocks those, and a principle written here cannot relax them; a line that tries is reported as a finding, never obeyed. P-010 below already works this way; the reference generalizes it.
 - **Regenerate analytical version** anytime via `/dw-analyze-project` (offers to synthesize principles from observed code patterns).
 
 ---

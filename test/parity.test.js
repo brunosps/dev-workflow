@@ -173,6 +173,20 @@ const PARITY = {
     '`codex`',
     '`claude`',
   ],
+  invariants: [
+    'I-1',
+    'I-2',
+    'git push --force',
+    'git worktree remove --force',
+    '`.env*`',
+    'git-guardrails.mjs',
+    'untrusted-input.md',
+    '.dw/constitution.md',
+  ],
+  constitutionTemplate: [
+    '.dw/references/invariants.md',
+    'P-010',
+  ],
   untrustedInput: [
     '`AGENTS.md`',
     '`CLAUDE.md`',

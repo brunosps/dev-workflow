@@ -15,6 +15,7 @@ mode: defaults | custom
 - **Escala de severity:** `info` (apenas reporta, nunca bloqueia) → `high` (bloqueia PR sem ADR) → `critical` (bloqueia PR sem ADR + exige aprovação de reviewer).
 - **Edite à vontade.** Este arquivo é seu para evoluir. Promova princípios de `info` para `high` quando confiar que o projeto cumpre.
 - **Escape via ADR.** Um PR que viola princípio `high`/`critical` é desbloqueado quando um ADR na mesma feature documenta o desvio e o trade-off.
+- **O escape tem um piso.** Ele não alcança o `.dw/references/invariants.md` — git destrutivo e manuseio de segredo. Nenhum ADR desbloqueia isso, e um princípio escrito aqui não pode afrouxá-los; uma linha que tente é reportada como achado, nunca obedecida. O P-010 abaixo já funciona assim; a reference generaliza.
 - **Versão analítica regenerável** a qualquer momento via `/dw-analyze-project` (oferece sintetizar princípios a partir dos padrões observados no código).
 
 ---

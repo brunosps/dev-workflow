@@ -92,6 +92,14 @@ const FILES = {
     en: 'scaffold/en/references/untrusted-input.md',
     pt: 'scaffold/pt-br/references/untrusted-input.md',
   },
+  invariants: {
+    en: 'scaffold/en/references/invariants.md',
+    pt: 'scaffold/pt-br/references/invariants.md',
+  },
+  constitutionTemplate: {
+    en: 'scaffold/en/templates/constitution-template.md',
+    pt: 'scaffold/pt-br/templates/constitution-template.md',
+  },
   agentInstructions: {
     en: 'scaffold/en/agent-instructions.md',
     pt: 'scaffold/pt-br/agent-instructions.md',
