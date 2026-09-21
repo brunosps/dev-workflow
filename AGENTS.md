@@ -24,6 +24,13 @@ This repository ships the dev-workflow scaffolding itself. Do not confuse these 
 - `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` are generated from `scaffold/skill-registry.json` by `npm run build:plugin`.
 - If registry or plugin generation changes, run `npm run build:plugin` and keep generated manifests in sync. `npm run validate` fails on manifest drift.
 
+## Behavioural Evals
+
+- `npm test` and `npm run validate` check structure only. Before publishing to npm, run the eval in `evals/README.md` for each dangerous surface touched since the last publish.
+- The bar is zero CRITICAL/HIGH findings and no invented behaviour. Behaviour an agent described that the contract does not define is a defect of the contract.
+- Findings fix the scaffold file, never the eval.
+- Eval 1 is the standing hard gate for the dangerous surfaces and is folded into evals 2-5 rather than run separately.
+
 ## External Patterns
 
 - Patterns ported from external repos must be recorded in `docs/skills-ecosystem-comparison.md`, including what was adopted or rejected and the attribution/licensing context.
