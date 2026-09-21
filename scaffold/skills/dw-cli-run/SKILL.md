@@ -38,6 +38,14 @@ Use with `dw-codex-run`, `dw-claude-run`, or `dw-copilot-run`. The command suppl
 
 WRITE runs arm `/dw-report` once (`armed_by: dw-cli-run`) (idempotent, skipped when `DW_REPORT_AUTO=off`). On cancellation stop only the recorded task handle/PID, preserve files and logs, and disarm reporting. Never remove a worktree to kill its worker or walk up the process tree. The parent uses `/dw-worktree merge <slug>` for authorized merge and cleanup in the same turn (end-of-life); KEEP worktrees remain intact.
 
+## Stops
+
+The dispatch is authorized by the approved task assignment; it is not re-asked. The owning command
+enumerates its complete stop list, and every stop follows `.dw/references/automode.md`: persist the
+worktree, audit log and session sidecar, report the exact question with the supported resume command, and
+exit `BLOCKED`. A stop is a successful run that ended early — the failure mode is continuing past a
+blocker by inventing a way around it.
+
 ## Structured Return
 
 - **Status:** `PASS` task acceptance and required checks satisfied; `FINDINGS` corrections remain; `BLOCKED` unavailable executor, permissions or unresolved decision; `NOT_APPLICABLE` no CLI execution in scope.

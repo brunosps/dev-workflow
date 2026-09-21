@@ -33,4 +33,22 @@ Preserve `autopilot-state.json` fields: mode, wish, prd_path, from_prd_slug, cur
 | completed | Report validated delivery and links/branch; publication may still be pending authorization. |
 
 Update state after each checkpoint. Report current task, evidence and remaining work compactly. Preserve checkpoints on user pause or actual blocker; fix recoverable in-scope failures and continue.
+## Stops
+
+This command runs under `.dw/references/automode.md`: the invocation authorizes its full flow, and the
+stops below are the complete set. Anything not listed here continues. Each stop persists
+`autopilot-state.json`, reports the exact question with the resume command, and exits `BLOCKED` — a clean
+early exit, not a failure.
+
+1. `--from-prd <slug>` names a PRD that does not exist.
+2. The task/assignment matrix has not been approved.
+3. The security gate returns REJECTED, or a SECRET finding appears (no ADR escape).
+4. A review finding is `high`/`critical` with no ADR justifying it.
+5. A task dependency is outside the approved plan.
+6. Merge, push or publication is reached without the applicable authorization.
+7. A floor invariant would have to be crossed (`.dw/references/invariants.md`).
+
+A planning-only request is not a stop — it is the requested end state; report the plan and keep the resume
+point.
+
 </system_instructions>

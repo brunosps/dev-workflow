@@ -139,4 +139,18 @@ Read `.dw/references/execution-contract.md`. Consume approved task assignments a
 
 Resume preserves completed checkpoints unless evidence is invalid or artifacts are missing. Separate delivery from merge/push/publication authorization. Keep partial work on block/pause and never silently change a task's executor.
 
+## Stops
+
+This command runs under `.dw/references/automode.md`. Stops persist `status.json` and `progress.md`, report
+the exact question with `/dw-goal resume`, and set `status: "blocked"` — which is a recorded outcome, not a
+failed run.
+
+1. The same blocker repeats for three consecutive turns with no meaningful progress.
+2. A checkpoint's required artifacts cannot be verified after the command that should have produced them.
+3. An Open QA bug remains and the user has not explicitly accepted the deferral.
+4. Merge, push or publication is reached without separate authorization.
+5. A floor invariant would have to be crossed (`.dw/references/invariants.md`).
+
+`pause` is a user-requested stop and follows the same protocol.
+
 </system_instructions>

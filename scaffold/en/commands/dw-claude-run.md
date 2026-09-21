@@ -32,4 +32,21 @@ Store task, provider, worktree, approved assignment, session ID and audit path b
 Return the `dw-cli-run` Structured Return with evidence and the exact supported resume command. The parent continues the approved plan; merge/push/publication require applicable authorization.
 
 Capability inspection: Claude Code 2.1.265.
+## Stops
+
+This command runs under `.dw/references/automode.md`: the approved task assignment authorizes the
+dispatch, and the stops below are the complete set. Each persists the worktree, audit log and session
+sidecar, reports the exact question with the supported resume command, and exits `BLOCKED`.
+
+1. The adapter table is missing — `dw-cli-run` returns `BLOCKED` without it.
+2. The approved permission profile cannot be resolved from the installed CLI's help output.
+3. A WRITE dispatch has no dedicated worktree.
+4. The worker's diff touches a protected path, or a suspected secret appears in it.
+5. Session identity cannot be proven on resume and partial work would be at risk.
+6. Integration, merge or push is reached — the worker never performs these and returns to the parent.
+7. A floor invariant would have to be crossed (`.dw/references/invariants.md`).
+
+Being unable to resolve a model is not a stop when an approved fallback exists. A completed turn is not
+proof of task success: completion needs the terminal event, the process outcome and inspected files.
+
 </system_instructions>

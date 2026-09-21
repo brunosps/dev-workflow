@@ -33,4 +33,22 @@ Preserve campos de `autopilot-state.json`: mode, wish, prd_path, from_prd_slug, 
 | completed | Reporte entrega validada e links/branch; publicação pode aguardar autorização. |
 
 Atualize estado após cada checkpoint. Reporte task atual, evidência e restante de forma compacta. Preserve checkpoints em pausa ou bloqueio real; corrija falhas recuperáveis no escopo e continue.
+## Paradas
+
+Este comando roda sob o `.dw/references/automode.md`: a invocação autoriza o fluxo inteiro, e as paradas
+abaixo são o conjunto completo. O que não estiver listado aqui, segue. Cada parada persiste o
+`autopilot-state.json`, reporta a pergunta exata com o comando de retomada e sai `BLOCKED` — saída limpa e
+antecipada, não falha.
+
+1. `--from-prd <slug>` aponta um PRD que não existe.
+2. A matriz de task/atribuição não foi aprovada.
+3. O security gate devolve REPROVADO, ou aparece finding de SECRET (sem escape de ADR).
+4. Um finding de review é `high`/`critical` sem ADR justificando.
+5. Uma dependência de task está fora do plano aprovado.
+6. Merge, push ou publicação é alcançado sem a autorização aplicável.
+7. Seria preciso cruzar uma invariante do piso (`.dw/references/invariants.md`).
+
+Pedido apenas de planejamento não é parada — é o estado final pedido; reporte o plano e preserve o ponto de
+retomada.
+
 </system_instructions>

@@ -30,4 +30,21 @@ Dependência ausente: conclua primeiro a task aprovada pendente; pergunte só se
 ## Relatório final
 
 Retorne IDs concluídos e SHAs, arquivos afetados, checks válidos, achados pendentes e próximo passo. `/dw-review` escreve `<prd-path>/QA/review-consolidated.md`. Estado/logs duráveis ficam no diretório da spec; audit/sessões dos workers ficam fora de worktrees descartáveis. Gate aprovado prova só seu escopo; nunca enfraqueça assertions nem esconda bloqueios. Merge, push e publicação exigem autorização aplicável.
+## Paradas
+
+Este comando roda sob o `.dw/references/automode.md`: a invocação mais a matriz de tasks aprovada autorizam
+a execução, e as paradas abaixo são o conjunto completo. Cada uma persiste o `execution-state.json`,
+reporta a pergunta exata com o comando de retomada (`/dw-run --resume`) e sai `BLOCKED`.
+
+1. Tasks ou dependências ausentes ou não aprovadas.
+2. `--checkpoint` foi pedido — pausa deliberada entre waves.
+3. Uma dependência cai fora do plano aprovado.
+4. Aparece comportamento novo de produto, conflito arquitetural ou dependência não aprovada.
+5. Concorrência é necessária sem agentes/worktrees aprovados ou caminho de integração definido.
+6. Merge, push ou publicação é alcançado sem a autorização aplicável.
+7. Seria preciso cruzar uma invariante do piso (`.dw/references/invariants.md`).
+
+Findings dentro do escopo são corrigidos sem perguntar. Um pedido de retomada já autoriza a continuação —
+inspecione o estado salvo e o worktree real em vez de perguntar "continuo?" de novo.
+
 </system_instructions>

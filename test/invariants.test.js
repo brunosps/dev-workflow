@@ -59,6 +59,36 @@ test('the floor states the direction: project rules may only tighten', () => {
   }
 });
 
+test('every automode surface cites the contract and enumerates its stops', () => {
+  // The stop lists are per-command on purpose: a global list would be either too
+  // broad to respect or too narrow to be true. This asserts each one exists and
+  // routes to the shared contract — nothing validates a `.dw/references/*.md`
+  // citation from a command body otherwise.
+  const AUTOMODE = [
+    'dw-autopilot', 'dw-run', 'dw-goal',
+    'dw-codex-run', 'dw-claude-run', 'dw-copilot-run',
+  ];
+  for (const locale of ['en', 'pt-br']) {
+    assert.ok(exists(`scaffold/${locale}/references/automode.md`), `${locale} automode contract missing`);
+    for (const command of AUTOMODE) {
+      const body = read(`scaffold/${locale}/commands/${command}.md`);
+      assert.match(body, /\.dw\/references\/automode\.md/, `${locale} ${command} must cite the contract`);
+      assert.match(body, /^## (Stops|Paradas)$/m, `${locale} ${command} must enumerate its stops`);
+      assert.match(body, /invariants\.md/, `${locale} ${command} must name the floor as a stop`);
+    }
+  }
+  assert.match(read('scaffold/skills/dw-cli-run/SKILL.md'), /automode\.md/);
+});
+
+test('the automode contract refuses a fifth status and says why', () => {
+  for (const locale of ['en', 'pt-br']) {
+    const contract = read(`scaffold/${locale}/references/automode.md`);
+    assert.match(contract, /`BLOCKED`/, `${locale}: a stop maps to BLOCKED`);
+    assert.match(contract, /`PARKED`/, `${locale}: must name the rejected status to keep the decision visible`);
+    assert.match(contract, /second runtime|segundo runtime/, `${locale}: must disclaim the runtime reading`);
+  }
+});
+
 test('the floor is honest about where the hook does not reach', () => {
   for (const locale of ['en', 'pt-br']) {
     const floor = read(`scaffold/${locale}/references/invariants.md`);

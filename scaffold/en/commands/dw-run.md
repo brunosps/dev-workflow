@@ -30,4 +30,21 @@ Missing dependency: finish its pending approved task first; ask only if it is ou
 ## Completion report
 
 Return completed task IDs and commit SHAs, affected files, valid checks, unresolved findings and next step. `/dw-review` writes `<prd-path>/QA/review-consolidated.md`. Durable state and logs remain in the spec directory; worker audit/session files stay outside disposable worktrees. A passed gate proves its scope only; never weaken assertions or hide a blocking finding. Merge, push and publication require applicable authorization.
+## Stops
+
+This command runs under `.dw/references/automode.md`: the invocation plus the approved task matrix
+authorize execution, and the stops below are the complete set. Each one persists `execution-state.json`,
+reports the exact question with the resume command (`/dw-run --resume`), and exits `BLOCKED`.
+
+1. Tasks or dependencies are missing or unapproved.
+2. `--checkpoint` was requested — a deliberate pause between waves.
+3. A dependency falls outside the approved plan.
+4. New product behavior, an architectural conflict, or an unapproved dependency appears.
+5. Concurrency is needed without approved agents/worktrees or a defined integration path.
+6. Merge, push or publication is reached without the applicable authorization.
+7. A floor invariant would have to be crossed (`.dw/references/invariants.md`).
+
+In-scope findings are corrected without asking. A resume request already authorizes continuation — inspect
+saved state and the actual worktree instead of asking "continue?" again.
+
 </system_instructions>

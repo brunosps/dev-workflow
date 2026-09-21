@@ -96,6 +96,22 @@ const FILES = {
     en: 'scaffold/en/references/invariants.md',
     pt: 'scaffold/pt-br/references/invariants.md',
   },
+  automode: {
+    en: 'scaffold/en/references/automode.md',
+    pt: 'scaffold/pt-br/references/automode.md',
+  },
+  autopilot: {
+    en: 'scaffold/en/commands/dw-autopilot.md',
+    pt: 'scaffold/pt-br/commands/dw-autopilot.md',
+  },
+  goal: {
+    en: 'scaffold/en/commands/dw-goal.md',
+    pt: 'scaffold/pt-br/commands/dw-goal.md',
+  },
+  codexRun: {
+    en: 'scaffold/en/commands/dw-codex-run.md',
+    pt: 'scaffold/pt-br/commands/dw-codex-run.md',
+  },
   constitutionTemplate: {
     en: 'scaffold/en/templates/constitution-template.md',
     pt: 'scaffold/pt-br/templates/constitution-template.md',

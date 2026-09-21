@@ -173,6 +173,25 @@ const PARITY = {
     '`codex`',
     '`claude`',
   ],
+  automode: [
+    '`BLOCKED`',
+    '`PARKED`',
+    'execution-contract.md',
+    '.dw/references/invariants.md',
+    'lib/skill-registry.js',
+    '/dw-report',
+  ],
+  autopilot: [
+    '.dw/references/automode.md',
+    'autopilot-state.json',
+  ],
+  goal: [
+    '.dw/references/automode.md',
+    'status.json',
+  ],
+  codexRun: [
+    '.dw/references/automode.md',
+  ],
   invariants: [
     'I-1',
     'I-2',

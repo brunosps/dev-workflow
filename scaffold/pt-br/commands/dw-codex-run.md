@@ -33,4 +33,21 @@ Retorne Structured Return do `dw-cli-run` com evidências e comando de retomada 
 
 Inspeção de capacidades: codex-cli 0.153.4.
 O help atual de `exec resume` não expõe `--sandbox`; não copie flags iniciais às cegas nem acrescente bypass. Use perfil/configuração aprovado equivalente e suportado; caso contrário bloqueie esse modo de retomada e reconstrua sessão restrita nova. TOML `mcp_servers='{}'` sozinho não prova que entradas MCP herdadas foram desativadas.
+## Paradas
+
+Este comando roda sob o `.dw/references/automode.md`: a atribuição de task aprovada autoriza o dispatch, e
+as paradas abaixo são o conjunto completo. Cada uma persiste o worktree, o log de auditoria e o sidecar de
+sessão, reporta a pergunta exata com o comando de retomada suportado e sai `BLOCKED`.
+
+1. A tabela de adapter está ausente — o `dw-cli-run` devolve `BLOCKED` sem ela.
+2. O perfil de permissão aprovado não pode ser resolvido pelo help da CLI instalada.
+3. Um dispatch WRITE não tem worktree dedicado.
+4. O diff do worker toca caminho protegido, ou nele aparece suspeita de segredo.
+5. A identidade da sessão não pode ser provada na retomada e o trabalho parcial ficaria em risco.
+6. Integração, merge ou push é alcançado — o worker nunca executa isso e devolve ao parent.
+7. Seria preciso cruzar uma invariante do piso (`.dw/references/invariants.md`).
+
+Não conseguir resolver um modelo não é parada quando existe fallback aprovado. Um turno concluído não prova
+sucesso da task: conclusão exige o evento terminal, o desfecho do processo e os arquivos inspecionados.
+
 </system_instructions>

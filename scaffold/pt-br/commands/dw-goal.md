@@ -139,4 +139,18 @@ Leia `.dw/references/execution-contract.md`. Consuma escolhas aprovadas por task
 
 Retomada preserva checkpoints concluídos salvo evidência inválida ou artefatos ausentes. Separe entrega de autorização para merge/push/publicação. Preserve trabalho parcial em bloqueio/pausa e nunca troque executor silenciosamente.
 
+## Paradas
+
+Este comando roda sob o `.dw/references/automode.md`. As paradas persistem `status.json` e `progress.md`,
+reportam a pergunta exata com `/dw-goal resume` e marcam `status: "blocked"` — que é desfecho registrado,
+não execução falha.
+
+1. O mesmo bloqueio se repete por três turnos consecutivos sem progresso significativo.
+2. Os artefatos exigidos por um checkpoint não podem ser verificados após o comando que deveria produzi-los.
+3. Resta bug de QA em aberto e o usuário não aceitou explicitamente o adiamento.
+4. Merge, push ou publicação é alcançado sem autorização separada.
+5. Seria preciso cruzar uma invariante do piso (`.dw/references/invariants.md`).
+
+`pause` é parada pedida pelo usuário e segue o mesmo protocolo.
+
 </system_instructions>
