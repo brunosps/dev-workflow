@@ -56,6 +56,7 @@ When available under `./.agents/skills/`, these are invoked operationally:
 - `dw-debug-protocol`: **(in `--fix` mode — ALWAYS)** — six-step triage (Reproduce → Localize → Reduce → Fix Root Cause → Guard → Verify End-to-End) for each detected bug. Stop-the-line discipline; root-cause over symptom; regression test in same atomic commit.
 - `vercel-react-best-practices`: (UI mode) when React/Next.js regression risk is suspected.
 - `dw-ui-discipline`: (UI mode) when validating design consistency — anti-slop catalog + WCAG accessibility floor check.
+- `dw-chaos-engineering`: **(by name only)** — adversarial pass over a change whose normal tests already pass. Ask for it after QA is green when resilience matters more than coverage; it writes tests only, runs locally, and caps at 3 rounds. Never auto-invoked.
 - `dw-verify`: **(in `--fix` mode — ALWAYS)** — before marking any bug `Fixed` or `Closed`, requires VERIFICATION REPORT PASS (test + lint + build) AND retest evidence (screenshot in UI mode, JSONL log in API mode, eval-run delta in AI mode).
 
 ## Output Structure

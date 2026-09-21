@@ -56,6 +56,7 @@ Quando disponíveis em `./.agents/skills/`, invocadas operacionalmente:
 - `dw-debug-protocol`: **(em modo `--fix` — SEMPRE)** — six-step triage (Reproduzir → Localizar → Reduzir → Fix Root Cause → Guardar → Verify End-to-End) pra cada bug detectado. Stop-the-line discipline; root-cause sobre symptom; regression test no mesmo commit atômico.
 - `vercel-react-best-practices`: (modo UI) quando risco de regressão React/Next.js suspeitado.
 - `dw-ui-discipline`: (modo UI) ao validar consistência de design — anti-slop catalog + WCAG accessibility floor.
+- `dw-chaos-engineering`: **(só por nome)** — passagem adversarial sobre uma mudança cujos testes normais já passam. Peça depois do QA verde, quando resiliência importa mais que cobertura; escreve só testes, roda local e tem teto de 3 rodadas. Nunca é invocada sozinha.
 - `dw-verify`: **(em modo `--fix` — SEMPRE)** — antes de marcar bug como `Fixed` ou `Closed`, requer VERIFICATION REPORT PASS (test + lint + build) E evidência de reteste (screenshot em UI, JSONL log em API, eval-run delta em AI).
 
 ## Estrutura de Output

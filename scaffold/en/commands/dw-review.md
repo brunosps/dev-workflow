@@ -210,6 +210,7 @@ When available under `./.agents/skills/`, these are invoked as analytical suppor
 - `dw-llm-eval`: **REQUIRED when the diff touches AI/LLM feature code paths**. Reference dataset + ≥2 oracle rungs + judge calibration (if rung 4 used) + eval run results MUST be in the PR. Missing → REJECTED.
 - `security-review`: use when the diff touches auth, authorization, external input, upload, SQL, secrets, SSRF, XSS, or sensitive surfaces.
 - `vercel-react-best-practices`: use when the diff touches React/Next.js.
+- `dw-chaos-engineering`: **by name only** — when the diff's resilience is the open question rather than its correctness. A KILLED attack on an open PR ships unskipped and this review rejects until it is fixed.
 - `dw-silent-failure`: use when the diff touches error handling, fallbacks, retries, async jobs, queues, database writes, or external API calls.
 
 ## Agent Dispatch

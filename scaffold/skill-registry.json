@@ -28,6 +28,18 @@
       "bundled": true
     },
     {
+      "name": "dw-chaos-engineering",
+      "kind": "protocol",
+      "tier": "specialty",
+      "owner": "manual,dw-qa,dw-review",
+      "trigger": "Explicit request to adversarially test or stress an implemented change",
+      "expected_output": "Chaos report with per-attack classification, minimal repros, and the routing of each finding.",
+      "load_policy": "lazy-references",
+      "context_limit": 8000,
+      "invocation": "explicit",
+      "bundled": true
+    },
+    {
       "name": "dw-cli-run",
       "kind": "protocol",
       "tier": "core",
