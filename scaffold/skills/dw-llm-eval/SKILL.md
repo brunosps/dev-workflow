@@ -80,6 +80,7 @@ For agent / tool-use evaluation, read `references/agent-tool-use-evaluation-deta
 |------------|------|
 | Designing an eval suite for an AI feature | `references/oracle-ladder.md` (climb the ladder) |
 | Using LLM-as-judge | `references/judge-calibration.md` (mandatory before relying on it) |
+| Decision with a fixed answer set (classify, route, score a rubric) | `references/bounded-decisions.md` — score the candidates instead of generating, and why the probability is not a confidence |
 | Building / curating a reference dataset | `references/reference-dataset.md` |
 | RAG-specific feature | `references/rag-metrics.md` |
 | Agent / tool-use feature | `references/agent-eval.md` |

@@ -16,6 +16,11 @@ Process:
 4. Compute Spearman rank correlation between human scores and judge scores.
 
 **Target:** Spearman ≥0.80.
+
+> **This is rank agreement, not probability calibration.** Spearman answers "does the judge order cases the
+> way a human would". It says nothing about whether a judge reporting 0.8 is right 80% of the time — a
+> judge can pass this bar and still be badly calibrated. If your judge emits a confidence or a probability
+> and anything downstream reads it as one, see `references/bounded-decisions.md`.
 **Acceptable:** 0.70-0.80 with documented rationale (e.g., "subjective tone judgments inherently noisy").
 **Reject:** <0.70. The judge is not measuring what you think it's measuring.
 

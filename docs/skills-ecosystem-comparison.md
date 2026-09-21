@@ -511,6 +511,46 @@ e o compromisso é dos mais profundos do projeto.
 
 E **papel de notificador**: só o aviso, não o papel.
 
+### 13. Decisões limitadas e a diferença entre acordo e calibração (2026-09-21)
+
+Origem: a onda em torno do **Jev**, da TypeSafe AI (anunciado em 15/09/2026), e de duas reações a ela —
+o post *"Build your own Jev (100% local)"* de [Avi Chawla](https://x.com/_avichawla) (20/09) e o
+[`mizorewww/laya-mlx`](https://github.com/mizorewww/laya-mlx) (Apache-2.0, 19/09), porte MLX dos modelos
+Laya da Convai Innovations.
+
+**Nada foi adotado como runtime, e a razão é categórica.** O `laya-mlx` exige macOS 14+, Apple Silicon,
+Python 3.11+ e MLX, mais o download de um checkpoint. Somos um CLI Node com `deps: {}`, CI em Ubuntu nas
+versões 18/22/24, que não chama modelo nenhum. E a técnica do Chawla, que não precisa de modelo novo,
+exige ler os logits do modelo — quem roda o modelo é o harness, e não temos acesso a eles. Não há caminho,
+e não deveria haver: o valor do pacote é ser zero-dep e funcionar em todo harness.
+
+**O que foi adotado é princípio, em `dw-llm-eval/references/bounded-decisions.md`** — a skill que orienta
+o código de IA do *usuário*, não a nossa infraestrutura. Três coisas:
+
+1. Quando o espaço de resposta já é conhecido, pontuar os candidatos em vez de gerar texto. A técnica não
+   é nova — benchmarks de múltipla escolha são avaliados assim há anos —, mas código de produto raramente
+   usa, e a escada de oráculos era silenciosa sobre ela.
+2. **O aviso que não existia em lugar nenhum da skill, e é o ganho real:** probabilidade crua de modelo
+   não é confiança calibrada, e preference tuning piora isso. Nossa régua de `Spearman ≥0.80` mede
+   **acordo de ranking** entre juiz e humano; calibração é outra propriedade, e um juiz pode passar numa e
+   falhar na outra. O `judge-calibration.md` ganhou o cruzamento explícito.
+3. A escolha entre pontuar com o modelo que você já roda (custo zero de entrada, calibração pior) e um
+   modelo de decisão dedicado (melhor calibrado por construção, mais um modelo para operar).
+
+**Nenhum fornecedor é nomeado na skill** — sem Jev, Laya, TypeSafe, MLX, sem os números `200×/400×`, sem
+datas. O princípio continua verdadeiro quando a onda passar; os nomes provavelmente não. A proveniência
+vive aqui, que é o que o `AGENTS.md` pede.
+
+**Ressalva registrada na data da análise:** o Jev tinha 6 dias, o `laya-mlx` tinha 2, com validação em 63
+questões declarada pelos próprios autores e suporte a uma única plataforma. Recomendar adoção de qualquer
+um violaria o nosso `dw-search-first`. O que transferiu foi o padrão — e o fato de existir implementação
+aberta, local e offline, que prova que ele não obriga a um fornecedor.
+
+Números da TypeSafe registrados com o contexto que eles mesmos declaram: `193,6× mais rápido e 444,6× mais
+barato` medido em quatro workflows contra a média de GPT-6 Astra + Fable 5.1, com a ressalva escrita por
+eles de que estão *"no extremo superior dos ganhos do mundo real"* e de que as avaliações *"foram feitas
+por indivíduos da equipe de model capabilities, então viés pode existir"*.
+
 ## O que NÃO foi portado (e por quê)
 
 1. **`CONTEXT.md` na raiz (mattpocock)** — a *disciplina* de domain-modeling FOI adotada (seção 5 acima), mas o
@@ -579,6 +619,7 @@ E **papel de notificador**: só o aviso, não o papel.
 | Bateria de evals | `evals/README.md` + regra em `AGENTS.md` | samsantosb/ship-it (MIT) |
 | Contrato de automode | `scaffold/{en,pt-br}/references/automode.md` + seção Stops em 6 comandos e no `dw-cli-run` | samsantosb/ship-it (MIT) |
 | Skill de chaos | `scaffold/skills/dw-chaos-engineering/` + `scaffold/skill-registry.json` | samsantosb/ship-it (MIT) |
+| Decisões limitadas | `scaffold/skills/dw-llm-eval/references/bounded-decisions.md` + cruzamento em `judge-calibration.md` | Jev (TypeSafe), Avi Chawla, laya-mlx (Apache-2.0) — só o princípio |
 
 ## Segurança do update
 
