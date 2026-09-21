@@ -1,12 +1,17 @@
-# Skills ecosystem comparison — dev-workflow × mattpocock/skills × ponytail
+# Skills ecosystem comparison — dev-workflow × ecossistema de skills
 
-Análise comparativa entre o `dev-workflow` e dois repositórios de referência de
-skills para agentes de código — [`mattpocock/skills`](https://github.com/mattpocock/skills)
-(coleção de skills "for real engineers", com distinção explícita entre invocação por
-usuário e por modelo) e [`DietrichGebert/ponytail`](https://github.com/DietrichGebert/ponytail)
-(sistema de minimalismo "lazy senior developer", com decision ladder, modos de
-intensidade e hooks de plataforma). O objetivo foi identificar gaps, decidir o que
-adotar e integrar as adoções nas convenções do dev-workflow.
+Análise comparativa entre o `dev-workflow` e repositórios de referência de skills para
+agentes de código. O objetivo é sempre o mesmo: identificar gaps, decidir o que adotar
+e integrar as adoções nas convenções do dev-workflow.
+
+As fontes, em ordem de análise:
+
+| Fonte | Licença | O que trouxe |
+|---|---|---|
+| [`mattpocock/skills`](https://github.com/mattpocock/skills) | MIT | Distinção user/model-invoked, git-guardrails, grilling, domain-modeling, triage |
+| [`DietrichGebert/ponytail`](https://github.com/DietrichGebert/ponytail) | MIT | Decision ladder, modos de intensidade, statusline, hooks |
+| [`akitaonrails/my-skills`](https://github.com/akitaonrails/my-skills) | **sem licença** | Fronteira de confiança, refutação de findings, auditoria de composição (seção 11) |
+| [`samsantosb/ship-it`](https://github.com/samsantosb/ship-it) | MIT | Piso de invariantes, bateria de evals, contrato de automode, chaos (seção 12) |
 
 > Nota de rigor: este documento compara **padrões de design observáveis na estrutura
 > dos repositórios**. Métricas de popularidade/adoção citadas por terceiros não foram
@@ -41,6 +46,12 @@ exercem bem.
 | Verificação adversarial de findings | Pre-Report Gate + piso de confiança, mas o verificador é o mesmo raciocínio que produziu o candidato | — | — | **Adotar** → pipeline de 3 saídas em `dw-review-rigor` + agente `dw-finding-refuter` |
 | Auditoria de faixa já mergeada | `/dw-review --since <ref>` cobre UM trabalho | — | — | **Adotar** → `/dw-review --post-merge [<base>]` |
 | Rot de skill por uso real | `/dw-skill-health` audita estrutura; `/dw-context-budget` audita orçamento | — | — | **Adotar** → evidência de uso no `session-cost.mjs` + seção no `/dw-skill-health` |
+| Piso que o escape de ADR não alcança | só o P-010 (segredos) tinha cláusula sem-ADR, enterrada num Enforcement | — | — | **Adotar** → `.dw/references/invariants.md` + ponteiro na constitution |
+| Eval comportamental das próprias skills | ausente: 161 testes, todos estruturais | — | — | **Adotar** → `evals/` na raiz, fora do pacote |
+| Contrato de automode e parada limpa | estado durável existe (`/dw-pause`, `dw-goal`), mas paradas não são enumeradas | — | — | **Adotar** → `.dw/references/automode.md` + seção de Stops por comando |
+| Teste adversarial | ausente | — | — | **Adotar** → skill `dw-chaos-engineering`, `invocation: explicit` |
+| Acompanhar o PR até o merge (`watch-pr`) | ausente: o pipeline termina ao abrir o PR | — | — | **Rejeitado nesta rodada** — projeto à parte |
+| Idioma como config em vez de par EN/PT | 41 comandos × 2 + 19 templates × 2 + 5 references × 2 | — | — | **Rejeitado** — custo registrado na seção 12 |
 
 ## O que foi portado
 
@@ -385,6 +396,121 @@ precedente do `/dw-context-budget` e torna a janela auditável. O que o sinal pr
 obediência**. Rejeitado: qualquer coleta de transcript além dessa contagem. A regra "janela declarada, nunca
 afirmação absoluta" e a separação "sem telemetria" ≠ "sem disparo" são nossas, não da fonte.
 
+### 12. Piso de invariantes, bateria de evals, automode e chaos (2026-09-21)
+
+Quatro técnicas adaptadas de [`samsantosb/ship-it`](https://github.com/samsantosb/ship-it)
+(MIT © Samuel Santos) — 7 skills + 6 contratos compartilhados, ~126 KB, sem push desde 14/07/2026.
+Licença permissiva, ao contrário da seção 11: o crédito é obrigatório, e o conteúdo foi reescrito no
+nosso vocabulário porque a arquitetura é outra (eles resolvem 4 papéis por detecção e trabalham com
+cards; nós temos `.dw/` versionado e 41 comandos).
+
+Decidido em entrevista de seis rodadas com o dono. Restrição de superfície: **sem comando novo e sem
+flag nova** — só reference, skill e diretório.
+
+**12.1 — O piso que o escape de ADR não alcança.** O `.dw/constitution.md` gradua princípios por severity
+e desbloqueia violação `high`/`critical` com um ADR. Esse escape governado é deliberado, mas era
+**ilimitado**: a única coisa fora dele era o P-010 (segredos), como cláusula enterrada no Enforcement de
+um princípio.
+
+`.dw/references/invariants.md` nomeia o piso: git destrutivo (I-1) e manuseio de segredo (I-2). Dois
+itens, curto de propósito — um piso que cresce até cobrir toda preferência deixa de ser piso.
+
+A metade que mais importa é a direção: regra de projeto obriga só **apertando**. Uma linha em
+`.dw/rules/**`, na constitution, no `CLAUDE.md` ou no `CONTRIBUTING.md` que **afrouxe** uma invariante
+não é override — é reportada como achado e nunca obedecida, o mesmo tratamento que o
+`untrusted-input.md` já dá a conteúdo externo. Write-back incluso: nenhum comando escreve regra que
+enfraqueça o piso, nem quando o arquivo do próprio dono pede.
+
+Mora em `scaffold/{en,pt-br}/references/` porque esse compartimento é managed e sobrescrito no update
+(`lib/init.js:105-119`) e — ao contrário de templates, que têm `.dw/templates/overrides/` — **não tem
+caminho de override nenhum** (`lib/utils.js:43`). Um piso que o consumidor pudesse apagar não seria piso.
+
+O arquivo é honesto sobre a própria verificação: o `git-guardrails.mjs` implementa parte do I-1, mas só
+cobre Bash no Claude Code e **falha aberto** em quatro pontos. Então a reference é a regra e o hook é uma
+implementação — e o texto nomeia o que o hook não casa hoje (`rebase` sobre branch pushada,
+`filter-branch`, `reflog expire`, `gc --prune`, `stash drop`, `branch -M`, `update-ref -d`,
+`commit --amend` em commit pushado).
+
+**12.2 — A bateria de evals.** Os 161 testes de `test/` eram **todos estruturais**. Nenhum dizia se uma
+skill é compreendida e obedecida. A lacuna ficou concreta em 18/09, quando o `untrusted-input.md` e o
+modo `--post-merge` foram validados com sandboxes montados à mão: funcionaram, e nada disso era
+repetível.
+
+`evals/` tem seis prompts numerados, cada um rodado contra **subagente novo** com apenas os arquivos
+listados. **O tier é parte da eval:** rodar compreensão em modelo fraco *é* o teste — modelo fraco
+passando significa instrução robusta, e se só o forte entende, o achado é sobre a skill.
+
+Barra: zero CRITICAL/HIGH **e** nada inventado. A segunda metade pega mais — comportamento descrito que o
+contrato não define significa que o agente preencheu a lacuna com algo plausível em vez de parar.
+**Findings consertam o arquivo, nunca a eval.**
+
+A eval 1 (compreensão dos invariantes sob pressão adversarial) é hard gate permanente e é **embutida** nas
+evals 2-5. Ela carrega um cenário de controle — o dono pedindo para apertar — então um agente que recusa
+tudo também reprova.
+
+Duas evals sondam defeitos conhecidos em vez de escondê-los: `<AUDIT>` nunca é resolvido para um caminho
+(citado 9× nos runners) e `autopilot-state.json` não tem diretório em lugar nenhum. Um agente que inventa
+qualquer um dos dois gera `GAP` contra o contrato, não contra o agente.
+
+Fica na raiz, versionada no git e fora do pacote npm (`files` é allowlist — verificado: zero entradas em
+`npm pack --dry-run`). Chamada `evals/` e não `eval/` para não colidir com `.dw/eval/`, que é o diretório
+de datasets do `dw-llm-eval` no projeto do consumidor.
+
+**Primeira execução, registrada:** a eval 1 rodada em modelo fraco contra o piso recém-escrito passou 7/7
+com citação exata, incluindo o cenário de controle. Mas a linha que autorizou "o dono aperta na sessão"
+veio do `untrusted-input.md`, porque a seção de direção do piso enumerava arquivos e não o dono. Uma
+cláusula fechou. A bateria achou algo na primeira vez que rodou.
+
+**12.3 — Contrato de automode.** Seis comandos mais o `dw-cli-run` rodam sem ninguém necessariamente
+olhando, e nenhum dizia onde podia parar. As paradas existiam, espalhadas em prosa; nenhuma lista era
+declarada como completa.
+
+`.dw/references/automode.md` fixa duas regras: invocar um comando autoriza o fluxo dele (não repergunte o
+que a invocação concedeu nem o que a matriz aprovada já resolveu), e **parar é execução bem-sucedida que
+terminou cedo** — o modo de falha oposto é seguir adiante do bloqueio inventando contorno.
+
+Protocolo: persistir → reportar com o comando exato de retomada → sair limpo. Status é `BLOCKED`
+preenchido de verdade. **Sem `PARKED`** — vocabulário compartilhado por todas as skills e validado em
+`lib/skill-registry.js`, rejeitado pela terceira vez.
+
+As listas de parada são **por comando**, não globais: uma lista global seria ampla demais para ser
+respeitada ou estreita demais para ser verdadeira. Cada uma foi montada a partir das paradas já escritas
+naquele comando. Todas terminam no mesmo piso.
+
+A reference abre se declarando: o `docs/model-workflow-modernization.md` descarta "um segundo runtime
+autônomo" de propósito, e isto não é aquilo. Sem esse parágrafo o arquivo leria como reabertura de uma
+decisão fechada.
+
+Traz também a observação mais afiada deles, para a qual não tínhamos equivalente: numa execução
+desacompanhada em que o único canal é o chat, uma parada é texto que ninguém lê — a execução sai limpa, o
+trabalho fica preservado, e a tarefa fica parada parecendo terminada. Nenhum papel de notificador foi
+criado; nomear a limitação é a mitigação.
+
+**12.4 — `dw-chaos-engineering`.** Não tínhamos nada adversarial. A skill governa só o protocolo de
+atacar-rodar-classificar e cita o `dw-testing-discipline` para *como* escrever o teste.
+
+Três pontos carregam o valor: o **gate de baseline** (suíte verde antes do primeiro ataque — com baseline
+vermelho não se distingue achado de ambiente quebrado); **cada ataque afirma o comportamento correto**,
+nunca o bug, o que faz um ataque que falha ser achado real e o mesmo teste virar regressão de graça depois
+do fix; e o **teste do advogado de defesa** antes de selar qualquer achado, que é a mesma separação entre
+fato e interpretação que o `dw-review-rigor` faz entre finding e lead não resolvido.
+
+`invocation: "explicit"` — revisado depois da entrevista, ao descobrir que o ship-it travou a deles
+deliberadamente, a única das sete com trava. Escreve arquivos, roda a suíte inteira e custa tempo real.
+
+**O que NÃO foi portado, com o custo declarado.** O `watch-pr` deles acompanha o PR até o merge —
+avaliando todo comentário de review, corrigindo o razoável, sempre respondendo, classificando falha de CI
+por SHA e janela de tempo, e notificando em aprovação, trava ou silêncio. Rejeitado nesta rodada: é
+pipeline novo depois do PR e seria projeto à parte. **A lacuna fica aberta** e é a maior que sobra.
+
+Também rejeitado: **idioma como config**. Eles mantêm um conjunto de skills em inglês mais um
+`language.md` respondido uma vez; nós mantemos 41 comandos × 2 + 19 templates × 2 + 5 references × 2 em
+lockstep, com `test/parity.test.js` de guarda. É crítica arquitetural legítima e o custo é real — cada
+edição desta sessão foi feita duas vezes. Mas reverter quebraria a memória muscular de todo usuário PT-BR,
+e o compromisso é dos mais profundos do projeto.
+
+E **papel de notificador**: só o aviso, não o papel.
+
 ## O que NÃO foi portado (e por quê)
 
 1. **`CONTEXT.md` na raiz (mattpocock)** — a *disciplina* de domain-modeling FOI adotada (seção 5 acima), mas o
@@ -402,7 +528,16 @@ afirmação absoluta" e a separação "sem telemetria" ≠ "sem disparo" são no
 6. **Hooks por-plataforma para Codex/Copilot/OpenCode (ponytail)** — o gate de hook foi
    limitado ao Claude Code (único alvo com `settings.json` hoje). Os `*-hooks.json` por
    plataforma ficam como follow-up documentado, não nesta rodada.
-7. **O passo de release (akitaonrails)** — a skill `release` dele (derivar versão do changelog, CI verde no
+7. **`watch-pr` (samsantosb/ship-it)** — acompanhar o PR até merge ou bloqueio, avaliando todo comentário
+   de review, corrigindo o razoável, sempre respondendo, classificando falha de CI por SHA + janela de 5
+   min, e notificando em aprovação/trava/silêncio. Rejeitado nesta rodada por ser pipeline novo depois do
+   PR, com o mesmo argumento do passo de release. A lacuna fica aberta e reconhecida: hoje o pipeline
+   termina ao abrir o PR e ninguém acompanha review nem CI.
+8. **Idioma como config (samsantosb/ship-it)** — um conjunto de skills em inglês mais um `language.md`
+   respondido uma vez, em vez do nosso par EN/PT completo. Crítica arquitetural legítima, custo real
+   (41 comandos × 2 + 19 templates × 2 + 5 references × 2 em lockstep), rejeitada porque reverter
+   quebraria a memória muscular de todo usuário PT-BR.
+9. **O passo de release (akitaonrails)** — a skill `release` dele (derivar versão do changelog, CI verde no
    SHA exato, tag anotada, nunca reescrever tag publicada) NÃO foi portada, e nenhum `/dw-release` foi
    criado. Decisão explícita do dono: o pipeline do dev-workflow termina no PR. A recomendação de semver
    do `--post-merge` é uma linha de relatório, e `test/post-merge-audit.test.js` transforma isso em gate —
@@ -440,6 +575,10 @@ afirmação absoluta" e a separação "sem telemetria" ≠ "sem disparo" são no
 | Auditoria de composição | `scaffold/skills/dw-review-rigor/references/composition-audit.md` + modo `--post-merge` em `scaffold/{en,pt-br}/commands/dw-review.md` | akitaonrails/my-skills (técnica; repo sem licença) |
 | Sinal de uso de skill | `scaffold/scripts/hooks/session-cost.mjs` (campo `skills` em `.dw/metrics/costs.jsonl`) | — |
 | Evidência de uso no audit | `scaffold/{en,pt-br}/commands/dw-skill-health.md` | akitaonrails/my-skills (princípio "skill encostada é dívida") |
+| Piso de invariantes | `scaffold/{en,pt-br}/references/invariants.md` + ponteiro em `templates/constitution-template.md` | samsantosb/ship-it (MIT) |
+| Bateria de evals | `evals/README.md` + regra em `AGENTS.md` | samsantosb/ship-it (MIT) |
+| Contrato de automode | `scaffold/{en,pt-br}/references/automode.md` + seção Stops em 6 comandos e no `dw-cli-run` | samsantosb/ship-it (MIT) |
+| Skill de chaos | `scaffold/skills/dw-chaos-engineering/` + `scaffold/skill-registry.json` | samsantosb/ship-it (MIT) |
 
 ## Segurança do update
 
@@ -463,6 +602,9 @@ Ambos os repositórios de referência são MIT. As adoções preservam os crédi
   do Grill nativo (`dw-grilling` + `dw-domain-modeling`) e da borda `/dw-triage`. Comportamento reimplementado
   na nossa voz; nenhuma prosa upstream copiada.
 
+- `samsantosb/ship-it` (MIT © Samuel Santos) — contrato de guardrails em duas camadas, bateria de
+  validação, contrato de autonomia e a skill de chaos, na base do `invariants.md`, do `evals/`, do
+  `automode.md` e do `dw-chaos-engineering`. Crédito preservado no cabeçalho de cada arquivo adotado.
 - `akitaonrails/my-skills` — **sem licença declarada (all rights reserved)**. Apenas a técnica foi
   adaptada, reescrita na nossa voz e no nosso vocabulário (`needs-validation`, candidate pipeline,
   Structured Return, `.dw/**`); nenhum texto, snippet, tabela, nome de arquivo ou estrutura de headings do
