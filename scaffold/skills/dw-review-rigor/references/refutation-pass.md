@@ -40,6 +40,32 @@ and stop at the first hit:
 If everything you can say about the candidate at the end is what you already said at the start, the result
 is `UNRESOLVED`, not confirmed.
 
+## What each exit may and may not carry
+
+The three exits are not three severities of the same thing — they are three different claims, and each one
+is entitled to different fields. Most of the damage a review does comes from mixing them: a severity on an
+unresolved lead reads as an assessed risk, and a remediation on a refuted claim sends someone to fix
+nothing.
+
+| Exit | Carries | **Must not carry** |
+|---|---|---|
+| `finding` | The confirmed cause, the reachable input or state, the observable outcome, the fix, a severity | A *claimed* cause — by this point it is established or it is not a finding |
+| `needs-validation` | The **claimed** cause, the trace, the evidence so far, what blocks resolution, and how to resolve it | **A severity.** Also no fix and no exploit path — you do not have the facts those require |
+| `rejected` | The claim as it was made, and what disproved it | A severity, a fix, an exploit path, a blocker — the claim is closed, not pending |
+
+The prohibition on severity for `needs-validation` is the load-bearing one. A severity is an assessment of
+impact, and an unresolved lead has not established the impact. "Possible critical" is not a cautious
+finding; it is a number with nothing behind it, and it will be read as a ranking.
+
+## Degradation: no environment means unresolved, not resolved
+
+When the environment needed to settle a claim is unavailable — no sandbox, no runtime, no access to the
+configuration that decides it — the candidate stays `needs-validation`. It is not promoted because the
+reasoning looked strong, and it is not dropped because it could not be checked.
+
+This is the rule that keeps the class honest. Without it, a missing environment quietly turns into whatever
+the reviewer already believed.
+
 ## needs-validation format
 
 ```
@@ -87,6 +113,12 @@ merged under Rule 1. Spend the pass where a wrong answer would cost something.
 ## Attribution
 
 The three-outcome discipline — adversarial refutation by a reader who did not produce the claim, an
-unresolved-lead class that carries no severity, and a durable record of rejected candidates — was
-reimplemented independently from the technique described in `akitaonrails/my-skills`. That repository
-declares no license; no upstream text, structure, or file was reused, and no reuse license is assumed.
+unresolved-lead class that carries no severity, and a durable record of rejected candidates — originates in
+[`cloudflare/security-audit-skill`](https://github.com/cloudflare/security-audit-skill) (MIT), which calls
+it adversarial verification, needs-validation discipline and coverage honesty. It reached this project
+through `akitaonrails/my-skills`, which credits Cloudflare for the same model and declares no license of
+its own. **Attribution chain: cloudflare → akitaonrails → dev-workflow.**
+
+The per-exit field contract and the degradation rule above come from reading the Cloudflare skill directly:
+there they are enforced by a JSON schema and a validator script, and here they are prose, because our
+reviews are markdown reports rather than validated records. No upstream text or file was reused.

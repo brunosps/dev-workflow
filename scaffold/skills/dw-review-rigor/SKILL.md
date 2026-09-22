@@ -23,7 +23,7 @@ By `/dw-review --code-only` (all five rules plus the full candidate pipeline), `
 
 ## Candidate Pipeline
 
-Nothing you notice is a finding yet. Everything enters as a **candidate** and leaves through exactly one of three exits: `finding`, `needs-validation`, or `rejected`. There is no fourth — a candidate that quietly disappears is a defect of the review, not a tidy report.
+Nothing you notice is a finding yet. Everything enters as a **candidate** and leaves through exactly one of three exits: `finding`, `needs-validation`, or `rejected`. There is no fourth — a candidate that quietly disappears is a defect of the review.
 
 **Stage 1 — Gate.** Clear four checks; any "no" or "unsure" means this is not ready to be a finding:
 
@@ -36,9 +36,9 @@ See `references/false-positives.md` for patterns LLM reviewers habitually mis-fl
 
 **Stage 2 — Refutation.** The reasoning that produced a candidate cannot also be its check; it anchors every reading that follows. Each candidate clearing Stage 1 faces a deliberate attempt to disprove it. With subagents, dispatch `dw-finding-refuter` with the claim and the raw code, never the reasoning behind it, one candidate per dispatch. Otherwise re-derive the path from source, working to show the outcome cannot happen. Packet contract, upstream guards and both output formats: `references/refutation-pass.md`.
 
-**Stage 3 — Disposition.** Holds on evidence the refutation found for itself → `finding`, with a severity. Blocked upstream, input unreachable, or behavior intended → `rejected`, one line at the end of the report naming what disproved it. Cannot be established either way → `needs-validation`, which never receives a severity and records what is missing and what would settle it.
+**Stage 3 — Disposition.** Holds on evidence the refutation found for itself → `finding`, with a severity. Blocked upstream, input unreachable, or behavior intended → `rejected`, one line at the end of the report naming what disproved it. Cannot be established either way → `needs-validation`, which never receives a severity and records what is missing and what would settle it. When the environment needed to settle a claim is unavailable, it **stays** `needs-validation` — not promoted, not dropped. Each exit carries different fields: contract in `references/refutation-pass.md`.
 
-Report only findings you are **>80% confident** are real *after* Stage 2. Three needs-validation entries and one finding is a more honest round than four findings.
+Report only findings you are **>80% confident** are real *after* Stage 2. Three needs-validation entries and one finding is a more honest round than four.
 
 ## The Five Rules
 
@@ -93,7 +93,7 @@ The caller emits:
 
 ## Inspired by
 
-The five rules are ported from Compozy's `cy-review-round` (credit: [Compozy](https://github.com/compozy/compozy), MIT) and extracted here so three review commands share one discipline; adapted to persist reviews in `<target>/QA/` or `<target>/review/` with no issue-file frontmatter. The candidate pipeline, `needs-validation` and the rejected-candidate log are independently reimplemented from the technique in `akitaonrails/my-skills` — that repository declares no license and no upstream text was reused.
+The five rules are ported from Compozy's `cy-review-round` (credit: [Compozy](https://github.com/compozy/compozy), MIT), extracted here so three review commands share one discipline. The candidate pipeline, `needs-validation` and the rejected-candidate log originate in [`cloudflare/security-audit-skill`](https://github.com/cloudflare/security-audit-skill) (MIT), reaching us via `akitaonrails/my-skills` — chain: cloudflare → akitaonrails → dev-workflow. Reimplemented independently; no upstream text reused.
 
 ## Structured Return
 

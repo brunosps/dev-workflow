@@ -101,6 +101,41 @@ test('the skill that fetches the web treats what it fetched as data', () => {
   }
 });
 
+test('each exit is entitled to different fields, and needs-validation never gets a severity', () => {
+  const pass = read('scaffold/skills/dw-review-rigor/references/refutation-pass.md');
+  // A severity is an assessment of impact; an unresolved lead has not established the
+  // impact. "Possible critical" is a number with nothing behind it that still ranks.
+  assert.match(pass, /Must not carry/, 'the contract must say what each exit is forbidden');
+  assert.match(pass, /needs-validation/);
+  assert.match(pass, /rejected/);
+});
+
+test('a missing environment leaves the candidate unresolved, never resolved', () => {
+  // Without this, an unavailable sandbox quietly becomes whatever the reviewer believed.
+  for (const [file, label] of [
+    ['scaffold/skills/dw-review-rigor/SKILL.md', 'review pipeline'],
+    ['scaffold/skills/dw-review-rigor/references/refutation-pass.md', 'refutation protocol'],
+    ['scaffold/skills/security-review/references/review-process-detail.md', 'security fp-check'],
+  ]) {
+    const body = read(file);
+    assert.match(body, /unavailable/i, `${label} must name the missing-environment case`);
+    assert.match(body, /needs-validation/, `${label} must route it to needs-validation`);
+  }
+});
+
+test('the attribution names the origin, not only the intermediary', () => {
+  // akitaonrails credits cloudflare for this model and declares no license of its own.
+  // Crediting only the intermediary would drop the MIT origin from the chain.
+  for (const file of [
+    'scaffold/skills/dw-review-rigor/SKILL.md',
+    'scaffold/skills/dw-review-rigor/references/refutation-pass.md',
+  ]) {
+    const body = read(file);
+    assert.match(body, /cloudflare\/security-audit-skill/, `${file} must name the origin`);
+    assert.match(body, /cloudflare → akitaonrails → dev-workflow/, `${file} must state the chain`);
+  }
+});
+
 test('the security gate carries the third verdict too', () => {
   assert.match(read('scaffold/skills/security-review/SKILL.md'), /needs-validation/);
   for (const locale of ['en', 'pt-br']) {

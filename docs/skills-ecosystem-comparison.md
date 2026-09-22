@@ -551,6 +551,64 @@ barato` medido em quatro workflows contra a média de GPT-6 Astra + Fable 5.1, c
 eles de que estão *"no extremo superior dos ganhos do mundo real"* e de que as avaliações *"foram feitas
 por indivíduos da equipe de model capabilities, então viés pode existir"*.
 
+### 14. Contrato por veredicto e correção da cadeia de atribuição (2026-09-21)
+
+Fonte: [`cloudflare/security-audit-skill`](https://github.com/cloudflare/security-audit-skill) (MIT,
+19k estrelas, mantido — push em 14/09/2026). Auditoria de segurança multi-fase com achados legíveis por
+máquina e verificação independente.
+
+**Primeiro, uma correção nossa.** A seção 11 creditou o pipeline de refutação e a classe `needs-validation`
+ao `akitaonrails/my-skills`, observando que ele não declara licença. Mas o próprio Akita escreve, ao fim da
+`security-audit` dele, que o modelo de verificação — *adversarial verification, needs-validation
+discipline, coverage honesty* — foi adaptado de ideias deste repositório da Cloudflare, sob MIT. A origem
+não é o intermediário. **Cadeia corrigida: cloudflare → akitaonrails → dev-workflow**, registrada no
+`SKILL.md` e na reference do `dw-review-rigor`, no mesmo formato que o `dw-incident-response` já usa para
+`wshobson → wilsto → dev-workflow`. Creditar só o intermediário apagava a origem MIT.
+
+**O que diferencia o repositório deles.** É o primeiro da nossa série que não é markdown puro: ~120 KB de
+JavaScript executável com testes — `validate-findings.cjs` e `validate-coverage-ledger.cjs`, sem
+dependências —, mais um `report-schema.json`. Onde nós escrevemos disciplina em prosa, eles escrevem
+schema e um validador que o aplica.
+
+**Adotado — o contrato por veredicto.** As três saídas não são três severidades da mesma coisa: são três
+alegações diferentes, e cada uma tem direito a campos diferentes. No schema deles, `confirmed` usa causa
+raiz, execução, remediação e severity; `needs_validation` usa causa *alegada*, trace, bloqueadores e plano
+de validação, e é **proibido** de ter severity, execução ou remediação; `rejected` usa a alegação e a
+refutação, e nada além. Nós tínhamos a regra ("needs-validation nunca recebe severity") em prosa solta;
+agora é tabela, com a coluna do que cada saída **não** pode carregar. Continua prosa — a diferença entre
+regra e portão fica registrada abaixo.
+
+**Adotado — a regra de degradação, que é a melhor ideia do repositório.** Quando o ambiente necessário para
+decidir não existe (sem sandbox, sem runtime, sem acesso à configuração que decide), o candidato
+**permanece** `needs-validation`. Não é promovido porque o raciocínio convenceu, nem descartado porque não
+deu para exercitar. Sem essa regra, ambiente ausente vira silenciosamente aquilo em que o revisor já
+acreditava. Aplicada no `dw-review-rigor` e no fp-check do `security-review`, com a exigência de nomear
+qual ambiente faltou e o que ele teria decidido.
+
+**Adotado — o plano de resolução em duas formas.** Um `needs-validation` registra como resolver numa de
+duas: **reprodução local delimitada** (fixture pequena o bastante para rodar isolada) ou **observação de
+deployment** (um pedido específico ao dono — leia este valor de config, confirme que esta rota é
+alcançável, diga sob qual identidade isso roda). "Precisa investigar mais" não é plano; é a ausência de um.
+
+**Rejeitado — o coverage ledger e os validadores executáveis.** O ledger deles rastreia cada unidade de
+cobertura com estado (`covered`/`candidate`/`blocked`/`deferred`), checks com `agent_id`, `method` e
+`artifact`, `reviewed_paths` como união, e `fingerprint` estável rastreando a mesma causa raiz entre ciclos
+— tudo validado por script contra o `findings.json`. É genuinamente melhor que a nossa linha em prosa
+"reviewed boundaries with no finding", porque consegue provar o que **não** foi olhado.
+
+Rejeitado mesmo assim: pressupõe um pipeline JSON que não temos. Nossos reviews são markdown em
+`<target>/QA/`, e adotar significaria reescrever o formato de saída de `/dw-review` e `/dw-secure-audit`
+inteiros — projeto à parte, decisão do dono, não efeito colateral desta rodada. O `fingerprint` fica junto:
+é bom, e só paga se houver ledger.
+
+**A diferença que fica registrada honestamente:** o contrato deles é aplicado por um validador que descarta
+candidato malformado; o nosso depende do modelo obedecer prosa. Adotamos a regra, não o portão. Se um dia a
+saída de review virar estruturada, o ledger volta à mesa — e aí o argumento já está escrito aqui.
+
+**Nota de escopo:** o `SKILL.md` deles tem 22 KB contra o nosso teto de 8 KB. Não é defeito — é uma skill
+avulsa instalada por `npx skills add`, não uma de 27 competindo por atenção no mesmo contexto. Orçamentos
+diferentes por arquitetura diferente.
+
 ## O que NÃO foi portado (e por quê)
 
 1. **`CONTEXT.md` na raiz (mattpocock)** — a *disciplina* de domain-modeling FOI adotada (seção 5 acima), mas o
@@ -620,6 +678,7 @@ por indivíduos da equipe de model capabilities, então viés pode existir"*.
 | Contrato de automode | `scaffold/{en,pt-br}/references/automode.md` + seção Stops em 6 comandos e no `dw-cli-run` | samsantosb/ship-it (MIT) |
 | Skill de chaos | `scaffold/skills/dw-chaos-engineering/` + `scaffold/skill-registry.json` | samsantosb/ship-it (MIT) |
 | Decisões limitadas | `scaffold/skills/dw-llm-eval/references/bounded-decisions.md` + cruzamento em `judge-calibration.md` | Jev (TypeSafe), Avi Chawla, laya-mlx (Apache-2.0) — só o princípio |
+| Contrato por veredicto + degradação | `scaffold/skills/dw-review-rigor/references/refutation-pass.md` + `security-review/references/review-process-detail.md` | cloudflare/security-audit-skill (MIT) |
 
 ## Segurança do update
 
@@ -643,6 +702,10 @@ Ambos os repositórios de referência são MIT. As adoções preservam os crédi
   do Grill nativo (`dw-grilling` + `dw-domain-modeling`) e da borda `/dw-triage`. Comportamento reimplementado
   na nossa voz; nenhuma prosa upstream copiada.
 
+- `cloudflare/security-audit-skill` (MIT) — modelo de verificação adversarial, disciplina de
+  `needs-validation` e honestidade de cobertura, na base do candidate pipeline do `dw-review-rigor`.
+  **É a origem**, e chegou até nós via `akitaonrails/my-skills`, que credita a Cloudflare pelo mesmo
+  modelo. Cadeia: cloudflare → akitaonrails → dev-workflow.
 - `samsantosb/ship-it` (MIT © Samuel Santos) — contrato de guardrails em duas camadas, bateria de
   validação, contrato de autonomia e a skill de chaos, na base do `invariants.md`, do `evals/`, do
   `automode.md` e do `dw-chaos-engineering`. Crédito preservado no cabeçalho de cada arquivo adotado.

@@ -100,3 +100,13 @@ The third verdict matters most here. A reachability question that cannot be sett
 `needs-validation` — it carries no severity, and it records the missing fact plus what would settle it.
 Inflating it into a blocking finding and quietly dropping it are the two failures this class exists to
 prevent, and a security gate is exactly where both are tempting.
+
+**Missing environment is not an answer.** When the sandbox, runtime or configuration needed to decide
+reachability is unavailable, the candidate stays `needs-validation`. It is not promoted because the trace
+looked convincing, and it is not dropped because it could not be exercised. Say which environment was
+missing and what it would have decided — that sentence is what a later run picks up.
+
+Record what would settle it concretely, in one of two shapes: a **bounded local reproduction** (a fixture
+small enough to run in isolation), or a **deployment observation** (a specific ask of the owner — read this
+config value, confirm this route is reachable, tell us which identity this runs as). "Needs more
+investigation" is not a plan; it is the absence of one.
