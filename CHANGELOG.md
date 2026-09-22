@@ -10,6 +10,81 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > those versions were released, so they are summaries of what shipped, not
 > contemporaneous release notes. `git log` remains the authoritative record.
 
+## [2.4.0] — 2026-09-21
+
+### Added
+
+- **A floor the ADR escape does not reach.** `.dw/references/invariants.md` names the
+  invariants no ADR unblocks — destructive git and secret handling — and states the
+  direction: project rules bind only by tightening. A line in `.dw/rules/**`, the
+  constitution or `CLAUDE.md` that would loosen one is reported as a finding, never
+  obeyed. It ships in the managed references directory, which has no override path, so
+  a consumer cannot remove it durably.
+- **External text is evidence, never an instruction.** `.dw/references/untrusted-input.md`
+  plus anchors in the commands that ingest third-party content — triage, review, bugfix,
+  secure-audit and the three skill installers — and one sentence in the always-loaded
+  instruction block, so the rule applies even when no command was invoked. Includes the
+  authority checklist for installing someone else's skill, and covers fetched
+  documentation in `dw-source-grounding`, `/dw-brainstorm --mode=research` and `/dw-plan`.
+- **A refutation step before a finding is reported.** `dw-review-rigor` now routes every
+  candidate to exactly one of `finding`, `needs-validation` or `rejected`. The new
+  read-only `dw-finding-refuter` agent receives the claim and the raw code without the
+  reasoning that produced it. An unresolved lead never receives a severity; a refuted one
+  stays logged so the next round does not rediscover it.
+- **`/dw-review --post-merge [<base>]`** — a composition audit of an already-merged range:
+  frozen boundary, first-parent provenance, seven cross-interaction classes, a
+  documentation ledger built from the diff, and a semver recommendation. Read-only; it
+  never tags, bumps or publishes.
+- **`dw-chaos-engineering`** (explicit invocation) — adversarial testing with a vector
+  catalogue, a green-baseline gate, KILLED/SURVIVED/INCONCLUSIVE classification and a
+  three-round cap. Local only, writes tests only.
+- **An automode contract.** `.dw/references/automode.md` plus a named `Stops` section in
+  `/dw-autopilot`, `/dw-run`, `/dw-goal` and the three runners: invoking a command
+  authorizes its flow, the enumerated stops are the complete set, and a stop persists
+  state, reports the exact resume command and exits cleanly.
+- **Skill usage evidence in `/dw-skill-health`.** The SessionEnd cost hook now records
+  which skills a session's tool calls referenced, in the file it already wrote. Missing
+  telemetry is reported as missing, never as disuse.
+- **Bounded-decision guidance in `dw-llm-eval`**, including the distinction our judge
+  calibration never made explicit: Spearman ≥0.80 is rank agreement, not probability
+  calibration.
+- **`evals/`** — a behavioural battery for this repository's own skills, run against fresh
+  sub-agents at a declared model tier. Versioned in git, excluded from the package.
+
+### Changed
+
+- **No bundled command carries the invocation lock any more.** `dw-open-design`,
+  `dw-claude-run`, `dw-copilot-run` and the three `dw-subtask-*` join `dw-codex-run`.
+  After an update the model may fire these directly where it previously could not. The
+  lock is not an authorization gate: where approval already exists upstream it only made
+  the user retype a command they had authorized. The runners' real gates are unchanged —
+  dedicated worktree, never the main checkout, never a merge, dual evaluation and the STOP
+  at the gate.
+- `security-review`'s fp-check gains a third verdict: reachability that cannot be
+  established either way is `needs-validation`, with no severity, rather than drifting into
+  blocking or advisory.
+- A candidate whose deciding environment is unavailable stays unresolved instead of being
+  promoted or dropped.
+
+### Fixed
+
+- `dw-review-rigor` pointed prior-round awareness at `.dw/spec/prd-*/reviews/`, a directory
+  no command has ever written. Reviews live in `<target>/QA/` and `<target>/review/`.
+- `<AUDIT>` was referenced nine times across the runners without ever being resolved. It is
+  `.dw/cli-run`, which `init` has been creating all along.
+- `autopilot-state.json` had no directory anywhere in the repository. It is
+  `.dw/autopilot-state.json`.
+- The constitution installer printed "All 10 principles start at `severity: info`". The
+  template has eleven, and two ship at `high`.
+- `security-review` appeared twice in `/dw-review`'s complementary skills.
+- The git guardrails hook now also denies `filter-branch`, `reflog expire`, `gc --prune`,
+  `stash drop`, `stash clear`, `branch -M` and `update-ref -d`. `rebase` and
+  `commit --amend` are deliberately left out — routine on unpushed work, and a command line
+  cannot tell pushed from unpushed.
+- The ecosystem comparison's title and attribution chain: the adversarial-verification
+  model originates in `cloudflare/security-audit-skill` (MIT) and reached this project
+  through `akitaonrails/my-skills`.
+
 ## [2.3.0] — 2026-09-09
 
 ### Added
