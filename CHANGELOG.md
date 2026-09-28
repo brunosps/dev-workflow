@@ -10,6 +10,86 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > those versions were released, so they are summaries of what shipped, not
 > contemporaneous release notes. `git log` remains the authoritative record.
 
+## [2.5.0] — 2026-09-28
+
+### Added
+
+- **`/dw-quality-gate` — a measured quality gate on new code.** SonarQube's "Clean as You
+  Code" idea without a server: the diff's new code is measured for complexity, duplication,
+  new lint issues and coverage of changed lines, and each changed file is compared with its
+  own merge-base version measured by the same engine. Only what the diff introduces or makes
+  worse blocks; pre-existing debt a diff merely touches is advisory. Verdicts are `APPROVED`,
+  `APPROVED WITH CAVEATS`, `REJECTED` and `UNMEASURED` (no complexity engine ran, which
+  blocks: complexity is the one required layer).
+  - Engines are layered like the Security Gate: qlty for cognitive complexity with lizard as
+    fallback, jscpd over the whole source tree for duplication, qlty check or the project's
+    own lint, and the project's own coverage report. A missing engine degrades one layer.
+  - A diff never configures its own gate: `.dw/quality/gate.json` (thresholds, `exclude`,
+    waivers), `.qlty/qlty.toml`, the linter's config and ignore files, `.jscpd.json`, and the
+    lint and coverage commands are read from the base branch (a changed file is swapped for
+    its base version during measurement and restored byte for byte), and a diff that loosens them alongside code is a blocking `config-loosening`
+    finding. A configuration-only PR (gate.json, qlty.toml, ADRs) is the sanctioned route:
+    its loosening is listed for the owner's review instead of blocking.
+  - Blanket or file-wide suppressions added by the diff block; a suppression that names the
+    rule and gives a checkable reason is advisory. Coverage exclusions follow the same rule
+    when a coverage threshold is set.
+  - Complexity is the one required layer. lizard (cyclomatic, blind to nesting) is only the
+    engine for languages qlty cannot parse; a qlty-supported file measured without qlty is
+    `UNMEASURED`.
+  - New code is measured against the working tree, including untracked files, so
+    uncommitted `/dw-run` output counts; duplication
+    scans every tracked source file with `--min-lines 0`, since jscpd otherwise drops dense
+    clones on fewer than five lines.
+  - Refutation can reject a blocking candidate only for named reasons (generated code, flat
+    enum switch, engine mis-parse, required boilerplate); an unsure refutation leaves the
+    finding standing. Waivers need a reason, an existing ADR for HIGH rules, and may cap the
+    value with `max`.
+  - Coverage never blocks without a project threshold (`coverage.newCode`); with one, a
+    missing report fails the layer instead of skipping it.
+- **`/dw-quality-gate --full`** — a complete, advisory project report: complexity
+  distribution, worst functions, duplication by language and directory, lint, coverage,
+  hotspots (churn × complexity), trend against the previous report and the baseline, and a
+  prioritized debt backlog routed to `/dw-refactor`, tests or lint fixes.
+  `--update-baseline` writes `.dw/quality/baseline.json` from the same measurement on the
+  base branch.
+- **`install-deps` installs the quality engines** instead of only printing instructions:
+  qlty from its pinned GitHub release with the SHA-256 verified, lizard into a private venv
+  (sidestepping PEP 668), and a warmed npx cache for jscpd — all under `~/.dw`, never inside
+  a project and without editing the shell profile.
+- **`/dw-analyze-project` Step 5.2** runs `/dw-quality-gate --full --no-write-config` (or
+  `--update-baseline` on the base branch), cites the measured values in the anti-patterns and
+  the concerns map, and records a `## Quality Baseline` in `.dw/rules/index.md`.
+  `--no-write-config` keeps that documentation-only command from writing `.qlty/qlty.toml`.
+- `dw-simplification/references/quality-gate-tools.md` — engine commands and output shapes,
+  each verified by running it (qlty 0.649, lizard 1.24, jscpd 5.3).
+
+### Changed
+
+- **The Quality Gate is mandatory, in every language.** After updating, `/dw-review`
+  (Level 3 step 9) returns REJECTED when `.dw/quality/quality-summary.md` is missing, stale,
+  `REJECTED` or `UNMEASURED`; `/dw-generate-pr` (hard gate 3) re-runs the gate against the
+  PR's target branch before every push, on a clean tree, instead of trusting a stored
+  summary, and copies suppressions, configuration changes and degraded layers into the PR
+  description; and
+  `/dw-autopilot` runs it next to the Security Gate. Run
+  `npx @brunosps00/dev-workflow install-deps` so the engines are present; without any engine
+  the verdict is `UNMEASURED` and PRs block.
+- `/dw-autopilot`: the Security Gate's non-SECRET `REJECTED` gets one fix pass and a re-scan,
+  like the Quality Gate, before stop 3; a SECRET still stops at once. A fix pass invalidates
+  the review and the scan. Stop 5 applies to findings still `high`/`critical` after the
+  goal's correction, and an ADR the run wrote itself does not count. Stops now persist
+  `status: blocked`, `blocked_reason` and `question`, with a `blocked` resume row, and never
+  record a secret value.
+- `/dw-autopilot` now reads `.dw/references/untrusted-input.md` before external text enters
+  the run.
+- `/dw-run` gains stop 8: the review stays REJECTED on something a code correction cannot
+  clear (quality gate `UNMEASURED`, a SECRET, a decision needing an ADR or waiver).
+- `/dw-review`'s escapes are stated per gate instead of "ADR is the only escape": an ADR for
+  constitution high+critical and non-SECRET security findings, a `gate.json` waiver for the
+  quality gate, none for SECRET or verify.
+- `complexity-metrics.md` splits cognitive 16+ into 16-25 and 26+, and distinguishes
+  whole-repo CI gates from new-code gates.
+
 ## [2.4.0] — 2026-09-21
 
 ### Added
