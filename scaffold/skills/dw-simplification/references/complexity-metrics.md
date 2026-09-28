@@ -27,7 +27,8 @@ This metric correlates better with bug rate than cyclomatic. Most modern linters
 |-------|--------|
 | 0-9 | Fine |
 | 10-15 | Review |
-| 16+ | Refactor |
+| 16-25 | Refactor |
+| 26+ | Refactor; also the gross threshold for whole-repo CI gates (reported as "critical" by `/dw-quality-gate --full`) |
 
 ### 3. Nesting depth
 
@@ -143,5 +144,6 @@ rust-code-analysis-cli -m -p src/
 
 - Run on PRs that touched complex code; flag if a function moved to a worse bucket.
 - Run on long-lived hot files quarterly; spot drift.
-- Set CI gates ONLY at gross thresholds (e.g., cognitive >25), not at edge thresholds (>10).
-- Treat metrics as conversation starters, not pass/fail gates.
+- Whole-repo CI gates: ONLY at gross thresholds (e.g., cognitive >25), not at edge thresholds (>10).
+- New-code gates (`/dw-quality-gate`): block at the "Refactor" bucket (cognitive >15) only for functions the diff creates or makes worse, and only after refutation. Pre-existing complexity a diff merely touches is advisory.
+- Everywhere else, treat metrics as conversation starters, not pass/fail gates. Deterministic engine commands per ecosystem: `quality-gate-tools.md`.

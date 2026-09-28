@@ -16,10 +16,13 @@
     | `dw-verify` | **SEMPRE** — invocada antes do `git push`. Sem VERIFICATION REPORT PASS válido para insumos, ambiente e escopo atuais, o PR **NÃO** pode ser criado. |
     | `dw-git-discipline` | **SEMPRE** — valida naming de branch (`<tipo>/<escopo>` kebab-case), histórico atomic-commit (cada commit single-intent, mensagem conventional), tempo de vida da branch (flag se >7 dias) e escopo da PR (sugere split se diff > ~400 linhas). Descrição da PR segue summary + test plan, não dump de `git log`. |
     | `/dw-secure-audit` | **SEMPRE para projetos TS/Python/C#/Rust** — um `.dw/secure-audit/audit-summary.md` fresco com status ≠ REJECTED é obrigatório para projetos em linguagem suportada. |
+    | `/dw-quality-gate` | **SEMPRE** — roda de novo aqui contra a branch alvo do PR (`--scan-only`); o verdict não pode ser `REJECTED` nem `UNMEASURED`. Summary gravado antes não é confiável nesta etapa. |
 
     <critical>Hard gate 1 (verify): use `dw-verify` para confirmar evidência válida dos insumos, ambiente e escopo atuais antes de push/PR. Reutilize evidência equivalente; execute checks exigidos ausentes/invalidados. Outra sessão ou commit só de bookkeeping não invalida checks.</critical>
 
     <critical>Hard gate 2 (security): para projetos TS/Python/C#/Rust, se `.dw/secure-audit/audit-summary.md` não existir, estiver desatualizado (anterior à última edição) OU tiver status REJECTED, PARAR e invocar `/dw-secure-audit` antes de prosseguir. Findings SECRET e vulnerabilidades HIGH/CRITICAL NÃO podem chegar ao PR. Para outras linguagens (Go, Java, etc.), este gate é pulado com nota.</critical>
+
+    <critical>Hard gate 3 (quality): a árvore de trabalho precisa estar limpa antes — o gate mede a árvore de trabalho e o push envia commits, então uma diferença entre eles faria o gate julgar o código errado; senão PARAR e passar pelo `/dw-commit`. Depois, imediatamente antes do push, rode `/dw-quality-gate --scan-only` com a branch alvo do PR como base, independente do que `.dw/quality/quality-summary.md` já diga — o summary vive em `.dw/`, nunca fica stale por edições em `.dw/` e pode ter sido gerado para outro range. Se o verdict novo for `REJECTED` ou `UNMEASURED`, PARAR. Código novo acima de limite bloqueante sem waiver válido NÃO pode chegar ao PR. `UNMEASURED` significa que nenhuma engine de complexidade rodou: instale com `npx @brunosps00/dev-workflow install-deps`; o gate não é pulado para nenhuma linguagem. Copie `## Configuration changes`, `## New suppressions` e toda camada degradada (engine ausente, `complexity measured without nesting (lizard)`, cobertura não medida) para a descrição do PR sob o título "Quality gate notes", para o revisor ver o que o gate não conseguiu garantir.</critical>
 
     ## Uso
 

@@ -202,6 +202,7 @@ Quando disponíveis em `./.agents/skills/`, são invocadas como apoio analítico
 - `dw-review-rigor`: **SEMPRE** — dono do candidate pipeline (gate → refutação → disposição), de-duplication (mesmo pattern em N arquivos = 1 finding), severity ordering (critical → high → medium → low), verify-before-flag, skip-what-linter-catches, signal-over-volume. A tabela "Problemas Encontrados" segue essa disciplina. Em `--post-merge`, também carrega `references/composition-audit.md`.
 - `dw-verify`: **SEMPRE** — invocada antes de emitir `APROVADO` ou `APROVADO COM RESSALVAS`. Sem VERIFICATION REPORT PASS (test + lint + build), verdict não pode ser APROVADO.
 - `dw-secure-audit` (**Security Gate**): **SEMPRE para projetos TS/Python/C#/Rust** — acionado aqui e o verdict é enforced. Se a linguagem é suportada e `.dw/secure-audit/audit-summary.md` fresco está ausente OU REPROVADO, o verdict do review é **REPROVADO** — sem exceção. O mesmo gate também é comando standalone (`/dw-secure-audit`) e fase explícita no `/dw-autopilot`. Agora soma Semgrep SAST (diff) + gitleaks secrets sobre OWASP/Trivy/SCA.
+- `dw-quality-gate` (**Quality Gate**): **SEMPRE** — acionado aqui e o verdict é enforced. Mede o código novo (complexidade, duplicação, novos issues de lint, cobertura das linhas alteradas) contra a versão de cada arquivo alterado no merge-base, com limites lidos da branch base. Se `.dw/quality/quality-summary.md` fresco estiver ausente, stale, `REJECTED` ou `UNMEASURED`, o verdict do review é **REPROVADO**. Também é comando standalone (`/dw-quality-gate`) e fase explícita no `/dw-autopilot`.
 - `security-review`: a skill OWASP nível-diff que o gate usa (injection, authz, secrets, SSRF, crypto — só HIGH CONFIDENCE). Recorra a ela diretamente quando o diff tocar auth, autorização, input externo, upload, SQL, secrets, SSRF, XSS ou outra superfície sensível.
 - `dw-simplification`: use quando diff toca código denso — aplica Chesterton's Fence, protocolo de refactor preservando comportamento, métricas de complexidade.
 - `dw-minimalism`: use quando o diff adiciona código que pode estar over-built — flagra generalidade especulativa, helpers de um único caller, abstração prematura e violações de YAGNI (a contraparte pré-geração do `dw-simplification`).
@@ -306,10 +307,10 @@ Se FALTANDO > 0, o veredicto sugere revisitar `/dw-plan tasks` pra escopar ou `/
    - Para cada princípio, checar diff por violações conforme linha Enforcement do princípio.
    - Severity-graded: info → low, high → critical+REPROVADO-exceto-ADR, critical → critical+REPROVADO-exceto-ADR-with-approval.
 
-4. **Qualidade de código** (via disciplina `dw-review-rigor`):
+4. **Qualidade de código** (via disciplina `dw-review-rigor`). Rode o `/dw-quality-gate` (passo 9) antes deste passo quando não houver summary fresco, para que os números abaixo sejam medidos, não estimados:
    - Violações SOLID.
-   - Complexidade ciclomática / cognitiva (com thresholds `dw-simplification`).
-   - Violações DRY (apenas com impacto significativo — não dedup prematuro).
+   - Complexidade ciclomática / cognitiva (com thresholds `dw-simplification`). Cite os números do Quality Gate (passo 9) como evidência; não re-estime o que ele mediu.
+   - Violações DRY (apenas com impacto significativo — não dedup prematuro). A lista de clones do gate é o ponto de partida medido.
    - Code smells (taxonomia Fowler).
    - Para mudanças em fluxo de dados, dependências ou ferramentas de qualidade do frontend, leia `dw-ui-discipline/references/frontend-engineering.md` e a baseline de qualidade/TechSpec do módulo. Inspecione geração/validação de API, limites de imports, regras de negócio duplicadas, código inalcançável e novas exclusões abrangentes. Execute checks adotados via `dw-verify`; ferramenta opcional ausente é proposta, não reprovação automática. Investigue mutantes sobreviventes quando a análise estiver no escopo; não aprove apenas por score. Relate mudanças na obrigatoriedade do CI separadamente dos resultados locais.
 
@@ -331,6 +332,13 @@ Se FALTANDO > 0, o veredicto sugere revisitar `/dw-plan tasks` pra escopar ou `/
    - Acione `/dw-secure-audit` contra o diff (OWASP + Semgrep SAST + gitleaks + Trivy/SCA + supply-chain). Ele produz/atualiza `.dw/secure-audit/audit-summary.md`.
    - Scan mais recente deve estar presente, fresco (pós-última-edição) e não REPROVADO. Se linguagem suportada e audit ausente OU REPROVADO → verdict do review **REPROVADO**. Findings SECRET sempre bloqueiam (sem escape de ADR).
    - O mesmo gate também roda standalone (`/dw-secure-audit`) e é fase explícita no `/dw-autopilot`; `/dw-generate-pr` re-enforça o verdict antes do PR.
+
+9. **Quality Gate (`dw-quality-gate`, toda linguagem):**
+   - Acione `/dw-quality-gate` contra o mesmo range (`--since <ref>` quando o review usa). Ele produz/atualiza `.dw/quality/quality-summary.md`.
+   - Summary mais recente deve estar presente, fresco (nenhum arquivo fora de `.dw/` mudou desde o `Head:` dele — veja a regra de Frescor do gate; artefatos de review e bookkeeping em `.dw/` não o deixam stale, mudança no `gate.json` deixa) e nem `REJECTED` nem `UNMEASURED` → senão verdict do review **REPROVADO**. Dívida pré-existente que o diff só toca nunca bloqueia.
+   - **O verdict do gate é a autoridade deste passo.** Os findings bloqueantes dele já passaram pela refutação dentro do gate; este review não os re-refuta nem derruba um `REJECTED`. As únicas saídas são mudar o código e rodar de novo, ou um waiver em `.dw/quality/gate.json` que o próprio gate aplica.
+   - No relatório, os findings do gate aparecem uma vez, deduplicados contra os itens de complexidade/DRY do passo 4 (mesmo arquivo + símbolo = um finding, citando o valor do gate), não colados ao lado.
+   - O `/dw-generate-pr` re-enforça o verdict e o frescor dele antes do PR.
 
 ### Output
 
@@ -357,6 +365,7 @@ Quando ambos níveis rodam, relatório consolidado em `<target>/QA/review-consol
 **Level 3 (Qualidade):** APROVADO | APROVADO COM RESSALVAS | REPROVADO
 **Verification Report:** PASS
 **Security Audit:** PASS (ou REPROVADO com motivos)
+**Quality Gate:** APPROVED | APPROVED WITH CAVEATS (ou REJECTED / UNMEASURED com motivos)
 **Constitution Compliance:** PASS (ou violações listadas)
 **Comando de diff:** git diff <effective-base-or-ref>...HEAD
 
@@ -394,6 +403,6 @@ Quando ambos níveis rodam, relatório consolidado em `<target>/QA/review-consol
 - Ambos níveis rodam por default exceto se flags especificarem. Maioria dos PRs precisa de ambos.
 - Veredicto consolidado é o único número pra confiar. Relatórios individuais drill down.
 - Findings são signal, não volume. `dw-review-rigor` enforça isso.
-- Hard gates (verify, secure-audit, constitution high+critical) são não-negociáveis. ADR é o único escape.
+- Hard gates (verify, secure-audit, quality-gate, constitution high+critical) são não-negociáveis. As saídas são por gate e em nenhum outro lugar: ADR para constitution high+critical e para findings de segurança não-SECRET; waiver no `gate.json` (com ADR para HIGH) para o quality gate; nenhuma para SECRET ou para verify.
 
 </system_instructions>

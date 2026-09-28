@@ -46,6 +46,7 @@ Use the installed root routing rules first. Consult this catalog only to locate 
 | "Redesign this UI" / "Audit and ship a new design" | `/dw-redesign-ui "<target>"` |
 | "Audit dependencies" / "Are we behind on packages?" | `/dw-secure-audit --plan` |
 | "Scan for vulnerabilities" / "Security check" | `/dw-secure-audit` |
+| "Quality gate" / "Measure complexity and duplication" / "Like SonarQube" | `/dw-quality-gate` (`--full` for the complete project report) |
 | "Analyze this project" / "Generate rules" | `/dw-analyze-project` |
 | "Open a new project" / "Bootstrap a stack" | `/dw-new-project` |
 | "Dockerize this" / "Add docker-compose" | `/dw-dockerize` |

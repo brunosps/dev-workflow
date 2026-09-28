@@ -46,7 +46,7 @@ const HELP_TEXT = `
     doctor                 Check managed files, wrappers, agents, and MCP configuration
     repair                 Reconcile managed files using the recorded install state
     subtask                Create, complete, consume, and list local subagent handoffs
-    install-deps           Install system dependencies (Playwright browsers, MCP servers)
+    install-deps           Install system dependencies (Playwright browsers, MCP servers, quality-gate engines)
     setup-wsl-browser      (WSL) Install the optional user-level CDP fallback relay for the real Windows browser without admin
     install-azure-skills   Opt-in: clone curated Azure skills from MicrosoftDocs/Agent-Skills
                            into .agents/skills/azure/ and register the Microsoft Learn MCP

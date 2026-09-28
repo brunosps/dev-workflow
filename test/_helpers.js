@@ -128,6 +128,14 @@ const FILES = {
     en: 'scaffold/en/commands/dw-secure-audit.md',
     pt: 'scaffold/pt-br/commands/dw-secure-audit.md',
   },
+  qualityGate: {
+    en: 'scaffold/en/commands/dw-quality-gate.md',
+    pt: 'scaffold/pt-br/commands/dw-quality-gate.md',
+  },
+  generatePr: {
+    en: 'scaffold/en/commands/dw-generate-pr.md',
+    pt: 'scaffold/pt-br/commands/dw-generate-pr.md',
+  },
   findSkills: {
     en: 'scaffold/en/commands/dw-find-skills.md',
     pt: 'scaffold/pt-br/commands/dw-find-skills.md',

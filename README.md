@@ -42,7 +42,7 @@ Exportable skills (no `.dw/` pipeline required): `dw-minimalism`, `dw-search-fir
 
 ## Commands
 
-dev-workflow v2.3.0 ships **41 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
+dev-workflow v2.3.0 ships **42 commands** organized into four tiers. Most users only invoke Tier 1 + Tier 2.
 
 ### Tier 1 — Gateway (4)
 
@@ -90,7 +90,7 @@ Use these when you want step-by-step control instead of `/dw-autopilot`.
 | **`/dw-install-azure-skills`** | **Opt-in.** Clones curated Azure skills from [`MicrosoftDocs/Agent-Skills`](https://github.com/MicrosoftDocs/Agent-Skills) (CC-BY-4.0) into `.agents/skills/azure/` and registers the [Microsoft Learn MCP Server](https://learn.microsoft.com/en-us/training/support/mcp-get-started) (HTTP, no-auth). Interactive category selection (Compute / Data & Storage / AI & ML / Networking / Identity & Security / DevOps / Observability / Integration / Architecture / All). Re-run to refresh from upstream. Also available as CLI: `npx @brunosps00/dev-workflow install-azure-skills`. |
 | **`/dw-install-aws-skills`** | **Opt-in.** Clones curated AWS skills from [`aws/agent-toolkit-for-aws`](https://github.com/aws/agent-toolkit-for-aws) (Apache 2.0) into `.agents/skills/aws/` and registers the unified [AWS MCP Server](https://docs.aws.amazon.com/aws-mcp/) (stdio via `uvx mcp-proxy-for-aws@latest`). **Requires `uv`, `aws cli ≥ 2.32.0`, and AWS credentials.** Interactive category selection (Core / Analytics / Database / EC2 / Migration / Networking / Operations / Security / Serverless / Storage / All). The agent gains `aws___call_aws` (executes 15,000+ AWS APIs) and `aws___run_script` (Python sandboxed) — review `.dw/references/aws-mcp-instructions.md` for the destructive-operations protocol. Also available as CLI: `npx @brunosps00/dev-workflow install-aws-skills [--region=<aws-region>]`. |
 
-### Tier 4 — Hidden/Internal (12)
+### Tier 4 — Hidden/Internal (13)
 
 These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help --advanced`.
 
@@ -99,6 +99,7 @@ These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help 
 | **`/dw-adr "decision"`** | Records an Architecture Decision Record at `.dw/spec/<prd>/adrs/`. | `/dw-plan techspec --council`; deviations from constitution |
 | **`/dw-intel "question"`** | Query codebase intelligence (`.dw/intel/`). `--build` (re)creates the index. | `/dw-plan`, `/dw-review`, `/dw-bugfix` |
 | **`/dw-secure-audit`** | **Security Gate** (phase after review/QA, before commit/PR): OWASP + Semgrep SAST (diff/generated code) + gitleaks secrets + Trivy SCA/IaC + lockfile + supply-chain + outdated. Rigoroso: secrets/CRITICAL/HIGH block (secrets have no ADR escape). Flags: `--scan-only`, `--plan`, `--execute`. See [docs/security-gate.md](docs/security-gate.md). | `/dw-review`, `/dw-autopilot` (explicit step), enforced by `/dw-generate-pr` |
+| **`/dw-quality-gate`** | **Quality Gate** (measured, SonarQube-style "Clean as You Code" without a server): complexity, duplication, new lint issues and coverage of the diff's new code, each changed file compared with its merge-base version; thresholds come from the base branch, so a PR cannot loosen its own gate. qlty (or lizard) for complexity, jscpd for duplication; no complexity engine = `UNMEASURED`, which blocks. Pre-existing debt never blocks. `--full` writes a complete project report (distributions, hotspots, trend, prioritized debt backlog). Flags: `--since`, `--full`, `--update-baseline`, `--scan-only`. | `/dw-review`, `/dw-autopilot` (next to the Security Gate), enforced by `/dw-generate-pr` |
 | **`/dw-goal "<objective>"`** | Durable objective contract. Uses Codex native `/goal` when available and `.dw/goals/` everywhere for Codex, Copilot, Claude Code, and OpenCode. | `/dw-autopilot` after planning |
 | **`/dw-claude-run`** | Fire `claude -p` (headless) in a dedicated git worktree to implement a prepared prompt/spec. Claude adapter over the `dw-cli-run` protocol: durable audit log, resumable session via `--session-id`, 0–10 dual evaluation, STOP for the gate. Never the main checkout; never merges. | `/dw-plan tasks` cross-tool assignment, once approved; or manually |
 | **`/dw-codex-run`** | Fire `codex exec` in a dedicated git worktree to implement a prepared prompt/spec. Codex adapter over the `dw-cli-run` protocol: durable audit log, resumable per-task session, 0–10 dual evaluation, STOP for the gate. Never the main checkout; never merges. | `/dw-plan tasks` cross-tool assignment, once approved; or manually |
@@ -113,17 +114,17 @@ These are auto-invoked by Tier 1-3 commands. Available standalone via `/dw-help 
 
 ```
 /dw-autopilot "wish"  ------>  PRD → TechSpec → Tasks + execution assignments → approval
-                             → /dw-goal → Security Gate → validated delivery → authorized publication
+                             → /dw-goal → Security Gate + Quality Gate → validated delivery → authorized publication
     --- OR step-by-step ---
 
 /dw-opportunities --> /dw-brainstorm --> /dw-plan --> .dw/spec/prd-{name}/{prd,techspec,tasks}.md
                           |
-                    /dw-goal             -->  /dw-run → /dw-review → /dw-qa → /dw-review → /dw-secure-audit
+                    /dw-goal             -->  /dw-run → /dw-review → /dw-qa → /dw-review → /dw-secure-audit → /dw-quality-gate
                           |
                     /dw-commit + /dw-generate-pr
 
 Manual alternative after /dw-plan:
-  /dw-run → /dw-review → /dw-qa → /dw-review → /dw-secure-audit → /dw-commit → /dw-generate-pr
+  /dw-run → /dw-review → /dw-qa → /dw-review → /dw-secure-audit → /dw-quality-gate → /dw-commit → /dw-generate-pr
 
 Shortcuts:
   /dw-intel "question"         Query codebase intelligence
@@ -330,6 +331,9 @@ Installed via `npx @brunosps00/dev-workflow install-deps`:
 | **Semgrep** | SAST layer for `/dw-secure-audit`, focused on generated-code diffs with pinned security rulesets. `install-deps` detects presence and prints OS-specific install instructions. | [semgrep.dev](https://semgrep.dev/) |
 | **gitleaks** | Dedicated secret scanner for `/dw-secure-audit`; any confirmed secret blocks without ADR exception. `install-deps` detects presence and prints OS-specific install instructions. | [github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks) |
 | **syft** | Optional SBOM/license inventory layer for `/dw-secure-audit`; advisory and non-blocking. `install-deps` detects presence and prints OS-specific install instructions. | [github.com/anchore/syft](https://github.com/anchore/syft) |
+| **qlty** | Primary complexity engine of `/dw-quality-gate` (cognitive + cyclomatic per function). Fair Source (BSL 1.1), free including commercial use. `install-deps` downloads the pinned release into `~/.dw/bin` and verifies its SHA-256. | [github.com/qltysh/qlty](https://github.com/qltysh/qlty) |
+| **lizard** | Complexity fallback for `/dw-quality-gate` (~30 languages, MIT). `install-deps` installs the pinned version into a private venv under `~/.dw` (needs Python 3). | [github.com/terryyin/lizard](https://github.com/terryyin/lizard) |
+| **jscpd** | Duplication engine for `/dw-quality-gate` (150+ formats, MIT), run as `npx -y jscpd@5`; `install-deps` warms the npx cache. | [github.com/kucherenko/jscpd](https://github.com/kucherenko/jscpd) |
 | **Docker + Docker Compose** | Required by `/dw-new-project` and `/dw-dockerize` for dev dependency seeding and image generation. `install-deps` detects presence and prints OS-specific install instructions — does not install automatically. | [docs.docker.com](https://docs.docker.com/engine/install/) |
 
 ## Options

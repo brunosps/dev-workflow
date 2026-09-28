@@ -213,7 +213,7 @@
       "name": "dw-simplification",
       "kind": "protocol",
       "tier": "specialty",
-      "owner": "dw-review,dw-brainstorm",
+      "owner": "dw-review,dw-brainstorm,dw-quality-gate",
       "trigger": "Refactor analysis, code smells, complexity, or behavior-preserving simplification",
       "expected_output": "Simplification target, risk, behavior-preserving checks, and recommendation.",
       "load_policy": "lazy-references",

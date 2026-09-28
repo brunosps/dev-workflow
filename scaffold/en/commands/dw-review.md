@@ -202,6 +202,7 @@ When available under `./.agents/skills/`, these are invoked as analytical suppor
 - `dw-review-rigor`: **ALWAYS** — owns the candidate pipeline (gate → refutation → disposition), de-duplication (same pattern in N files = 1 finding), severity ordering (critical → high → medium → low), verify-before-flag, skip-what-linter-catches, and signal-over-volume. The "Issues Found" table follows this discipline. In `--post-merge`, it also loads `references/composition-audit.md`.
 - `dw-verify`: **ALWAYS** — invoked before emitting `APPROVED` or `APPROVED WITH CAVEATS`. Without a VERIFICATION REPORT PASS (test + lint + build), verdict cannot be APPROVED.
 - `dw-secure-audit` (**Security Gate**): **ALWAYS for TS/Python/C#/Rust projects** — triggered here and the verdict is enforced. If the project's language is supported and a fresh `.dw/secure-audit/audit-summary.md` is missing OR has REJECTED status, the review verdict is **REJECTED** — no exception. The same gate is also a standalone command (`/dw-secure-audit`) and an explicit phase in `/dw-autopilot`. It now adds Semgrep SAST (diff) + gitleaks secrets on top of OWASP/Trivy/SCA.
+- `dw-quality-gate` (**Quality Gate**): **ALWAYS** — triggered here and the verdict is enforced. It measures the new code (complexity, duplication, new lint issues, coverage of changed lines) against each changed file's merge-base version, with thresholds read from the base branch. If a fresh `.dw/quality/quality-summary.md` is missing, stale, `REJECTED` or `UNMEASURED`, the review verdict is **REJECTED**. Also a standalone command (`/dw-quality-gate`) and an explicit phase in `/dw-autopilot`.
 - `security-review`: the OWASP diff-level skill the gate uses (injection, authz, secrets, SSRF, crypto — HIGH CONFIDENCE only). Reach for it directly when the diff touches auth, authorization, external input, upload, SQL, secrets, SSRF, XSS or another sensitive surface.
 - `dw-simplification`: use when the diff touches dense or twisty code — applies Chesterton's Fence, behavior-preserving refactor protocol, complexity metrics.
 - `dw-minimalism`: use when the diff adds code that may be over-built — flags speculative generality, single-caller helpers, premature abstraction, and YAGNI violations (the pre-generation counterpart to `dw-simplification`).
@@ -306,10 +307,10 @@ If MISSING > 0, the verdict suggests revisiting `/dw-plan tasks` to scope or `/d
    - For each principle, check diff for violations per the principle's Enforcement line.
    - Severity-graded: info → low, high → critical+REJECTED-unless-ADR, critical → critical+REJECTED-unless-ADR-with-approval.
 
-4. **Code quality** (via `dw-review-rigor` discipline):
+4. **Code quality** (via `dw-review-rigor` discipline). Run `/dw-quality-gate` (step 9) before this step when no fresh summary exists, so the numbers below are measured, not estimated:
    - SOLID violations.
-   - Cyclomatic / cognitive complexity (with `dw-simplification` thresholds).
-   - DRY violations (only when impact is meaningful — not premature deduplication).
+   - Cyclomatic / cognitive complexity (with `dw-simplification` thresholds). Cite the Quality Gate numbers (step 9) as evidence; do not re-estimate what it measured.
+   - DRY violations (only when impact is meaningful — not premature deduplication). The gate's clone list is the measured starting point.
    - Code smells (Fowler taxonomy).
    - For frontend data flow, dependency or quality-tooling changes, read `dw-ui-discipline/references/frontend-engineering.md` and the module's quality baseline/TechSpec. Inspect API generation/validation, import boundaries, duplicated business behavior, unreachable code and newly widened ignores. Execute adopted checks under `dw-verify`; an absent optional tool is a proposal, not an automatic rejection. Investigate mutation survivors when analysis is in scope; do not approve from a score alone. Report changes to CI enforcement separately from local test results.
 
@@ -331,6 +332,13 @@ If MISSING > 0, the verdict suggests revisiting `/dw-plan tasks` to scope or `/d
    - Trigger `/dw-secure-audit` against the diff (OWASP + Semgrep SAST + gitleaks + Trivy/SCA + supply-chain). It produces/refreshes `.dw/secure-audit/audit-summary.md`.
    - Latest scan must be present, fresh (post-last-edit), and not REJECTED. If language is supported and the audit is missing OR REJECTED → review verdict **REJECTED**. SECRET findings always block (no ADR escape).
    - The same gate is also runnable standalone (`/dw-secure-audit`) and is an explicit phase in `/dw-autopilot`; `/dw-generate-pr` re-enforces the verdict before the PR.
+
+9. **Quality Gate (`dw-quality-gate`, every language):**
+   - Trigger `/dw-quality-gate` against the same range (`--since <ref>` when the review uses it). It produces/refreshes `.dw/quality/quality-summary.md`.
+   - Latest summary must be present, fresh (no file outside `.dw/` changed since its `Head:` — see the gate's Freshness rule; review and bookkeeping artifacts under `.dw/` do not stale it, a `gate.json` change does), and neither `REJECTED` nor `UNMEASURED` → otherwise review verdict **REJECTED**. Pre-existing debt the diff only touches never blocks.
+   - **The gate's verdict is authoritative for this step.** Its blocking findings already passed refutation inside the gate; this review does not re-refute them or overturn a `REJECTED`. The only ways past it are a code change and a re-run, or a waiver in `.dw/quality/gate.json` that the gate itself applies.
+   - In the report, gate findings are listed once, de-duplicated against the complexity/DRY items of step 4 (same file + symbol = one finding, citing the gate's value), not pasted alongside them.
+   - `/dw-generate-pr` re-enforces the verdict and its freshness before the PR.
 
 ### Output
 
@@ -357,6 +365,7 @@ When both levels run, a consolidated report at `<target>/QA/review-consolidated.
 **Level 3 (Quality):** APPROVED | APPROVED WITH CAVEATS | REJECTED
 **Verification Report:** PASS
 **Security Audit:** PASS (or REJECTED with reasons)
+**Quality Gate:** APPROVED | APPROVED WITH CAVEATS (or REJECTED / UNMEASURED with reasons)
 **Constitution Compliance:** PASS (or violations listed)
 **Diff command:** git diff <effective-base-or-ref>...HEAD
 
@@ -394,6 +403,6 @@ When both levels run, a consolidated report at `<target>/QA/review-consolidated.
 - Both levels run by default unless flags specify otherwise. Most PRs need both.
 - The consolidated verdict is the single number to trust. Individual level reports drill down.
 - Findings are signal, not volume. `dw-review-rigor` enforces this.
-- Hard gates (verify, secure-audit, constitution high+critical) are non-negotiable. ADR is the only escape.
+- Hard gates (verify, secure-audit, quality-gate, constitution high+critical) are non-negotiable. Escapes are per gate and nowhere else: an ADR for constitution high+critical and for non-SECRET security findings; a `gate.json` waiver (with an ADR for HIGH) for the quality gate; none for SECRET or for verify.
 
 </system_instructions>

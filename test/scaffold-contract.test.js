@@ -296,3 +296,48 @@ test('the comparison doc does not claim a bundled command is user-invoked', () =
     }
   }
 });
+
+test('dw-quality-gate is registered and enforced by review, autopilot and generate-pr', () => {
+  for (const locale of ['en', 'pt-br']) {
+    const entry = COMMANDS[locale].find((cmd) => cmd.name === 'dw-quality-gate');
+    assert.ok(entry, `missing dw-quality-gate command registry entry for ${locale}`);
+    assert.ok(!entry.userInvoked, 'dw-quality-gate must stay model-invocable: review and autopilot call it');
+
+    const summary = '.dw/quality/quality-summary.md';
+    const review = read(`scaffold/${locale}/commands/dw-review.md`);
+    const pr = read(`scaffold/${locale}/commands/dw-generate-pr.md`);
+    const autopilot = read(`scaffold/${locale}/commands/dw-autopilot.md`);
+    const help = read(`scaffold/${locale}/commands/dw-help.md`);
+    const routing = read(`scaffold/${locale}/references/command-routing.md`);
+
+    for (const [name, body] of [['dw-review', review], ['dw-generate-pr', pr], ['dw-autopilot', autopilot]]) {
+      assert.ok(body.includes('/dw-quality-gate'), `${locale} ${name} must invoke /dw-quality-gate`);
+      assert.ok(body.includes(summary), `${locale} ${name} must read ${summary}`);
+    }
+    // UNMEASURED must block wherever the verdict is enforced, or a missing engine silently passes.
+    assert.ok(review.includes('`UNMEASURED`'), `${locale} dw-review must reject UNMEASURED`);
+    assert.ok(pr.includes('Hard gate 3 (quality)'), `${locale} dw-generate-pr must carry hard gate 3`);
+    assert.ok(pr.includes('`UNMEASURED`'), `${locale} dw-generate-pr must reject UNMEASURED`);
+    assert.match(autopilot, /^4\. .*`UNMEASURED`/m, `${locale} dw-autopilot must stop on UNMEASURED`);
+    assert.ok(help.includes('`/dw-quality-gate`'), `${locale} dw-help must list /dw-quality-gate`);
+    assert.ok(routing.includes('`/dw-quality-gate`'), `${locale} command-routing must route to /dw-quality-gate`);
+  }
+
+  // /dw-analyze-project seeds the report and baseline, but stays documentation-only:
+  // it must pass --no-write-config and must not install engines.
+  for (const locale of ['en', 'pt-br']) {
+    const analyze = read(`scaffold/${locale}/commands/dw-analyze-project.md`);
+    const gate = read(`scaffold/${locale}/commands/dw-quality-gate.md`);
+    assert.ok(analyze.includes('/dw-quality-gate --full --no-write-config'), `${locale} dw-analyze-project must run the full report without writing config`);
+    assert.ok(analyze.includes('/dw-quality-gate --update-baseline --no-write-config'), `${locale} dw-analyze-project must seed the baseline on a clean base branch`);
+    assert.ok(analyze.includes('## Quality Baseline'), `${locale} dw-analyze-project must record the Quality Baseline in index.md`);
+    assert.match(analyze, /### (Step|Passo) 5\.2/, `${locale} dw-analyze-project must carry Step 5.2`);
+    assert.ok(gate.includes('`--no-write-config`'), `${locale} dw-quality-gate must define --no-write-config`);
+    assert.ok(gate.includes('/dw-analyze-project'), `${locale} dw-quality-gate must name its analyze-project caller`);
+  }
+
+  const tools = read('scaffold/skills/dw-simplification/references/quality-gate-tools.md');
+  for (const token of ['qlty metrics', 'COMPONENT_TYPE_FUNCTION', 'lizard --csv', 'npx -y jscpd@5', 'lcov', 'baseline.json', 'full-report.json']) {
+    assert.ok(tools.includes(token), `quality-gate-tools.md missing ${JSON.stringify(token)}`);
+  }
+});

@@ -99,6 +99,7 @@ In the formal Level 3 review (post-Level 2 chain from `dw-review-implementation`
 - `references/behavior-preserving.md` — characterization tests, refactor with test gate, rollback patterns, codemod tooling per language.
 - `references/deep-modules.md` — high-leverage modules behind small interfaces; deletion test, locality, leverage, seam, adapter diagnostic; anti-patterns (shallow wrapper, god-module). Invoked by `/dw-refactor` and `/dw-brainstorm` refactor-audit mode.
 - `references/dead-code-tools.md` — per-ecosystem tools that surface SAFE-tier dead-code candidates (knip/depcheck/ts-prune for JS/TS; vulture/ruff for Python; deadcode/staticcheck for Go; cargo-udeps for Rust). Candidates still pass Chesterton's Fence before deletion.
+- `references/quality-gate-tools.md` — deterministic engines for `/dw-quality-gate` (qlty, lizard, jscpd, coverage reports): commands, output parsing, new-code line mapping, `baseline.json` shape.
 
 ## Inspired by
 

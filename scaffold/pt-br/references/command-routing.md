@@ -46,6 +46,7 @@ Aplique primeiro as regras de roteamento da raiz. Consulte este catálogo soment
 | "Redesign dessa UI" / "Audita e entrega novo design" | `/dw-redesign-ui "<target>"` |
 | "Audita dependências" / "Estamos atrasados em pacotes?" | `/dw-secure-audit --plan` |
 | "Scan de vulnerabilidades" / "Check de segurança" | `/dw-secure-audit` |
+| "Quality gate" / "Mede complexidade e duplicação" / "Tipo SonarQube" | `/dw-quality-gate` (`--full` para o relatório completo do projeto) |
 | "Analisa esse projeto" / "Gera rules" | `/dw-analyze-project` |
 | "Abre um novo projeto" / "Bootstrap de stack" | `/dw-new-project` |
 | "Dockeriza isso" / "Adiciona docker-compose" | `/dw-dockerize` |

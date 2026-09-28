@@ -11,6 +11,8 @@ const INGESTING_COMMANDS = [
   'dw-review',
   'dw-bugfix',
   'dw-secure-audit',
+  'dw-quality-gate',
+  'dw-autopilot',
   'dw-find-skills',
   'dw-install-aws-skills',
   'dw-install-azure-skills',

@@ -28,6 +28,7 @@ As rules geradas por este comando são consumidas por:
 - `/dw-review --code-only` -- lê rules para verificações de conformidade
 - `/dw-refactor` -- lê rules para contexto do projeto
 - `/dw-plan techspec` -- lê rules para decisões de arquitetura
+- `/dw-quality-gate` -- lê o Quality Baseline; o Passo 5.2 semeia `.dw/quality/baseline.json` (a referência de tendência) quando roda na branch base
 
 <critical>NUNCA modifique código fonte, apenas leia e documente</critical>
 <critical>Gere os arquivos de rules em .dw/rules/ na raiz do workspace</critical>
@@ -362,6 +363,28 @@ email.service → config, templates
 ```
 
 **Registrar nós críticos** em uma tabela com Ca, Ce, Instabilidade e classificação de risco.
+
+### Passo 5.2: Relatório de Qualidade Medido (`/dw-quality-gate --full`)
+
+Os antipatterns e a topologia acima vêm da leitura do código; este passo mede. Rode
+`/dw-quality-gate --full --no-write-config` uma vez para o workspace inteiro. Ele só grava em `.dw/quality/`
+(`full-report.md`, `full-report.json`) e, com `--no-write-config`, nunca cria `.qlty/qlty.toml` — sem config do
+qlty existente, a complexidade cai para o lizard. Quando a branch atual é a branch base, nenhum arquivo fora de `.dw/` tem mudança não
+commitada (a saída deste próprio comando em `.dw/intel/` e `.dw/rules/` não conta) e `.dw/quality/baseline.json`
+não existe, rode `/dw-quality-gate --update-baseline --no-write-config` no lugar: mesma medição, e ainda semeia o
+baseline contra o qual os próximos relatórios `--full` medem a tendência.
+
+Este comando não instala engines (o jscpd roda via `npx`, que pode preencher o cache do npx). Se o relatório vier com engines `skipped (not installed)`, mantenha o relatório
+parcial, registre quais camadas não foram medidas e aponte para `npx @brunosps00/dev-workflow install-deps`.
+Engine ausente nunca interrompe a análise.
+
+Use o relatório como evidência, não como fonte para copiar:
+- **Antipatterns do Passo 5:** cite os valores medidos para god files, funções complexas e lógica duplicada (as funções e clones do topo do relatório) em vez de estimar.
+- **Mapa de concerns do Passo 9:** Hot Spots e Código Hostil partem do relatório (itens 1 e 4 abaixo).
+- **`.dw/rules/index.md`:** adicione uma seção `## Quality Baseline` com a tabela de visão geral do relatório (funções acima do limite, % duplicado, erros de lint, cobertura ou `not measured`), as engines usadas, a data e o SHA, e um link para `.dw/quality/full-report.md`.
+- **`.dw/rules/<module>.md`:** em Antipatterns, as funções acima do limite e os clones do módulo, com referência de arquivo.
+
+Não copie o backlog de dívida para `.dw/rules/`: ele vive no relatório e muda a cada execução.
 
 ### Passo 6: Detectar Padrões Git e Colaboração
 
@@ -733,7 +756,7 @@ Caso contrário (primeira execução), construa o arquivo do zero usando `.dw/te
 
 **Dados a coletar:**
 
-1. **Hot Spots — análise de churn.** Para cada módulo descoberto no Passo 5, compute a contagem de commits tocando arquivos do módulo nos últimos 90 dias (`git log --since="90 days ago" --name-only -- <module-path> | wc -l`). Módulos no top 20% por churn são candidatos. Cruze com `.dw/bugfixes/` (próximo item) — módulos que também aparecem lá são Hot Spots confirmados; o resto fica como "churn alto — verificar com o time."
+1. **Hot Spots — análise de churn.** Quando o Passo 5.2 produziu `.dw/quality/full-report.json`, parta dos hotspots dele (commits em 90 dias × complexidade máxima por arquivo) agregados por módulo, e use o comando de churn abaixo só para completar módulos que o relatório não cobriu. Para cada módulo descoberto no Passo 5, compute a contagem de commits tocando arquivos do módulo nos últimos 90 dias (`git log --since="90 days ago" --name-only -- <module-path> | wc -l`). Módulos no top 20% por churn são candidatos. Cruze com `.dw/bugfixes/` (próximo item) — módulos que também aparecem lá são Hot Spots confirmados; o resto fica como "churn alto — verificar com o time."
 
 2. **Histórico de Bugs Conhecidos — agregação de bugfixes.** Se `.dw/bugfixes/` existir, escaneie todo `SUMMARY.md` dentro. Para cada um, parseie a tabela `Arquivos Tocados`; agregue paths de arquivos pelo módulo top-level (ex: `src/auth/session.ts` -> `src/auth/`). Qualquer módulo com `>= 2` fixes históricos entra na seção Histórico de Bugs Conhecidos com contagem e slugs recentes.
 
@@ -746,7 +769,7 @@ Caso contrário (primeira execução), construa o arquivo do zero usando `.dw/te
 
 4. **Código Hostil.** Heurísticas para código que precisa de entendimento completo antes de modificar:
    - Regex literais com mais de 80 caracteres sem comentário explicativo.
-   - Funções acima de 100 linhas com complexidade ciclomática que resiste à leitura rápida (heurística aproximada: muitos `if`/`switch`/loops aninhados).
+   - Funções acima do limite de complexidade no relatório do Passo 5.2 (as do topo, com o valor medido). Sem relatório, use a heurística aproximada: funções acima de 100 linhas com muitos `if`/`switch`/loops aninhados.
    - Código manual de transação/locking fora da camada idiomática de um ORM.
    - Serializadores/parsers custom (ex: JSON, CSV, formatos binários escritos a mão) sem arquivo de teste correspondente.
    Sinalize candidatos e deixe o usuário confirmar.
@@ -827,6 +850,7 @@ Este passo é aditivo e reversível; nunca edita código de componente, só docu
 - [ ] Nenhum secret exposto
 - [ ] Convenções de teste documentadas (framework, padrões, cobertura)
 - [ ] Step 8 (constitution) oferecido e resolvido (A/B/C)
+- [ ] Passo 5.2 rodou `/dw-quality-gate --full --no-write-config` (ou `--update-baseline` numa branch base limpa); `## Quality Baseline` no index.md cita o relatório, e camadas não medidas estão nomeadas
 - [ ] Step 9 (mapa de concerns) apresentou candidatos, aguardou aprovação, escreveu `.dw/rules/concerns.md` (ou anotou que não há sinais)
 - [ ] Passo 10 (autoridade de design) rodou para projetos frontend: autoridade existente respeitada, ou `DESIGN.md` gerado a partir de tokens reais, ou bootstrap via curated-defaults recomendado
 - [ ] Blocos com marker preserved em concerns.md mantidos verbatim no refresh

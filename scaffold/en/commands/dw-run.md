@@ -43,6 +43,7 @@ reports the exact question with the resume command (`/dw-run --resume`), and exi
 5. Concurrency is needed without approved agents/worktrees or a defined integration path.
 6. Merge, push or publication is reached without the applicable authorization.
 7. A floor invariant would have to be crossed (`.dw/references/invariants.md`).
+8. The review stays REJECTED on something a code correction cannot clear: a quality gate `UNMEASURED` (engines must be installed), a SECRET finding, or a finding that needs an ADR or a `gate.json` waiver — decisions that belong to the owner.
 
 In-scope findings are corrected without asking. A resume request already authorizes continuation — inspect
 saved state and the actual worktree instead of asking "continue?" again.

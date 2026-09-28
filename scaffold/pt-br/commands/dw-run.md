@@ -43,6 +43,7 @@ reporta a pergunta exata com o comando de retomada (`/dw-run --resume`) e sai `B
 5. Concorrência é necessária sem agentes/worktrees aprovados ou caminho de integração definido.
 6. Merge, push ou publicação é alcançado sem a autorização aplicável.
 7. Seria preciso cruzar uma invariante do piso (`.dw/references/invariants.md`).
+8. O review continua REPROVADO por algo que uma correção de código não resolve: quality gate `UNMEASURED` (é preciso instalar engines), finding SECRET, ou finding que exige ADR ou waiver no `gate.json` — decisões que são do dono.
 
 Findings dentro do escopo são corrigidos sem perguntar. Um pedido de retomada já autoriza a continuação —
 inspecione o estado salvo e o worktree real em vez de perguntar "continuo?" de novo.

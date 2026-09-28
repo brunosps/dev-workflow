@@ -57,15 +57,15 @@ Use `/dw-autopilot "desejo"` como gateway pra maior parte do trabalho. Comandos 
 
 ## Workflow em resumo
 
-`/dw-autopilot "desejo"` roda planejamento primeiro e para. Reinvoque para retomar via `/dw-goal`, Security Gate, commit e PR. Passo a passo:
+`/dw-autopilot "desejo"` roda planejamento primeiro e para. Reinvoque para retomar via `/dw-goal`, Security Gate, Quality Gate, commit e PR. Passo a passo:
 
 ```
-/dw-opportunities → /dw-brainstorm → /dw-plan → /dw-goal → /dw-secure-audit → /dw-commit → /dw-generate-pr
+/dw-opportunities → /dw-brainstorm → /dw-plan → /dw-goal → /dw-secure-audit → /dw-quality-gate → /dw-commit → /dw-generate-pr
 ```
 
 ## Comandos avançados / internos
 
-Passe `--advanced` pra ver internos (`dw-adr`, `dw-intel`, `dw-secure-audit`, `dw-goal`, `dw-find-skills`, `dw-update`, `dw-subtask-start`, `dw-subtask-complete`, `dw-subtask-resume`) — usualmente invocados por outros comandos.
+Passe `--advanced` pra ver internos (`dw-adr`, `dw-intel`, `dw-secure-audit`, `dw-quality-gate`, `dw-goal`, `dw-find-skills`, `dw-update`, `dw-subtask-start`, `dw-subtask-complete`, `dw-subtask-resume`) — usualmente invocados por outros comandos.
 ```
 
 ## Modo advanced — flag `--advanced`
@@ -77,13 +77,14 @@ ALSO show:
 
 Auto-invocados por comandos primários mas disponíveis standalone.
 
-## Tier 4 — Hidden (9)
+## Tier 4 — Hidden (10)
 
 | Comando | O que | Invocado por |
 |---------|-------|--------------|
 | `/dw-adr "decisão"` | Registra um ADR em `.dw/spec/<prd>/adrs/`. | `/dw-plan techspec --council`, desvios de constitution |
 | `/dw-intel "pergunta"` | Query de codebase intel; `--build` (re)indexa `.dw/intel/`. | `/dw-plan`, `/dw-review`, `/dw-bugfix` |
 | `/dw-secure-audit` | OWASP + Semgrep SAST + gitleaks secrets + Trivy SCA/IaC + lockfile + supply-chain scan. Hard gate. Flags: `--scan-only`, `--plan`, `--execute`. | `/dw-review`, `/dw-autopilot`, `/dw-generate-pr` |
+| `/dw-quality-gate` | Gate medido sobre o código novo do diff: complexidade, duplicação, novos issues de lint, cobertura das linhas alteradas (qlty ou lizard para complexidade, jscpd para duplicação), contra a versão de cada arquivo alterado no merge-base; os limites vêm da branch base. Hard gate. Flags: `--since`, `--full` (relatório completo do projeto), `--update-baseline`, `--scan-only`. | `/dw-review`, `/dw-autopilot`, `/dw-generate-pr` |
 | `/dw-goal "<objetivo>"` | Contrato de objetivo duravel com `.dw/goals/`; faz ponte com `/goal` nativo do Codex quando disponivel. | `/dw-autopilot` apos planejamento |
 | `/dw-find-skills "query"` | Busca npx skills ecosystem, valida, instala. | manual ao estender bundle |
 | `/dw-update` | Atualiza dev-workflow pro último release npm com snapshot rollback, depois roda ações pós-update listadas (`/dw-analyze-project`, `/dw-intel --build`, `/dw-harness-audit`, `/dw-skill-health`) quando aplicável. | manutenção manual |
@@ -126,6 +127,7 @@ Auto-invocados por comandos primários mas disponíveis standalone.
 | `oportunidades de seguranca`, `ideias de hardening`, `melhorar seguranca` | `/dw-opportunities "security"` |
 | `security`, `vulnerabilidades`, `cve`, `deps` | `/dw-secure-audit` |
 | `secret`, `sast`, `semgrep`, `gitleaks`, `trivy` | `/dw-secure-audit` |
+| `qualidade`, `quality gate`, `sonar`, `sonarqube`, `complexidade`, `duplicação`, `code smell`, `cobertura`, `hotspots` | `/dw-quality-gate` (`--full` para o relatório completo do projeto) |
 | `adr`, `decisão` | `/dw-adr` |
 | `docker`, `compose`, `container` | `/dw-dockerize` |
 | `new project`, `bootstrap`, `scaffold` | `/dw-new-project` |
@@ -144,7 +146,7 @@ Sem match: surface padrão + nota.
 - Use `/dw-autopilot "o que você quer"`; aprove a matriz de tasks/executores e continue até entrega validada. Publicação segue autorização existente.
 
 **P: Tenho que usar `/dw-autopilot`?**
-- Não. Pipeline granular dá controle a cada step, com `/dw-goal` quando quiser executar run/review/QA/review como objetivo duravel, seguido por `/dw-secure-audit`, `/dw-commit` e `/dw-generate-pr`.
+- Não. Pipeline granular dá controle a cada step, com `/dw-goal` quando quiser executar run/review/QA/review como objetivo duravel, seguido por `/dw-secure-audit`, `/dw-quality-gate`, `/dw-commit` e `/dw-generate-pr`.
 
 **P: Só quero corrigir um bug.**
 - `/dw-bugfix "<descrição>"`. Tria, 3 perguntas, fixa ou roteia.
@@ -157,6 +159,9 @@ Sem match: surface padrão + nota.
 
 **P: Onde entra segurança?**
 - `/dw-review` auto-invoca `/dw-secure-audit` para stacks suportadas; `/dw-autopilot` trata como gate nomeado antes de commit/PR; `/dw-generate-pr` reforça o summary aprovado mais recente.
+
+**P: Existe um quality gate estilo SonarQube?**
+- `/dw-quality-gate` mede o código novo do diff com engines locais (sem servidor) e bloqueia o que o diff introduz ou piora; dívida antiga nunca bloqueia. `/dw-review` invoca, `/dw-autopilot` roda ao lado do Security Gate e `/dw-generate-pr` reforça. `--full` grava o relatório completo do projeto (distribuições, hotspots, tendência, backlog de dívida priorizado). O `/dw-analyze-project` roda o `--full` (Passo 5.2) e registra o Quality Baseline nas rules. O `install-deps` instala as engines.
 
 **P: Como descubro o que fazer depois?**
 - `/dw-opportunities` escaneia o projeto instalado e sugere oportunidades de produto, UX, automacao, refactor e seguranca.
