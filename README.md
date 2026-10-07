@@ -16,7 +16,7 @@ This will:
 5. Install bundled skills (`dw-verify`, `dw-memory`, `dw-review-rigor`, `dw-ui-discipline`, `dw-testing-discipline`, `security-review`, etc.) to `.agents/skills/`
 6. Generate skill wrappers and project agents for Claude Code, Codex, Copilot, and OpenCode
 7. Configure MCP servers (Context7 + Playwright)
-8. Install enforcement hooks (git guardrails + a `SessionEnd` token-cost tracker → `.dw/metrics/costs.jsonl`) + a statusline (branch · active spec · minimalism mode · today's estimated spend) into `.claude/settings.json` (merge-aware — your own hooks/statusline are never overwritten)
+8. Install enforcement hooks (git guardrails + a `SessionEnd` token-cost tracker → `.dw/metrics/costs.jsonl`) + a statusline (branch · active spec · minimalism mode · today's estimated spend) into `.claude/settings.json`, and the git guardrails into `.codex/hooks.json` for Codex (merge-aware — your own hooks/statusline are never overwritten; Codex runs project hooks only after you trust them)
 
 > **Compozy-inspired disciplines.** Since 0.5.0, dev-workflow bundles three primitives — `dw-verify`, `dw-memory`, `dw-review-rigor` — adapted from the [Compozy](https://github.com/compozy/compozy) project and invoked internally by existing commands. See [docs/compozy-integration.md](docs/compozy-integration.md) for what was ported and what was not.
 

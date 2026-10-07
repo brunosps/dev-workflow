@@ -92,7 +92,7 @@ test('the automode contract refuses a fifth status and says why', () => {
 test('the floor is honest about where the hook does not reach', () => {
   for (const locale of ['en', 'pt-br']) {
     const floor = read(`scaffold/${locale}/references/invariants.md`);
-    // git-guardrails.mjs fails open in four places and only covers Bash under Claude Code.
+    // git-guardrails.mjs fails open in four places and only covers Bash under Claude Code and Codex.
     // A floor that implies the hook enforces it would be claiming a guarantee we do not have.
     assert.match(floor, /git-guardrails\.mjs/, `${locale} must name the partial implementation`);
     assert.match(floor, /fails open|falha aberto/, `${locale} must say the hook fails open`);

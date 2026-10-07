@@ -50,8 +50,9 @@ it is the boundary working. An agent that cannot destroy work cannot be talked i
 
 **How this is enforced:** partly by `.dw/scripts/hooks/git-guardrails.mjs`, a `PreToolUse` hook that denies
 these patterns on Bash. The hook is **one implementation, not the source of the rule**, and it has two
-known limits: it only covers Bash under Claude Code, and it **fails open** — a parse error or a runtime
-fault allows the command through. So the rule binds even where the hook does not run.
+known limits: it only covers Bash under Claude Code and Codex (Codex runs it only once the project and the
+hook are trusted), and it **fails open** — a parse error or a runtime fault allows the command through. So
+the rule binds even where the hook does not run.
 
 Two operations are deliberately left out of the hook and live only here: `rebase` and `commit --amend`.
 Both are routine on unpushed work, and a command line cannot tell pushed from unpushed. Denying them would

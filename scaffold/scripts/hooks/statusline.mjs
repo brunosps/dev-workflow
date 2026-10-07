@@ -3,9 +3,11 @@
  * dev-workflow statusline — Claude Code statusLine command.
  *
  * Prints one line: git branch · dev-workflow active spec (if any) · minimalism
- * mode. Reads the session payload (JSON on stdin) for the working dir; falls
- * back to process.cwd(). Fails SAFE — any error prints a minimal line so the
- * statusline never breaks the session.
+ * mode. Reads the session payload (JSON on stdin): the branch comes from the
+ * current dir, the .dw/ state from the project dir, since the shell may sit in a
+ * subdirectory. Falls back to $CLAUDE_PROJECT_DIR, then process.cwd(). Fails
+ * SAFE — any error prints a minimal line so the statusline never breaks the
+ * session.
  *
  * Minimalism mode is read from .dw/minimalism.json (see the dw-minimalism skill).
  */
@@ -93,23 +95,24 @@ function activeSpec(cwd) {
 
 async function main() {
   let cwd = process.cwd();
+  let root = process.env.CLAUDE_PROJECT_DIR || '';
   try {
     const payload = JSON.parse(await readStdin());
-    cwd =
-      (payload && payload.workspace && payload.workspace.current_dir) ||
-      (payload && payload.cwd) ||
-      cwd;
+    const workspace = (payload && payload.workspace) || {};
+    cwd = workspace.current_dir || (payload && payload.cwd) || cwd;
+    root = workspace.project_dir || root;
   } catch {
-    /* use process.cwd() */
+    /* use $CLAUDE_PROJECT_DIR / process.cwd() */
   }
+  root = root || cwd;
 
   const parts = [];
   const branch = gitBranch(cwd);
   if (branch) parts.push(`⎇ ${branch}`);
-  const spec = activeSpec(cwd);
+  const spec = activeSpec(root);
   if (spec) parts.push(spec);
-  parts.push(`min:${minimalismMode(cwd)}`);
-  const cost = costToday(cwd);
+  parts.push(`min:${minimalismMode(root)}`);
+  const cost = costToday(root);
   if (cost) parts.push(cost);
 
   process.stdout.write(`dw · ${parts.join(' · ')}`);

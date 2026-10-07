@@ -49,8 +49,9 @@ funcionando. Um agente que não consegue destruir trabalho não pode ser convenc
 
 **Como isso é verificado:** em parte pelo `.dw/scripts/hooks/git-guardrails.mjs`, um hook `PreToolUse` que
 nega esses padrões no Bash. O hook é **uma implementação, não a fonte da regra**, e tem dois limites
-conhecidos: só cobre Bash no Claude Code, e **falha aberto** — erro de parse ou exceção em runtime deixa o
-comando passar. Então a regra obriga mesmo onde o hook não roda.
+conhecidos: só cobre Bash no Claude Code e no Codex (o Codex só o roda depois que o projeto e o hook são
+marcados como confiáveis), e **falha aberto** — erro de parse ou exceção em runtime deixa o comando passar.
+Então a regra obriga mesmo onde o hook não roda.
 
 Duas operações ficam de fora do hook de propósito e vivem só aqui: `rebase` e `commit --amend`. As duas são
 rotina em trabalho não pushado, e uma linha de comando não distingue pushado de não pushado. Negá-las

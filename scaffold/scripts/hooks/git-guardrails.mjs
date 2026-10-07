@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * dev-workflow git guardrails — Claude Code PreToolUse hook (matcher: Bash).
+ * dev-workflow git guardrails — PreToolUse hook (matcher: Bash) for Claude Code
+ * (.claude/settings.json) and Codex (.codex/hooks.json); both send the same payload.
  *
  * Blocks irreversible git commands (force push, hard reset, clean -f, branch
  * deletion, remote branch deletion). Everything else is allowed.
@@ -76,7 +77,7 @@ export function evaluatePayload(input) {
           permissionDecision: 'deny',
           permissionDecisionReason:
             `Blocked by dev-workflow git guardrails: ${rule.why}. ` +
-            `If this is intentional, run it yourself outside the agent, or adjust .claude/settings.json hooks.`,
+            `If this is intentional, run it yourself outside the agent, or adjust the hook in .claude/settings.json or .codex/hooks.json.`,
         },
       };
     }
