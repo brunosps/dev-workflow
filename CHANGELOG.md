@@ -10,6 +10,35 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > those versions were released, so they are summaries of what shipped, not
 > contemporaneous release notes. `git log` remains the authoritative record.
 
+## [2.6.0] — 2026-10-07
+
+### Added
+
+- **Git guardrails under Codex.** `init` and `update` also write the git-guardrails
+  `PreToolUse` hook to `.codex/hooks.json` — same payload and deny contract as Claude Code,
+  matcher `Bash`. It is the only hook Codex gets: the session-cost tracker parses Claude Code
+  transcripts and Codex has no statusLine command. Codex runs project hooks only after the
+  project and the hook are trusted. Merge-aware like the Claude side: a malformed
+  `.codex/hooks.json` is left untouched, and `uninstall` removes only our entry, deleting the
+  file when nothing else is left. `doctor` warns when the Codex guardrail is missing or
+  outdated.
+
+### Fixed
+
+- **Hooks stopped running whenever the shell left the project root.** The hook and statusLine
+  commands were cwd-relative (`node .dw/scripts/hooks/…`). Claude Code runs hooks in the
+  session's current directory, which follows every `cd`, so from any subdirectory they failed
+  with `Cannot find module` — and a failing `PreToolUse` hook is non-blocking, so Bash ran with
+  no git guardrail at all. In one real session, 843 of 1,243 Bash calls ran unguarded this way.
+  Commands now resolve `${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel || pwd)}`:
+  Claude Code exports the variable to hooks, and Codex, which exports none, gets the git root.
+  `update` rewrites the old entries in place, and `doctor` reports a cwd-relative guardrail as
+  an issue.
+- The statusline read `.dw/` state (active spec, minimalism mode, today's spend) from the
+  current directory. It now reads it from the payload's `workspace.project_dir`.
+- The guardrail's deny message pointed only at `.claude/settings.json`; it now names
+  `.codex/hooks.json` too, as does the invariants floor.
+
 ## [2.5.0] — 2026-09-28
 
 ### Added
