@@ -136,6 +136,14 @@ const FILES = {
     en: 'scaffold/en/commands/dw-generate-pr.md',
     pt: 'scaffold/pt-br/commands/dw-generate-pr.md',
   },
+  qa: {
+    en: 'scaffold/en/commands/dw-qa.md',
+    pt: 'scaffold/pt-br/commands/dw-qa.md',
+  },
+  redesignUi: {
+    en: 'scaffold/en/commands/dw-redesign-ui.md',
+    pt: 'scaffold/pt-br/commands/dw-redesign-ui.md',
+  },
   findSkills: {
     en: 'scaffold/en/commands/dw-find-skills.md',
     pt: 'scaffold/pt-br/commands/dw-find-skills.md',

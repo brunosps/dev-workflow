@@ -12,6 +12,7 @@ As fontes, em ordem de análise:
 | [`DietrichGebert/ponytail`](https://github.com/DietrichGebert/ponytail) | MIT | Decision ladder, modos de intensidade, statusline, hooks |
 | [`akitaonrails/my-skills`](https://github.com/akitaonrails/my-skills) | **sem licença** | Fronteira de confiança, refutação de findings, auditoria de composição (seção 11) |
 | [`samsantosb/ship-it`](https://github.com/samsantosb/ship-it) | MIT | Piso de invariantes, bateria de evals, contrato de automode, chaos (seção 12) |
+| [`emilkowalski/skills`](https://github.com/emilkowalski/skills) ([aiforui.dev](https://aiforui.dev/skills)) | MIT | Motion, mobile web e stress de conteúdo em `dw-ui-discipline` (seção 15) |
 
 > Nota de rigor: este documento compara **padrões de design observáveis na estrutura
 > dos repositórios**. Métricas de popularidade/adoção citadas por terceiros não foram
@@ -609,6 +610,60 @@ saída de review virar estruturada, o ledger volta à mesa — e aí o argumento
 avulsa instalada por `npx skills add`, não uma de 27 competindo por atenção no mesmo contexto. Orçamentos
 diferentes por arquitetura diferente.
 
+### 15. Motion, mobile web e stress de conteúdo (de emilkowalski/skills, 2026-11-09)
+
+Fonte: [`emilkowalski/skills`](https://github.com/emilkowalski/skills) (MIT © 2026 Emil Kowalski), publicado
+em [aiforui.dev/skills](https://aiforui.dev/skills) como material de apoio do curso "AI for UI". São 17 skills
+só de markdown (sem scripts), quase todas de animação e acabamento de UI, instaláveis com
+`npx skills add emilkowalski/skills`. Lidos na fonte: `emil-design-eng`, `review-animations` (+ `STANDARDS.md`),
+`animation-performance`, `remove-animations`, `break-ui` (+ `CATALOG.md`), `mobile-native`, `prototype`,
+`improve-animations`, `gestures` e os dois cheatsheets.
+
+**Diagnóstico.** O `dw-ui-discipline` já cobria grounding, anti-slop, WCAG, matriz de estados e responsivo. As
+lacunas estavam em três pontos: (1) nada testava a UI com **dados** de pior caso — a matriz enumera estados,
+não o conteúdo dentro deles, e o `/dw-qa` só capturava 375px e 1440px; (2) o `motion.md` (52 linhas, vindo do
+impeccable) não tinha filtro de frequência e **mandava usar `ease-in` na saída**, o oposto da regra upstream,
+além de se contradizer sobre reduced motion; (3) o `responsive.md` não tratava o comportamento de plataforma
+mobile, e citava `env(safe-area-inset-*)` sem o `viewport-fit=cover` que faz o valor deixar de ser zero.
+
+**Adotado:**
+
+1. **`references/content-stress.md`** (de `break-ui` + `CATALOG.md`) — catálogo de valores de pior caso
+   plausíveis ou tirados do schema, tabela de assinaturas de falha (sintoma → causa → correção), a regra
+   wrap/truncar no fim/truncar no meio/clamp por campo, e as checagens de ambiente (largura real do container,
+   320px, zoom de 200%, dark, RTL, touch). Adaptações: a injeção segue a ordem mocks do projeto → `page.route()`
+   no teste → switch dev-only, porque o `/dw-qa` não edita código de produto; Broken/Ugly/Fragile mapeiam para
+   high/medium/low; e entrou uma lista de sinais estáticos para o `/dw-review`, que não renderiza.
+2. **`references/motion.md` reescrito** (de `emil-design-eng`, `review-animations`/`STANDARDS.md`,
+   `animation-performance`, `remove-animations`) — filtro de frequência antes da curva (teclado e 100+/dia não
+   animam), tabela de easing com **`ease-in` proibido em UI**, curvas fortes como default quando o projeto não
+   tem tokens, durações por elemento com teto de 300ms, física (`scale(0)` proibido, `transform-origin` no
+   gatilho com modal isento, `:active` com `scale(0.97)`), transitions em vez de keyframes para o que é
+   disparado rápido, timing assimétrico, tiers de custo por propriedade, `transition: all` proibido,
+   `will-change` só depois de medir, reduced motion como "menos e mais suave, não zero", o filtro de remoção com
+   seus riscos (estado inicial `opacity: 0` que fica para trás, código que espera `transitionend`, etc.) e 13
+   gatilhos de revisão consumidos pelo `/dw-review`.
+3. **`references/responsive.md`, seção "Mobile platform fixes"** (de `mobile-native`) — hover gated por
+   `(hover: hover) and (pointer: fine)`, tap highlight, `dvh`/`svh`, inputs com 16px, `touch-action`,
+   `overscroll-behavior`, safe areas com `viewport-fit=cover`, `user-select` só em controles, `theme-color` por
+   esquema, e a regra de que nada disso se verifica em emulação.
+4. **`accessibility-floor.md`** — item 11 (zoom nunca desabilitado; conteúdo sobrevive a 200%), item 10
+   reescrito para "mais suave, não zero", e o exemplo Tailwind trocado de `transition-all` para
+   `transition-transform`.
+5. **Comandos (EN/PT):** `/dw-qa` roda o passe de content stress no modo UI e lista o que precisa de aparelho
+   real; `/dw-review` checa motion contra os gatilhos e dados renderizados contra os sinais estáticos;
+   `/dw-redesign-ui` exige que as direções divirjam num eixo nomeado (de `prototype`: "três tons da mesma ideia
+   desperdiçam o seletor") e roda o content stress no passo de validação.
+
+**Decisão sobre springs.** O impeccable proibia bounce; o Emil recomenda spring com bounce 0.1–0.3. Decisão do
+dono: spring liberado **só em motion dirigido por gesto** (drag com momentum, drag-to-dismiss, swipe); curvas
+com overshoot continuam proibidas no resto da UI, e o `ui-slop-detect` segue flagando `bounce-easing`.
+
+**Adaptado:** o upstream bloqueia o review em qualquer gatilho; aqui os gatilhos viram candidatos do
+`dw-review-rigor` (medium por padrão, high em ação de teclado/100+ por dia), porque REJECTED no `/dw-review` é
+reservado a hard gates. O gatilho upstream "entrada só com fade, sem transform inicial" ficou de fora: contradiz
+a tabela de redução do próprio `remove-animations`, que reduz entradas frequentes a opacity pura.
+
 ## O que NÃO foi portado (e por quê)
 
 1. **`CONTEXT.md` na raiz (mattpocock)** — a *disciplina* de domain-modeling FOI adotada (seção 5 acima), mas o
@@ -640,6 +695,18 @@ diferentes por arquitetura diferente.
    criado. Decisão explícita do dono: o pipeline do dev-workflow termina no PR. A recomendação de semver
    do `--post-merge` é uma linha de relatório, e `test/post-merge-audit.test.js` transforma isso em gate —
    os comandos não podem conter `git tag`, `npm publish`, `npm version` nem `git push --tags`.
+10. **Skills de nicho do emilkowalski/skills** — `animate-expo` (React Native), `ask-sonner` (biblioteca
+    específica), `write-swift` e `apple-design`/`choreograph`/`animation-vocabulary` (conteúdo de ofício sem
+    lacuna de pipeline correspondente). Ficam a um `npx skills add emilkowalski/skills --skill <nome>` para
+    quem precisar.
+11. **`pick-ui-library` (emilkowalski)** — lista curada pessoal de bibliotecas. Conflita com o
+    `dw-search-first` e o `dw-source-grounding`, que exigem verificar a dependência na fonte em vez de herdar
+    a preferência de alguém.
+12. **Harness do `prototype` e planos do `improve-animations` (emilkowalski)** — a rota isolada com seletor
+    de variantes mudaria o fluxo do `/dw-redesign-ui` (fica como follow-up; só a regra do eixo nomeado
+    entrou), e a pasta `plans/` com subagentes duplica o `/dw-plan` → `/dw-run`.
+13. **Formatos de saída do emilkowalski** — a resposta fixa de uma linha na invocação vazia e a tabela
+    Before/After/Why. O Structured Return e o formato do `dw-review-rigor` já cobrem.
 
 ## Mapeamento de arquivos
 
@@ -679,6 +746,10 @@ diferentes por arquitetura diferente.
 | Skill de chaos | `scaffold/skills/dw-chaos-engineering/` + `scaffold/skill-registry.json` | samsantosb/ship-it (MIT) |
 | Decisões limitadas | `scaffold/skills/dw-llm-eval/references/bounded-decisions.md` + cruzamento em `judge-calibration.md` | Jev (TypeSafe), Avi Chawla, laya-mlx (Apache-2.0) — só o princípio |
 | Contrato por veredicto + degradação | `scaffold/skills/dw-review-rigor/references/refutation-pass.md` + `security-review/references/review-process-detail.md` | cloudflare/security-audit-skill (MIT) |
+| Stress de conteúdo | `scaffold/skills/dw-ui-discipline/references/content-stress.md` + `scaffold/{en,pt-br}/commands/dw-qa.md` + `dw-redesign-ui.md` | emilkowalski/skills `break-ui` (MIT) |
+| Motion | `scaffold/skills/dw-ui-discipline/references/motion.md` + gatilhos em `scaffold/{en,pt-br}/commands/dw-review.md` | emilkowalski/skills `emil-design-eng`, `review-animations`, `animation-performance`, `remove-animations` (MIT) |
+| Mobile web | `scaffold/skills/dw-ui-discipline/references/responsive.md` + `accessibility-floor.md` §11 | emilkowalski/skills `mobile-native` (MIT) |
+| Eixo nomeado nas direções | `scaffold/{en,pt-br}/commands/dw-redesign-ui.md` (passo 4) | emilkowalski/skills `prototype` (MIT) |
 
 ## Segurança do update
 
@@ -709,6 +780,10 @@ Ambos os repositórios de referência são MIT. As adoções preservam os crédi
 - `samsantosb/ship-it` (MIT © Samuel Santos) — contrato de guardrails em duas camadas, bateria de
   validação, contrato de autonomia e a skill de chaos, na base do `invariants.md`, do `evals/`, do
   `automode.md` e do `dw-chaos-engineering`. Crédito preservado no cabeçalho de cada arquivo adotado.
+- `emilkowalski/skills` (MIT © 2026 Emil Kowalski) — catálogo de pior caso, assinaturas de falha, regras de
+  motion e correções de plataforma mobile, na base de `content-stress.md`, do `motion.md` reescrito e da seção
+  mobile do `responsive.md`. Tabelas e valores condensados e adaptados (não copiados na íntegra); crédito e
+  licença no cabeçalho de cada reference. O `motion.md` mantém também o crédito ao impeccable (Apache-2.0).
 - `akitaonrails/my-skills` — **sem licença declarada (all rights reserved)**. Apenas a técnica foi
   adaptada, reescrita na nossa voz e no nosso vocabulário (`needs-validation`, candidate pipeline,
   Structured Return, `.dw/**`); nenhum texto, snippet, tabela, nome de arquivo ou estrutura de headings do

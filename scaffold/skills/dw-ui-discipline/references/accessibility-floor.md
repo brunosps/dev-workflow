@@ -152,23 +152,33 @@ Screen readers switch pronunciation based on this.
 
 ### 10. Reduced motion respect
 
-Honor `prefers-reduced-motion`:
+Honor `prefers-reduced-motion`. It means fewer and gentler animations, not zero: drop movement (slide,
+scale, parallax), keep the opacity/color changes that show a state change.
 
 ```css
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+  .drawer { transition: opacity 200ms ease; transform: none; }
 }
 ```
 
 Or in Tailwind:
 ```html
-<div className="transition-all motion-reduce:transition-none">
+<div className="transition-transform motion-reduce:transition-none">
 ```
 
+A global `animation-duration: 0.01ms !important` reset is an acceptable project-wide fallback, as long as
+every state change stays visible. Details in `motion.md` §7.
+
 Vestibular disorders trigger on parallax, large slide-ins, infinite scroll animations.
+
+### 11. Zoom is never disabled
+
+`user-scalable=no` and `maximum-scale=1` in the viewport meta block pinch-zoom for low-vision users (WCAG
+1.4.4 Resize Text). They are usually added to stop iOS zooming into inputs; fix the cause instead —
+inputs at `font-size: 16px` or more (`responsive.md`, "Mobile platform fixes").
+
+Content must also survive **200% browser zoom** without clipping or overlapping: fixed heights on text
+boxes are the usual culprit (`content-stress.md`, Step 4).
 
 ## Verification recipes
 
@@ -195,8 +205,9 @@ Run on every PR. Block merge on violations.
 1. Open the changed page.
 2. Tab through with keyboard only. Verify focus visible at every stop.
 3. Run axe DevTools, fix violations.
-4. Toggle prefers-reduced-motion in DevTools rendering panel. Verify animations stop.
-5. Test with screen reader (VoiceOver on Mac, NVDA on Windows) on at least one critical flow.
+4. Toggle prefers-reduced-motion in DevTools rendering panel. Verify movement stops and state changes stay visible.
+5. Zoom the page to 200%. Verify nothing clips, overlaps or becomes unreachable.
+6. Test with screen reader (VoiceOver on Mac, NVDA on Windows) on at least one critical flow.
 
 ### Spot checks
 
@@ -221,5 +232,6 @@ LLM-produced UI commonly fails on:
 - `outline: none` with no replacement focus state.
 - Modals that trap focus only on success path, not on error.
 - Auto-playing carousels with no pause control.
+- `user-scalable=no` / `maximum-scale=1` in the viewport meta.
 
 `/dw-review --code-only` runs axe-style checks on the diff for these.

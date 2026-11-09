@@ -36,7 +36,9 @@ Adicionadas a `dw-ui-discipline/references/` (conteúdo autoral creditando a pro
 tabela "Required reading by context" do `SKILL.md`:
 - `color-oklch.md` — OKLCH, tinted neutrals, escalas, dark mode, contraste.
 - `type-scale.md` — modular scale, pairing, measure/line-length, fluid type.
-- `motion.md` — easing (anti-bounce), durações, stagger, `prefers-reduced-motion`.
+- `motion.md` — easing (anti-bounce), durações, stagger, `prefers-reduced-motion`. Reescrito em 2026-11 a partir
+  de `emilkowalski/skills`: `ease-in` deixou de ser a regra de saída e spring ficou liberado só em gestos
+  (ver `skills-ecosystem-comparison.md`, seção 15).
 - `responsive.md` — mobile-first, breakpoints, container queries, fluid space, touch.
 - `ux-writing.md` — labels verb-led, mensagens de erro, empty states, microcopy.
 

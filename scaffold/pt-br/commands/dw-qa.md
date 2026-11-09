@@ -55,7 +55,7 @@ Quando disponíveis em `./.agents/skills/`, invocadas operacionalmente:
 - `dw-llm-eval`: **(modo AI — quando invocado com `--ai`)** — roda reference dataset contra implementação atual. Computa precision@k / faithfulness / outcome accuracy. Loga JSONL em `QA/logs/ai/<feature>-<date>.jsonl`. Alerta em regressão >10% vs run anterior.
 - `dw-debug-protocol`: **(em modo `--fix` — SEMPRE)** — six-step triage (Reproduzir → Localizar → Reduzir → Fix Root Cause → Guardar → Verify End-to-End) pra cada bug detectado. Stop-the-line discipline; root-cause sobre symptom; regression test no mesmo commit atômico.
 - `vercel-react-best-practices`: (modo UI) quando risco de regressão React/Next.js suspeitado.
-- `dw-ui-discipline`: (modo UI) ao validar consistência de design — anti-slop catalog + WCAG accessibility floor.
+- `dw-ui-discipline`: (modo UI) ao validar consistência de design — anti-slop catalog + WCAG accessibility floor, mais o passe de content stress de `references/content-stress.md`.
 - `dw-chaos-engineering`: **(só por nome)** — passagem adversarial sobre uma mudança cujos testes normais já passam. Peça depois do QA verde, quando resiliência importa mais que cobertura; escreve só testes, roda local e tem teto de 3 rodadas. Nunca é invocada sozinha.
 - `dw-verify`: **(em modo `--fix` — SEMPRE)** — antes de marcar bug como `Fixed` ou `Closed`, requer VERIFICATION REPORT PASS (test + lint + build) E evidência de reteste (screenshot em UI, JSONL log em API, eval-run delta em AI).
 
@@ -92,7 +92,8 @@ Leia a baseline de qualidade/TechSpec do módulo afetado. Reutilize evidência v
    - Fluxos negativos (ações não autorizadas, input malformado).
    - Regressions (smoke check em surfaces adjacentes).
    - WCAG 2.2 accessibility per `dw-ui-discipline/references/accessibility-floor.md`.
-4. **Capturar evidência**: screenshots em 375px mobile + 1440px desktop, console logs, network HARs.
+   - Content stress per `dw-ui-discipline/references/content-stress.md` em toda surface que renderiza dado de usuário ou de API: mapear os campos renderizados e seus limites, montar uma fixture de pior caso realista (mais vazio, um item e 1.000+ linhas), injetá-la na fronteira de dados — fixtures/mocks do próprio projeto, ou `page.route()` no teste; nunca editando o componente — e checar na largura real do container, em 320px, com zoom de 200% e em dark mode/RTL quando o produto suporta. Cada quebra vai para `bugs.md` com o mapeamento de severidade da reference (Broken → high, Ugly → medium, Fragile → low). Comportamento de plataforma mobile (hover preso, zoom em input, safe areas) não reproduz em emulação: liste em `qa-report.md` como pendente de aparelho real em vez de marcar como aprovado.
+4. **Capturar evidência**: screenshots em 375px mobile + 1440px desktop, console logs, network HARs; no passe de content stress, screenshots da fixture de pior caso em 320px e com zoom de 200%.
 5. **Detectar páginas stub/placeholder**: qualquer página com "TODO" ou conteúdo dummy óbvio → flagar como bug.
 6. **Escrever `qa-report.md`**: test plan, execution log, refs de evidência, contagem de bugs por severity.
 7. **Escrever `bugs.md`**: uma entrada por bug com severity, repro steps, link de evidência, status (`Open`).

@@ -305,6 +305,21 @@ const PARITY = {
     'git diff --name-only <ref>...HEAD',
     '<effective-base-or-ref>...HEAD',
     'three-dot',
+    'references/motion.md` §9',
+    'references/content-stress.md',
+  ],
+  qa: [
+    'dw-ui-discipline/references/content-stress.md',
+    'page.route()',
+    '320px',
+    '200%',
+    'Broken → high, Ugly → medium, Fragile → low',
+  ],
+  redesignUi: [
+    'dw-ui-discipline/references/content-stress.md',
+    '"Quiet", "Editorial", "Dense"',
+    '320px',
+    '200%',
   ],
   refactor: [
     'Dependency categories decide seam tests',

@@ -33,12 +33,13 @@ For the four grounding questions, read `references/the-four-grounding-questions-
 | Any UI work (the full version of the grounding) | `references/hard-gate.md` |
 | Reviewing or proposing a design | `references/visual-slop.md` (14 patterns + specific anti-default values) |
 | Designing state coverage | `references/state-matrix.md` |
+| Stress-testing with worst-case data (long names, `1 members`, 1,000 rows, 320px, 200% zoom) | `references/content-stress.md` |
 | Interactive widget (button, form, modal, anything clickable) | `references/accessibility-floor.md` |
 | No design authority exists in the project | `references/curated-defaults.md` (palettes / fonts / scales) |
 | Choosing or reviewing a palette / dark mode | `references/color-oklch.md` (OKLCH, tinted neutrals, contrast) |
 | Fonts, sizing, hierarchy, line length | `references/type-scale.md` (modular scale, pairing, measure) |
-| Adding animation or transitions | `references/motion.md` (easing, duration, reduced-motion) |
-| Cross-device / breakpoints / touch | `references/responsive.md` (mobile-first, container queries) |
+| Adding, reviewing or removing animation | `references/motion.md` (frequency gate, easing, performance, removal, review triggers) |
+| Cross-device / touch / mobile web | `references/responsive.md` (mobile-first, container queries, mobile fixes) |
 | Any user-facing copy (labels, errors, empty states) | `references/ux-writing.md` |
 
 ## The 14 visual-slop patterns (full catalog in `references/visual-slop.md`)
@@ -74,7 +75,8 @@ Before any interactive widget ships:
 - [ ] No keyboard traps.
 - [ ] Touch targets ≥24×24 CSS pixels (≥44×44 recommended on mobile).
 - [ ] Heading hierarchy is semantic (no skipped levels).
-- [ ] `prefers-reduced-motion` honored.
+- [ ] `prefers-reduced-motion` honored (gentler, not zero).
+- [ ] Zoom never disabled (no `user-scalable=no` / `maximum-scale=1`); content survives 200% zoom.
 
 Full verification recipes in `references/accessibility-floor.md`. `/dw-review --code-only` rejects the verdict if any interactive widget ships without these.
 
@@ -90,7 +92,8 @@ In all bend cases, document the bend in the PR (one line). "I skipped the state 
 
 - `/dw-redesign-ui` runs the grounding end-to-end. Steps 4 (propose) and 7 (validate) consult this skill explicitly.
 - `/dw-plan techspec` UI sections must answer the 4 grounding questions and reference the state matrix.
-- `/dw-review --code-only` checks UI diffs against the 14 visual-slop patterns and the accessibility floor.
+- `/dw-review --code-only` checks UI diffs against the 14 visual-slop patterns, the accessibility floor, `motion.md` §9 triggers and `content-stress.md` static signals.
+- `/dw-qa` (UI mode) runs the content-stress pass.
 - `/dw-functional-doc` records the surface-job and scene sentences in the overview for each screen.
 
 ## Why this approach
@@ -108,5 +111,5 @@ When invoked directly or by a harness, return or merge this block:
 - **Evidence:** design source read, four grounding answers, states checked, screenshots, and accessibility checks.
 - **Artifacts:** UI proposal, design notes, state matrix, screenshot path, or QA finding.
 - **Decisions:** palette/type/component choices, state handling, and accepted deviations.
-- **Risks:** training-data defaults, missing states, contrast/focus failures, unreadable hierarchy, or mobile overflow.
+- **Risks:** training-data defaults, missing states, contrast/focus failures, unreadable hierarchy, worst-case data breaks, high-frequency motion, or mobile overflow.
 - **Next Step:** exact design/code/QA action or missing input to gather.
