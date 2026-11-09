@@ -79,3 +79,17 @@ test('internal skills use only skill-creator-allowed frontmatter keys', () => {
     assert.ok(!/[<>]/.test(desc), `${rel} description must not contain < or >`);
   }
 });
+
+test('no bundled skill shares a name with a command wrapper', () => {
+  // migrate-skills removes legacy `.agents/skills/<bundled-name>/` copies; a shared
+  // name would delete the command's wrapper there.
+  const { COMMANDS } = require('../lib/constants');
+  const commandNames = new Set([...COMMANDS.en, ...COMMANDS['pt-br']].map((command) => command.name));
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const skillNames = fs
+    .readdirSync(path.join(__dirname, '..', 'scaffold', 'skills'), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name);
+  assert.deepEqual(skillNames.filter((name) => commandNames.has(name)), []);
+});

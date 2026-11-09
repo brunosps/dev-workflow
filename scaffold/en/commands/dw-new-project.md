@@ -39,7 +39,7 @@ You are a workspace bootstrap lead for the dev-workflow ecosystem. Your job is t
 - Project one-pager: `.dw/spec/projects/{{PROJECT_NAME}}.md` (uses `.dw/templates/project-onepager.md`)
 - Final report: `.dw/spec/projects/{{PROJECT_NAME}}-bootstrap.md`
 - Seeded rules: `.dw/rules/index.md` (minimal, replaceable later by `/dw-analyze-project`)
-- Compose recipes: `.agents/skills/docker-compose-recipes/services/*.yml`
+- Compose recipes: `.dw/skills/docker-compose-recipes/services/*.yml`
 
 ## Required Behavior — Pipeline
 
@@ -157,7 +157,7 @@ If fullstack:
 
 #### 3.3 Generate `docker-compose.dev.yml`
 
-1. Read `.agents/skills/docker-compose-recipes/SKILL.md` and the relevant `services/<name>.yml` files.
+1. Read `.dw/skills/docker-compose-recipes/SKILL.md` and the relevant `services/<name>.yml` files.
 2. Apply the merge algorithm in `references/compose-composition.md`:
    - Concatenate selected service blocks under `services:`.
    - Aggregate named volumes under `volumes:`.
@@ -300,7 +300,7 @@ monorepo: <pnpm-workspaces|turborepo|nx|none>
 | ... | ... | ... |
 
 ## Services Composed
-<table of services with port + UI URL + credential requirements, sourced from .agents/skills/docker-compose-recipes/>
+<table of services with port + UI URL + credential requirements, sourced from .dw/skills/docker-compose-recipes/>
 
 ## Next Steps
 1. `cp .env.example .env`, generate unique local secrets, and set every required value such as `POSTGRES_PASSWORD`.

@@ -23,7 +23,7 @@ Colete sinais apenas do que já está persistido:
 4. **Apresente** os candidatos no chat como lista markdown — id, trigger, action, confidence, evidence. NÃO escreva ainda.
 5. **Pergunte**: "Aprovar quais para armazenar? (ids, ou 'todos', ou 'nenhum'). Algum para promover a principio de constitution?"
 6. Na aprovação:
-   - Grave cada instinct aprovado em `.dw/memory/instincts/<slug>.md` no formato de `.agents/skills/dw-memory/references/instincts.md` (crie ou atualize; nunca duplique um id existente).
+   - Grave cada instinct aprovado em `.dw/memory/instincts/<slug>.md` no formato de `.dw/skills/dw-memory/references/instincts.md` (crie ou atualize; nunca duplique um id existente).
    - Para os que o usuário escolher promover, encaminhe ao fluxo de constitution — proponha um principio `P-NNN` em `severity: info` para o Step 8 do `/dw-analyze-project`. NÃO edite `.dw/constitution.md` direto sem o usuário reconfirmar.
 7. Atualize a confiança de instincts existentes que a nova evidência reconfirme ou contradiga.
 

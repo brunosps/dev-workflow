@@ -11,7 +11,7 @@
 
     ## Complementary Skills
 
-    When available in the project under `./.agents/skills/`, use these skills as operational support without replacing this command:
+    When available in the project under `./.dw/skills/`, use these skills as operational support without replacing this command:
 
     - `dw-git-discipline`: **ALWAYS** — enforces atomic commits (one logical intent per commit; refactor separate from feature), Conventional Commits format, lint+tests+build green BEFORE the commit, and bans bypassing pre-commit hooks (`--no-verify`) or amending pushed commits. When mixed changes are detected, splits via `git add -p`.
 

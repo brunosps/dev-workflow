@@ -61,7 +61,7 @@ digraph brainstorm_decision {
 
 ## Complementary Skills
 
-When available in the project under `./.agents/skills/`, use these skills to enrich ideation:
+When available in the project under `./.dw/skills/`, use these skills to enrich ideation:
 
 - `dw-council`: invoked by the dispatcher's **council** mode — multi-advisor stress-test of the most promising options with mandatory steel-manning and concession tracking. The dispatcher fires it when 2+ paths tie OR consensus forms too quickly (false-consensus signal). Not invoked on every brainstorm — only when signals justify it.
 - `dw-simplification`: invoked by the dispatcher's **refactor-audit** mode — applies Chesterton's Fence + complexity metrics + the new **deep-modules** reference (deletion test, locality, leverage, interface depth) to every flagged smell.
@@ -345,7 +345,7 @@ turns and it writes files. Because it is stateful and mutating, it starts **only
 
 <critical>Ask exactly ONE unresolved decision per interaction, then wait. Never dump a list of questions.</critical>
 
-Grill is powered by two internal skills (loaded by path from `./.agents/skills/`, never exported):
+Grill is powered by two internal skills (loaded by path from `./.dw/skills/`, never exported):
 - **`dw-grilling`** — the decision-tree interview engine (dependency ordering, one decision per turn, a
   recommended answer for every question, facts discovered rather than asked, the shared-understanding gate).
 - **`dw-domain-modeling`** — the vocabulary engine (canonical terms, fuzzy/overloaded-term challenge, code

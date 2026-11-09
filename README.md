@@ -13,7 +13,7 @@ This will:
 2. Create `.dw/commands/` with workflow commands
 3. Create `.dw/templates/` with document templates (PRD, TechSpec, Tasks, ADR, etc.)
 4. Create `.dw/rules/` (populated by `/dw-analyze-project`) + a curated `.dw/rules-library/` declarative baseline per stack (loaded lazily via `.dw/config/stack-mappings.json`)
-5. Install bundled skills (`dw-verify`, `dw-memory`, `dw-review-rigor`, `dw-ui-discipline`, `dw-testing-discipline`, `security-review`, etc.) to `.agents/skills/`
+5. Install bundled skills (`dw-verify`, `dw-memory`, `dw-review-rigor`, `dw-ui-discipline`, `dw-testing-discipline`, `security-review`, etc.) to `.dw/skills/` — outside every agent's skill index; commands load them by path
 6. Generate skill wrappers and project agents for Claude Code, Codex, Copilot, and OpenCode
 7. Configure MCP servers (Context7 + Playwright)
 8. Install enforcement hooks (git guardrails + a `SessionEnd` token-cost tracker → `.dw/metrics/costs.jsonl`) + a statusline (branch · active spec · minimalism mode · today's estimated spend) into `.claude/settings.json`, and the git guardrails into `.codex/hooks.json` for Codex (merge-aware — your own hooks/statusline are never overwritten; Codex runs project hooks only after you trust them)
@@ -226,6 +226,7 @@ your-project/
 │   │   └── concerns.md    # Risk map: hot spots, fragile integrations, bug history (Step 9 of /dw-analyze-project)
 │   ├── constitution.md    # Declarative principles (auto-installed when missing)
 │   ├── skill-registry.json # Local skill taxonomy, triggers, owners, load policy, and context limits
+│   ├── skills/            # Bundled skills, loaded by path from commands (not listed in any agent's skill index)
 │   ├── references/        # Reference documentation
 │   ├── scripts/           # Utility scripts
 │   ├── spec/              # PRD directories — each contains tasks-validation.md
@@ -241,7 +242,7 @@ your-project/
 │   ├── skills/            # Claude Code wrappers
 │   ├── agents/            # Claude Code project agents
 │   └── settings.json      # MCP servers (Context7, Playwright)
-├── .agents/skills/        # Codex/Copilot wrappers + bundled skills
+├── .agents/skills/        # Codex/Copilot wrappers (bundled skills live in .dw/skills/)
 ├── .agents/agents/        # Codex/Copilot fallback agent definitions
 ├── .github/agents/        # GitHub Copilot custom agents
 ├── .opencode/commands/    # OpenCode wrappers
@@ -274,7 +275,7 @@ npx @brunosps00/dev-workflow subtask list
 
 ## Bundled Skills
 
-Skills installed to `.agents/skills/` for use by all commands. The bundle is governed by `scaffold/skill-registry.json`, which records each skill's kind, tier, owner, trigger, expected output, load policy, context limit, invocation control (`model` vs `explicit`), and à-la-carte `exportable` flag.
+Skills installed to `.dw/skills/` for use by all commands. They sit outside the directories Codex, Copilot, OpenCode and Claude Code scan for model-invocable skills (`.agents/skills/`, `.claude/skills/`, `.github/skills/`, `.opencode/skills/`), so each tool's skill index lists only the `dw-*` command entry points; commands read the skills they need by path. Releases up to 2.6.0 installed them under `.agents/skills/`, and `update` moves them (a same-named skill you installed from elsewhere is left alone). The bundle is governed by `scaffold/skill-registry.json`, which records each skill's kind, tier, owner, trigger, expected output, load policy, context limit, invocation control (`model` vs `explicit`), and à-la-carte `exportable` flag.
 
 Skill kinds:
 

@@ -7,7 +7,7 @@ Você é o auditor de saúde de skills e agentes do dev-workflow.
 - Use antes de promover um aprendizado para skill reutilizavel.
 
 ## Processo
-1. Leia `scaffold/skill-registry.json` ao auditar o repo dev-workflow, ou `.dw/skill-registry.json` + `.agents/skills/` em projetos consumidores.
+1. Leia `scaffold/skill-registry.json` ao auditar o repo dev-workflow, ou `.dw/skill-registry.json` + as skills bundled instaladas em `.dw/skills/` em projetos consumidores. Skills em `.claude/skills/`, `.agents/skills/` e nos demais índices de agente são wrappers de comando ou do próprio usuário; uma skill do dev-workflow encontrada lá é cópia legada que o `update` remove.
 2. Agrupe skills por `kind`: `protocol`, `domain-pack`, `recipe-pack`, `asset-pack`.
 3. Valide que toda skill tem trigger, output esperado, owner, load policy e limite de contexto.
 4. Valide que todo `SKILL.md` bundled tem contrato `## Structured Return` com `Status`, `Scope`, `Evidence`, `Artifacts`, `Decisions`, `Risks` e `Next Step`.
@@ -59,6 +59,28 @@ Declare a janela antes de qualquer julgamento: conte as linhas instrumentadas �
 
 Recomende rebaixar só quando TUDO valer: coorte invocável por modelo; ao menos 20 sessões instrumentadas ou 30 dias de janela; zero referências; sem sinal de artefato; comando owner alcançável. Abaixo disso, mostre as contagens e diga que a janela é curta demais para concluir. Remover skill bundled do pacote é entrada append-only em `lib/removed-bundled-skills.js` — este comando propõe, nunca remove e nunca deleta arquivo.
 
+### Comandos — quais entradas merecem lugar no índice
+
+Todo comando `dw-*` instalado é uma entrada no índice de skills de cada agente, e índice lotado piora a escolha que o modelo faz ali. Linhas com o objeto `commands` registram quais comandos a sessão carregou: uma leitura de `.dw/commands/<nome>.md` (todo wrapper faz uma) ou uma chamada da ferramenta Skill nomeando o comando. As regras das skills valem sem mudança: chave `commands` ausente é falta de telemetria, a janela é contada só pelas linhas que trazem `commands`, e a contagem mede carregamento, não sucesso. O hook lê só transcripts do Claude Code; quando o projeto também roda Codex, Copilot ou OpenCode, diga que essas sessões não entram na conta.
+
+Mostre uma tabela: comando, sessões que o carregaram, referências. Depois, para cada família de comandos com o mesmo propósito, mostre as contagens dos membros lado a lado:
+
+| Família | Membros |
+|---|---|
+| Handoff de subagente | `dw-subtask-start`, `dw-subtask-complete`, `dw-subtask-resume` |
+| Runners externos | `dw-codex-run`, `dw-claude-run`, `dw-copilot-run` |
+| Instaladores de skills de nuvem | `dw-install-aws-skills`, `dw-install-azure-skills` |
+| Auditorias de instalação e contexto | `dw-skill-health`, `dw-harness-audit`, `dw-context-budget` |
+| Checkpoint de sessão | `dw-pause`, `dw-resume` |
+
+Classifique cada família:
+
+- `CANDIDATA A FUSÃO` — a janela tem ao menos 20 sessões instrumentadas ou 30 dias, e a família inteira foi carregada em menos de 5% delas, ou algum membro nunca foi carregado enquanto outro foi. Um comando com modos custaria menos entradas no índice.
+- `MANTER SEPARADOS` — dois ou mais membros foram carregados, cada um, em ao menos 5 sessões: os nomes distintos estão em uso, e fundir troca um hábito medido por um índice menor.
+- `CEDO DEMAIS` — abaixo do limiar da janela. Mostre as contagens e diga isso.
+
+Comandos fora de família seguem a redação das skills: comando invocável por modelo com zero carregamentos numa janela longa o bastante é `CANDIDATO A OCIOSO`, nunca "não usado". Fusão ou remoção no pacote é decisão de produto registrada append-only em `lib/removed-commands.js` (o update então remove os wrappers antigos); este comando propõe, nunca renomeia, remove ou edita comandos. Ao auditar o próprio repositório dev-workflow não há telemetria local: reporte `SEM TELEMETRIA`, a menos que o mantenedor forneça os `costs.jsonl` de projetos consumidores, e agregue esses por projeto antes de somar.
+
 ## Saída
 
 Quando `.dw/config/routing-defaults.json` existir, compare seus candidatos atuais com o `.dw/config/routing.json` do proprietário. Relate diferenças relevantes e valide modelos/capacidades propostos antes da adoção. Valores diferentes podem ser intencionais; não os trate como falha de migração nem sobrescreva automaticamente. Atribuições de tarefas aprovadas têm precedência sobre ambos os arquivos de candidatos.
@@ -70,6 +92,7 @@ Inclua:
 - Issues de registry/schema.
 - Cobertura de retorno estruturado, incluindo qualquer skill sem contrato ou vocabulario de status.
 - Evidência de uso: a janela declarada, as tabelas por coorte e toda candidata a ociosa com sua frase de janela. Sem telemetria, diga isso em vez de pontuar.
+- Uso de comandos: a tabela por comando e a classificação de cada família (`CANDIDATA A FUSÃO`, `MANTER SEPARADOS`, `CEDO DEMAIS`).
 - Top 3 fixes.
 
 Marcador final: `## SKILL-HEALTH COMPLETE`

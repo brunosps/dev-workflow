@@ -23,7 +23,7 @@ Gather signals only from what is already persisted:
 4. **Present** candidates in chat as a markdown list — id, trigger, action, confidence, evidence. Do NOT write yet.
 5. **Ask**: "Approve which to store? (ids, or 'all', or 'none'). Any to promote to a constitution principle?"
 6. On approval:
-   - Write each approved instinct to `.dw/memory/instincts/<slug>.md` in the format from `.agents/skills/dw-memory/references/instincts.md` (create or update; never duplicate an existing id).
+   - Write each approved instinct to `.dw/memory/instincts/<slug>.md` in the format from `.dw/skills/dw-memory/references/instincts.md` (create or update; never duplicate an existing id).
    - For any the user chooses to promote, hand off to the constitution flow — propose a `P-NNN` principle at `severity: info` for `/dw-analyze-project` Step 8. Do NOT edit `.dw/constitution.md` directly without the user re-confirming.
 7. Update confidence on existing instincts that new evidence reconfirms or contradicts.
 

@@ -64,7 +64,7 @@ Não recuse responder — devolva a melhor info disponível.
 
 ### 2. Detecção do shape da query
 
-Classifique o `{{QUERY}}` em uma das formas documentadas em `.agents/skills/dw-codebase-intel/references/query-patterns.md`:
+Classifique o `{{QUERY}}` em uma das formas documentadas em `.dw/skills/dw-codebase-intel/references/query-patterns.md`:
 
 - **where-is** — primário: `files.json`, secundário: `apis.json`
 - **what-uses** — primário: `deps.json` (libs) ou `files.json` (símbolos)

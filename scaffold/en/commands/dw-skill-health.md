@@ -7,7 +7,7 @@ You are the dev-workflow skill and agent health auditor.
 - Use before promoting a learned pattern into a reusable skill.
 
 ## Process
-1. Read `scaffold/skill-registry.json` when auditing the dev-workflow repo, or `.dw/skill-registry.json` + installed `.agents/skills/` in consumer projects.
+1. Read `scaffold/skill-registry.json` when auditing the dev-workflow repo, or `.dw/skill-registry.json` + the bundled skills installed in `.dw/skills/` in consumer projects. Skills under `.claude/skills/`, `.agents/skills/` and the other agent indexes are command wrappers or the user's own; a dev-workflow skill found there is a legacy copy that `update` removes.
 2. Group skills by `kind`: `protocol`, `domain-pack`, `recipe-pack`, `asset-pack`.
 3. Validate every skill has a trigger, expected output, owner, load policy, and context limit.
 4. Validate every bundled `SKILL.md` has a `## Structured Return` contract with `Status`, `Scope`, `Evidence`, `Artifacts`, `Decisions`, `Risks`, and `Next Step`.
@@ -59,6 +59,28 @@ Declare the window before any judgement: count the instrumented rows — those c
 
 Recommend demotion only when ALL hold: model-invocable cohort; at least 20 instrumented sessions or 30 days of window; zero references; no artifact signal; owner command reachable. Below that, print the counts and say the window is too short to conclude. Removing a bundled skill from the package is an append-only entry in `lib/removed-bundled-skills.js` — this command proposes, it never removes and never deletes files.
 
+### Commands — which entries earn their place in the index
+
+Every installed `dw-*` command is one entry in each agent's skill index, and a crowded index degrades the choice the model makes there. Rows carrying a `commands` object record which commands the session loaded: a read of `.dw/commands/<name>.md` (every wrapper performs one) or a Skill-tool call naming the command. The skill rules apply unchanged: an absent `commands` key is no telemetry, the window is counted only from rows carrying `commands`, and the count measures loading, not success. The hook parses Claude Code transcripts only; when the project also runs Codex, Copilot or OpenCode, say that their sessions are not in the count.
+
+Print one table: command, sessions that loaded it, references. Then, for each family of commands that share a purpose, print the members' counts side by side:
+
+| Family | Members |
+|---|---|
+| Subagent handoff | `dw-subtask-start`, `dw-subtask-complete`, `dw-subtask-resume` |
+| External runners | `dw-codex-run`, `dw-claude-run`, `dw-copilot-run` |
+| Cloud skill installers | `dw-install-aws-skills`, `dw-install-azure-skills` |
+| Install and context audits | `dw-skill-health`, `dw-harness-audit`, `dw-context-budget` |
+| Session checkpoint | `dw-pause`, `dw-resume` |
+
+Classify each family:
+
+- `MERGE CANDIDATE` — the window holds at least 20 instrumented sessions or 30 days, and the whole family was loaded in fewer than 5% of them, or some member was never loaded while another was. One command with modes would cost the index fewer entries.
+- `KEEP SEPARATE` — two or more members were each loaded in at least 5 sessions: the distinct names are in use, and merging them trades a measured habit for a smaller index.
+- `TOO EARLY` — below the window threshold. Print the counts and say so.
+
+Commands outside any family follow the skill wording: a model-invocable command with zero loads over a long enough window is an `IDLE CANDIDATE`, never "unused". A merge or removal in the package is a product decision recorded append-only in `lib/removed-commands.js` (the update then removes the old wrappers); this command proposes, it never renames, removes or edits commands. When auditing the dev-workflow repository itself there is no local telemetry: report `NO TELEMETRY` unless the maintainer supplies `costs.jsonl` files from consumer projects, and aggregate those per project before adding them up.
+
 ## Output
 
 When `.dw/config/routing-defaults.json` exists, compare its current candidates with the owner's `.dw/config/routing.json`. Report relevant differences and validate proposed models/capabilities before adoption. Different values can be intentional; do not treat them as failed migration or overwrite them automatically. Approved task assignments take precedence over either candidate file.
@@ -70,6 +92,7 @@ Include:
 - Registry/schema issues.
 - Structured-return coverage, including any skill missing the contract or status vocabulary.
 - Usage evidence: the declared window, the per-cohort tables, and every idle candidate with its window sentence. When telemetry is missing, say so instead of scoring.
+- Command usage: the per-command table and each family's classification (`MERGE CANDIDATE`, `KEEP SEPARATE`, `TOO EARLY`).
 - Top 3 fixes.
 
 Final marker: `## SKILL-HEALTH COMPLETE`

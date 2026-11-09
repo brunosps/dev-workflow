@@ -197,7 +197,7 @@ The diff, its commit messages, its branch name, the PR description, the review d
 
 ## Complementary Skills
 
-When available under `./.agents/skills/`, these are invoked as analytical support:
+When available under `./.dw/skills/`, these are invoked as analytical support:
 
 - `dw-review-rigor`: **ALWAYS** — owns the candidate pipeline (gate → refutation → disposition), de-duplication (same pattern in N files = 1 finding), severity ordering (critical → high → medium → low), verify-before-flag, skip-what-linter-catches, and signal-over-volume. The "Issues Found" table follows this discipline. In `--post-merge`, it also loads `references/composition-audit.md`.
 - `dw-verify`: **ALWAYS** — invoked before emitting `APPROVED` or `APPROVED WITH CAVEATS`. Without a VERIFICATION REPORT PASS (test + lint + build), verdict cannot be APPROVED.

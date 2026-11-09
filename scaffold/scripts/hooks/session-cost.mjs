@@ -12,9 +12,12 @@
  * USD is a best-effort ESTIMATE from a local price table — tokens are exact.
  *
  * The same pass also counts which skills the session's tool calls referenced,
- * emitted as `skills` on the row. `/dw-skill-health` reads it as usage evidence.
- * An absent `skills` key means the row predates this instrumentation; `{}` means
- * the session was observed and nothing fired — those are different facts.
+ * emitted as `skills` on the row, and which dev-workflow commands it loaded
+ * (a read of `.dw/commands/<name>.md`, which every command wrapper performs, or a
+ * Skill-tool call naming a command), emitted as `commands`. `/dw-skill-health`
+ * reads both as usage evidence. An absent key means the row predates that
+ * instrumentation; `{}` means the session was observed and nothing fired —
+ * those are different facts.
  *
  * Contract: reads the SessionEnd payload as JSON on stdin. Fails SAFE — any
  * error exits 0 without writing, so a hook bug never disrupts the session.
@@ -70,7 +73,7 @@ function knownSkills() {
       return false;
     }
   };
-  for (const base of ['.agents/skills', '.claude/skills']) {
+  for (const base of ['.dw/skills', '.agents/skills', '.claude/skills']) {
     const root = join(PROJECT_ROOT, base);
     if (!isDir(root)) continue;
     let top;
@@ -103,8 +106,29 @@ function knownSkills() {
 }
 
 // Matches a skills/ path inside a tool call's input, capturing at most two
-// segments so a grouped `group/skill` is preserved.
-const SKILL_PATH = /(?:\.agents|\.claude)\/skills\/([A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)?)\//g;
+// segments so a grouped `group/skill` is preserved. `.dw/skills/` is where the
+// bundled skills live; `.agents/` and `.claude/` hold wrappers, external and
+// legacy copies.
+const SKILL_PATH = /(?:\.dw|\.agents|\.claude)\/skills\/([A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)?)\//g;
+
+// Matches the canonical command file every wrapper tells the agent to read.
+const COMMAND_PATH = /\.dw\/commands\/([A-Za-z0-9._-]+)\.md/g;
+
+// Commands this project has installed: the names usage counting may emit under
+// `commands`. Their wrappers also sit under `.claude/skills/` and
+// `.agents/skills/`, so knownSkills() sees the same names; a command name is
+// always counted as a command, never as a skill.
+function knownCommands() {
+  const names = new Set();
+  try {
+    for (const file of readdirSync(join(DW_DIR, 'commands'))) {
+      if (file.endsWith('.md')) names.add(file.slice(0, -3));
+    }
+  } catch {
+    /* no installed commands — nothing to count */
+  }
+  return names;
+}
 
 // Count skill references in ONE assistant message.
 //
@@ -113,17 +137,22 @@ const SKILL_PATH = /(?:\.agents|\.claude)\/skills\/([A-Za-z0-9._-]+(?:\/[A-Za-z0
 // `tool_result` that returned the CONTENTS of a SKILL.md (those cite other
 // skills) and a user prompt that merely names one — both would report a skill as
 // fired when it never was. What this measures is loading, not obedience.
-function countSkillUses(msg, known, out) {
+function countSkillUses(msg, known, out, commands = new Set(), commandOut = {}) {
   const content = msg && msg.content;
   if (!Array.isArray(content)) return;
   for (const block of content) {
     if (!block || block.type !== 'tool_use' || !block.input) continue;
-    // One tool call is one reference per skill, however many times its input
-    // names that skill. A grep over three files under the same skill directory
-    // is one load, not three.
+    // One tool call is one reference per skill or command, however many times
+    // its input names it. A grep over three files under the same skill
+    // directory is one load, not three.
     const seen = new Set();
-    if (block.name === 'Skill' && typeof block.input.skill === 'string' && known.has(block.input.skill)) {
-      seen.add(block.input.skill);
+    const seenCommands = new Set();
+    const note = (name) => {
+      if (commands.has(name)) seenCommands.add(name);
+      else if (known.has(name)) seen.add(name);
+    };
+    if (block.name === 'Skill' && typeof block.input.skill === 'string') {
+      note(block.input.skill);
     }
     let serialized;
     try {
@@ -136,24 +165,29 @@ function countSkillUses(msg, known, out) {
       let match;
       while ((match = SKILL_PATH.exec(serialized)) !== null) {
         const full = match[1];
-        const name = known.has(full) ? full : full.split('/')[0];
-        if (known.has(name)) seen.add(name);
+        note(known.has(full) ? full : full.split('/')[0]);
+      }
+      COMMAND_PATH.lastIndex = 0;
+      while ((match = COMMAND_PATH.exec(serialized)) !== null) {
+        if (commands.has(match[1])) seenCommands.add(match[1]);
       }
     }
     for (const name of seen) out[name] = (out[name] || 0) + 1;
+    for (const name of seenCommands) commandOut[name] = (commandOut[name] || 0) + 1;
   }
 }
 
 // Sum per-turn usage from the transcript, grouped by model, and count which
 // skills the session's tool calls referenced.
-function tallyTranscript(transcriptPath, known) {
+function tallyTranscript(transcriptPath, known, commands = new Set()) {
   const byModel = {};
   const skills = {};
+  const commandUses = {};
   let raw;
   try {
     raw = readFileSync(transcriptPath, 'utf-8');
   } catch {
-    return { byModel, skills };
+    return { byModel, skills, commands: commandUses };
   }
   for (const line of raw.split('\n')) {
     if (!line.trim()) continue;
@@ -166,7 +200,7 @@ function tallyTranscript(transcriptPath, known) {
     if (obj.type !== 'assistant') continue;
     const msg = obj && obj.message;
     try {
-      countSkillUses(msg, known, skills);
+      countSkillUses(msg, known, skills, commands, commandUses);
     } catch {
       /* usage evidence is best-effort — never let it break cost tracking */
     }
@@ -179,7 +213,7 @@ function tallyTranscript(transcriptPath, known) {
     m.cache_write += u.cache_creation_input_tokens || 0;
     m.cache_read += u.cache_read_input_tokens || 0;
   }
-  return { byModel, skills };
+  return { byModel, skills, commands: commandUses };
 }
 
 async function main() {
@@ -198,7 +232,13 @@ async function main() {
   } catch {
     known = new Set();
   }
-  const { byModel, skills } = tallyTranscript(transcriptPath, known);
+  let installedCommands;
+  try {
+    installedCommands = knownCommands();
+  } catch {
+    installedCommands = new Set();
+  }
+  const { byModel, skills, commands } = tallyTranscript(transcriptPath, known, installedCommands);
   const modelNames = Object.keys(byModel);
   if (modelNames.length === 0) return process.exit(0); // nothing to record
 
@@ -223,9 +263,10 @@ async function main() {
     total_usd: Number(totalUsd.toFixed(4)),
     total_tokens: totalTokens,
     models,
-    // Always emitted, even empty: `{}` records an observed session with no skill
-    // reference, while an absent key marks a row written before this existed.
+    // Always emitted, even empty: `{}` records an observed session with no
+    // reference, while an absent key marks a row written before that existed.
     skills,
+    commands,
   };
 
   try {

@@ -80,7 +80,7 @@ services: []
 │   └── api/                      (criado por `pnpm dlx @nestjs/cli` ou scaffold escolhido)
 ├── packages/
 │   └── shared/                   (criado pelo /dw-new-project)
-├── docker-compose.dev.yml        (composto a partir de .agents/skills/docker-compose-recipes/)
+├── docker-compose.dev.yml        (composto a partir de .dw/skills/docker-compose-recipes/)
 ├── .env.example                  (consolidado dos servicos selecionados)
 ├── .gitignore                    (por stack)
 ├── .dockerignore                 (por stack)

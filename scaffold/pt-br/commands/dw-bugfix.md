@@ -36,7 +36,7 @@
 
     ## Skills Complementares
 
-    Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como suporte contextual sem substituir este comando:
+    Quando disponíveis no projeto em `./.dw/skills/`, use estas skills como suporte contextual sem substituir este comando:
 
     - `dw-debug-protocol`: **SEMPRE** — conduz o bug pelo six-step triage (Reproduzir → Localizar → Reduzir → Fix Root Cause → Guardar → Verificar End-to-End). Stop-the-line discipline; root-cause sobre symptom; regression test commitado no mesmo commit atômico. Para bugs não triviais, ou depois que a primeira tentativa de fix falhar, o Passo 1 precisa estabelecer um loop de feedback red-capable antes de teorizar. Bugs não-reprodutíveis seguem o sub-protocolo instrument-first — sem fix por palpite a não ser com acknowledgement explícito.
     - `dw-verify`: **SEMPRE** — em modo Direto, invocada antes do commit da correção. O VERIFICATION REPORT deve mostrar que o sintoma original do bug não se reproduz mais (não apenas que os testes passam).

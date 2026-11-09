@@ -48,7 +48,7 @@ Compute `<target>` ONCE at the start; substitute it wherever you see `<target>` 
 
 ## Complementary Skills
 
-When available under `./.agents/skills/`, these are invoked operationally:
+When available under `./.dw/skills/`, these are invoked operationally:
 
 - `dw-testing-discipline`: **(UI mode — ALWAYS)** — core rules and 25 anti-patterns apply to every QA test authored. `references/playwright-recipes.md` for tactical patterns. `references/three-workflow-patterns.md` to pick the right verification mode (UI / network / perf). `references/security-boundary.md` for any flow that crosses an auth boundary.
 - `api-testing-recipes`: **(API mode — ALWAYS)** — validated snippets for `.http`, pytest+httpx, supertest, WebApplicationFactory, reqwest. Composes per-FR test files in `QA/scripts/api/` and JSONL logs in `QA/logs/api/`.

@@ -38,7 +38,7 @@ digraph redesign_decision {
 
 ## Skills Complementares
 
-Quando disponíveis no projeto em `./.agents/skills/`, use para guiar o redesign:
+Quando disponíveis no projeto em `./.dw/skills/`, use para guiar o redesign:
 
 - `dw-ui-discipline`: **OBRIGATÓRIO** — roda o hard-gate de 4 checkpoints (brand authorities OU curated defaults; surface job sentence; state matrix completa; scene sentence) ANTES de qualquer proposta. Os 14 anti-slop patterns são checados contra cada direção. O WCAG 2.2 AA floor é não-negociável no step de validate.
 - `vercel-react-best-practices`: use quando o projeto for React/Next.js para padrões de performance e implementação

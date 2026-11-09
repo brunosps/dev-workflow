@@ -30,7 +30,7 @@ You are a planning orchestrator that takes an idea through the full PRD → Tech
 
 ## Complementary Skills
 
-When available under `./.agents/skills/`, use these as planning support:
+When available under `./.dw/skills/`, use these as planning support:
 
 - `dw-source-grounding`: **ALWAYS** in TechSpec stage — every framework/library decision must cite official docs with version + retrieval date.
 - `dw-ui-discipline`: **REQUIRED** when the PRD has UI surfaces — runs the 4 grounding questions before any visual design lands in the TechSpec.

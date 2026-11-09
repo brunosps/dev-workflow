@@ -216,12 +216,26 @@ const PARITY = {
   ],
   agentInstructions: [
     '.dw/references/untrusted-input.md',
+    '.dw/skills/',
   ],
   skillHealth: [
     '.dw/metrics/costs.jsonl',
     '`skills`',
     'invocation: explicit',
     'session-cost',
+    '`commands`',
+    '.dw/skills/',
+    '.dw/commands/<',
+    'lib/removed-commands.js',
+    'dw-subtask-start',
+    'dw-install-aws-skills',
+    '20',
+    '5%',
+  ],
+  update: [
+    '.dw/skills "$SNAPSHOT_DIR/"',
+    '"$SNAPSHOT_DIR/agents-skills/." .agents/skills/',
+    '`.dw/skills/`',
   ],
   secureAudit: [
     '.dw/references/untrusted-input.md',

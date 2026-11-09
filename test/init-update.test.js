@@ -143,3 +143,46 @@ test('init and update create .dw/reports/ with a machine-local .gitignore for th
   assert.ok(fs.readFileSync(gitignorePath, 'utf8').includes('custom.log'));
   assert.ok(readManagedFiles(tempDir).includes(path.join('.dw', 'reports', '.gitignore')));
 });
+
+test('update moves bundled skills out of .agents/skills/ and keeps what is not ours', (t) => {
+  const sourceRoot = path.join(__dirname, '..');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dw-skill-relocation-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const write = (file, content) => {
+    fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
+    fs.writeFileSync(path.join(dir, file), content);
+  };
+  const ourVerify = fs.readFileSync(path.join(sourceRoot, 'scaffold/skills/dw-verify/SKILL.md'), 'utf8');
+  const thirdPartyHumanizer = '---\nname: humanizer\ndescription: upstream copy the user installed\n---\n# Humanizer\n';
+  write('.dw/install-state.json', JSON.stringify({ version: '2.6.0', lang: 'en', profile: 'core', modules: ['core'] }));
+  // Legacy layout from releases up to 2.6.0.
+  write('.agents/skills/dw-verify/SKILL.md', ourVerify);
+  write('.agents/skills/dw-verify/references/stale.md', 'old reference\n');
+  // Same name as a bundled skill, but installed from elsewhere: must survive.
+  write('.agents/skills/humanizer/SKILL.md', thirdPartyHumanizer);
+  // The user's own skill and a vendor bundle: never touched.
+  write('.agents/skills/my-own-skill/SKILL.md', '# mine\n');
+  write('.agents/skills/aws/core/SKILL.md', '# aws\n');
+
+  runCli(dir, 'update', '--lang=en');
+
+  assert.ok(fs.existsSync(path.join(dir, '.dw/skills/dw-verify/SKILL.md')), 'bundled skill installed in .dw/skills/');
+  assert.ok(!fs.existsSync(path.join(dir, '.agents/skills/dw-verify')), 'legacy copy of a bundled skill removed');
+  assert.equal(fs.readFileSync(path.join(dir, '.agents/skills/humanizer/SKILL.md'), 'utf8'), thirdPartyHumanizer);
+  assert.ok(fs.existsSync(path.join(dir, '.agents/skills/my-own-skill/SKILL.md')));
+  assert.ok(fs.existsSync(path.join(dir, '.agents/skills/aws/core/SKILL.md')));
+  // Command wrappers stay discoverable: they are the entry points.
+  assert.ok(fs.existsSync(path.join(dir, '.agents/skills/dw-review/SKILL.md')));
+  // No bundled skill (other than the user's same-named humanizer) remains in an agent index.
+  for (const name of fs.readdirSync(path.join(sourceRoot, 'scaffold/skills'))) {
+    if (name === 'humanizer') continue;
+    assert.ok(!fs.existsSync(path.join(dir, '.agents/skills', name)), `${name} still under .agents/skills/`);
+    assert.ok(!fs.existsSync(path.join(dir, '.claude/skills', name)), `${name} under .claude/skills/`);
+  }
+
+  const uninstall = spawnSync(process.execPath, [cli, 'uninstall'], { cwd: dir, encoding: 'utf8' });
+  assert.equal(uninstall.status, 0, uninstall.stderr);
+  assert.ok(!fs.existsSync(path.join(dir, '.dw/skills')), 'uninstall removes .dw/skills/');
+  assert.equal(fs.readFileSync(path.join(dir, '.agents/skills/humanizer/SKILL.md'), 'utf8'), thirdPartyHumanizer);
+  assert.ok(fs.existsSync(path.join(dir, '.agents/skills/my-own-skill/SKILL.md')));
+});

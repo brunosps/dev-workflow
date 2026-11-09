@@ -39,7 +39,7 @@ Você é o líder de bootstrap de workspace do dev-workflow. Sua função é peg
 - One-pager do projeto: `.dw/spec/projects/{{PROJECT_NAME}}.md` (usa `.dw/templates/project-onepager.md`)
 - Relatório final: `.dw/spec/projects/{{PROJECT_NAME}}-bootstrap.md`
 - Rules semeadas: `.dw/rules/index.md` (mínimo, depois substituido/enriquecido por `/dw-analyze-project`)
-- Receitas de compose: `.agents/skills/docker-compose-recipes/services/*.yml`
+- Receitas de compose: `.dw/skills/docker-compose-recipes/services/*.yml`
 
 ## Comportamento Obrigatório — Pipeline
 
@@ -157,7 +157,7 @@ Se fullstack:
 
 #### 3.3 Gerar `docker-compose.dev.yml`
 
-1. Leia `.agents/skills/docker-compose-recipes/SKILL.md` e os `services/<nome>.yml` relevantes.
+1. Leia `.dw/skills/docker-compose-recipes/SKILL.md` e os `services/<nome>.yml` relevantes.
 2. Aplique o algoritmo de merge de `references/compose-composition.md`:
    - Concatene blocos sob `services:`.
    - Agregue volumes nomeados sob `volumes:`.
@@ -300,7 +300,7 @@ monorepo: <pnpm-workspaces|turborepo|nx|none>
 | ... | ... | ... |
 
 ## Servicos Compostos
-<tabela de servicos com porta + URL UI + requisitos de credenciais, vinda de .agents/skills/docker-compose-recipes/>
+<tabela de servicos com porta + URL UI + requisitos de credenciais, vinda de .dw/skills/docker-compose-recipes/>
 
 ## Proximos Passos
 1. `cp .env.example .env`, gere secrets locais unicos e defina todo valor obrigatorio como `POSTGRES_PASSWORD`.

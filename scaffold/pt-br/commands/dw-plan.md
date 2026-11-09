@@ -30,7 +30,7 @@ Você é um orquestrador de planejamento que conduz uma ideia pelo pipeline comp
 
 ## Skills Complementares
 
-Quando disponíveis em `./.agents/skills/`, use como suporte:
+Quando disponíveis em `./.dw/skills/`, use como suporte:
 
 - `dw-source-grounding`: **SEMPRE** no estágio TechSpec — toda decisão de framework/library cita docs oficiais com versão + data.
 - `dw-ui-discipline`: **OBRIGATÓRIO** quando PRD tem superfícies de UI — roda as 4 grounding questions antes do design visual entrar no TechSpec.

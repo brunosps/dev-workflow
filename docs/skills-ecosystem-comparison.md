@@ -664,6 +664,57 @@ com overshoot continuam proibidas no resto da UI, e o `ui-slop-detect` segue fla
 reservado a hard gates. O gatilho upstream "entrada só com fade, sem transform inicial" ficou de fora: contradiz
 a tabela de redução do próprio `remove-animations`, que reduz entradas frequentes a opacity pura.
 
+### 16. Índice de skills enxuto e medição de uso de comandos (2026-11-09)
+
+Origem: um cheat sheet de arquitetura de agentes (autor e fonte não identificados; números não verificados por
+nós) cujo problema 3 é "too much in view": a escolha de tool/skill piora conforme a lista cresce, descrição
+compacta rende muito mais que descrição completa, e o remédio é índice de uma linha com corpo sob demanda.
+Fatos de plataforma conferidos na documentação oficial:
+
+- **Codex** ([learn.chatgpt.com/docs/build-skills](https://learn.chatgpt.com/docs/build-skills)): varre
+  `.agents/skills` do diretório atual até a raiz do repo; o índice inicial traz nome, descrição e caminho de cada
+  skill, usa no máximo 2% da janela, encurta descrições quando lota e pode omitir skills.
+- **OpenCode** ([opencode.ai/docs/skills](https://opencode.ai/docs/skills/)): lê `.opencode/skills`,
+  `.claude/skills` e `.agents/skills`.
+- **GitHub Copilot** ([about agent skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)):
+  lê `.github/skills`, `.claude/skills` e `.agents/skills`.
+
+**Diagnóstico.** As 27 skills bundled eram instaladas em `.agents/skills/`, junto com os 41 wrappers de comando.
+Codex, Copilot e OpenCode listavam as 68 entradas como invocáveis pelo modelo, embora o desenho do produto seja
+que os comandos carreguem as skills por caminho (no Claude Code elas nunca estiveram no índice). E o hook de uso
+só contava skills: o comando digitado pelo usuário (`/dw-review`) lê `.dw/commands/dw-review.md`, caminho que não
+era contado, então não havia dado para decidir quais comandos fundir.
+
+**Adotado:**
+
+1. **Skills bundled em `.dw/skills/`**, fora de todo índice de agente. O índice de cada ferramenta passa a listar
+   só os comandos (41). `init`/`update` instalam lá; o `migrate-skills` remove a cópia legada em `.agents/skills/`
+   só quando ela é nossa (o `SKILL.md` traz o contrato Structured Return que toda skill bundled tem) e preserva
+   skill homônima instalada pelo usuário (`humanizer`, `security-review`, `vercel-react-best-practices`…);
+   `uninstall` faz o mesmo; `doctor` avisa sobre cópia legada; as instruções do agente e os comandos (EN/PT)
+   apontam para `.dw/skills/<nome>/`. O snapshot do `/dw-update` inclui `.dw/skills/`, e o rollback de
+   `.agents/skills` deixou de aninhar a pasta dentro dela mesma.
+2. **Uso de comandos medido.** O hook `session-cost` emite `commands` (leitura de `.dw/commands/<nome>.md` ou
+   chamada da ferramenta Skill com nome de comando), separado de `skills`; wrapper em `.claude/skills/` não conta
+   mais como skill. O `/dw-skill-health` ganhou a seção de comandos com cinco famílias (handoff de subagente,
+   runners externos, instaladores de nuvem, auditorias, checkpoint) e a classificação `MERGE CANDIDATE` /
+   `KEEP SEPARATE` / `TOO EARLY`, com o mesmo limiar de janela das skills (20 sessões ou 30 dias).
+
+**Rejeitado nesta rodada:**
+
+- **Fundir comandos agora.** Sem dado de uso (uma única sessão instrumentada nos projetos do mantenedor), seria
+  trocar memória muscular por palpite, o mesmo argumento que manteve o par EN/PT (item 8 da lista abaixo). A
+  decisão sai do `/dw-skill-health` quando a janela fechar.
+- **`allow_implicit_invocation: false` (Codex) / `disable-model-invocation` (OpenCode).** Cobririam uma ferramenta
+  cada; a doc do Codex não diz se a skill sai do índice; o Copilot não tem flag equivalente. Tirar do diretório
+  resolve as três.
+- **Remover a duplicata de wrappers** que Copilot e OpenCode veem (mesmo comando em `.claude/skills/` e
+  `.agents/skills/`). O OpenCode deduplica por ID; o comportamento do Copilot não está documentado. Fica como
+  follow-up.
+
+Limitação conhecida: a telemetria vem só de transcripts do Claude Code; sessões do Codex, Copilot e OpenCode não
+entram na contagem.
+
 ## O que NÃO foi portado (e por quê)
 
 1. **`CONTEXT.md` na raiz (mattpocock)** — a *disciplina* de domain-modeling FOI adotada (seção 5 acima), mas o
@@ -750,6 +801,8 @@ a tabela de redução do próprio `remove-animations`, que reduz entradas freque
 | Motion | `scaffold/skills/dw-ui-discipline/references/motion.md` + gatilhos em `scaffold/{en,pt-br}/commands/dw-review.md` | emilkowalski/skills `emil-design-eng`, `review-animations`, `animation-performance`, `remove-animations` (MIT) |
 | Mobile web | `scaffold/skills/dw-ui-discipline/references/responsive.md` + `accessibility-floor.md` §11 | emilkowalski/skills `mobile-native` (MIT) |
 | Eixo nomeado nas direções | `scaffold/{en,pt-br}/commands/dw-redesign-ui.md` (passo 4) | emilkowalski/skills `prototype` (MIT) |
+| Skills bundled fora dos índices | `lib/skill-registry.js` (`BUNDLED_SKILLS_REL`), `lib/init.js`, `lib/migrate-skills.js`, `lib/uninstall.js`, `lib/doctor.js`, `scaffold/{en,pt-br}/agent-instructions.md` | docs de Codex, OpenCode e Copilot |
+| Uso de comandos | `scaffold/scripts/hooks/session-cost.mjs` (`commands`) + `scaffold/{en,pt-br}/commands/dw-skill-health.md` | — |
 
 ## Segurança do update
 

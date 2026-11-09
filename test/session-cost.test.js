@@ -130,3 +130,47 @@ test('a corrupt transcript exits 0 without writing', () => {
   const row = runHook(root, ['{not json', '']);
   assert.equal(row, null, 'no usable turn means no row');
 });
+
+function installCommand(root, name) {
+  fs.mkdirSync(path.join(root, '.dw', 'commands'), { recursive: true });
+  fs.writeFileSync(path.join(root, '.dw', 'commands', `${name}.md`), '# command');
+  // The Claude wrapper shares the command's name under .claude/skills/.
+  fs.mkdirSync(path.join(root, '.claude', 'skills', name), { recursive: true });
+  fs.writeFileSync(path.join(root, '.claude', 'skills', name, 'SKILL.md'), '# wrapper');
+}
+
+test('a bundled skill read from .dw/skills/ counts as a skill reference', () => {
+  const root = makeProject(['dw-verify']);
+  const row = runHook(root, [
+    assistant([{ type: 'tool_use', name: 'Read', input: { file_path: '.dw/skills/dw-verify/SKILL.md' } }]),
+  ]);
+  assert.deepEqual(row.skills, { 'dw-verify': 1 });
+});
+
+test('reading a command file counts the command, never as a skill', () => {
+  const root = makeProject(['dw-verify']);
+  installCommand(root, 'dw-review');
+  const row = runHook(root, [
+    assistant([{ type: 'tool_use', name: 'Read', input: { file_path: '.dw/commands/dw-review.md' } }]),
+    assistant([{ type: 'tool_use', name: 'Skill', input: { skill: 'dw-review' } }]),
+    assistant([{ type: 'tool_use', name: 'Read', input: { file_path: '.claude/skills/dw-review/SKILL.md' } }]),
+  ]);
+  assert.deepEqual(row.commands, { 'dw-review': 3 });
+  assert.deepEqual(row.skills, {}, 'a command wrapper under .claude/skills/ is not a skill use');
+});
+
+test('a command file that is not installed is ignored', () => {
+  const root = makeProject([]);
+  installCommand(root, 'dw-review');
+  const row = runHook(root, [
+    assistant([{ type: 'tool_use', name: 'Read', input: { file_path: '.dw/commands/dw-not-a-command.md' } }]),
+  ]);
+  assert.deepEqual(row.commands, {});
+});
+
+test('the commands key is always emitted, even with no command installed', () => {
+  const root = makeProject(['dw-verify']);
+  const row = runHook(root, [assistant([{ type: 'text', text: 'nothing to do' }])]);
+  assert.ok(Object.prototype.hasOwnProperty.call(row, 'commands'), 'commands key must always be emitted');
+  assert.deepEqual(row.commands, {});
+});

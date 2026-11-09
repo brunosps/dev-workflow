@@ -136,6 +136,10 @@ const FILES = {
     en: 'scaffold/en/commands/dw-generate-pr.md',
     pt: 'scaffold/pt-br/commands/dw-generate-pr.md',
   },
+  update: {
+    en: 'scaffold/en/commands/dw-update.md',
+    pt: 'scaffold/pt-br/commands/dw-update.md',
+  },
   qa: {
     en: 'scaffold/en/commands/dw-qa.md',
     pt: 'scaffold/pt-br/commands/dw-qa.md',

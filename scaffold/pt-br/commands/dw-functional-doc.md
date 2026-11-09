@@ -53,7 +53,7 @@ Funciona melhor com projeto analisado por `/dw-analyze-project`
 
 ## Skills complementares
 
-Quando disponíveis no projeto em `./.agents/skills/`, use estas skills como apoio operacional, sem substituir este comando como fonte de verdade:
+Quando disponíveis no projeto em `./.dw/skills/`, use estas skills como apoio operacional, sem substituir este comando como fonte de verdade:
 
 - `dw-testing-discipline`: apoio para estruturar fluxos E2E (`references/playwright-recipes.md`), padrões de coleta de evidência, e aplicar core rules + hierarquia de seletores em qualquer teste referenciado pelo doc
 - `remotion-best-practices`: apoio obrigatório quando houver vídeo humano final, legendas, composição, transições, FFmpeg ou Remotion
