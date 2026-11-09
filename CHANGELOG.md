@@ -10,6 +10,56 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > those versions were released, so they are summaries of what shipped, not
 > contemporaneous release notes. `git log` remains the authoritative record.
 
+## [2.7.0] — 2026-11-09
+
+### Added
+
+- **Content stress in `dw-ui-discipline`.** New `references/content-stress.md`: a catalog of
+  realistic worst-case values (long and one-letter names, unbreakable emails, `1 members`,
+  1,000+ rows, RTL, emoji-first names), failure signatures with their CSS cause and fix, and
+  a per-field truncate/wrap/clamp rule. `/dw-qa` runs it in UI mode — worst-case data injected
+  at the data boundary (the project's mocks, or `page.route()`, never by editing the
+  component), checked at the real container width, 320px, 200% zoom and dark/RTL — and
+  `/dw-redesign-ui` runs it at validation. Adapted from `break-ui` in
+  [`emilkowalski/skills`](https://github.com/emilkowalski/skills) (MIT).
+- **Mobile platform fixes** in `responsive.md`: hover gated by `(hover: hover) and
+  (pointer: fine)`, `100dvh`/`100svh`, 16px inputs instead of disabling zoom,
+  `touch-action: manipulation`, `overscroll-behavior`, `viewport-fit=cover` for safe areas,
+  `theme-color` per scheme, and the rule that none of it is verified in device emulation.
+- **Command usage telemetry.** The `session-cost` hook records a `commands` object (reads of
+  `.dw/commands/<name>.md`, or a Skill call naming a command) beside `skills`.
+  `/dw-skill-health` reports per-command usage and classifies five command families as
+  `MERGE CANDIDATE`, `KEEP SEPARATE` or `TOO EARLY` (20 sessions or 30 days of window).
+- `/dw-review` checks motion changes against the escalation triggers in `motion.md` and
+  data-rendering changes against the content-stress static signals.
+- `/dw-redesign-ui` directions must diverge on a named axis (layout, density, personality,
+  motion, interaction model) and are named for it, never "Option A/B".
+
+### Changed
+
+- **Bundled skills install to `.dw/skills/`** instead of `.agents/skills/`. Codex, Copilot and
+  OpenCode all scan `.agents/skills/`, so each listed the 27 bundled skills as model-invocable
+  next to the command wrappers; commands load them by path, and the tool indexes now hold only
+  the `dw-*` entry points. `update` removes a legacy copy from `.agents/skills/` only when it is
+  a dev-workflow copy (its `SKILL.md` carries the Structured Return contract) and leaves a
+  same-named skill installed from elsewhere in place; `uninstall` follows the same rule and
+  `doctor` warns about leftovers. Commands, agent instructions and the `/dw-update` snapshot
+  point at the new location.
+- **`motion.md` rewritten.** Frequency decides before easing (keyboard-triggered and 100+/day
+  actions do not animate); `ease-in` is never used on UI, exits included (the previous rule
+  said exits ease in); no `scale(0)`, no `transition: all`; trigger-anchored
+  `transform-origin`; transitions over keyframes for rapid triggers; property cost tiers;
+  `will-change` only after a measured problem; a removal gate with its hazards. Springs are
+  allowed only for gesture-driven motion. Adapted from `emilkowalski/skills` (MIT).
+- Reduced motion means fewer and gentler animations, not zero; the accessibility floor adds
+  item 11 (zoom is never disabled; content survives 200% zoom).
+
+### Fixed
+
+- `/dw-update --rollback` copied the `.agents/skills` snapshot into the existing folder,
+  nesting it as `.agents/skills/agents-skills` instead of restoring it.
+- A command wrapper under `.claude/skills/` was counted as a skill use in `costs.jsonl`.
+
 ## [2.6.0] — 2026-10-07
 
 ### Added
