@@ -275,7 +275,7 @@ npx @brunosps00/dev-workflow subtask list
 
 ## Bundled Skills
 
-Skills installed to `.dw/skills/` for use by all commands. They sit outside the directories Codex, Copilot, OpenCode and Claude Code scan for model-invocable skills (`.agents/skills/`, `.claude/skills/`, `.github/skills/`, `.opencode/skills/`), so each tool's skill index lists only the `dw-*` command entry points; commands read the skills they need by path. Releases up to 2.6.0 installed them under `.agents/skills/`, and `update` moves them (a same-named skill you installed from elsewhere is left alone). The bundle is governed by `scaffold/skill-registry.json`, which records each skill's kind, tier, owner, trigger, expected output, load policy, context limit, invocation control (`model` vs `explicit`), and à-la-carte `exportable` flag.
+Skills installed to `.dw/skills/` for use by all commands. They sit outside the directories Codex, Copilot, OpenCode and Claude Code scan for model-invocable skills (`.agents/skills/`, `.claude/skills/`, `.github/skills/`, `.opencode/skills/`), so each tool's skill index lists only the `dw-*` command entry points; commands read the skills they need by path. Releases up to 2.6.0 installed them under `.agents/skills/`; `update` retires those copies once the new ones are in place, moving them to `.dw/.migrated/<timestamp>/` rather than deleting them, and leaves a same-named skill you installed from elsewhere where it is. The bundle is governed by `scaffold/skill-registry.json`, which records each skill's kind, tier, owner, trigger, expected output, load policy, context limit, invocation control (`model` vs `explicit`), and à-la-carte `exportable` flag.
 
 Skill kinds:
 
@@ -434,7 +434,7 @@ v1.0.0 consolidated the legacy command surface into the current `dw-*` pipeline.
 On the next `npx @brunosps00/dev-workflow update`, the following happens automatically:
 
 1. The 15 renamed commands' wrappers are detected as orphans (their names no longer exist in `lib/constants.js`) and removed from `.claude/skills/`, `.agents/skills/`, and `.opencode/commands/`.
-2. The migrator prints each removal with the friendly "old → new" mapping (e.g., `[orphan] Removing wrapper .agents/skills/dw-create-prd (replaced in v1.0.0 by 'dw-plan prd')`).
+2. The migrator prints each removal with the friendly "old → new" mapping (e.g., `[orphan] Retiring wrapper .agents/skills/dw-create-prd (replaced in v1.0.0 by 'dw-plan prd')`).
 3. The current command wrappers are installed for the consolidated commands.
 4. The bundled skills are refreshed.
 

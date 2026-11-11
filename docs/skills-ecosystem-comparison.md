@@ -692,7 +692,10 @@ era contado, então não havia dado para decidir quais comandos fundir.
    só os comandos (41). `init`/`update` instalam lá; o `migrate-skills` remove a cópia legada em `.agents/skills/`
    só quando ela é nossa (o `SKILL.md` traz o contrato Structured Return que toda skill bundled tem) e preserva
    skill homônima instalada pelo usuário (`humanizer`, `security-review`, `vercel-react-best-practices`…);
-   `uninstall` faz o mesmo; `doctor` avisa sobre cópia legada; as instruções do agente e os comandos (EN/PT)
+   `uninstall` faz o mesmo; `doctor` avisa sobre cópia legada. Depois do eval 7 (seção 17): quando o
+   `install-state` anterior rastreava arquivos, o `SKILL.md` legado tem de estar entre eles; nada é apagado —
+   o que é aposentado vai para `.dw/.migrated/<timestamp>/`, arquivos que o time adicionou são nomeados na saída,
+   e a migração roda depois da cópia nova; as instruções do agente e os comandos (EN/PT)
    apontam para `.dw/skills/<nome>/`. O snapshot do `/dw-update` inclui `.dw/skills/`, e o rollback de
    `.agents/skills` deixou de aninhar a pasta dentro dela mesma.
 2. **Uso de comandos medido.** O hook `session-cost` emite `commands` (leitura de `.dw/commands/<nome>.md` ou
@@ -738,7 +741,12 @@ estado final (rung 3) e dataset a partir de falhas; o `/dw-bugfix` já adicionav
    deploy; `dev` sobe e `holdout` não é overfitting.
 4. **Na nossa bateria (`evals/`):** runs registradas em `evals/runs/` e comparadas cenário a cenário; superfície
    perigosa nova ganha eval na mesma mudança (regra em `AGENTS.md`); eval 7 cobre a remoção de diretórios do
-   `update`/`uninstall`, superfície criada na 2.7.0 sem eval.
+   `update`/`uninstall`, superfície criada na 2.7.0 sem eval. A primeira run (`evals/runs/2026-11-10-7-*`)
+   reprovou com cinco HIGH — remoção sem cópia no `npx … update` direto, migração antes da cópia, arquivo do time
+   apagado junto com a cópia legada, falso positivo do teste de posse e remoção só por nome. A segunda run caiu
+   para um HIGH e pegou uma regressão introduzida pela própria correção (o rollback passou a apagar
+   `.dw/templates/overrides/`), que a contagem total escondia e a comparação cenário a cenário mostrou. A terceira
+   run passou sem HIGH; a 2.7.0 só é publicada depois dela.
 
 **Rejeitado:** o ferramental do LangSmith (experiments, annotation queues, Insights, online evaluators) — a
 telemetria do `session-cost` já faz o papel de sinal online para nós; o Harbor com sandbox — o rung 3 já checa o
@@ -843,8 +851,9 @@ a skill nova e os scripts de hook são recopiados (managed, sobrescritos); o reg
 wrappers são regenerados; `.dw/minimalism.json` é seed init-only e preservado no update e no
 uninstall; as entradas de hook/statusline são reconciliadas por marcador (atualizadas se nossas,
 intocadas se do usuário) e removidas só as nossas no uninstall; o snapshot do `/dw-update`
-agora inclui `.claude/settings.json`. Regra append-only: remoções/renames futuros entram em
-`lib/removed-bundled-skills.js`.
+agora inclui `.claude/settings.json` e `.dw/install-state.json`. Desde a 2.7.0 o `migrate-skills` não apaga:
+move o que aposenta para `.dw/.migrated/<timestamp>/`, porque um `npx … update` direto do terminal não tira
+snapshot. Regra append-only: remoções/renames futuros entram em `lib/removed-bundled-skills.js`.
 
 ## Licença e atribuição
 

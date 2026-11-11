@@ -168,6 +168,13 @@ test('update moves bundled skills out of .agents/skills/ and keeps what is not o
 
   assert.ok(fs.existsSync(path.join(dir, '.dw/skills/dw-verify/SKILL.md')), 'bundled skill installed in .dw/skills/');
   assert.ok(!fs.existsSync(path.join(dir, '.agents/skills/dw-verify')), 'legacy copy of a bundled skill removed');
+  const migratedRoot = path.join(dir, '.dw/.migrated');
+  const [stamp] = fs.readdirSync(migratedRoot);
+  assert.equal(
+    fs.readFileSync(path.join(migratedRoot, stamp, '.agents/skills/dw-verify/references/stale.md'), 'utf8'),
+    'old reference\n',
+    'a retired legacy copy is moved, not deleted'
+  );
   assert.equal(fs.readFileSync(path.join(dir, '.agents/skills/humanizer/SKILL.md'), 'utf8'), thirdPartyHumanizer);
   assert.ok(fs.existsSync(path.join(dir, '.agents/skills/my-own-skill/SKILL.md')));
   assert.ok(fs.existsSync(path.join(dir, '.agents/skills/aws/core/SKILL.md')));
@@ -185,4 +192,69 @@ test('update moves bundled skills out of .agents/skills/ and keeps what is not o
   assert.ok(!fs.existsSync(path.join(dir, '.dw/skills')), 'uninstall removes .dw/skills/');
   assert.equal(fs.readFileSync(path.join(dir, '.agents/skills/humanizer/SKILL.md'), 'utf8'), thirdPartyHumanizer);
   assert.ok(fs.existsSync(path.join(dir, '.agents/skills/my-own-skill/SKILL.md')));
+});
+
+test('update keeps foreign skills, saves team additions and never deletes outright', (t) => {
+  const sourceRoot = path.join(__dirname, '..');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dw-skill-ownership-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const write = (file, content) => {
+    fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
+    fs.writeFileSync(path.join(dir, file), content);
+  };
+  const ourUi = fs.readFileSync(path.join(sourceRoot, 'scaffold/skills/dw-ui-discipline/SKILL.md'), 'utf8');
+  // A third-party skill that happens to use the same two Structured Return labels.
+  const lookalike = '---\nname: security-review\n---\n# Upstream\n- **Status:** ok\n- **Next Step:** none\n';
+  write('.dw/install-state.json', JSON.stringify({
+    version: '2.6.0', lang: 'en', profile: 'core', modules: ['core'],
+    // 2.6.0 tracked the copy it installed; the look-alike arrived after that update.
+    managed_files: ['.agents/skills/dw-ui-discipline/SKILL.md'],
+  }));
+  write('.agents/skills/dw-ui-discipline/SKILL.md', ourUi);
+  write('.agents/skills/dw-ui-discipline/references/our-brand.md', 'team rules\n');
+  write('.agents/skills/security-review/SKILL.md', lookalike);
+  // Name listed in removed-bundled-skills.js: retired by name, so it must be recoverable.
+  write('.agents/skills/webapp-testing/SKILL.md', '# webapp-testing\n');
+
+  const result = spawnSync(process.execPath, [cli, 'update', '--lang=en'], { cwd: dir, encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
+
+  assert.equal(fs.readFileSync(path.join(dir, '.agents/skills/security-review/SKILL.md'), 'utf8'), lookalike);
+  assert.match(result.stdout, /\[kept\] \.agents\/skills\/security-review .*not in the previous install state/);
+
+  assert.ok(!fs.existsSync(path.join(dir, '.agents/skills/dw-ui-discipline')));
+  assert.match(result.stdout, /references\/our-brand\.md was not installed by dev-workflow/);
+  const [stamp] = fs.readdirSync(path.join(dir, '.dw/.migrated'));
+  const saved = path.join(dir, '.dw/.migrated', stamp, '.agents/skills');
+  assert.equal(fs.readFileSync(path.join(saved, 'dw-ui-discipline/references/our-brand.md'), 'utf8'), 'team rules\n');
+  assert.ok(fs.existsSync(path.join(saved, 'webapp-testing/SKILL.md')), 'name-matched removal is a move');
+  assert.ok(fs.existsSync(path.join(dir, '.dw/skills/dw-ui-discipline/SKILL.md')));
+});
+
+test('uninstall keeps template overrides and only retires dev-workflow entries from .codex/skills', (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dw-codex-skills-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  runCli(dir, 'init', '--lang=en');
+  fs.mkdirSync(path.join(dir, '.codex/skills/dw-review'), { recursive: true });
+  fs.writeFileSync(path.join(dir, '.codex/skills/dw-review/SKILL.md'), '# old wrapper\n');
+  fs.mkdirSync(path.join(dir, '.codex/skills/my-tool'), { recursive: true });
+  fs.writeFileSync(path.join(dir, '.codex/skills/my-tool/SKILL.md'), '# mine\n');
+
+  fs.writeFileSync(path.join(dir, '.dw/templates/overrides/prd-template.md'), '# ours\n');
+
+  runCli(dir, 'uninstall');
+
+  assert.ok(!fs.existsSync(path.join(dir, '.codex/skills/dw-review')));
+  const [stamp] = fs.readdirSync(path.join(dir, '.dw/.migrated'));
+  assert.ok(fs.existsSync(path.join(dir, '.dw/.migrated', stamp, '.codex/skills/dw-review/SKILL.md')));
+  assert.ok(fs.existsSync(path.join(dir, '.codex/skills/my-tool/SKILL.md')));
+  assert.equal(fs.readFileSync(path.join(dir, '.dw/templates/overrides/prd-template.md'), 'utf8'), '# ours\n');
+  assert.ok(!fs.existsSync(path.join(dir, '.dw/templates/prd-template.md')), 'managed templates removed');
+});
+
+test('update retires legacy skills only after the new copies are installed', () => {
+  const init = fs.readFileSync(path.join(__dirname, '..', 'lib', 'init.js'), 'utf8');
+  const copy = init.indexOf('path.join(projectRoot, BUNDLED_SKILLS_REL)');
+  const migrate = init.indexOf('migrateSkills(projectRoot');
+  assert.ok(copy > 0 && migrate > copy, 'migrateSkills must run after the .dw/skills copy');
 });

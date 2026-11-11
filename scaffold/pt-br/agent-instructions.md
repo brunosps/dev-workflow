@@ -27,7 +27,7 @@ Na quebra de tasks, proponha desenvolvimento local ou cruzado e modelo, esforço
 
 Claude pode delegar implementação por `/dw-codex-run`; Codex pode usar `/dw-claude-run`. O parent conduz review, correções e continuidade. Agentes locais herdam o modelo da sessão salvo override aprovado na task. Delegue trabalho independente e delimitado quando melhorar qualidade ou tempo; mantenha trabalho pequeno ou acoplado local. Máximo de 3 workers por fluxo e nunca escritores simultâneos no mesmo worktree.
 
-Leia primeiro arquivos relevantes. Use `.dw/intel/` ou code-explorer quando ajudar em fluxos amplos ou desconhecidos, conferindo o índice contra o código atual. Carregue entrypoints de skills somente para tasks correspondentes e referências somente para o modo escolhido. As skills do dev-workflow ficam em `.dw/skills/<nome>/`; quando um comando nomear uma, leia de lá. Subagentes recebem um pacote compacto e retornam evidências e decisões, não logs completos.
+Leia primeiro arquivos relevantes. Use `.dw/intel/` ou code-explorer quando ajudar em fluxos amplos ou desconhecidos, conferindo o índice contra o código atual. Carregue entrypoints de skills somente para tasks correspondentes e referências somente para o modo escolhido. As skills do dev-workflow ficam em `.dw/skills/<nome>/`; quando um comando nomear uma, leia de lá. `.agents/skills/` e `.claude/skills/` também guardam skills do usuário e de outras ferramentas: fora do `update`, não apague nada ali sem listar e perguntar antes. Subagentes recebem um pacote compacto e retornam evidências e decisões, não logs completos.
 
 ## Conclusão e limites
 

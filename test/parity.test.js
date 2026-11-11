@@ -194,6 +194,8 @@ const PARITY = {
     '.dw/references/automode.md',
   ],
   invariants: [
+    '`.codex/skills/`',
+    '.dw/.migrated/<timestamp>/',
     'I-1',
     'I-2',
     'git push --force',
@@ -218,6 +220,8 @@ const PARITY = {
   agentInstructions: [
     '.dw/references/untrusted-input.md',
     '.dw/skills/',
+    '`.agents/skills/`',
+    '`update`',
   ],
   skillHealth: [
     '.dw/metrics/costs.jsonl',
@@ -234,9 +238,17 @@ const PARITY = {
     '5%',
   ],
   update: [
+    '`[v<N>]`',
+    '! -name overrides',
+    '[ -d "$SNAPSHOT_DIR" ] ||',
     '.dw/skills "$SNAPSHOT_DIR/"',
     '"$SNAPSHOT_DIR/agents-skills/." .agents/skills/',
     '`.dw/skills/`',
+    '.dw/.migrated/',
+    'cp .dw/install-state.json "$SNAPSHOT_DIR/install-state.json"',
+    'rm -rf ".dw/$d"',
+    '`Installed version: <',
+    '`[kept]`',
   ],
   secureAudit: [
     '.dw/references/untrusted-input.md',

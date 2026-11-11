@@ -81,6 +81,11 @@ Este piso é estreito de propósito. Algo genuinamente destrutivo que não estej
 isso — aplique o mesmo critério: se a ação destrói trabalho sem segunda cópia, reescreve história
 compartilhada ou move uma credencial, pare e pergunte. Uma confirmação a mais custa uma mensagem.
 
+O mesmo vale para as pastas de skills que os agentes compartilham — `.agents/skills/`, `.claude/skills/`,
+`.codex/skills/`: elas guardam também skills do usuário e de outras ferramentas. Fora do `update`/`uninstall`
+do próprio CLI, liste o que removeria e pergunte por entrada; mova o aprovado para `.dw/.migrated/<timestamp>/`,
+nunca `rm`.
+
 ## Atribuição
 
 O modelo de duas camadas — um piso que regra de projeto só pode apertar, nunca afrouxar — foi adaptado do

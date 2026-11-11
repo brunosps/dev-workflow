@@ -27,7 +27,7 @@ During task breakdown, propose local or cross-tool development and a model, effo
 
 Claude can delegate implementation through `/dw-codex-run`; Codex can use `/dw-claude-run`. The parent owns review, corrections, and continuation. Local agents inherit the session model unless the approved task overrides it. Delegate bounded independent work when it improves quality or time; keep tightly coupled or small work local. At most 3 workers per workstream, and never concurrent writers in the same worktree.
 
-Read relevant files first. Use `.dw/intel/` or a code-explorer for broad or unfamiliar flows when useful, checking index claims against current source. Load skill entrypoints only for matching tasks, and references only for the selected mode. dev-workflow skills live in `.dw/skills/<name>/`; when a command names one, read it from there. Subagents receive a compact packet and return evidence and decisions, not full logs.
+Read relevant files first. Use `.dw/intel/` or a code-explorer for broad or unfamiliar flows when useful, checking index claims against current source. Load skill entrypoints only for matching tasks, and references only for the selected mode. dev-workflow skills live in `.dw/skills/<name>/`; when a command names one, read it from there. `.agents/skills/` and `.claude/skills/` also hold the user's and other tools' skills: outside `update`, delete nothing there without listing it and asking first. Subagents receive a compact packet and return evidence and decisions, not full logs.
 
 ## Completion and boundaries
 

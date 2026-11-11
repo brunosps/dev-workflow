@@ -29,10 +29,11 @@ cp -r .dw/commands .dw/templates .dw/references .dw/scripts .dw/skills "$SNAPSHO
 [ -d .agents/skills ] && cp -r .agents/skills "$SNAPSHOT_DIR/agents-skills" 2>/dev/null
 # .claude/settings.json agora e mutado pelo update (MCPs + hooks + statusLine)
 [ -f .claude/settings.json ] && mkdir -p "$SNAPSHOT_DIR/claude" && cp .claude/settings.json "$SNAPSHOT_DIR/claude/settings.json" 2>/dev/null
+[ -f .dw/install-state.json ] && cp .dw/install-state.json "$SNAPSHOT_DIR/install-state.json" 2>/dev/null
 echo "Snapshot salvo em $SNAPSHOT_DIR"
 ```
 
-Manter apenas os 3 snapshots mais recentes (remover os mais antigos) para evitar acumulo.
+Manter apenas os 3 snapshots mais recentes em `.dw/.backup/` (remover os mais antigos) para evitar acumulo. `.dw/.migrated/` não é snapshot: nunca remova.
 
 ### 1. Registrar Versão Atual (Obrigatório)
 
@@ -86,7 +87,13 @@ O comando `update` sobrescreve arquivos gerenciados e PRESERVA:
 
 O comando `update` também roda o passo de migração GSD automaticamente — se o projeto tem `.planning/` legado (de uso prévio do GSD), o conteúdo é migrado para `.dw/intel/`, `.dw/spec/active-session.md`, `.dw/spec/quick/`, etc., e `.planning/` é renomeado para `.planning.gsd-archive-<DATA>/` para inspeção. Os arquivos `.claude/commands/gsd/`, `.claude/agents/gsd-*.md`, `.claude/hooks/gsd-*.js` e `.claude/gsd-file-manifest.json` são removidos durante a migração.
 
-Se o update falhar (erro de rede, permissão, pacote indisponível): reporte o erro ao usuário e PARE. NÃO tente workarounds manuais como copiar arquivos.
+O CLI nunca apaga o que aposenta: move para `.dw/.migrated/<timestamp>/`, mantendo o caminho relativo, e imprime o destino. Isso acontece só depois que as skills novas estão em `.dw/skills/`, então um update interrompido deixa as cópias antigas no lugar. O que ele aposenta, e como decide:
+
+- **Cópias legadas de skills bundled** em `.agents/skills/` (`[moved]`): só quando a cópia é do dev-workflow. Skill homônima que não é sai como `[kept]` e fica intocada.
+- **Skills removidas em releases anteriores** (`[v<N>]`) e **fontes de comandos removidos** (`[legacy]`): casadas por nome, então uma skill homônima de outra origem também é movida — é o move que torna isso recuperável.
+- **Wrappers `dw-*` órfãos** (`[orphan]`): `dw-` é o namespace deste pacote; uma skill do usuário chamada `dw-*` é movida, não perdida.
+
+Se o update falhar (erro de rede, permissão, pacote indisponível): reporte o erro ao usuário e PARE. NÃO tente workarounds manuais como copiar arquivos. Passe ao usuário o caminho do snapshot do passo 0 e as duas saídas: rodar o update de novo depois de resolver a causa (ele é idempotente), ou `/dw-update --rollback`.
 
 ### 4. Capturar Nova Versão
 
@@ -96,7 +103,7 @@ node -e 'const s = JSON.parse(require("node:fs").readFileSync(".dw/install-state
 
 ### Checks de compatibilidade do upgrade
 
-Leia o `.dw/commands/dw-update.md` atualizado após o CLI terminar. Use `.dw/install-state.json` e o output `Installed version` do CLI para a diferença de versões: um pacote executado por `npx` não precisa ser resolvível pelo `node_modules` do consumidor. Estado novo ausente ou inválido é falha de verificação; não declare sucesso do update.
+Leia o `.dw/commands/dw-update.md` atualizado após o CLI terminar. Use `.dw/install-state.json` e o output `Installed version` do CLI para a diferença de versões: um pacote executado por `npx` não precisa ser resolvível pelo `node_modules` do consumidor. Estado novo ausente ou inválido é falha de verificação; não declare sucesso do update. A versão lida no passo 4 tem de ser igual ao lado direito da linha `Installed version: <antiga> -> <nova>` do CLI; se essa linha faltar, ou as versões diferirem, o CLI não terminou e o update falhou.
 
 Em um upgrade de versão anterior à 2.3.0 (ou versão legada desconhecida):
 
@@ -116,6 +123,7 @@ Apresente ao usuário:
 - Resumo do que o output do `update` mostrou (arquivos copiados, wrappers gerados, MCPs configurados)
 - As `Post-update agent actions` impressas pelo CLI
 - Quaisquer avisos ou erros
+- Toda linha `[moved]`, `[v<N>]`, `[orphan]`, `[legacy]` ou `[kept]` do `Skill migration`, o caminho `.dw/.migrated/<timestamp>/` e todo arquivo marcado `was not installed by dev-workflow` (adição do próprio time: ofereça trazê-lo de volta numa skill do time, nunca em `.dw/skills/`, que o update sobrescreve)
 
 ### 6. Executar Ações de Agente Pós-Update (Obrigatório)
 
@@ -144,20 +152,28 @@ Se invocado com `--rollback`:
 1. Listar snapshots em `.dw/.backup/`
 2. Se nenhum existir: PARAR e reportar "Nenhum snapshot disponível"
 3. Se mais de um existir: perguntar ao usuário qual restaurar (padrão: mais recente)
-4. Confirmar com o usuário: "Restaurar snapshot `<path>`? Isso SOBRESCREVE `.dw/commands/`, `.dw/templates/`, `.dw/references/`, `.dw/scripts/`, `.dw/skills/`, `.agents/skills/` e `.claude/settings.json`. Prosseguir? [s/N]"
+4. Confirmar com o usuário: "Restaurar snapshot `<path>`? Isso SUBSTITUI `.dw/commands/`, `.dw/templates/`, `.dw/references/`, `.dw/scripts/` e `.dw/skills/` pelas cópias do snapshot (quando ele as tem), copia o `.agents/skills/` do snapshot por cima do atual sem remover outras entradas, e restaura `.claude/settings.json` e `.dw/install-state.json`. `.dw/templates/overrides/` nunca é tocado. Prosseguir? [s/N]"
 5. Somente após `s`: copiar de volta
 
 ```bash
-cp -r "$SNAPSHOT_DIR/commands"   .dw/
-cp -r "$SNAPSHOT_DIR/templates"  .dw/
-cp -r "$SNAPSHOT_DIR/references" .dw/ 2>/dev/null
-cp -r "$SNAPSHOT_DIR/scripts"    .dw/ 2>/dev/null
-cp -r "$SNAPSHOT_DIR/skills"     .dw/ 2>/dev/null
+SNAPSHOT_DIR=".dw/.backup/<timestamp-escolhido>"   # o snapshot confirmado no passo 4
+[ -d "$SNAPSHOT_DIR" ] || { echo "Snapshot não encontrado: $SNAPSHOT_DIR"; exit 1; }
+# Pastas gerenciadas de .dw são substituídas, para não sobrar arquivo da release mais nova.
+for d in commands references scripts skills; do
+  [ -d "$SNAPSHOT_DIR/$d" ] && rm -rf ".dw/$d" && cp -r "$SNAPSHOT_DIR/$d" .dw/
+done
+# .dw/templates/overrides/ é do dono: restaure os templates gerenciados em volta dele, nunca o remova.
+if [ -d "$SNAPSHOT_DIR/templates" ]; then
+  find .dw/templates -mindepth 1 -maxdepth 1 ! -name overrides -exec rm -rf {} +
+  for f in "$SNAPSHOT_DIR/templates"/*; do [ "$(basename "$f")" = overrides ] || cp -r "$f" .dw/templates/; done
+fi
+# .agents/skills é compartilhada com as skills do próprio usuário: mescla, nunca substitui.
 [ -d "$SNAPSHOT_DIR/agents-skills" ] && mkdir -p .agents/skills && cp -r "$SNAPSHOT_DIR/agents-skills/." .agents/skills/ 2>/dev/null
 [ -f "$SNAPSHOT_DIR/claude/settings.json" ] && cp "$SNAPSHOT_DIR/claude/settings.json" .claude/settings.json 2>/dev/null
+[ -f "$SNAPSHOT_DIR/install-state.json" ] && cp "$SNAPSHOT_DIR/install-state.json" .dw/install-state.json 2>/dev/null
 ```
 
-6. Reportar: snapshot restaurado, versão provavelmente recuperada (ler de `.dw/commands/dw-help.md` ou metadata se houver)
+6. Reportar: snapshot restaurado, e a versão do `.dw/install-state.json` restaurado (ou "unknown" quando o snapshot é anterior a ele). Snapshot de antes da 2.7.0 não tem `skills/`: `.dw/skills/` fica como estava, o que é inofensivo (comandos antigos leem `.agents/skills/`), e o próximo update aposenta de novo as cópias restauradas em `.agents/skills/`.
 
 ## Opções Avançadas
 

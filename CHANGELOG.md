@@ -49,11 +49,18 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Bundled skills install to `.dw/skills/`** instead of `.agents/skills/`. Codex, Copilot and
   OpenCode all scan `.agents/skills/`, so each listed the 27 bundled skills as model-invocable
   next to the command wrappers; commands load them by path, and the tool indexes now hold only
-  the `dw-*` entry points. `update` removes a legacy copy from `.agents/skills/` only when it is
-  a dev-workflow copy (its `SKILL.md` carries the Structured Return contract) and leaves a
-  same-named skill installed from elsewhere in place; `uninstall` follows the same rule and
+  the `dw-*` entry points. `update` retires a legacy copy from `.agents/skills/` only when it is
+  a dev-workflow copy — its `SKILL.md` carries the Structured Return contract and, when the
+  previous install state tracked files, is one of them — and leaves a same-named skill
+  installed from elsewhere in place, printed as `[kept]`; `uninstall` follows the same rule and
   `doctor` warns about leftovers. Commands, agent instructions and the `/dw-update` snapshot
   point at the new location.
+- **`update` and `uninstall` no longer delete what they retire.** Legacy skill copies, removed
+  skills, orphan `dw-*` wrappers and removed command sources are moved to
+  `.dw/.migrated/<timestamp>/` with their relative paths, and files the team added inside a
+  retired copy are named in the output. A terminal `npx … update` takes no snapshot, so this is
+  the copy those users keep. The migration now runs after the new skills are copied, so an
+  interrupted update leaves the old copies in place.
 - **`motion.md` rewritten.** Frequency decides before easing (keyboard-triggered and 100+/day
   actions do not animate); `ease-in` is never used on UI, exits included (the previous rule
   said exits ease in); no `scale(0)`, no `transition: all`; trigger-anchored
@@ -68,6 +75,12 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `/dw-update --rollback` copied the `.agents/skills` snapshot into the existing folder,
   nesting it as `.agents/skills/agents-skills` instead of restoring it.
 - A command wrapper under `.claude/skills/` was counted as a skill use in `costs.jsonl`.
+- `/dw-update --rollback` merged the snapshot over the current files, so files added by the
+  newer release survived it; managed `.dw/` folders are now replaced, and the snapshot also
+  saves and restores `.dw/install-state.json`. `/dw-update` checks the installed version
+  against the CLI's `Installed version` line instead of accepting the old state file.
+- `uninstall` removed `.codex/skills/` wholesale; it now removes only `dw-*` entries and
+  dev-workflow skill copies there.
 
 ## [2.6.0] — 2026-10-07
 

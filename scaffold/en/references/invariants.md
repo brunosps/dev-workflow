@@ -81,6 +81,10 @@ This floor is narrow by design. Something genuinely destructive that is not list
 apply the same standard: if the action destroys work with no second copy, rewrites shared history, or moves
 a credential, stop and ask. An extra confirmation costs a message.
 
+The same holds for the skill folders agents share — `.agents/skills/`, `.claude/skills/`, `.codex/skills/`:
+they hold the user's and other tools' skills too. Outside the CLI's own `update`/`uninstall`, list what
+you would remove and ask per entry; move what is approved to `.dw/.migrated/<timestamp>/`, never `rm` it.
+
 ## Attribution
 
 The two-layer model — a floor that project rules may only tighten, never loosen — is adapted from the
