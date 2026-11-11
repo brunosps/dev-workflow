@@ -37,6 +37,7 @@ Each case is one line in `cases.jsonl`:
 ```json
 {
   "id": "case-001",
+  "split": "dev",
   "input": {
     "user_message": "I want to cancel my subscription",
     "user_context": { "tier": "premium", "tenure_months": 18 }
@@ -60,6 +61,7 @@ Each case is one line in `cases.jsonl`:
 Fields:
 
 - **`id`** — stable identifier (you'll reference it in regression reports).
+- **`split`** — `dev` (you tune against it) or `holdout` (you never do). See "Held-out split".
 - **`input`** — what the system receives. Match the production input shape exactly.
 - **`expected`** — for rungs 1-3, the deterministic expected output or state change. For rung 4, the rubric-target (what a 5/5 answer would do).
 - **`rubric_criteria`** — which rubric dimensions this case exercises.
@@ -129,18 +131,70 @@ Process:
 4. **Categorize** — difficulty, tags, rubric criteria.
 5. **Promote** to `cases.jsonl` after review.
 
+## Baseline before the change
+
+> Eval-first, from LangChain's [eval-driven development](https://www.langchain.com/blog/what-is-eval-driven-development)
+> post (2026-11-09): the eval is written and run before the change it measures.
+
+When a task adds or changes an AI behavior, the eval exists before the implementation:
+
+1. **Spec the behavior, one at a time.** Four lines, definite enough to score pass/fail: when it should
+   happen, what the system does, what it must not do, and which existing behaviors must keep working.
+   "The answer is helpful" is not a spec.
+2. **Add the cases** for it: the new behavior, its must-not boundary (the near miss that should NOT
+   trigger it), and the existing cases that cover the keep-working list.
+3. **Run the baseline** on the current code, before any change, and save it as
+   `runs/<YYYY-MM-DD>-baseline.jsonl`.
+4. **Read the baseline.** New-behavior cases must fail there. A new case that already passes does not test
+   the change: rewrite it or drop it. Existing cases that pass are the regression set for this change.
+5. Implement, re-run, compare case by case (see "Detecting drift").
+
+Each line of a run file is one case:
+
+```json
+{"id": "case-001", "split": "dev", "pass": true, "score": 4, "commit": "a1b2c3d", "dataset_version": "2.3"}
+```
+
+`pass` is required (the verdict against the case's oracle); `score` only when a rung-4 judge produced one.
+
+## Held-out split
+
+Iterating until every case passes overfits the system to the dataset: the prompt learns the cases, not the
+behavior. Mark about 20% of cases `"split": "holdout"`, spread across difficulty and tags, and:
+
+- iterate against `dev` only — never read a holdout failure to decide the next prompt tweak;
+- run `holdout` before merge to main and before deploy;
+- if `dev` improves and `holdout` stays flat or drops, report overfitting instead of the improvement.
+
+A holdout case that was used to tune is no longer held out: move it to `dev` and add a fresh one.
+
 ## Sampling for regression runs
 
 You don't need to re-run the entire dataset every time. Smart sampling:
 
-- **PR-time:** random sample of 30% + all "high difficulty" cases + any case added in the last 30 days. Fast feedback.
-- **Pre-merge to main:** full dataset.
+- **PR-time:** `dev` split only — random sample of 30% + all "high difficulty" cases + any case added in the last 30 days. Fast feedback.
+- **Pre-merge to main:** full dataset, `holdout` included.
 - **Nightly:** full dataset + judge re-calibration check.
 - **Pre-deploy:** full dataset + manual eyeball on 10 random outputs.
 
 ## Detecting drift
 
-After each run, compare against the prior run on the SAME cases:
+After each run, compare against the prior run on the SAME cases — **case by case first, averages
+second.** An average can rise while a case that used to pass breaks: the change fixed five things and
+overwrote one behavior someone depends on.
+
+```
+Run 2026-05-08 vs 2026-05-01 (dataset 2.3, 24 cases):
+  flipped pass → fail: case-007 (dev), case-019 (holdout)
+  flipped fail → pass: case-021, case-022, case-023
+  unchanged: 19
+```
+
+The gate: **any case that passed in the prior run and fails now blocks**, whatever the average says, until
+it is fixed or accepted in writing (PR or techspec: case id, why the old behavior no longer holds). A
+fail → pass flip on a case nobody was working on is also worth a look: it may be judge drift, not progress.
+
+Then the metric deltas:
 
 ```
 Run 2026-05-08 vs 2026-05-01:

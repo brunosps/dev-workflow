@@ -34,6 +34,15 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   data-rendering changes against the content-stress static signals.
 - `/dw-redesign-ui` directions must diverge on a named axis (layout, density, personality,
   motion, interaction model) and are named for it, never "Option A/B".
+- **Eval-first in `dw-llm-eval`**, from LangChain's eval-driven development post: a four-line
+  behavior spec (when / does / must not / keeps working) and a baseline run on the current code
+  before the change, where new-behavior cases must fail; a `holdout` split (~20%) never tuned
+  against; and drift compared case by case — a case that passed and now fails blocks, whatever
+  the average says. `/dw-plan` orders the Eval Plan subtask before implementation; `/dw-qa --ai`
+  lists pass → fail flips and reports `holdout` apart from `dev`.
+- **Eval runs are recorded** in `evals/runs/` and compared scenario by scenario; a change that
+  adds a dangerous surface adds its eval in the same change. New eval 7 covers deletion in
+  `update` and `uninstall`.
 
 ### Changed
 

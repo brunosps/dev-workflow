@@ -52,7 +52,7 @@ When available under `./.dw/skills/`, these are invoked operationally:
 
 - `dw-testing-discipline`: **(UI mode — ALWAYS)** — core rules and 25 anti-patterns apply to every QA test authored. `references/playwright-recipes.md` for tactical patterns. `references/three-workflow-patterns.md` to pick the right verification mode (UI / network / perf). `references/security-boundary.md` for any flow that crosses an auth boundary.
 - `api-testing-recipes`: **(API mode — ALWAYS)** — validated snippets for `.http`, pytest+httpx, supertest, WebApplicationFactory, reqwest. Composes per-FR test files in `QA/scripts/api/` and JSONL logs in `QA/logs/api/`.
-- `dw-llm-eval`: **(AI mode — when invoked with `--ai`)** — runs reference dataset against current implementation. Computes precision@k / faithfulness / outcome accuracy. Logs JSONL to `QA/logs/ai/<feature>-<date>.jsonl`. Alerts on >10% metric regression vs prior run.
+- `dw-llm-eval`: **(AI mode — when invoked with `--ai`)** — runs reference dataset against current implementation. Computes precision@k / faithfulness / outcome accuracy. Logs JSONL to `QA/logs/ai/<feature>-<date>.jsonl`. Lists per-case pass → fail flips vs prior run (each is a bug) and alerts on >10% metric regression.
 - `dw-debug-protocol`: **(in `--fix` mode — ALWAYS)** — six-step triage (Reproduce → Localize → Reduce → Fix Root Cause → Guard → Verify End-to-End) for each detected bug. Stop-the-line discipline; root-cause over symptom; regression test in same atomic commit.
 - `vercel-react-best-practices`: (UI mode) when React/Next.js regression risk is suspected.
 - `dw-ui-discipline`: (UI mode) when validating design consistency — anti-slop catalog + WCAG accessibility floor check, plus the content-stress pass in `references/content-stress.md`.
@@ -118,7 +118,7 @@ Read the affected module's quality baseline/TechSpec. Reuse valid required-check
    - Agent: outcome assertion + trajectory match (per `--ai-mode` parameter or feature config).
    - Classification: exact match accuracy.
 3. Log JSONL to `QA/logs/ai/<feature>-<date>.jsonl`.
-4. Compare to prior run's JSONL — alert on >10% regression in any metric.
+4. Compare to the prior run's JSONL case by case: list every case that flipped pass → fail and file each one as a bug, whatever the averages say. Then alert on >10% regression in any metric. Run the `holdout` split too and report it apart from `dev`.
 5. Append AI-mode section to `qa-report.md`.
 
 ## Mode 1.5: Interactive UAT (`/dw-qa --uat`)

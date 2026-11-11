@@ -52,7 +52,9 @@ Structure:
 └── runs/<YYYY-MM-DD>.jsonl  # results of each eval run
 ```
 
-See `references/reference-dataset.md` for case-design principles, sampling from production, and when to expand the set.
+Eval-first: run a baseline on the current code before the change; new-behavior cases must fail there. Compare runs case by case: a case that passed and now fails blocks, whatever the average says. Never tune against the `holdout` split.
+
+See `references/reference-dataset.md` for case design, baseline, holdout, per-case drift and when to expand the set.
 
 ## Consistency (run-to-run stability)
 

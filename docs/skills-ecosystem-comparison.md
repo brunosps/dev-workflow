@@ -13,6 +13,7 @@ As fontes, em ordem de análise:
 | [`akitaonrails/my-skills`](https://github.com/akitaonrails/my-skills) | **sem licença** | Fronteira de confiança, refutação de findings, auditoria de composição (seção 11) |
 | [`samsantosb/ship-it`](https://github.com/samsantosb/ship-it) | MIT | Piso de invariantes, bateria de evals, contrato de automode, chaos (seção 12) |
 | [`emilkowalski/skills`](https://github.com/emilkowalski/skills) ([aiforui.dev](https://aiforui.dev/skills)) | MIT | Motion, mobile web e stress de conteúdo em `dw-ui-discipline` (seção 15) |
+| [LangChain — "What is eval-driven development"](https://www.langchain.com/blog/what-is-eval-driven-development) | post de blog (só o princípio) | Baseline antes da mudança, drift caso a caso, split holdout, runs registradas na bateria (seção 17) |
 
 > Nota de rigor: este documento compara **padrões de design observáveis na estrutura
 > dos repositórios**. Métricas de popularidade/adoção citadas por terceiros não foram
@@ -715,6 +716,35 @@ era contado, então não havia dado para decidir quais comandos fundir.
 Limitação conhecida: a telemetria vem só de transcripts do Claude Code; sessões do Codex, Copilot e OpenCode não
 entram na contagem.
 
+### 17. Eval-driven development (de LangChain, 2026-11-10)
+
+Origem: o post [What is eval-driven development](https://www.langchain.com/blog/what-is-eval-driven-development)
+(Divya Santhanam, LangChain, 2026-11-09). O ciclo é: definir o comportamento de forma pontuável, escrever o eval e
+rodar o baseline antes de construir, mudar e comparar contra o experimento anterior caso a caso.
+
+**Já tínhamos:** a `dw-llm-eval` cobria escada de oráculos, juiz calibrado contra humanos, trajetória, checagem de
+estado final (rung 3) e dataset a partir de falhas; o `/dw-bugfix` já adicionava o caso que falhou antes da correção.
+
+**Adotado:**
+
+1. **Drift caso a caso** (`references/reference-dataset.md`, `/dw-qa --ai` EN/PT). O exemplo antigo de "Detecting
+   drift" mostrava só deltas de média, o erro que o post aponta. Agora o relatório lista os flips pass → fail, e
+   qualquer caso que passava e falha bloqueia até ser corrigido ou aceito por escrito, seja qual for a média.
+2. **Baseline antes da mudança.** Spec do comportamento em quatro linhas (quando / faz / não deve / continua
+   funcionando), casos, run `runs/<data>-baseline.jsonl` no código atual; casos novos têm de falhar ali. A subtask
+   de Eval Plan do `/dw-plan` (EN/PT) vem antes das subtasks de implementação. Formato de linha de run definido
+   (`id`, `split`, `pass`, `score`, `commit`, `dataset_version`).
+3. **Split holdout** (`split: dev|holdout`, ~20%): itera-se só contra `dev`; `holdout` roda antes do merge e do
+   deploy; `dev` sobe e `holdout` não é overfitting.
+4. **Na nossa bateria (`evals/`):** runs registradas em `evals/runs/` e comparadas cenário a cenário; superfície
+   perigosa nova ganha eval na mesma mudança (regra em `AGENTS.md`); eval 7 cobre a remoção de diretórios do
+   `update`/`uninstall`, superfície criada na 2.7.0 sem eval.
+
+**Rejeitado:** o ferramental do LangSmith (experiments, annotation queues, Insights, online evaluators) — a
+telemetria do `session-cost` já faz o papel de sinal online para nós; o Harbor com sandbox — o rung 3 já checa o
+estado final; juiz pass/fail no lugar da escala 1-5 e "descrição de ferramenta como primeiro suspeito" ficaram
+de fora desta rodada (ajuste menor, sem lacuna medida).
+
 ## O que NÃO foi portado (e por quê)
 
 1. **`CONTEXT.md` na raiz (mattpocock)** — a *disciplina* de domain-modeling FOI adotada (seção 5 acima), mas o
@@ -803,6 +833,8 @@ entram na contagem.
 | Eixo nomeado nas direções | `scaffold/{en,pt-br}/commands/dw-redesign-ui.md` (passo 4) | emilkowalski/skills `prototype` (MIT) |
 | Skills bundled fora dos índices | `lib/skill-registry.js` (`BUNDLED_SKILLS_REL`), `lib/init.js`, `lib/migrate-skills.js`, `lib/uninstall.js`, `lib/doctor.js`, `scaffold/{en,pt-br}/agent-instructions.md` | docs de Codex, OpenCode e Copilot |
 | Uso de comandos | `scaffold/scripts/hooks/session-cost.mjs` (`commands`) + `scaffold/{en,pt-br}/commands/dw-skill-health.md` | — |
+| Baseline, holdout e drift caso a caso | `scaffold/skills/dw-llm-eval/references/reference-dataset.md` + `SKILL.md` + `scaffold/{en,pt-br}/commands/dw-plan.md` + `dw-qa.md` | LangChain, post de eval-driven development (só o princípio) |
+| Runs registradas e eval 7 | `evals/README.md` + `evals/runs/` + regra em `AGENTS.md` | LangChain, post de eval-driven development (só o princípio) |
 
 ## Segurança do update
 

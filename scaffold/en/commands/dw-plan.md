@@ -169,7 +169,7 @@ Runs when default mode (after TechSpec approval) OR `plan tasks`.
 3. **End-to-end coverage:** every user-facing flow has backend + frontend + functional UI subtasks if applicable.
 4. **Test placement (`dw-testing-discipline`):** every test-adding subtask names its invariant per the placement doctrine. Owning layer specified.
 5. **Constitution alignment:** every task lists `Constitution: respects P-NNN` or `Constitution: deviates P-NNN — ADR planned: <slug>` or `Constitution: n/a — reason: <one-liner>`.
-6. **LLM-eval subtask (when applicable):** if the PRD has an AI feature, one task must include an Eval Plan subtask (reference dataset path, oracle rungs, judge calibration, target metrics).
+6. **LLM-eval subtask (when applicable):** if the PRD has an AI feature, one task must include an Eval Plan subtask (reference dataset path, oracle rungs, judge calibration, target metrics), ordered before the implementation subtasks: behavior spec (when / does / must not / keeps working), cases, and a baseline run on the current code where the new-behavior cases fail.
 7. **Dependency declaration:** each task explicitly lists which previous tasks it depends on. Write the field as `Depends on: none` or `Depends on: 1.0, 2.0` in `tasks.md` and each `<N>_task.md`. Validation rejects cycles.
 8. **Output locations:**
    - Summary: `.dw/spec/prd-<feature-slug>/tasks.md`

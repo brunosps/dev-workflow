@@ -51,6 +51,7 @@ const PARITY = {
     'Decision Map',
     'Frontier: none',
     'Canonical Vocabulary',
+    'baseline',
   ],
   analyze: [
     '.dw/domain/**',
@@ -328,6 +329,8 @@ const PARITY = {
     '320px',
     '200%',
     'Broken → high, Ugly → medium, Fragile → low',
+    'pass → fail',
+    '`holdout`',
   ],
   redesignUi: [
     'dw-ui-discipline/references/content-stress.md',

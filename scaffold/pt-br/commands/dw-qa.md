@@ -52,7 +52,7 @@ Quando disponíveis em `./.dw/skills/`, invocadas operacionalmente:
 
 - `dw-testing-discipline`: **(modo UI — SEMPRE)** — core rules e 25 anti-patterns valem pra todo teste QA. `references/playwright-recipes.md` pra patterns táticos. `references/three-workflow-patterns.md` pra escolher modo de verificação (UI / network / perf). `references/security-boundary.md` pra fluxos que cruzam auth.
 - `api-testing-recipes`: **(modo API — SEMPRE)** — snippets validados pra `.http`, pytest+httpx, supertest, WebApplicationFactory, reqwest. Compõe per-FR test files em `QA/scripts/api/` e logs JSONL em `QA/logs/api/`.
-- `dw-llm-eval`: **(modo AI — quando invocado com `--ai`)** — roda reference dataset contra implementação atual. Computa precision@k / faithfulness / outcome accuracy. Loga JSONL em `QA/logs/ai/<feature>-<date>.jsonl`. Alerta em regressão >10% vs run anterior.
+- `dw-llm-eval`: **(modo AI — quando invocado com `--ai`)** — roda reference dataset contra implementação atual. Computa precision@k / faithfulness / outcome accuracy. Loga JSONL em `QA/logs/ai/<feature>-<date>.jsonl`. Lista flips pass → fail por caso vs run anterior (cada um é bug) e alerta em regressão >10% de métrica.
 - `dw-debug-protocol`: **(em modo `--fix` — SEMPRE)** — six-step triage (Reproduzir → Localizar → Reduzir → Fix Root Cause → Guardar → Verify End-to-End) pra cada bug detectado. Stop-the-line discipline; root-cause sobre symptom; regression test no mesmo commit atômico.
 - `vercel-react-best-practices`: (modo UI) quando risco de regressão React/Next.js suspeitado.
 - `dw-ui-discipline`: (modo UI) ao validar consistência de design — anti-slop catalog + WCAG accessibility floor, mais o passe de content stress de `references/content-stress.md`.
@@ -118,7 +118,7 @@ Leia a baseline de qualidade/TechSpec do módulo afetado. Reutilize evidência v
    - Agent: outcome assertion + trajectory match (per parâmetro `--ai-mode` ou config da feature).
    - Classification: exact match accuracy.
 3. Logar JSONL em `QA/logs/ai/<feature>-<date>.jsonl`.
-4. Comparar com JSONL da run anterior — alertar em regressão >10% em qualquer métrica.
+4. Comparar com o JSONL da run anterior caso a caso: listar todo caso que virou pass → fail e registrar cada um como bug, seja qual for a média. Depois alertar em regressão >10% em qualquer métrica. Rodar também o split `holdout` e reportar separado do `dev`.
 5. Anexar seção modo-AI em `qa-report.md`.
 
 ## Modo 1.5: UAT Interativo (`/dw-qa --uat`)

@@ -29,6 +29,8 @@ This repository ships the dev-workflow scaffolding itself. Do not confuse these 
 - `npm test` and `npm run validate` check structure only. Before publishing to npm, run the eval in `evals/README.md` for each dangerous surface touched since the last publish.
 - The bar is zero CRITICAL/HIGH findings and no invented behaviour. Behaviour an agent described that the contract does not define is a defect of the contract.
 - Findings fix the scaffold file, never the eval.
+- A change that adds a dangerous surface (deleting, overwriting, executing, dispatching, writing outside `.dw/`) adds or extends its eval in the same change.
+- Record every run in `evals/runs/` and compare it with the previous run of the same eval scenario by scenario.
 - Eval 1 is the standing hard gate for the dangerous surfaces and is folded into evals 2-5 rather than run separately.
 
 ## External Patterns
